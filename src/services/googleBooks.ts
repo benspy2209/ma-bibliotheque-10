@@ -1,3 +1,4 @@
+
 import { Book } from '@/types/book';
 
 export const GOOGLE_BOOKS_API_KEY = 'AIzaSyDUQ2dB8e_EnUp14DY9GnYAv2CmGiqBapY';
@@ -6,9 +7,9 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
-    // Amélioration de la recherche avec inauthor pour une recherche plus précise des auteurs
+    // Amélioration de la recherche avec inauthor et langRestrict pour livres en français
     const response = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=inauthor:${encodeURIComponent(query)}&maxResults=40&key=${GOOGLE_BOOKS_API_KEY}`
+      `https://www.googleapis.com/books/v1/volumes?q=inauthor:${encodeURIComponent(query)}&langRestrict=fr&maxResults=40&key=${GOOGLE_BOOKS_API_KEY}`
     );
 
     if (!response.ok) {
@@ -28,9 +29,10 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
       publishers: [item.volumeInfo.publisher],
       subjects: item.volumeInfo.categories,
       language: [item.volumeInfo.language]
-    })) || [];
+    }))?.filter(book => book.language[0] === 'fr') || [];
   } catch (error) {
     console.error('Erreur lors de la recherche Google Books:', error);
     return [];
   }
 }
+
