@@ -9,11 +9,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, Grid, CalendarDays } from "lucide-react";
+import { ArrowUpDown, Grid, CalendarDays, ArrowDownAZ, ArrowUpAZ } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
-type SortOption = 'recent' | 'author' | 'title';
+type SortOption = 'recent' | 'author' | 'title' | 'az' | 'za';
 type ViewMode = 'simple' | 'grouped';
 
 export default function Library() {
@@ -60,6 +60,12 @@ export default function Library() {
         
         case 'title':
           return a.title.localeCompare(b.title);
+
+        case 'az':
+          return a.title.localeCompare(b.title);
+        
+        case 'za':
+          return b.title.localeCompare(a.title);
         
         default:
           return 0;
@@ -140,6 +146,10 @@ export default function Library() {
         return 'Livres par auteur';
       case 'title':
         return 'Livres par titre';
+      case 'az':
+        return 'Livres de A à Z';
+      case 'za':
+        return 'Livres de Z à A';
       default:
         return 'Ma Bibliothèque';
     }
@@ -206,8 +216,13 @@ export default function Library() {
                 <DropdownMenuItem onClick={() => setSortBy('author')}>
                   Auteur
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy('title')}>
-                  Titre
+                <DropdownMenuItem onClick={() => setSortBy('az')}>
+                  <ArrowDownAZ className="mr-2 h-4 w-4" />
+                  A à Z
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy('za')}>
+                  <ArrowUpAZ className="mr-2 h-4 w-4" />
+                  Z à A
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
