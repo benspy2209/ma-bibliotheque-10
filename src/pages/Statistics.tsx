@@ -4,7 +4,7 @@ import { Book } from '@/types/book';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Book as BookIcon, BookOpen, Library } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 export default function Statistics() {
@@ -49,7 +49,8 @@ export default function Statistics() {
         acc[monthKey] = {
           name: monthKey,
           books: 0,
-          pages: 0
+          pages: 0,
+          date: new Date(book.completionDate!) // Ajout de la date pour le tri
         };
       }
       acc[monthKey].books += 1;
@@ -59,13 +60,18 @@ export default function Statistics() {
       acc[monthKey].pages += !isNaN(pages) ? pages : 0;
       
       return acc;
-    }, {} as Record<string, { name: string; books: number; pages: number }>);
+    }, {} as Record<string, { name: string; books: number; pages: number; date: Date }>);
+
+    // Trier les données par date
+    const monthlyData = Object.values(booksByMonth)
+      .sort((a, b) => a.date.getTime() - b.date.getTime()) // Tri chronologique
+      .slice(-6);
 
     return {
       totalBooks,
       totalPages,
       avgPagesPerBook,
-      monthlyData: Object.values(booksByMonth).reverse().slice(0, 6)
+      monthlyData
     };
   }, [books]);
 
