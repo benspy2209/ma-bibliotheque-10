@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 
 interface BookDetailsProps {
   book: Book;
@@ -209,10 +210,9 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
                       <Calendar
                         mode="single"
                         selected={currentBook.completionDate ? new Date(currentBook.completionDate) : undefined}
-                        onSelect={(date: Date | undefined) => handleCompletionDateChange(date)}
+                        onSelect={handleCompletionDateChange}
                         disabled={(date) => date > new Date()}
                         initialFocus
-                        className="p-3 pointer-events-auto"
                       />
                     </PopoverContent>
                   </Popover>
