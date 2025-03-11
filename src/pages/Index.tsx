@@ -19,6 +19,7 @@ const Index = () => {
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [displayedBooks, setDisplayedBooks] = useState(BOOKS_PER_PAGE);
+  const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
 
   const results = useQueries({
@@ -65,6 +66,10 @@ const Index = () => {
       return;
     }
     setDisplayedBooks(prev => prev + BOOKS_PER_PAGE);
+  };
+
+  const handleBookUpdate = () => {
+    setRefreshKey(prev => prev + 1);
   };
 
   const visibleBooks = books.slice(0, displayedBooks);
@@ -140,6 +145,7 @@ const Index = () => {
             book={selectedBook}
             isOpen={!!selectedBook}
             onClose={() => setSelectedBook(null)}
+            onUpdate={handleBookUpdate}
           />
         )}
 
