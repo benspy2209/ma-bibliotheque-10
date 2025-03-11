@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Book } from '@/types/book';
 import { Card } from "@/components/ui/card";
@@ -7,17 +6,19 @@ import { BookDetails } from '@/components/BookDetails';
 export default function Library() {
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0); // Add refresh key
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const loadBooks = () => {
-    const library = JSON.parse(localStorage.getItem('library') || '{}');
-    const booksList = Object.values(library) as Book[];
-    setBooks(booksList);
+    // Charger tous les livres du localStorage
+    const storedBooks = Object.entries(localStorage)
+      .filter(([key]) => key.startsWith('book_'))
+      .map(([_, value]) => JSON.parse(value));
+    setBooks(storedBooks);
   };
 
   useEffect(() => {
     loadBooks();
-  }, [refreshKey]); // Add refreshKey dependency
+  }, [refreshKey]);
 
   const handleBookUpdate = () => {
     loadBooks();
