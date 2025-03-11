@@ -10,11 +10,16 @@ import { getBookDetails } from '@/services/bookDetails';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
 import { removeDuplicateBooks } from '@/lib/utils';
+import { useToast } from "@/components/ui/use-toast";
+
+const BOOKS_PER_PAGE = 12;
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [displayedBooks, setDisplayedBooks] = useState(BOOKS_PER_PAGE);
+  const { toast } = useToast();
 
   const results = useQueries({
     queries: [
@@ -38,6 +43,7 @@ const Index = () => {
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
+    setDisplayedBooks(BOOKS_PER_PAGE);
     
     const timeoutId = setTimeout(() => {
       setDebouncedQuery(value);
@@ -50,6 +56,19 @@ const Index = () => {
     const details = await getBookDetails(book.id);
     setSelectedBook({ ...book, ...details });
   };
+
+  const handleLoadMore = () => {
+    if (displayedBooks >= books.length) {
+      toast({
+        description: "Il n'y a plus de livres à afficher.",
+      });
+      return;
+    }
+    setDisplayedBooks(prev => prev + BOOKS_PER_PAGE);
+  };
+
+  const visibleBooks = books.slice(0, displayedBooks);
+  const hasMoreBooks = displayedBooks < books.length;
 
   return (
     <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-8 fade-in">
@@ -81,7 +100,7 @@ const Index = () => {
         )}
 
         <div className="book-grid">
-          {(!debouncedQuery ? [] : books).map((book) => (
+          {(!debouncedQuery ? [] : visibleBooks).map((book) => (
             <Card 
               key={book.id} 
               className="book-card group cursor-pointer"
@@ -102,7 +121,7 @@ const Index = () => {
           ))}
         </div>
 
-        {debouncedQuery && books.length === 0 && !isLoading && (
+        {debouncedQuery && visibleBooks.length === 0 && !isLoading && (
           <div className="text-center text-gray-600">
             Aucun livre trouvé
           </div>
@@ -116,11 +135,21 @@ const Index = () => {
           />
         )}
 
-        {books.length > 0 && (
+        {debouncedQuery && visibleBooks.length > 0 && (
           <div className="mt-12 text-center">
-            <Button variant="outline" className="hover:bg-secondary">
-              Voir plus de livres
-            </Button>
+            {hasMoreBooks ? (
+              <Button 
+                variant="outline" 
+                className="hover:bg-secondary"
+                onClick={handleLoadMore}
+              >
+                Voir plus de livres
+              </Button>
+            ) : books.length > BOOKS_PER_PAGE && (
+              <p className="text-gray-600">
+                Tous les livres ont été affichés
+              </p>
+            )}
           </div>
         )}
       </div>
