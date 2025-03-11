@@ -13,6 +13,9 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 
 interface BookDetailsProps {
   book: Book;
@@ -34,6 +37,13 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
 
   const handleInputChange = (field: keyof Book, value: string) => {
     setCurrentBook(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleCompletionDateChange = (date: Date | undefined) => {
+    setCurrentBook(prev => ({
+      ...prev,
+      completionDate: date ? date.toISOString().split('T')[0] : undefined
+    }));
   };
 
   const saveToLibrary = (bookToSave: Book) => {
@@ -166,6 +176,50 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
                       </span>
                     ))}
                   </div>
+                )}
+              </div>
+            )}
+
+            {(isEditing || currentBook.status === 'completed') && (
+              <div>
+                <h3 className="font-semibold flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Date de lecture
+                </h3>
+                {isEditing ? (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[240px] pl-3 text-left font-normal",
+                          !currentBook.completionDate && "text-muted-foreground"
+                        )}
+                        disabled={currentBook.status !== 'completed'}
+                      >
+                        {currentBook.completionDate ? (
+                          format(new Date(currentBook.completionDate), "dd/MM/yyyy")
+                        ) : (
+                          <span>Choisir une date</span>
+                        )}
+                        <Calendar className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={currentBook.completionDate ? new Date(currentBook.completionDate) : undefined}
+                        onSelect={handleCompletionDateChange}
+                        disabled={(date) => date > new Date()}
+                        initialFocus
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                ) : (
+                  currentBook.completionDate && (
+                    <p>{format(new Date(currentBook.completionDate), "dd/MM/yyyy")}</p>
+                  )
                 )}
               </div>
             )}

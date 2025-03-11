@@ -17,4 +17,6 @@ export type Book = {
   subjects?: string[];
   isbn?: string;
   status?: ReadingStatus;
+  completionDate?: string; // Date de lecture
 };
+
