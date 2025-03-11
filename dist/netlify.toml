@@ -1,7 +1,6 @@
-[[redirects]]
-  from = "/livre/*"
-  to = "/:splat"
-  status = 200
+[build]
+  publish = "dist"
+  command = ""  # Pas de commande de build
 
 [[redirects]]
   from = "/*"
