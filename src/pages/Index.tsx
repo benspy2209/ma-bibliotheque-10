@@ -4,8 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Search } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQueries } from '@tanstack/react-query';
 import { searchBooks } from '@/services/openLibrary';
+import { searchGoogleBooks } from '@/services/googleBooks';
 import { getBookDetails } from '@/services/bookDetails';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
@@ -15,11 +16,23 @@ const Index = () => {
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
-  const { data: books = [], isLoading } = useQuery({
-    queryKey: ['books', debouncedQuery],
-    queryFn: () => searchBooks(debouncedQuery),
-    enabled: debouncedQuery.length > 0
+  const results = useQueries({
+    queries: [
+      {
+        queryKey: ['openLibrary', debouncedQuery],
+        queryFn: () => searchBooks(debouncedQuery),
+        enabled: debouncedQuery.length > 0
+      },
+      {
+        queryKey: ['googleBooks', debouncedQuery],
+        queryFn: () => searchGoogleBooks(debouncedQuery),
+        enabled: debouncedQuery.length > 0
+      }
+    ]
   });
+
+  const isLoading = results.some(result => result.isLoading);
+  const books = [...(results[0].data || []), ...(results[1].data || [])];
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
