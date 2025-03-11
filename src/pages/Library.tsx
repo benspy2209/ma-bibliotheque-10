@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Book } from '@/types/book';
 import { Card } from "@/components/ui/card";
@@ -9,29 +10,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, Grid, CalendarDays, ArrowDownAZ, ArrowUpAZ } from "lucide-react";
+import { ArrowUpDown, CalendarDays, TextIcon, User } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
-type SortOption = 'recent' | 'author' | 'title' | 'az' | 'za';
-type ViewMode = 'simple' | 'grouped';
+type SortOption = 'recent' | 'title' | 'author';
 
 export default function Library() {
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [sortBy, setSortBy] = useState<SortOption>('recent');
-  const [viewMode, setViewMode] = useState<ViewMode>('grouped');
 
   const loadBooks = () => {
-    console.log("Loading books from localStorage");
     const storedBooks = Object.entries(localStorage)
       .filter(([key]) => key.startsWith('book_'))
       .map(([_, value]) => {
         try {
-          const book = JSON.parse(value);
-          console.log("Loaded book:", book);
-          return book;
+          return JSON.parse(value);
         } catch (error) {
           console.error("Error parsing book from localStorage:", error);
           return null;
@@ -40,7 +36,6 @@ export default function Library() {
       .filter(book => book !== null);
     
     const sortedBooks = sortBooks(storedBooks, sortBy);
-    console.log("Total books loaded:", sortedBooks.length);
     setBooks(sortedBooks);
   };
 
@@ -56,67 +51,15 @@ export default function Library() {
         case 'author':
           const authorA = Array.isArray(a.author) ? a.author[0] : a.author;
           const authorB = Array.isArray(b.author) ? b.author[0] : b.author;
-          return authorA.localeCompare(authorB);
+          return authorA.localeCompare(authorB, 'fr');
         
         case 'title':
-          return a.title.localeCompare(b.title);
-
-        case 'az':
-          return a.title.localeCompare(b.title);
-        
-        case 'za':
-          return b.title.localeCompare(a.title);
+          return a.title.localeCompare(b.title, 'fr');
         
         default:
           return 0;
       }
     });
-  };
-
-  const groupAndSortBooks = (booksToSort: Book[], sortOption: SortOption) => {
-    if (sortOption === 'recent') {
-      const completedBooks = booksToSort.filter(book => book.completionDate);
-      
-      const groupedBooks = completedBooks.reduce((acc, book) => {
-        const date = new Date(book.completionDate!);
-        const monthKey = format(date, 'MMMM yyyy', { locale: fr });
-        
-        if (!acc[monthKey]) {
-          acc[monthKey] = [];
-        }
-        acc[monthKey].push(book);
-        return acc;
-      }, {} as Record<string, Book[]>);
-
-      Object.keys(groupedBooks).forEach(month => {
-        groupedBooks[month].sort((a, b) => 
-          new Date(b.completionDate!).getTime() - new Date(a.completionDate!).getTime()
-        );
-      });
-
-      return groupedBooks;
-    } else if (sortOption === 'author') {
-      return booksToSort.reduce((acc, book) => {
-        const author = Array.isArray(book.author) ? book.author[0] : book.author;
-        const firstLetter = author.charAt(0).toUpperCase();
-        
-        if (!acc[firstLetter]) {
-          acc[firstLetter] = [];
-        }
-        acc[firstLetter].push(book);
-        return acc;
-      }, {} as Record<string, Book[]>);
-    } else {
-      return booksToSort.reduce((acc, book) => {
-        const firstLetter = book.title.charAt(0).toUpperCase();
-        
-        if (!acc[firstLetter]) {
-          acc[firstLetter] = [];
-        }
-        acc[firstLetter].push(book);
-        return acc;
-      }, {} as Record<string, Book[]>);
-    }
   };
 
   useEffect(() => {
@@ -138,25 +81,27 @@ export default function Library() {
     return format(new Date(date), 'MMMM yyyy', { locale: fr });
   };
 
-  const getSortTitle = () => {
-    switch (sortBy) {
+  const getSortLabel = (option: SortOption) => {
+    switch (option) {
       case 'recent':
-        return 'Livres par date de lecture';
-      case 'author':
-        return 'Livres par auteur';
+        return 'Date de lecture';
       case 'title':
-        return 'Livres par titre';
-      case 'az':
-        return 'Livres de A à Z';
-      case 'za':
-        return 'Livres de Z à A';
-      default:
-        return 'Ma Bibliothèque';
+        return 'Titre';
+      case 'author':
+        return 'Auteur';
     }
   };
 
-  const sortedAndGroupedBooks = groupAndSortBooks(books, sortBy);
-  const sortedBooks = sortBooks(books, sortBy);
+  const getSortIcon = (option: SortOption) => {
+    switch (option) {
+      case 'recent':
+        return <CalendarDays className="mr-2 h-4 w-4" />;
+      case 'title':
+        return <TextIcon className="mr-2 h-4 w-4" />;
+      case 'author':
+        return <User className="mr-2 h-4 w-4" />;
+    }
+  };
 
   const renderBookCard = (book: Book) => (
     <Card 
@@ -165,7 +110,7 @@ export default function Library() {
       onClick={() => setSelectedBook(book)}
     >
       <img
-        src={book.cover}
+        src={book.cover || '/placeholder.svg'}
         alt={book.title}
         className="w-full h-[160px] object-cover rounded-t-lg"
       />
@@ -192,64 +137,41 @@ export default function Library() {
     <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">{getSortTitle()}</h1>
+          <h1 className="text-3xl font-bold">Ma Bibliothèque</h1>
           
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setViewMode(viewMode === 'simple' ? 'grouped' : 'simple')}
-            >
-              {viewMode === 'simple' ? <CalendarDays className="h-4 w-4" /> : <Grid className="h-4 w-4" />}
-            </Button>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  Trier par <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setSortBy('recent')}>
-                  Date de lecture
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy('author')}>
-                  Auteur
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy('az')}>
-                  <ArrowDownAZ className="mr-2 h-4 w-4" />
-                  A à Z
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy('za')}>
-                  <ArrowUpAZ className="mr-2 h-4 w-4" />
-                  Z à A
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                {getSortIcon(sortBy)}
+                {getSortLabel(sortBy)}
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setSortBy('recent')}>
+                {getSortIcon('recent')}
+                Date de lecture
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy('title')}>
+                {getSortIcon('title')}
+                Titre
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy('author')}>
+                {getSortIcon('author')}
+                Auteur
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         
         {books.length === 0 ? (
           <p className="text-center text-gray-600">
             Votre bibliothèque est vide. Ajoutez des livres depuis la recherche !
           </p>
-        ) : viewMode === 'simple' ? (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-            {sortedBooks.map(renderBookCard)}
-          </div>
         ) : (
-          <>
-            {Object.entries(sortedAndGroupedBooks).map(([group, groupBooks]) => (
-              <div key={group} className="mb-8">
-                <h3 className="text-xl font-semibold mb-4 text-gray-600">
-                  {group}
-                </h3>
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-                  {groupBooks.map(renderBookCard)}
-                </div>
-              </div>
-            ))}
-          </>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+            {books.map(renderBookCard)}
+          </div>
         )}
 
         {selectedBook && (
@@ -264,3 +186,4 @@ export default function Library() {
     </div>
   );
 }
+
