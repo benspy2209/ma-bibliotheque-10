@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -6,11 +5,14 @@ import { Card } from "@/components/ui/card";
 import { Search } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { searchBooks } from '@/services/openLibrary';
+import { getBookDetails } from '@/services/bookDetails';
 import { Book } from '@/types/book';
+import { BookDetails } from '@/components/BookDetails';
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
   const { data: books = [], isLoading } = useQuery({
     queryKey: ['books', debouncedQuery],
@@ -28,6 +30,11 @@ const Index = () => {
     }, 500);
 
     return () => clearTimeout(timeoutId);
+  };
+
+  const handleBookClick = async (book: Book) => {
+    const details = await getBookDetails(book.id);
+    setSelectedBook({ ...book, ...details });
   };
 
   return (
@@ -65,7 +72,11 @@ const Index = () => {
         {/* Grille de livres */}
         <div className="book-grid">
           {(!debouncedQuery ? [] : books).map((book) => (
-            <Card key={book.id} className="book-card group">
+            <Card 
+              key={book.id} 
+              className="book-card group cursor-pointer"
+              onClick={() => handleBookClick(book)}
+            >
               <img
                 src={book.cover}
                 alt={book.title}
@@ -86,6 +97,15 @@ const Index = () => {
           <div className="text-center text-gray-600">
             Aucun livre trouvé
           </div>
+        )}
+
+        {/* Dialogue des détails du livre */}
+        {selectedBook && (
+          <BookDetails
+            book={selectedBook}
+            isOpen={!!selectedBook}
+            onClose={() => setSelectedBook(null)}
+          />
         )}
 
         {/* Bouton "Charger plus" - désactivé pour l'instant car l'API ne supporte pas la pagination de cette manière */}

@@ -6,4 +6,12 @@ export type Book = {
   cover?: string;
   rating?: number;
   language: string[];
+  // Informations détaillées
+  numberOfPages?: number;
+  publishDate?: string;
+  series?: string;
+  description?: string;
+  publishers?: string[];
+  subjects?: string[];
 };
+
