@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from 'react';
 import { Book } from '@/types/book';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,8 +17,27 @@ export default function Statistics() {
 
   const stats = useMemo(() => {
     const totalBooks = books.length;
+    
+    // Log each book's pages to debug
+    books.forEach(book => {
+      console.log(`Book "${book.title}": ${book.numberOfPages} pages`);
+    });
+    
     const totalPages = books.reduce((sum, book) => {
-      return sum + (typeof book.numberOfPages === 'number' ? book.numberOfPages : 0);
+      if (!book.numberOfPages) {
+        console.log(`Book "${book.title}" has no pages defined`);
+        return sum;
+      }
+      
+      // Ensure numberOfPages is treated as a number
+      const pages = Number(book.numberOfPages);
+      if (isNaN(pages)) {
+        console.log(`Book "${book.title}" has invalid number of pages:`, book.numberOfPages);
+        return sum;
+      }
+      
+      console.log(`Adding ${pages} pages from "${book.title}"`);
+      return sum + pages;
     }, 0);
     
     const avgPagesPerBook = totalBooks > 0 ? Math.round(totalPages / totalBooks) : 0;
@@ -33,7 +53,11 @@ export default function Statistics() {
         };
       }
       acc[monthKey].books += 1;
-      acc[monthKey].pages += typeof book.numberOfPages === 'number' ? book.numberOfPages : 0;
+      
+      // Ensure numberOfPages is treated as a number for monthly stats
+      const pages = Number(book.numberOfPages || 0);
+      acc[monthKey].pages += !isNaN(pages) ? pages : 0;
+      
       return acc;
     }, {} as Record<string, { name: string; books: number; pages: number }>);
 
