@@ -12,12 +12,20 @@ export default function Statistics() {
     return Object.entries(localStorage)
       .filter(([key]) => key.startsWith('book_'))
       .map(([_, value]) => JSON.parse(value))
-      .filter((book): book is Book => book !== null && book.completionDate);
+      .filter((book): book is Book => book !== null && book.status === 'completed' && book.completionDate);
   });
 
   const stats = useMemo(() => {
     const totalBooks = books.length;
-    const totalPages = books.reduce((sum, book) => sum + (book.numberOfPages || 0), 0);
+    // Ne compter que les pages des livres qui ont un nombre de pages défini
+    const totalPages = books.reduce((sum, book) => {
+      const pages = book.numberOfPages;
+      if (typeof pages === 'number' && !isNaN(pages) && pages > 0) {
+        return sum + pages;
+      }
+      return sum;
+    }, 0);
+    
     const avgPagesPerBook = totalBooks > 0 ? Math.round(totalPages / totalBooks) : 0;
 
     // Grouper les livres par mois
@@ -31,7 +39,10 @@ export default function Statistics() {
         };
       }
       acc[monthKey].books += 1;
-      acc[monthKey].pages += book.numberOfPages || 0;
+      // Ne compter que les pages valides
+      if (typeof book.numberOfPages === 'number' && !isNaN(book.numberOfPages) && book.numberOfPages > 0) {
+        acc[monthKey].pages += book.numberOfPages;
+      }
       return acc;
     }, {} as Record<string, { name: string; books: number; pages: number }>);
 
