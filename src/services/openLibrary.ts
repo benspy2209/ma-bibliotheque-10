@@ -7,7 +7,6 @@ export async function searchBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
-    // Amélioration de la recherche en utilisant le paramètre author et en limitant aux livres français
     const response = await fetch(
       `${OPEN_LIBRARY_API}/search.json?q=${encodeURIComponent(query)}&language=fre&fields=key,title,author_name,cover_i,language,first_publish_date&limit=40`
     );
@@ -21,7 +20,7 @@ export async function searchBooks(query: string): Promise<Book[]> {
     return data.docs
       .filter((doc: any) => 
         doc.author_name?.some((author: string) => 
-          author.toLowerCase().includes(query.toLowerCase())
+          author.toLowerCase() === query.toLowerCase()
         ) && 
         (doc.language?.includes('fre') || doc.language?.includes('fra'))
       )
@@ -40,4 +39,3 @@ export async function searchBooks(query: string): Promise<Book[]> {
     return [];
   }
 }
-
