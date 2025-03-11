@@ -19,11 +19,26 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
     
     return data.items?.map((item: any) => {
       const volumeInfo = item.volumeInfo;
+      
+      // Améliorons la gestion des couvertures
+      let cover = '/placeholder.svg';
+      if (volumeInfo.imageLinks) {
+        // Essayons d'abord d'obtenir la meilleure qualité possible
+        cover = volumeInfo.imageLinks.extraLarge || 
+                volumeInfo.imageLinks.large || 
+                volumeInfo.imageLinks.medium || 
+                volumeInfo.imageLinks.thumbnail || 
+                volumeInfo.imageLinks.smallThumbnail;
+                
+        // Assurons-nous que l'URL est en HTTPS
+        cover = cover.replace('http:', 'https:');
+      }
+
       return {
         id: item.id,
         title: volumeInfo.title,
         author: volumeInfo.authors || ['Auteur inconnu'],
-        cover: volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:') || '/placeholder.svg',
+        cover: cover,
         description: volumeInfo.description || '',
         numberOfPages: volumeInfo.pageCount,
         publishDate: volumeInfo.publishedDate,

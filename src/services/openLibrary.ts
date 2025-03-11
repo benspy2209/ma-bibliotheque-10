@@ -48,22 +48,24 @@ export async function searchBooks(query: string): Promise<Book[]> {
           (doc.language?.includes('fre') || doc.language?.includes('fra'))
         )
         .map(async (doc: any) => {
-          // Récupérer les détails du livre
           const bookDetails = await fetchBookDetails(doc.key);
-          
-          // Récupérer les détails de la première édition si disponible
           let editionDetails = null;
           if (doc.edition_key?.[0]) {
             editionDetails = await fetchEditionDetails(doc.edition_key[0]);
+          }
+
+          // Amélioration de la gestion des couvertures
+          let cover = '/placeholder.svg';
+          if (doc.cover_i) {
+            // Essayons la plus grande taille d'abord
+            cover = `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`;
           }
 
           return {
             id: doc.key,
             title: doc.title,
             author: doc.author_name || ['Auteur inconnu'],
-            cover: doc.cover_i 
-              ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`
-              : '/placeholder.svg',
+            cover: cover,
             language: doc.language || [],
             publishDate: doc.first_publish_date,
             description: bookDetails?.description?.value || bookDetails?.description || '',
