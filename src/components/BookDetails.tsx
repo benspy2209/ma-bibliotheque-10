@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Book as BookIcon, Calendar, ListTree, Layers, Users } from 'lucide-react';
+import { AddToLibrary } from './AddToLibrary';
+import { useState } from 'react';
 
 interface BookDetailsProps {
   book: Book;
@@ -17,13 +19,27 @@ interface BookDetailsProps {
 }
 
 export function BookDetails({ book, isOpen, onClose }: BookDetailsProps) {
+  const [currentBook, setCurrentBook] = useState(book);
+
+  const handleStatusChange = (status: ReadingStatus) => {
+    setCurrentBook(prev => ({ ...prev, status }));
+    // Ici, vous pourriez ajouter la logique pour sauvegarder le statut dans localStorage
+    const library = JSON.parse(localStorage.getItem('library') || '{}');
+    library[book.id] = { ...book, status };
+    localStorage.setItem('library', JSON.stringify(library));
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">{book.title}</DialogTitle>
-          <DialogDescription>
-            Détails du livre
+          <DialogTitle className="text-2xl font-bold">{currentBook.title}</DialogTitle>
+          <DialogDescription className="flex justify-between items-center">
+            <span>Détails du livre</span>
+            <AddToLibrary 
+              onStatusChange={handleStatusChange}
+              currentStatus={currentBook.status}
+            />
           </DialogDescription>
         </DialogHeader>
         

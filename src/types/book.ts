@@ -1,4 +1,6 @@
 
+export type ReadingStatus = 'to-read' | 'reading' | 'completed';
+
 export type Book = {
   id: string;
   title: string;
@@ -13,6 +15,6 @@ export type Book = {
   description?: string;
   publishers?: string[];
   subjects?: string[];
-  isbn?: string;  // Added this field
+  isbn?: string;
+  status?: ReadingStatus;
 };
-
