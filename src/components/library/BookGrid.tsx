@@ -39,18 +39,18 @@ export const BookGrid = ({ books, onBookClick }: BookGridProps) => {
               target.src = '/placeholder.svg';
             }}
           />
-          <div className="p-2 space-y-2">
+          <div className="p-4 space-y-3">
             <h3 className="font-semibold text-sm line-clamp-1">{book.title}</h3>
             <p className="text-xs text-gray-600 line-clamp-1">
               {Array.isArray(book.author) ? book.author[0] : book.author}
             </p>
-            <div className="flex flex-col gap-1.5">
-              <Badge variant={book.status === 'completed' ? "default" : "secondary"}>
+            <div className="flex flex-col gap-2">
+              <Badge variant={book.status === 'completed' ? "default" : "secondary"} className="w-fit">
                 {statusLabels[book.status || 'to-read']}
               </Badge>
               {book.status === 'completed' && book.completionDate && (
-                <Badge variant="outline" className="bg-card">
-                  {formatCompletionDate(book.completionDate)}
+                <Badge variant="outline" className="w-fit bg-muted/50">
+                  Lu en {formatCompletionDate(book.completionDate)}
                 </Badge>
               )}
             </div>
