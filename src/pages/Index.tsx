@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { searchGoogleBooks } from '@/services/googleBooks';
 import { getBookDetails } from '@/services/bookDetails';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
+import { removeDuplicateBooks } from '@/lib/utils';
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -32,7 +32,8 @@ const Index = () => {
   });
 
   const isLoading = results.some(result => result.isLoading);
-  const books = [...(results[0].data || []), ...(results[1].data || [])];
+  const allBooks = [...(results[0].data || []), ...(results[1].data || [])];
+  const books = removeDuplicateBooks(allBooks);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
