@@ -1,4 +1,3 @@
-
 import { Book, ReadingStatus } from '@/types/book';
 import {
   Dialog,
@@ -19,9 +18,10 @@ interface BookDetailsProps {
   book: Book;
   isOpen: boolean;
   onClose: () => void;
+  onUpdate: () => void;
 }
 
-export function BookDetails({ book, isOpen, onClose }: BookDetailsProps) {
+export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProps) {
   const [currentBook, setCurrentBook] = useState(book);
   const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
@@ -40,6 +40,7 @@ export function BookDetails({ book, isOpen, onClose }: BookDetailsProps) {
     const library = JSON.parse(localStorage.getItem('library') || '{}');
     library[bookToSave.id] = bookToSave;
     localStorage.setItem('library', JSON.stringify(library));
+    onUpdate();
     toast({
       description: "Les modifications ont été enregistrées",
     });

@@ -7,12 +7,22 @@ import { BookDetails } from '@/components/BookDetails';
 export default function Library() {
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0); // Add refresh key
 
-  useEffect(() => {
+  const loadBooks = () => {
     const library = JSON.parse(localStorage.getItem('library') || '{}');
     const booksList = Object.values(library) as Book[];
     setBooks(booksList);
-  }, []);
+  };
+
+  useEffect(() => {
+    loadBooks();
+  }, [refreshKey]); // Add refreshKey dependency
+
+  const handleBookUpdate = () => {
+    loadBooks();
+    setRefreshKey(prev => prev + 1); // Trigger refresh
+  };
 
   const statusLabels: Record<string, string> = {
     'to-read': 'À lire',
@@ -61,6 +71,7 @@ export default function Library() {
             book={selectedBook}
             isOpen={!!selectedBook}
             onClose={() => setSelectedBook(null)}
+            onUpdate={handleBookUpdate} // Add onUpdate prop
           />
         )}
       </div>
