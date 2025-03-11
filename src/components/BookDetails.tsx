@@ -1,5 +1,4 @@
-
-import { Book } from '@/types/book';
+import { Book, ReadingStatus } from '@/types/book';
 import {
   Dialog,
   DialogContent,
