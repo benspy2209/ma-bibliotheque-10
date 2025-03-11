@@ -42,6 +42,7 @@ export function CompletionDate({ book, isEditing, onDateChange }: CompletionDate
               onSelect={onDateChange}
               disabled={(date) => date > new Date()}
               initialFocus
+              className="p-3 pointer-events-auto"
             />
           </PopoverContent>
         </Popover>
