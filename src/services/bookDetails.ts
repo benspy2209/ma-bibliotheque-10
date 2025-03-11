@@ -1,5 +1,5 @@
-
 import { Book } from '@/types/book';
+import { GOOGLE_BOOKS_API_KEY } from './googleBooks';
 
 export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
   if (bookId.startsWith('/works/')) {

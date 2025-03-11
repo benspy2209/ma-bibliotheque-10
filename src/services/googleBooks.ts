@@ -1,7 +1,6 @@
-
 import { Book } from '@/types/book';
 
-const GOOGLE_BOOKS_API_KEY = 'AIzaSyDUQ2dB8e_EnUp14DY9GnYAv2CmGiqBapY';
+export const GOOGLE_BOOKS_API_KEY = 'AIzaSyDUQ2dB8e_EnUp14DY9GnYAv2CmGiqBapY';
 
 export async function searchGoogleBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
