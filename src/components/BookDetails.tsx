@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Book as BookIcon, Calendar, ListTree, Layers, Users } from 'lucide-react';
@@ -21,6 +22,9 @@ export function BookDetails({ book, isOpen, onClose }: BookDetailsProps) {
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">{book.title}</DialogTitle>
+          <DialogDescription>
+            Détails du livre
+          </DialogDescription>
         </DialogHeader>
         
         <div className="grid grid-cols-[200px,1fr] gap-6 py-4">
@@ -39,25 +43,21 @@ export function BookDetails({ book, isOpen, onClose }: BookDetailsProps) {
               <p>{Array.isArray(book.author) ? book.author.join(', ') : book.author}</p>
             </div>
 
-            {book.publishDate && (
-              <div>
-                <h3 className="font-semibold flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Date de publication
-                </h3>
-                <p>{book.publishDate}</p>
-              </div>
-            )}
+            <div>
+              <h3 className="font-semibold flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Date de publication
+              </h3>
+              <p>{book.publishDate || "Date non disponible"}</p>
+            </div>
 
-            {book.numberOfPages && (
-              <div>
-                <h3 className="font-semibold flex items-center gap-2">
-                  <BookIcon className="h-4 w-4" />
-                  Nombre de pages
-                </h3>
-                <p>{book.numberOfPages} pages</p>
-              </div>
-            )}
+            <div>
+              <h3 className="font-semibold flex items-center gap-2">
+                <BookIcon className="h-4 w-4" />
+                Nombre de pages
+              </h3>
+              <p>{book.numberOfPages ? `${book.numberOfPages} pages` : "Information non disponible"}</p>
+            </div>
 
             {book.series && (
               <div>
@@ -90,15 +90,16 @@ export function BookDetails({ book, isOpen, onClose }: BookDetailsProps) {
           </div>
         </div>
 
-        {book.description && (
-          <>
-            <Separator className="my-4" />
-            <div>
-              <h3 className="font-semibold mb-2">Description</h3>
-              <p className="text-muted-foreground">{book.description}</p>
-            </div>
-          </>
-        )}
+        <Separator className="my-4" />
+        
+        <div>
+          <h3 className="font-semibold mb-2">Description</h3>
+          {book.description ? (
+            <p className="text-muted-foreground whitespace-pre-line">{book.description}</p>
+          ) : (
+            <p className="text-muted-foreground italic">Aucune description disponible pour ce livre</p>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
