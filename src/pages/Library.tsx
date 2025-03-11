@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Book } from '@/types/book';
 import { Card } from "@/components/ui/card";
@@ -166,67 +165,72 @@ export default function Library() {
   );
 
   return (
-    <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Ma Bibliothèque</h1>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2">
-                {getSortIcon(sortBy)}
-                {getSortLabel(sortBy)}
-                {sortBy.endsWith('-asc') ? (
-                  <ArrowUp className="h-4 w-4" />
-                ) : sortBy.endsWith('-desc') ? (
-                  <ArrowDown className="h-4 w-4" />
-                ) : null}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[200px]">
-              <DropdownMenuItem onClick={() => setSortBy('recent')} className="gap-2">
-                <CalendarDays className="h-4 w-4" />
-                Date de lecture
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy('title-asc')} className="gap-2">
-                <TextIcon className="h-4 w-4" />
-                Titre A → Z
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy('title-desc')} className="gap-2">
-                <TextIcon className="h-4 w-4" />
-                Titre Z → A
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy('author-asc')} className="gap-2">
-                <User className="h-4 w-4" />
-                Auteur A → Z
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy('author-desc')} className="gap-2">
-                <User className="h-4 w-4" />
-                Auteur Z → A
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        
-        {books.length === 0 ? (
-          <p className="text-center text-gray-600">
-            Votre bibliothèque est vide. Ajoutez des livres depuis la recherche !
-          </p>
-        ) : (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-            {books.map(renderBookCard)}
-          </div>
-        )}
+    <>
+      <div className="min-h-screen">
+        <NavBar />
+        <div className="px-4 py-8 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex justify-between items-center mb-8">
+              <h1 className="text-3xl font-bold">Ma Bibliothèque</h1>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    {getSortIcon(sortBy)}
+                    {getSortLabel(sortBy)}
+                    {sortBy.endsWith('-asc') ? (
+                      <ArrowUp className="h-4 w-4" />
+                    ) : sortBy.endsWith('-desc') ? (
+                      <ArrowDown className="h-4 w-4" />
+                    ) : null}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[200px]">
+                  <DropdownMenuItem onClick={() => setSortBy('recent')} className="gap-2">
+                    <CalendarDays className="h-4 w-4" />
+                    Date de lecture
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('title-asc')} className="gap-2">
+                    <TextIcon className="h-4 w-4" />
+                    Titre A → Z
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('title-desc')} className="gap-2">
+                    <TextIcon className="h-4 w-4" />
+                    Titre Z → A
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('author-asc')} className="gap-2">
+                    <User className="h-4 w-4" />
+                    Auteur A → Z
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('author-desc')} className="gap-2">
+                    <User className="h-4 w-4" />
+                    Auteur Z → A
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            
+            {books.length === 0 ? (
+              <p className="text-center text-gray-600">
+                Votre bibliothèque est vide. Ajoutez des livres depuis la recherche !
+              </p>
+            ) : (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                {books.map(renderBookCard)}
+              </div>
+            )}
 
-        {selectedBook && (
-          <BookDetails
-            book={selectedBook}
-            isOpen={!!selectedBook}
-            onClose={() => setSelectedBook(null)}
-            onUpdate={handleBookUpdate}
-          />
-        )}
+            {selectedBook && (
+              <BookDetails
+                book={selectedBook}
+                isOpen={!!selectedBook}
+                onClose={() => setSelectedBook(null)}
+                onUpdate={handleBookUpdate}
+              />
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

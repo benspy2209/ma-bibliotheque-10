@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from 'react';
 import { Book } from '@/types/book';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -76,102 +75,107 @@ export default function Statistics() {
   }, [books]);
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        <h1 className="text-3xl font-bold">Statistiques de lecture</h1>
+    <>
+      <div className="min-h-screen">
+        <NavBar />
+        <div className="px-4 py-8 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto space-y-8">
+            <h1 className="text-3xl font-bold">Statistiques de lecture</h1>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total des livres lus</CardTitle>
-              <BookIcon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalBooks}</div>
-            </CardContent>
-          </Card>
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total des livres lus</CardTitle>
+                  <BookIcon className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.totalBooks}</div>
+                </CardContent>
+              </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pages lues</CardTitle>
-              <BookOpen className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalPages}</div>
-            </CardContent>
-          </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Pages lues</CardTitle>
+                  <BookOpen className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.totalPages}</div>
+                </CardContent>
+              </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Moyenne de pages par livre</CardTitle>
-              <Library className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.avgPagesPerBook}</div>
-            </CardContent>
-          </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Moyenne de pages par livre</CardTitle>
+                  <Library className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.avgPagesPerBook}</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card className="p-4">
+              <CardHeader>
+                <CardTitle>Livres lus par mois</CardTitle>
+              </CardHeader>
+              <CardContent className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={stats.monthlyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="name"
+                      tick={{ fontSize: 12 }}
+                      interval={0}
+                      angle={-45}
+                      textAnchor="end"
+                    />
+                    <YAxis />
+                    <Tooltip 
+                      formatter={(value: number) => [value, 'Livres']}
+                      labelStyle={{ color: 'black' }}
+                    />
+                    <Bar 
+                      dataKey="books"
+                      fill="#8884d8"
+                      name="Livres lus"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card className="p-4">
+              <CardHeader>
+                <CardTitle>Pages lues par mois</CardTitle>
+              </CardHeader>
+              <CardContent className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={stats.monthlyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="name"
+                      tick={{ fontSize: 12 }}
+                      interval={0}
+                      angle={-45}
+                      textAnchor="end"
+                    />
+                    <YAxis />
+                    <Tooltip 
+                      formatter={(value: number) => [value, 'Pages']}
+                      labelStyle={{ color: 'black' }}
+                    />
+                    <Bar 
+                      dataKey="pages"
+                      fill="#82ca9d"
+                      name="Pages lues"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-
-        <Card className="p-4">
-          <CardHeader>
-            <CardTitle>Livres lus par mois</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats.monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="name"
-                  tick={{ fontSize: 12 }}
-                  interval={0}
-                  angle={-45}
-                  textAnchor="end"
-                />
-                <YAxis />
-                <Tooltip 
-                  formatter={(value: number) => [value, 'Livres']}
-                  labelStyle={{ color: 'black' }}
-                />
-                <Bar 
-                  dataKey="books"
-                  fill="#8884d8"
-                  name="Livres lus"
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card className="p-4">
-          <CardHeader>
-            <CardTitle>Pages lues par mois</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats.monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="name"
-                  tick={{ fontSize: 12 }}
-                  interval={0}
-                  angle={-45}
-                  textAnchor="end"
-                />
-                <YAxis />
-                <Tooltip 
-                  formatter={(value: number) => [value, 'Pages']}
-                  labelStyle={{ color: 'black' }}
-                />
-                <Bar 
-                  dataKey="pages"
-                  fill="#82ca9d"
-                  name="Pages lues"
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
       </div>
-    </div>
+    </>
   );
 }
