@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from 'react';
 import { Book } from '@/types/book';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,13 +16,8 @@ export default function Statistics() {
 
   const stats = useMemo(() => {
     const totalBooks = books.length;
-    // Ne compter que les pages des livres qui ont un nombre de pages défini
     const totalPages = books.reduce((sum, book) => {
-      const pages = book.numberOfPages;
-      if (typeof pages === 'number' && !isNaN(pages) && pages > 0) {
-        return sum + pages;
-      }
-      return sum;
+      return sum + (typeof book.numberOfPages === 'number' ? book.numberOfPages : 0);
     }, 0);
     
     const avgPagesPerBook = totalBooks > 0 ? Math.round(totalPages / totalBooks) : 0;
@@ -39,10 +33,7 @@ export default function Statistics() {
         };
       }
       acc[monthKey].books += 1;
-      // Ne compter que les pages valides
-      if (typeof book.numberOfPages === 'number' && !isNaN(book.numberOfPages) && book.numberOfPages > 0) {
-        acc[monthKey].pages += book.numberOfPages;
-      }
+      acc[monthKey].pages += typeof book.numberOfPages === 'number' ? book.numberOfPages : 0;
       return acc;
     }, {} as Record<string, { name: string; books: number; pages: number }>);
 
