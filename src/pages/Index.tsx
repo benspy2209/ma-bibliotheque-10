@@ -73,13 +73,21 @@ const Index = () => {
   return (
     <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-8 fade-in">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-12 text-center">
-          <h1 className="mb-4 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-            Découvrez votre prochaine lecture
-          </h1>
-          <p className="text-lg text-gray-600">
-            Explorez, partagez et découvrez de nouveaux livres
-          </p>
+        <div className="flex justify-between items-center mb-12">
+          <div className="text-center flex-1">
+            <h1 className="mb-4 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+              Découvrez votre prochaine lecture
+            </h1>
+            <p className="text-lg text-gray-600">
+              Explorez, partagez et découvrez de nouveaux livres
+            </p>
+          </div>
+          <a 
+            href="/library" 
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+          >
+            Ma Bibliothèque
+          </a>
         </div>
 
         <div className="relative mb-12 mx-auto max-w-2xl">
