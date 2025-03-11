@@ -27,29 +27,37 @@ export const BookGrid = ({ books, onBookClick }: BookGridProps) => {
       {books.map((book) => (
         <Card 
           key={book.id}
-          className="book-card group cursor-pointer hover:shadow-lg transition-shadow"
+          className="flex flex-col overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
           onClick={() => onBookClick(book)}
         >
-          <img
-            src={book.cover || '/placeholder.svg'}
-            alt={book.title}
-            className="w-full h-[160px] object-cover rounded-t-lg"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = '/placeholder.svg';
-            }}
-          />
-          <div className="p-4 space-y-3">
+          <div className="relative w-full h-[200px]">
+            <img
+              src={book.cover || '/placeholder.svg'}
+              alt={book.title}
+              className="absolute w-full h-full object-cover"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = '/placeholder.svg';
+              }}
+            />
+          </div>
+          <div className="flex flex-col flex-grow p-3 space-y-2">
             <h3 className="font-semibold text-sm line-clamp-1">{book.title}</h3>
             <p className="text-xs text-gray-600 line-clamp-1">
               {Array.isArray(book.author) ? book.author[0] : book.author}
             </p>
-            <div className="flex flex-col gap-2">
-              <Badge variant={book.status === 'completed' ? "default" : "secondary"} className="w-fit">
+            <div className="mt-auto space-y-1.5">
+              <Badge 
+                variant={book.status === 'completed' ? "default" : "secondary"}
+                className="block w-fit"
+              >
                 {statusLabels[book.status || 'to-read']}
               </Badge>
               {book.status === 'completed' && book.completionDate && (
-                <Badge variant="outline" className="w-fit bg-muted/50">
+                <Badge 
+                  variant="outline" 
+                  className="block w-fit bg-muted/50"
+                >
                   Lu en {formatCompletionDate(book.completionDate)}
                 </Badge>
               )}
