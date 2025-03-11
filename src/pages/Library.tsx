@@ -87,18 +87,27 @@ export default function Library() {
       });
 
       return groupedBooks;
+    } else if (sortOption === 'author') {
+      return booksToSort.reduce((acc, book) => {
+        const author = Array.isArray(book.author) ? book.author[0] : book.author;
+        const firstLetter = author.charAt(0).toUpperCase();
+        
+        if (!acc[firstLetter]) {
+          acc[firstLetter] = [];
+        }
+        acc[firstLetter].push(book);
+        return acc;
+      }, {} as Record<string, Book[]>);
     } else {
-      return {
-        "": booksToSort.sort((a, b) => {
-          if (sortOption === 'author') {
-            const authorA = Array.isArray(a.author) ? a.author[0] : a.author;
-            const authorB = Array.isArray(b.author) ? b.author[0] : b.author;
-            return authorA.localeCompare(authorB);
-          } else {
-            return a.title.localeCompare(b.title);
-          }
-        })
-      };
+      return booksToSort.reduce((acc, book) => {
+        const firstLetter = book.title.charAt(0).toUpperCase();
+        
+        if (!acc[firstLetter]) {
+          acc[firstLetter] = [];
+        }
+        acc[firstLetter].push(book);
+        return acc;
+      }, {} as Record<string, Book[]>);
     }
   };
 
@@ -140,7 +149,7 @@ export default function Library() {
     <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Ma Bibliothèque</h1>
+          <h1 className="text-3xl font-bold">{getSortTitle()}</h1>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -172,11 +181,9 @@ export default function Library() {
           <>
             {Object.entries(sortedAndGroupedBooks).map(([group, groupBooks]) => (
               <div key={group} className="mb-8">
-                {group && (
-                  <h3 className="text-xl font-semibold mb-4 text-gray-600">
-                    {group}
-                  </h3>
-                )}
+                <h3 className="text-xl font-semibold mb-4 text-gray-600">
+                  {group}
+                </h3>
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
                   {groupBooks.map((book) => (
                     <Card 
