@@ -19,7 +19,9 @@ export default function Library() {
   const loadBooks = () => {
     try {
       console.log("Chargement des livres...");
-      const storedBooks = Object.entries(localStorage)
+      
+      // Vérifier le localStorage du domaine principal
+      let storedBooks = Object.entries(localStorage)
         .filter(([key]) => key.startsWith('book_'))
         .map(([_, value]) => {
           try {
@@ -30,6 +32,32 @@ export default function Library() {
           }
         })
         .filter((book): book is Book => book !== null);
+
+      // Si aucun livre n'est trouvé, vérifier l'ancien domaine
+      if (storedBooks.length === 0) {
+        const oldDomainBooks = Object.entries(window.localStorage)
+          .filter(([key]) => key.startsWith('book_'))
+          .map(([_, value]) => {
+            try {
+              return JSON.parse(value);
+            } catch (error) {
+              console.error("Erreur lors du parsing d'un livre de l'ancien domaine:", error);
+              return null;
+            }
+          })
+          .filter((book): book is Book => book !== null);
+
+        // Si des livres sont trouvés dans l'ancien domaine, les copier dans le nouveau
+        if (oldDomainBooks.length > 0) {
+          oldDomainBooks.forEach(book => {
+            localStorage.setItem(`book_${book.id}`, JSON.stringify(book));
+          });
+          storedBooks = oldDomainBooks;
+          toast({
+            description: "Votre bibliothèque a été restaurée avec succès !",
+          });
+        }
+      }
       
       console.log("Nombre de livres trouvés:", storedBooks.length);
       const sortedBooks = sortBooks(storedBooks, sortBy);
