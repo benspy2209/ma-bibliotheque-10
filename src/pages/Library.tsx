@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Book } from '@/types/book';
 import { Card } from "@/components/ui/card";
@@ -41,24 +42,24 @@ export default function Library() {
             Votre bibliothèque est vide. Ajoutez des livres depuis la recherche !
           </p>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             {books.map((book) => (
               <Card 
                 key={book.id}
-                className="book-card group cursor-pointer"
+                className="book-card group cursor-pointer hover:shadow-lg transition-shadow"
                 onClick={() => setSelectedBook(book)}
               >
                 <img
                   src={book.cover}
                   alt={book.title}
-                  className="w-full h-[200px] object-cover"
+                  className="w-full h-[160px] object-cover rounded-t-lg"
                 />
-                <div className="p-4">
-                  <h3 className="font-semibold line-clamp-1">{book.title}</h3>
-                  <p className="text-sm text-gray-600">
+                <div className="p-2">
+                  <h3 className="font-semibold text-sm line-clamp-1">{book.title}</h3>
+                  <p className="text-xs text-gray-600 line-clamp-1">
                     {Array.isArray(book.author) ? book.author[0] : book.author}
                   </p>
-                  <span className="mt-2 inline-block text-sm px-2 py-1 bg-secondary rounded-full">
+                  <span className="mt-1 inline-block text-xs px-2 py-0.5 bg-secondary rounded-full">
                     {statusLabels[book.status || 'to-read']}
                   </span>
                 </div>
@@ -72,7 +73,7 @@ export default function Library() {
             book={selectedBook}
             isOpen={!!selectedBook}
             onClose={() => setSelectedBook(null)}
-            onUpdate={handleBookUpdate} // Add onUpdate prop
+            onUpdate={handleBookUpdate}
           />
         )}
       </div>
