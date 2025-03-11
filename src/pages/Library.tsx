@@ -3,11 +3,24 @@ import { useState, useEffect } from 'react';
 import { Book } from '@/types/book';
 import { Card } from "@/components/ui/card";
 import { BookDetails } from '@/components/BookDetails';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { ArrowUpDown } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+
+type SortOption = 'recent' | 'author' | 'title';
 
 export default function Library() {
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [sortBy, setSortBy] = useState<SortOption>('recent');
 
   const loadBooks = () => {
     console.log("Loading books from localStorage");
@@ -25,14 +38,37 @@ export default function Library() {
       })
       .filter(book => book !== null);
     
-    console.log("Total books loaded:", storedBooks.length);
-    setBooks(storedBooks);
+    const sortedBooks = sortBooks(storedBooks, sortBy);
+    console.log("Total books loaded:", sortedBooks.length);
+    setBooks(sortedBooks);
   };
 
-  // Charger les livres au montage du composant et quand refreshKey change
+  const sortBooks = (booksToSort: Book[], sortOption: SortOption): Book[] => {
+    return [...booksToSort].sort((a, b) => {
+      switch (sortOption) {
+        case 'recent':
+          if (!a.completionDate && !b.completionDate) return 0;
+          if (!a.completionDate) return 1;
+          if (!b.completionDate) return -1;
+          return new Date(b.completionDate).getTime() - new Date(a.completionDate).getTime();
+        
+        case 'author':
+          const authorA = Array.isArray(a.author) ? a.author[0] : a.author;
+          const authorB = Array.isArray(b.author) ? b.author[0] : b.author;
+          return authorA.localeCompare(authorB);
+        
+        case 'title':
+          return a.title.localeCompare(b.title);
+        
+        default:
+          return 0;
+      }
+    });
+  };
+
   useEffect(() => {
     loadBooks();
-  }, [refreshKey]);
+  }, [refreshKey, sortBy]);
 
   const handleBookUpdate = () => {
     loadBooks();
@@ -45,10 +81,35 @@ export default function Library() {
     'completed': 'Lu'
   };
 
+  const formatCompletionDate = (date: string) => {
+    return format(new Date(date), 'MMMM yyyy', { locale: fr });
+  };
+
   return (
     <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <h1 className="mb-8 text-3xl font-bold">Ma Bibliothèque</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold">Ma Bibliothèque</h1>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                Trier par <ArrowUpDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setSortBy('recent')}>
+                Date de lecture
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy('author')}>
+                Auteur
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy('title')}>
+                Titre
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
         
         {books.length === 0 ? (
           <p className="text-center text-gray-600">
@@ -72,9 +133,16 @@ export default function Library() {
                   <p className="text-xs text-gray-600 line-clamp-1">
                     {Array.isArray(book.author) ? book.author[0] : book.author}
                   </p>
-                  <span className="mt-1 inline-block text-xs px-2 py-0.5 bg-secondary rounded-full">
-                    {statusLabels[book.status || 'to-read']}
-                  </span>
+                  <div className="flex flex-col gap-1 mt-1">
+                    <span className="inline-block text-xs px-2 py-0.5 bg-secondary rounded-full">
+                      {statusLabels[book.status || 'to-read']}
+                    </span>
+                    {book.completionDate && (
+                      <span className="text-xs text-gray-500">
+                        Lu en {formatCompletionDate(book.completionDate)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </Card>
             ))}
