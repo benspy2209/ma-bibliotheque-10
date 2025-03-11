@@ -1,6 +1,7 @@
 
 import { Book } from '@/types/book';
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface BookGridProps {
   books: Book[];
@@ -15,7 +16,10 @@ export const BookGrid = ({ books, onBookClick }: BookGridProps) => {
   };
 
   const formatCompletionDate = (date: string) => {
-    return new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(new Date(date));
+    return new Intl.DateTimeFormat('fr-FR', { 
+      month: 'long',
+      year: 'numeric'
+    }).format(new Date(date));
   };
 
   return (
@@ -35,19 +39,19 @@ export const BookGrid = ({ books, onBookClick }: BookGridProps) => {
               target.src = '/placeholder.svg';
             }}
           />
-          <div className="p-2">
+          <div className="p-2 space-y-2">
             <h3 className="font-semibold text-sm line-clamp-1">{book.title}</h3>
             <p className="text-xs text-gray-600 line-clamp-1">
               {Array.isArray(book.author) ? book.author[0] : book.author}
             </p>
-            <div className="flex flex-col gap-1 mt-1">
-              <span className="inline-block text-xs px-2 py-0.5 bg-secondary rounded-full">
+            <div className="flex flex-col gap-1.5">
+              <Badge variant={book.status === 'completed' ? "default" : "secondary"}>
                 {statusLabels[book.status || 'to-read']}
-              </span>
-              {book.completionDate && (
-                <span className="text-xs text-gray-500">
-                  Lu en {formatCompletionDate(book.completionDate)}
-                </span>
+              </Badge>
+              {book.status === 'completed' && book.completionDate && (
+                <Badge variant="outline" className="bg-card">
+                  {formatCompletionDate(book.completionDate)}
+                </Badge>
               )}
             </div>
           </div>
