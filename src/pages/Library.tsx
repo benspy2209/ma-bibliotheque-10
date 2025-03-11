@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Book } from '@/types/book';
 import { Card } from "@/components/ui/card";
@@ -85,6 +84,19 @@ export default function Library() {
     return format(new Date(date), 'MMMM yyyy', { locale: fr });
   };
 
+  const getSortTitle = () => {
+    switch (sortBy) {
+      case 'recent':
+        return 'Livres par date de lecture';
+      case 'author':
+        return 'Livres par auteur';
+      case 'title':
+        return 'Livres par titre';
+      default:
+        return 'Ma Bibliothèque';
+    }
+  };
+
   return (
     <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -110,6 +122,8 @@ export default function Library() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+        
+        <h2 className="text-2xl font-semibold mb-6 text-gray-700">{getSortTitle()}</h2>
         
         {books.length === 0 ? (
           <p className="text-center text-gray-600">
