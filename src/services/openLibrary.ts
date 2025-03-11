@@ -25,7 +25,7 @@ export async function searchBooks(query: string): Promise<Book[]> {
         author: doc.author_name || ['Auteur inconnu'],
         cover: doc.cover_i 
           ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`
-          : 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=687&auto=format&fit=crop',
+          : '/placeholder.svg',
         language: doc.language || []
       }));
   } catch (error) {
