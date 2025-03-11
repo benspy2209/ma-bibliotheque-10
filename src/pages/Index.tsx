@@ -11,7 +11,7 @@ import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
 import { removeDuplicateBooks } from '@/lib/utils';
 import { useToast } from "@/components/ui/use-toast";
-import { NavBar } from '@/components/NavBar';
+import NavBar from '@/components/NavBar';
 
 const BOOKS_PER_PAGE = 12;
 

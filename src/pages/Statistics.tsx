@@ -3,8 +3,9 @@ import { Book } from '@/types/book';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Book as BookIcon, BookOpen, Library } from 'lucide-react';
-import { format, parse } from 'date-fns';
+import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import NavBar from '@/components/NavBar';
 
 export default function Statistics() {
   const [books] = useState<Book[]>(() => {
