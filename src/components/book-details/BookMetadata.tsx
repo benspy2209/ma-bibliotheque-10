@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 import { Input } from '@/components/ui/input';
 import { BookMetadataProps } from './types';
@@ -6,24 +5,25 @@ import { Book as BookIcon, Calendar, ListTree, Layers, Users } from 'lucide-reac
 
 export function BookMetadata({ book, isEditing, onInputChange }: BookMetadataProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div>
-        <h3 className="font-semibold flex items-center gap-2">
+        <h3 className="text-sm font-semibold flex items-center gap-2">
           <Users className="h-4 w-4" />
           Auteur(s)
         </h3>
         {isEditing ? (
           <Input
+            className="h-8 text-sm"
             value={Array.isArray(book.author) ? book.author.join(', ') : book.author}
             onChange={(e) => onInputChange('author', e.target.value)}
           />
         ) : (
-          <p>{Array.isArray(book.author) ? book.author.join(', ') : book.author}</p>
+          <p className="text-sm text-muted-foreground">{Array.isArray(book.author) ? book.author.join(', ') : book.author}</p>
         )}
       </div>
 
       <div>
-        <h3 className="font-semibold flex items-center gap-2">
+        <h3 className="text-sm font-semibold flex items-center gap-2">
           <Calendar className="h-4 w-4" />
           Date de publication
         </h3>
@@ -39,7 +39,7 @@ export function BookMetadata({ book, isEditing, onInputChange }: BookMetadataPro
       </div>
 
       <div>
-        <h3 className="font-semibold flex items-center gap-2">
+        <h3 className="text-sm font-semibold flex items-center gap-2">
           <BookIcon className="h-4 w-4" />
           Nombre de pages
         </h3>
@@ -56,7 +56,7 @@ export function BookMetadata({ book, isEditing, onInputChange }: BookMetadataPro
       </div>
 
       <div>
-        <h3 className="font-semibold flex items-center gap-2">
+        <h3 className="text-sm font-semibold flex items-center gap-2">
           <ListTree className="h-4 w-4" />
           Série
         </h3>
@@ -73,7 +73,7 @@ export function BookMetadata({ book, isEditing, onInputChange }: BookMetadataPro
 
       {(isEditing || (book.subjects && book.subjects.length > 0)) && (
         <div>
-          <h3 className="font-semibold flex items-center gap-2">
+          <h3 className="text-sm font-semibold flex items-center gap-2">
             <Layers className="h-4 w-4" />
             Catégories
           </h3>

@@ -57,17 +57,17 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <div className="flex justify-between items-center">
-            <DialogTitle className="text-2xl font-bold">{currentBook.title}</DialogTitle>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader className="pb-2">
+          <div className="flex justify-between items-center gap-4">
+            <DialogTitle className="text-xl font-bold line-clamp-1">{currentBook.title}</DialogTitle>
             <Button variant="outline" size="sm" onClick={() => setIsEditing(!isEditing)}>
               <PenLine className="h-4 w-4 mr-2" />
               {isEditing ? "Annuler" : "Éditer"}
             </Button>
           </div>
-          <DialogDescription className="flex justify-between items-center">
-            <span>Détails du livre</span>
+          <DialogDescription className="flex justify-between items-center pt-2">
+            <span className="text-sm">Détails du livre</span>
             <AddToLibrary 
               onStatusChange={handleStatusChange}
               currentStatus={currentBook.status}
@@ -75,14 +75,14 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
           </DialogDescription>
         </DialogHeader>
         
-        <div className="grid grid-cols-[200px,1fr] gap-6 py-4">
+        <div className="grid grid-cols-[150px,1fr] gap-4 py-2">
           <img
             src={currentBook.cover}
             alt={currentBook.title}
-            className="w-full rounded-lg shadow-lg"
+            className="w-full rounded-lg shadow-lg object-cover h-[200px]"
           />
           
-          <div className="space-y-4">
+          <div className="space-y-3">
             <BookMetadata
               book={currentBook}
               isEditing={isEditing}
@@ -97,7 +97,7 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
           </div>
         </div>
 
-        <Separator className="my-4" />
+        <Separator className="my-2" />
         
         <BookDescription
           description={currentBook.description}
@@ -106,7 +106,7 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
         />
 
         {isEditing && (
-          <div className="flex justify-end mt-4">
+          <div className="flex justify-end mt-2">
             <Button onClick={handleSave}>
               Enregistrer les modifications
             </Button>
