@@ -1,3 +1,4 @@
+
 import { Book, ReadingStatus } from '@/types/book';
 import {
   Dialog,
@@ -7,23 +8,15 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { Book as BookIcon, Calendar, ListTree, Layers, Users, PenLine } from 'lucide-react';
+import { PenLine } from 'lucide-react';
 import { AddToLibrary } from './AddToLibrary';
 import { useState } from 'react';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-
-interface BookDetailsProps {
-  book: Book;
-  isOpen: boolean;
-  onClose: () => void;
-  onUpdate: () => void;
-}
+import { BookDetailsProps } from './book-details/types';
+import { BookMetadata } from './book-details/BookMetadata';
+import { CompletionDate } from './book-details/CompletionDate';
+import { BookDescription } from './book-details/BookDescription';
 
 export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProps) {
   const [currentBook, setCurrentBook] = useState(book);
@@ -90,161 +83,27 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
           />
           
           <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Auteur(s)
-              </h3>
-              {isEditing ? (
-                <Input
-                  value={Array.isArray(currentBook.author) ? currentBook.author.join(', ') : currentBook.author}
-                  onChange={(e) => handleInputChange('author', e.target.value)}
-                />
-              ) : (
-                <p>{Array.isArray(currentBook.author) ? currentBook.author.join(', ') : currentBook.author}</p>
-              )}
-            </div>
-
-            <div>
-              <h3 className="font-semibold flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Date de publication
-              </h3>
-              {isEditing ? (
-                <Input
-                  value={currentBook.publishDate || ''}
-                  onChange={(e) => handleInputChange('publishDate', e.target.value)}
-                  placeholder="Date de publication"
-                />
-              ) : (
-                <p>{currentBook.publishDate || "Date non disponible"}</p>
-              )}
-            </div>
-
-            <div>
-              <h3 className="font-semibold flex items-center gap-2">
-                <BookIcon className="h-4 w-4" />
-                Nombre de pages
-              </h3>
-              {isEditing ? (
-                <Input
-                  type="number"
-                  value={currentBook.numberOfPages || ''}
-                  onChange={(e) => handleInputChange('numberOfPages', e.target.value)}
-                  placeholder="Nombre de pages"
-                />
-              ) : (
-                <p>{currentBook.numberOfPages ? `${currentBook.numberOfPages} pages` : "Information non disponible"}</p>
-              )}
-            </div>
-
-            <div>
-              <h3 className="font-semibold flex items-center gap-2">
-                <ListTree className="h-4 w-4" />
-                Série
-              </h3>
-              {isEditing ? (
-                <Input
-                  value={currentBook.series || ''}
-                  onChange={(e) => handleInputChange('series', e.target.value)}
-                  placeholder="Nom de la série"
-                />
-              ) : (
-                currentBook.series && <p>{currentBook.series}</p>
-              )}
-            </div>
-
-            {(isEditing || (currentBook.subjects && currentBook.subjects.length > 0)) && (
-              <div>
-                <h3 className="font-semibold flex items-center gap-2">
-                  <Layers className="h-4 w-4" />
-                  Catégories
-                </h3>
-                {isEditing ? (
-                  <Input
-                    value={currentBook.subjects?.join(', ') || ''}
-                    onChange={(e) => handleInputChange('subjects', e.target.value)}
-                    placeholder="Catégories (séparées par des virgules)"
-                  />
-                ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {currentBook.subjects?.slice(0, 5).map((subject, index) => (
-                      <span
-                        key={index}
-                        className="bg-secondary text-secondary-foreground px-2 py-1 rounded-full text-sm"
-                      >
-                        {subject}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {(isEditing || currentBook.status === 'completed') && (
-              <div>
-                <h3 className="font-semibold flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Date de lecture
-                </h3>
-                {isEditing ? (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-[240px] pl-3 text-left font-normal",
-                          !currentBook.completionDate && "text-muted-foreground"
-                        )}
-                        disabled={currentBook.status !== 'completed'}
-                      >
-                        {currentBook.completionDate ? (
-                          format(new Date(currentBook.completionDate), "dd/MM/yyyy")
-                        ) : (
-                          <span>Choisir une date</span>
-                        )}
-                        <Calendar className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={currentBook.completionDate ? new Date(currentBook.completionDate) : undefined}
-                        onSelect={handleCompletionDateChange}
-                        disabled={(date) => date > new Date()}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                ) : (
-                  currentBook.completionDate && (
-                    <p>{format(new Date(currentBook.completionDate), "dd/MM/yyyy")}</p>
-                  )
-                )}
-              </div>
-            )}
+            <BookMetadata
+              book={currentBook}
+              isEditing={isEditing}
+              onInputChange={handleInputChange}
+            />
+            
+            <CompletionDate
+              book={currentBook}
+              isEditing={isEditing}
+              onDateChange={handleCompletionDateChange}
+            />
           </div>
         </div>
 
         <Separator className="my-4" />
         
-        <div>
-          <h3 className="font-semibold mb-2">Description</h3>
-          {isEditing ? (
-            <textarea
-              className="w-full min-h-[100px] p-2 rounded-md border border-input"
-              value={currentBook.description || ''}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              placeholder="Description du livre"
-            />
-          ) : (
-            currentBook.description ? (
-              <p className="text-muted-foreground whitespace-pre-line">{currentBook.description}</p>
-            ) : (
-              <p className="text-muted-foreground italic">Aucune description disponible pour ce livre</p>
-            )
-          )}
-        </div>
+        <BookDescription
+          description={currentBook.description}
+          isEditing={isEditing}
+          onDescriptionChange={(value) => handleInputChange('description', value)}
+        />
 
         {isEditing && (
           <div className="flex justify-end mt-4">
