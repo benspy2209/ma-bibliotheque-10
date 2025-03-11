@@ -13,5 +13,6 @@ export type Book = {
   description?: string;
   publishers?: string[];
   subjects?: string[];
+  isbn?: string;  // Added this field
 };
 
