@@ -1,4 +1,3 @@
-
 import { Book, ReadingStatus } from '@/types/book';
 import {
   Dialog,
@@ -41,9 +40,7 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
   };
 
   const saveToLibrary = (bookToSave: Book) => {
-    const library = JSON.parse(localStorage.getItem('library') || '{}');
-    library[bookToSave.id] = bookToSave;
-    localStorage.setItem('library', JSON.stringify(library));
+    localStorage.setItem(`book_${bookToSave.id}`, JSON.stringify(bookToSave));
     onUpdate();
     toast({
       description: "Les modifications ont été enregistrées",
