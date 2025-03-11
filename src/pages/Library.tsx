@@ -10,20 +10,33 @@ export default function Library() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const loadBooks = () => {
-    // Charger tous les livres du localStorage
+    console.log("Loading books from localStorage");
     const storedBooks = Object.entries(localStorage)
       .filter(([key]) => key.startsWith('book_'))
-      .map(([_, value]) => JSON.parse(value));
+      .map(([_, value]) => {
+        try {
+          const book = JSON.parse(value);
+          console.log("Loaded book:", book);
+          return book;
+        } catch (error) {
+          console.error("Error parsing book from localStorage:", error);
+          return null;
+        }
+      })
+      .filter(book => book !== null);
+    
+    console.log("Total books loaded:", storedBooks.length);
     setBooks(storedBooks);
   };
 
+  // Charger les livres au montage du composant et quand refreshKey change
   useEffect(() => {
     loadBooks();
   }, [refreshKey]);
 
   const handleBookUpdate = () => {
     loadBooks();
-    setRefreshKey(prev => prev + 1); // Trigger refresh
+    setRefreshKey(prev => prev + 1);
   };
 
   const statusLabels: Record<string, string> = {
