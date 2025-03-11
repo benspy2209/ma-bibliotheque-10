@@ -7,8 +7,9 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
+    // Amélioration de la recherche avec inauthor pour une recherche plus précise des auteurs
     const response = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=fr&key=${GOOGLE_BOOKS_API_KEY}`
+      `https://www.googleapis.com/books/v1/volumes?q=inauthor:${encodeURIComponent(query)}&maxResults=40&key=${GOOGLE_BOOKS_API_KEY}`
     );
 
     if (!response.ok) {
