@@ -9,17 +9,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, Grid, CalendarDays } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
 type SortOption = 'recent' | 'author' | 'title';
+type ViewMode = 'simple' | 'grouped';
 
 export default function Library() {
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [sortBy, setSortBy] = useState<SortOption>('recent');
+  const [viewMode, setViewMode] = useState<ViewMode>('grouped');
 
   const loadBooks = () => {
     console.log("Loading books from localStorage");
@@ -144,6 +146,37 @@ export default function Library() {
   };
 
   const sortedAndGroupedBooks = groupAndSortBooks(books, sortBy);
+  const sortedBooks = sortBooks(books, sortBy);
+
+  const renderBookCard = (book: Book) => (
+    <Card 
+      key={book.id}
+      className="book-card group cursor-pointer hover:shadow-lg transition-shadow"
+      onClick={() => setSelectedBook(book)}
+    >
+      <img
+        src={book.cover}
+        alt={book.title}
+        className="w-full h-[160px] object-cover rounded-t-lg"
+      />
+      <div className="p-2">
+        <h3 className="font-semibold text-sm line-clamp-1">{book.title}</h3>
+        <p className="text-xs text-gray-600 line-clamp-1">
+          {Array.isArray(book.author) ? book.author[0] : book.author}
+        </p>
+        <div className="flex flex-col gap-1 mt-1">
+          <span className="inline-block text-xs px-2 py-0.5 bg-secondary rounded-full">
+            {statusLabels[book.status || 'to-read']}
+          </span>
+          {book.completionDate && (
+            <span className="text-xs text-gray-500">
+              Lu en {formatCompletionDate(book.completionDate)}
+            </span>
+          )}
+        </div>
+      </div>
+    </Card>
+  );
 
   return (
     <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-8">
@@ -151,32 +184,44 @@ export default function Library() {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">{getSortTitle()}</h1>
           
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                Trier par <ArrowUpDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setSortBy('recent')}>
-                Date de lecture
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy('author')}>
-                Auteur
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy('title')}>
-                Titre
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setViewMode(viewMode === 'simple' ? 'grouped' : 'simple')}
+            >
+              {viewMode === 'simple' ? <CalendarDays className="h-4 w-4" /> : <Grid className="h-4 w-4" />}
+            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  Trier par <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setSortBy('recent')}>
+                  Date de lecture
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy('author')}>
+                  Auteur
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy('title')}>
+                  Titre
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-        
-        <h2 className="text-2xl font-semibold mb-6 text-gray-700">{getSortTitle()}</h2>
         
         {books.length === 0 ? (
           <p className="text-center text-gray-600">
             Votre bibliothèque est vide. Ajoutez des livres depuis la recherche !
           </p>
+        ) : viewMode === 'simple' ? (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+            {sortedBooks.map(renderBookCard)}
+          </div>
         ) : (
           <>
             {Object.entries(sortedAndGroupedBooks).map(([group, groupBooks]) => (
@@ -185,35 +230,7 @@ export default function Library() {
                   {group}
                 </h3>
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-                  {groupBooks.map((book) => (
-                    <Card 
-                      key={book.id}
-                      className="book-card group cursor-pointer hover:shadow-lg transition-shadow"
-                      onClick={() => setSelectedBook(book)}
-                    >
-                      <img
-                        src={book.cover}
-                        alt={book.title}
-                        className="w-full h-[160px] object-cover rounded-t-lg"
-                      />
-                      <div className="p-2">
-                        <h3 className="font-semibold text-sm line-clamp-1">{book.title}</h3>
-                        <p className="text-xs text-gray-600 line-clamp-1">
-                          {Array.isArray(book.author) ? book.author[0] : book.author}
-                        </p>
-                        <div className="flex flex-col gap-1 mt-1">
-                          <span className="inline-block text-xs px-2 py-0.5 bg-secondary rounded-full">
-                            {statusLabels[book.status || 'to-read']}
-                          </span>
-                          {book.completionDate && (
-                            <span className="text-xs text-gray-500">
-                              Lu en {formatCompletionDate(book.completionDate)}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
+                  {groupBooks.map(renderBookCard)}
                 </div>
               </div>
             ))}
