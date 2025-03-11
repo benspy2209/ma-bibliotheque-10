@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,6 @@ const Index = () => {
     const value = e.target.value;
     setSearchQuery(value);
     
-    // Debounce la recherche
     const timeoutId = setTimeout(() => {
       setDebouncedQuery(value);
     }, 500);
@@ -40,7 +40,6 @@ const Index = () => {
   return (
     <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-8 fade-in">
       <div className="mx-auto max-w-7xl">
-        {/* En-tête */}
         <div className="mb-12 text-center">
           <h1 className="mb-4 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
             Découvrez votre prochaine lecture
@@ -50,7 +49,6 @@ const Index = () => {
           </p>
         </div>
 
-        {/* Barre de recherche */}
         <div className="relative mb-12 mx-auto max-w-2xl">
           <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
           <Input
@@ -62,14 +60,12 @@ const Index = () => {
           />
         </div>
 
-        {/* État de chargement */}
         {isLoading && (
           <div className="text-center text-gray-600">
             Recherche en cours...
           </div>
         )}
 
-        {/* Grille de livres */}
         <div className="book-grid">
           {(!debouncedQuery ? [] : books).map((book) => (
             <Card 
@@ -92,14 +88,12 @@ const Index = () => {
           ))}
         </div>
 
-        {/* Pas de résultats */}
         {debouncedQuery && books.length === 0 && !isLoading && (
           <div className="text-center text-gray-600">
             Aucun livre trouvé
           </div>
         )}
 
-        {/* Dialogue des détails du livre */}
         {selectedBook && (
           <BookDetails
             book={selectedBook}
@@ -108,7 +102,6 @@ const Index = () => {
           />
         )}
 
-        {/* Bouton "Charger plus" - désactivé pour l'instant car l'API ne supporte pas la pagination de cette manière */}
         {books.length > 0 && (
           <div className="mt-12 text-center">
             <Button variant="outline" className="hover:bg-secondary">
