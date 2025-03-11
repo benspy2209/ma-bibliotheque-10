@@ -4,41 +4,31 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Search } from 'lucide-react';
-
-// Données temporaires pour la démo
-const sampleBooks = [
-  {
-    id: 1,
-    title: "L'Étranger",
-    author: "Albert Camus",
-    cover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=687&auto=format&fit=crop",
-    rating: 4.5
-  },
-  {
-    id: 2,
-    title: "Les Misérables",
-    author: "Victor Hugo",
-    cover: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=687&auto=format&fit=crop",
-    rating: 4.8
-  },
-  {
-    id: 3,
-    title: "Le Petit Prince",
-    author: "Antoine de Saint-Exupéry",
-    cover: "https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=688&auto=format&fit=crop",
-    rating: 4.9
-  },
-  {
-    id: 4,
-    title: "Madame Bovary",
-    author: "Gustave Flaubert",
-    cover: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=687&auto=format&fit=crop",
-    rating: 4.3
-  },
-];
+import { useQuery } from '@tanstack/react-query';
+import { searchBooks } from '@/services/openLibrary';
+import { Book } from '@/types/book';
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+
+  const { data: books = [], isLoading } = useQuery({
+    queryKey: ['books', debouncedQuery],
+    queryFn: () => searchBooks(debouncedQuery),
+    enabled: debouncedQuery.length > 0
+  });
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    
+    // Debounce la recherche
+    const timeoutId = setTimeout(() => {
+      setDebouncedQuery(value);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  };
 
   return (
     <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-8 fade-in">
@@ -61,13 +51,20 @@ const Index = () => {
             placeholder="Rechercher un livre, un auteur..."
             className="pl-10 h-12"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={handleSearch}
           />
         </div>
 
+        {/* État de chargement */}
+        {isLoading && (
+          <div className="text-center text-gray-600">
+            Recherche en cours...
+          </div>
+        )}
+
         {/* Grille de livres */}
         <div className="book-grid">
-          {sampleBooks.map((book) => (
+          {(!debouncedQuery ? [] : books).map((book) => (
             <Card key={book.id} className="book-card group">
               <img
                 src={book.cover}
@@ -76,21 +73,29 @@ const Index = () => {
               />
               <div className="book-info">
                 <h3 className="text-lg font-semibold">{book.title}</h3>
-                <p className="text-sm text-gray-600">{book.author}</p>
-                <div className="mt-2 flex items-center">
-                  <span className="text-sm font-medium text-amber-500">★ {book.rating}</span>
-                </div>
+                <p className="text-sm text-gray-600">
+                  {Array.isArray(book.author) ? book.author[0] : book.author}
+                </p>
               </div>
             </Card>
           ))}
         </div>
 
-        {/* Bouton "Charger plus" */}
-        <div className="mt-12 text-center">
-          <Button variant="outline" className="hover:bg-secondary">
-            Voir plus de livres
-          </Button>
-        </div>
+        {/* Pas de résultats */}
+        {debouncedQuery && books.length === 0 && !isLoading && (
+          <div className="text-center text-gray-600">
+            Aucun livre trouvé
+          </div>
+        )}
+
+        {/* Bouton "Charger plus" - désactivé pour l'instant car l'API ne supporte pas la pagination de cette manière */}
+        {books.length > 0 && (
+          <div className="mt-12 text-center">
+            <Button variant="outline" className="hover:bg-secondary">
+              Voir plus de livres
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
