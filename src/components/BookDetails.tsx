@@ -73,7 +73,7 @@ export function BookDetails({ book, isOpen, onClose }: BookDetailsProps) {
               <div>
                 <h3 className="font-semibold flex items-center gap-2">
                   <Layers className="h-4 w-4" />
-                  Sujets
+                  Catégories
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {book.subjects.slice(0, 5).map((subject, index) => (
