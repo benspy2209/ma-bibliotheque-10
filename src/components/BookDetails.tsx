@@ -209,7 +209,7 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
                       <Calendar
                         mode="single"
                         selected={currentBook.completionDate ? new Date(currentBook.completionDate) : undefined}
-                        onSelect={handleCompletionDateChange}
+                        onSelect={(date: Date | undefined) => handleCompletionDateChange(date)}
                         disabled={(date) => date > new Date()}
                         initialFocus
                         className="p-3 pointer-events-auto"
