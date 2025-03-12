@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Book } from '@/types/book';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -6,30 +6,33 @@ import { Book as BookIcon, BookOpen, Library } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import NavBar from '@/components/NavBar';
+import { loadBooks } from '@/services/supabaseBooks';
+import { useQuery } from '@tanstack/react-query';
 
 export default function Statistics() {
-  const [books] = useState<Book[]>(() => {
-    return Object.entries(localStorage)
-      .filter(([key]) => key.startsWith('book_'))
-      .map(([_, value]) => JSON.parse(value))
-      .filter((book): book is Book => book !== null && book.status === 'completed' && book.completionDate);
+  const { data: books = [] } = useQuery({
+    queryKey: ['books'],
+    queryFn: loadBooks
   });
 
+  const completedBooks = books.filter((book): book is Book => 
+    book !== null && book.status === 'completed' && book.completionDate != null
+  );
+
   const stats = useMemo(() => {
-    const totalBooks = books.length;
+    const totalBooks = completedBooks.length;
     
     // Log each book's pages to debug
-    books.forEach(book => {
+    completedBooks.forEach(book => {
       console.log(`Book "${book.title}": ${book.numberOfPages} pages`);
     });
     
-    const totalPages = books.reduce((sum, book) => {
+    const totalPages = completedBooks.reduce((sum, book) => {
       if (!book.numberOfPages) {
         console.log(`Book "${book.title}" has no pages defined`);
         return sum;
       }
       
-      // Ensure numberOfPages is treated as a number
       const pages = Number(book.numberOfPages);
       if (isNaN(pages)) {
         console.log(`Book "${book.title}" has invalid number of pages:`, book.numberOfPages);
@@ -43,19 +46,18 @@ export default function Statistics() {
     const avgPagesPerBook = totalBooks > 0 ? Math.round(totalPages / totalBooks) : 0;
 
     // Grouper les livres par mois
-    const booksByMonth = books.reduce((acc, book) => {
+    const booksByMonth = completedBooks.reduce((acc, book) => {
       const monthKey = format(new Date(book.completionDate!), 'MMMM yyyy', { locale: fr });
       if (!acc[monthKey]) {
         acc[monthKey] = {
           name: monthKey,
           books: 0,
           pages: 0,
-          date: new Date(book.completionDate!) // Ajout de la date pour le tri
+          date: new Date(book.completionDate!) 
         };
       }
       acc[monthKey].books += 1;
       
-      // Ensure numberOfPages is treated as a number for monthly stats
       const pages = Number(book.numberOfPages || 0);
       acc[monthKey].pages += !isNaN(pages) ? pages : 0;
       
@@ -64,7 +66,7 @@ export default function Statistics() {
 
     // Trier les données par date
     const monthlyData = Object.values(booksByMonth)
-      .sort((a, b) => a.date.getTime() - b.date.getTime()) // Tri chronologique
+      .sort((a, b) => a.date.getTime() - b.date.getTime())
       .slice(-6);
 
     return {
@@ -73,7 +75,7 @@ export default function Statistics() {
       avgPagesPerBook,
       monthlyData
     };
-  }, [books]);
+  }, [completedBooks]);
 
   return (
     <>
