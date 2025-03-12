@@ -1,9 +1,8 @@
-
 import { createClient } from '@supabase/supabase-js';
 import { Book } from '@/types/book';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = 'https://ckeptymeczykfnbfcfuq.supabase.co';
+const supabaseKey = 'eyJhbGcioiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI';
 
 if (!supabaseUrl || !supabaseKey) {
   throw new Error('Les variables d\'environnement Supabase ne sont pas configurées.');
