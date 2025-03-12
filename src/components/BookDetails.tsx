@@ -1,3 +1,4 @@
+
 import { Book, ReadingStatus } from '@/types/book';
 import {
   Dialog,
@@ -16,16 +17,17 @@ import { BookDetailsProps } from './book-details/types';
 import { BookMetadata } from './book-details/BookMetadata';
 import { CompletionDate } from './book-details/CompletionDate';
 import { BookDescription } from './book-details/BookDescription';
+import { saveBook } from '@/services/supabaseBooks';
 
 export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProps) {
   const [currentBook, setCurrentBook] = useState(book);
   const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
 
-  const handleStatusChange = (status: ReadingStatus) => {
+  const handleStatusChange = async (status: ReadingStatus) => {
     const updatedBook = { ...currentBook, status };
     setCurrentBook(updatedBook);
-    saveToLibrary(updatedBook);
+    await saveToLibrary(updatedBook);
   };
 
   const handleInputChange = (field: keyof Book, value: string) => {
@@ -39,16 +41,24 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
     }));
   };
 
-  const saveToLibrary = (bookToSave: Book) => {
-    localStorage.setItem(`book_${bookToSave.id}`, JSON.stringify(bookToSave));
-    onUpdate();
-    toast({
-      description: "Les modifications ont été enregistrées",
-    });
+  const saveToLibrary = async (bookToSave: Book) => {
+    try {
+      await saveBook(bookToSave);
+      onUpdate();
+      toast({
+        description: "Les modifications ont été enregistrées",
+      });
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+      toast({
+        variant: "destructive",
+        description: "Une erreur est survenue lors de la sauvegarde",
+      });
+    }
   };
 
-  const handleSave = () => {
-    saveToLibrary(currentBook);
+  const handleSave = async () => {
+    await saveToLibrary(currentBook);
     setIsEditing(false);
   };
 
