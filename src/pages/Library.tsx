@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
 import { useToast } from "@/hooks/use-toast";
@@ -19,12 +19,14 @@ export default function Library() {
   const { data: books = [], refetch } = useQuery({
     queryKey: ['books'],
     queryFn: loadBooks,
-    onError: (error) => {
-      console.error("Erreur lors du chargement des livres:", error);
-      toast({
-        variant: "destructive",
-        description: "Une erreur est survenue lors du chargement de votre bibliothèque.",
-      });
+    meta: {
+      onError: (error: Error) => {
+        console.error("Erreur lors du chargement des livres:", error);
+        toast({
+          variant: "destructive",
+          description: "Une erreur est survenue lors du chargement de votre bibliothèque.",
+        });
+      }
     }
   });
 
