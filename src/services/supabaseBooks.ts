@@ -8,7 +8,12 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error('Les variables d\'environnement Supabase ne sont pas configurées.');
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: true,
+    storage: window.localStorage
+  }
+});
 
 export async function saveBook(book: Book) {
   const { error } = await supabase
