@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { useQueries } from '@tanstack/react-query';
 import { searchBooks } from '@/services/openLibrary';
 import { searchGoogleBooks } from '@/services/googleBooks';
+import { getBookDetails } from '@/services/bookDetails';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
 import { removeDuplicateBooks } from '@/lib/utils';
