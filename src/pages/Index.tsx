@@ -1,18 +1,16 @@
 import { useState } from 'react';
 import { Link } from "react-router-dom";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Search } from 'lucide-react';
 import { useQueries } from '@tanstack/react-query';
 import { searchBooks } from '@/services/openLibrary';
 import { searchGoogleBooks } from '@/services/googleBooks';
-import { getBookDetails } from '@/services/bookDetails';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
 import { removeDuplicateBooks } from '@/lib/utils';
 import { useToast } from "@/components/ui/use-toast";
 import NavBar from '@/components/NavBar';
+import SearchBar from '@/components/SearchBar';
 
 const BOOKS_PER_PAGE = 12;
 
@@ -43,8 +41,7 @@ const Index = () => {
   const allBooks = [...(results[0].data || []), ...(results[1].data || [])];
   const books = removeDuplicateBooks(allBooks);
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+  const handleSearch = (value: string) => {
     setSearchQuery(value);
     setDisplayedBooks(BOOKS_PER_PAGE);
     
@@ -99,16 +96,13 @@ const Index = () => {
             </Link>
           </div>
 
-          <div className="relative mb-12 mx-auto max-w-2xl">
-            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-            <Input
-              type="search"
-              placeholder="Rechercher un livre, un auteur..."
-              className="pl-10 h-12"
-              value={searchQuery}
-              onChange={handleSearch}
-            />
-          </div>
+          <SearchBar
+            searchQuery={searchQuery}
+            onSearch={handleSearch}
+            onBookSelect={handleBookClick}
+            suggestedBooks={books}
+            isLoading={isLoading}
+          />
 
           {isLoading && (
             <div className="text-center text-gray-600">
