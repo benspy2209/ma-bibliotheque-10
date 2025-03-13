@@ -83,10 +83,40 @@
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-10px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
 .fade-in {
-  animation: fadeIn 0.5s ease-in-out;
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+/* Page Transitions */
+.page-transition {
+  @apply transition-opacity duration-300;
+}
+
+.page-enter {
+  @apply opacity-0;
+}
+
+.page-enter-active {
+  @apply opacity-100;
+}
+
+.page-exit {
+  @apply opacity-100;
+}
+
+.page-exit-active {
+  @apply opacity-0;
 }
