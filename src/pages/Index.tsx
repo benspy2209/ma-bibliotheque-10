@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -90,12 +91,12 @@ const Index = () => {
                 Explorez, partagez et découvrez de nouveaux livres
               </p>
             </div>
-            <a 
-              href="/library" 
+            <Link 
+              to="/library" 
               className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
             >
               Ma Bibliothèque
-            </a>
+            </Link>
           </div>
 
           <div className="relative mb-12 mx-auto max-w-2xl">
