@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 import { Book } from '@/types/book';
 
@@ -16,6 +17,12 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
 });
 
 export async function saveBook(book: Book) {
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError || !user) {
+    throw new Error('Utilisateur non connecté');
+  }
+
   const { error } = await supabase
     .from('books')
     .upsert({
@@ -23,16 +30,23 @@ export async function saveBook(book: Book) {
       book_data: book,
       status: book.status,
       completion_date: book.completionDate,
-      user_id: (await supabase.auth.getUser()).data.user?.id
+      user_id: user.id
     });
 
   if (error) throw error;
 }
 
 export async function loadBooks() {
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError || !user) {
+    throw new Error('Utilisateur non connecté');
+  }
+
   const { data, error } = await supabase
     .from('books')
     .select('book_data')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
   if (error) throw error;
@@ -50,17 +64,13 @@ export async function deleteBook(bookId: string) {
     throw new Error('Utilisateur non connecté');
   }
 
-  try {
-    const { error } = await supabase
-      .from('books')
-      .delete()
-      .match({ id: bookId, user_id: user.id });
+  const { error } = await supabase
+    .from('books')
+    .delete()
+    .match({ id: bookId, user_id: user.id });
 
-    if (error) {
-      throw new Error(`Erreur lors de la suppression : ${error.message}`);
-    }
-  } catch (error) {
-    console.error('Erreur lors de la suppression:', error);
-    throw error;
+  if (error) {
+    console.error('Erreur Supabase:', error);
+    throw new Error(`Erreur lors de la suppression : ${error.message}`);
   }
 }
