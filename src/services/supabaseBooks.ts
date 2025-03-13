@@ -44,10 +44,18 @@ export async function deleteBook(bookId: string) {
     throw new Error('ID du livre non fourni');
   }
 
+  const user = await supabase.auth.getUser();
+  const userId = user.data.user?.id;
+
+  if (!userId) {
+    throw new Error('Utilisateur non connecté');
+  }
+
   const { error } = await supabase
     .from('books')
     .delete()
-    .eq('id', bookId);
+    .eq('id', bookId)
+    .eq('user_id', userId);
 
   if (error) throw error;
 }
