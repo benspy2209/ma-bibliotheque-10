@@ -84,10 +84,10 @@ const Index = () => {
         <div className="px-4 py-8 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-12">
             <div className="text-center flex-1">
-              <h1 className="mb-4 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+              <h1 className="mb-4 text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
                 Découvrez votre prochaine lecture
               </h1>
-              <p className="text-lg text-gray-600">
+              <p className="text-lg text-gray-600 dark:text-gray-200">
                 Explorez, partagez et découvrez de nouveaux livres
               </p>
             </div>
