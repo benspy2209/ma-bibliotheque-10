@@ -2,11 +2,11 @@
 import React from 'react';
 import {
   Command,
-  CommandDialog,
+  CommandInput,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import { Search } from 'lucide-react';
 import { Book } from '@/types/book';
@@ -38,33 +38,36 @@ const SearchBar = ({
             className="h-12"
           />
         </div>
-        {searchQuery && (
-          <CommandGroup className="max-h-[300px] overflow-y-auto">
-            <CommandEmpty>Aucun résultat trouvé.</CommandEmpty>
-            {suggestedBooks.map((book) => (
-              <CommandItem
-                key={book.id}
-                onSelect={() => onBookSelect(book)}
-                className="flex items-center gap-2 p-2"
-              >
-                <img
-                  src={book.cover}
-                  alt={book.title}
-                  className="h-12 w-8 object-cover"
-                />
-                <div className="flex flex-col">
-                  <span className="font-medium">{book.title}</span>
-                  <span className="text-sm text-gray-500">
-                    {Array.isArray(book.author) ? book.author[0] : book.author}
-                  </span>
-                </div>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        )}
+        <CommandList>
+          {searchQuery && (
+            <CommandGroup className="max-h-[300px] overflow-y-auto">
+              <CommandEmpty>Aucun résultat trouvé.</CommandEmpty>
+              {suggestedBooks.map((book) => (
+                <CommandItem
+                  key={book.id}
+                  onSelect={() => onBookSelect(book)}
+                  className="flex items-center gap-2 p-2"
+                >
+                  <img
+                    src={book.cover}
+                    alt={book.title}
+                    className="h-12 w-8 object-cover"
+                  />
+                  <div className="flex flex-col">
+                    <span className="font-medium">{book.title}</span>
+                    <span className="text-sm text-gray-500">
+                      {Array.isArray(book.author) ? book.author[0] : book.author}
+                    </span>
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
+        </CommandList>
       </Command>
     </div>
   );
 };
 
 export default SearchBar;
+
