@@ -80,21 +80,21 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
   };
 
   const handleDelete = async () => {
-    setShowDeleteAlert(false);
-    
     try {
+      setShowDeleteAlert(false);
       await deleteBook(currentBook.id);
-      onClose();
-      onUpdate();
       
       toast({
         description: "Le livre a été supprimé de votre bibliothèque",
       });
+
+      onClose();
+      onUpdate();
     } catch (error) {
       console.error('Erreur lors de la suppression:', error);
       toast({
         variant: "destructive",
-        description: "Une erreur est survenue lors de la suppression",
+        description: error instanceof Error ? error.message : "Une erreur est survenue lors de la suppression",
       });
     }
   };

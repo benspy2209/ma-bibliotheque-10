@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 import { Book } from '@/types/book';
 
@@ -51,19 +52,27 @@ export async function deleteBook(bookId: string) {
     throw new Error('Utilisateur non connecté');
   }
 
-  try {
-    const { error } = await supabase
-      .from('books')
-      .delete()
-      .eq('id', bookId)
-      .eq('user_id', userId);
+  // D'abord, vérifions si le livre existe et appartient à l'utilisateur
+  const { data: existingBook } = await supabase
+    .from('books')
+    .select('id')
+    .eq('id', bookId)
+    .eq('user_id', userId)
+    .single();
 
-    if (error) {
-      console.error('Erreur Supabase:', error);
-      throw new Error('Erreur lors de la suppression du livre');
-    }
-  } catch (error) {
-    console.error('Erreur complète:', error);
-    throw error;
+  if (!existingBook) {
+    throw new Error('Livre non trouvé ou non autorisé');
+  }
+
+  // Ensuite, effectuons la suppression
+  const { error } = await supabase
+    .from('books')
+    .delete()
+    .eq('id', bookId)
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error('Erreur Supabase lors de la suppression:', error);
+    throw new Error(`Erreur lors de la suppression : ${error.message}`);
   }
 }
