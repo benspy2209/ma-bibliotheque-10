@@ -2,6 +2,7 @@
 import { Book } from '@/types/book';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { StarRating } from '../StarRating';
 
 interface BookGridProps {
   books: Book[];
@@ -46,6 +47,9 @@ export const BookGrid = ({ books, onBookClick }: BookGridProps) => {
             <p className="text-xs text-gray-600 line-clamp-1">
               {Array.isArray(book.author) ? book.author[0] : book.author}
             </p>
+            {book.rating > 0 && (
+              <StarRating rating={book.rating} readonly />
+            )}
             <div className="mt-auto space-y-1.5">
               <Badge 
                 variant={book.status === 'completed' ? "default" : "secondary"}
@@ -67,4 +71,4 @@ export const BookGrid = ({ books, onBookClick }: BookGridProps) => {
       ))}
     </div>
   );
-};
+}

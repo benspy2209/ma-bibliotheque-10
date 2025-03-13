@@ -1,4 +1,3 @@
-
 import { Book, ReadingStatus } from '@/types/book';
 import {
   Dialog,
@@ -18,6 +17,7 @@ import { BookMetadata } from './book-details/BookMetadata';
 import { CompletionDate } from './book-details/CompletionDate';
 import { BookDescription } from './book-details/BookDescription';
 import { saveBook } from '@/services/supabaseBooks';
+import { StarRating } from './StarRating';
 
 export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProps) {
   const [currentBook, setCurrentBook] = useState(book);
@@ -39,6 +39,12 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
       ...prev,
       completionDate: date ? date.toISOString().split('T')[0] : undefined
     }));
+  };
+
+  const handleRatingChange = async (newRating: number) => {
+    const updatedBook = { ...currentBook, rating: newRating };
+    setCurrentBook(updatedBook);
+    await saveToLibrary(updatedBook);
   };
 
   const saveToLibrary = async (bookToSave: Book) => {
@@ -90,6 +96,13 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
           />
           
           <div className="space-y-3">
+            <div className="flex items-center gap-2 mb-4">
+              <StarRating 
+                rating={currentBook.rating || 0} 
+                onRate={handleRatingChange}
+                readonly={!isEditing}
+              />
+            </div>
             <BookMetadata
               book={currentBook}
               isEditing={isEditing}
