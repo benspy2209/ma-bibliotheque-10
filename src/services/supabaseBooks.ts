@@ -16,26 +16,7 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
   }
 });
 
-async function getCurrentUser() {
-  try {
-    const { data: { user }, error } = await supabase.auth.getUser();
-    if (error) {
-      console.error('Erreur lors de la récupération de l\'utilisateur:', error);
-      return null;
-    }
-    return user;
-  } catch (error) {
-    console.error('Erreur lors de la récupération de l\'utilisateur:', error);
-    return null;
-  }
-}
-
 export async function saveBook(book: Book) {
-  const user = await getCurrentUser();
-  if (!user) {
-    throw new Error('Veuillez vous connecter pour sauvegarder un livre');
-  }
-
   const { error } = await supabase
     .from('books')
     .upsert({
@@ -43,7 +24,6 @@ export async function saveBook(book: Book) {
       book_data: book,
       status: book.status,
       completion_date: book.completionDate,
-      user_id: user.id
     });
 
   if (error) {
@@ -53,15 +33,9 @@ export async function saveBook(book: Book) {
 }
 
 export async function loadBooks() {
-  const user = await getCurrentUser();
-  if (!user) {
-    return []; // Retourne une liste vide si l'utilisateur n'est pas connecté
-  }
-
   const { data, error } = await supabase
     .from('books')
     .select('book_data')
-    .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -77,15 +51,10 @@ export async function deleteBook(bookId: string) {
     throw new Error('ID du livre non fourni');
   }
 
-  const user = await getCurrentUser();
-  if (!user) {
-    throw new Error('Veuillez vous connecter pour supprimer un livre');
-  }
-
   const { error } = await supabase
     .from('books')
     .delete()
-    .match({ id: bookId, user_id: user.id });
+    .match({ id: bookId });
 
   if (error) {
     console.error('Erreur Supabase:', error);
