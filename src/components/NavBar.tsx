@@ -1,3 +1,4 @@
+
 import { NavLink } from "react-router-dom";
 import { Search, BookOpen, BarChart2 } from "lucide-react";
 
@@ -18,7 +19,7 @@ const NavBar = () => {
             className={({ isActive }) => `flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
           >
             <BookOpen className="h-4 w-4" />
-            Ma Bibliothèque
+            ma bibliotheque
           </NavLink>
           <NavLink 
             to="/statistics" 
