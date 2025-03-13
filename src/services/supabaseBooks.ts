@@ -17,19 +17,24 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
 });
 
 async function getCurrentUser() {
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error) {
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error) {
+      console.error('Erreur lors de la récupération de l\'utilisateur:', error);
+      return null;
+    }
+    return user;
+  } catch (error) {
     console.error('Erreur lors de la récupération de l\'utilisateur:', error);
-    throw new Error('Utilisateur non connecté');
+    return null;
   }
-  if (!user) {
-    throw new Error('Utilisateur non connecté');
-  }
-  return user;
 }
 
 export async function saveBook(book: Book) {
   const user = await getCurrentUser();
+  if (!user) {
+    throw new Error('Veuillez vous connecter pour sauvegarder un livre');
+  }
 
   const { error } = await supabase
     .from('books')
@@ -49,6 +54,9 @@ export async function saveBook(book: Book) {
 
 export async function loadBooks() {
   const user = await getCurrentUser();
+  if (!user) {
+    return []; // Retourne une liste vide si l'utilisateur n'est pas connecté
+  }
 
   const { data, error } = await supabase
     .from('books')
@@ -70,6 +78,9 @@ export async function deleteBook(bookId: string) {
   }
 
   const user = await getCurrentUser();
+  if (!user) {
+    throw new Error('Veuillez vous connecter pour supprimer un livre');
+  }
 
   const { error } = await supabase
     .from('books')
