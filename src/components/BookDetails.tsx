@@ -82,11 +82,12 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
   const handleDelete = async () => {
     try {
       await deleteBook(currentBook.id);
-      onUpdate();
-      onClose();
       toast({
         description: "Le livre a été supprimé de votre bibliothèque",
       });
+      setShowDeleteAlert(false);
+      onUpdate();
+      onClose();
     } catch (error) {
       console.error('Erreur lors de la suppression:', error);
       toast({
@@ -186,7 +187,10 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction 
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -40,6 +40,10 @@ export async function loadBooks() {
 }
 
 export async function deleteBook(bookId: string) {
+  if (!bookId) {
+    throw new Error('ID du livre non fourni');
+  }
+
   const { error } = await supabase
     .from('books')
     .delete()
