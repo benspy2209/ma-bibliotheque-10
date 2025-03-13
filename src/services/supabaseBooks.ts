@@ -51,11 +51,19 @@ export async function deleteBook(bookId: string) {
     throw new Error('Utilisateur non connecté');
   }
 
-  const { error } = await supabase
-    .from('books')
-    .delete()
-    .eq('id', bookId)
-    .eq('user_id', userId);
+  try {
+    const { error } = await supabase
+      .from('books')
+      .delete()
+      .eq('id', bookId)
+      .eq('user_id', userId);
 
-  if (error) throw error;
+    if (error) {
+      console.error('Erreur Supabase:', error);
+      throw new Error('Erreur lors de la suppression du livre');
+    }
+  } catch (error) {
+    console.error('Erreur complète:', error);
+    throw error;
+  }
 }

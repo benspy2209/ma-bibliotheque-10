@@ -80,11 +80,13 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
   };
 
   const handleDelete = async () => {
+    setShowDeleteAlert(false);
+    
     try {
-      setShowDeleteAlert(false);
       await deleteBook(currentBook.id);
-      onUpdate();
       onClose();
+      onUpdate();
+      
       toast({
         description: "Le livre a été supprimé de votre bibliothèque",
       });
