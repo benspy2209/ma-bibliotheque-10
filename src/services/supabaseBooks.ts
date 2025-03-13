@@ -16,12 +16,20 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
   }
 });
 
-export async function saveBook(book: Book) {
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
-  if (userError || !user) {
+async function getCurrentUser() {
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error) {
+    console.error('Erreur lors de la récupération de l\'utilisateur:', error);
     throw new Error('Utilisateur non connecté');
   }
+  if (!user) {
+    throw new Error('Utilisateur non connecté');
+  }
+  return user;
+}
+
+export async function saveBook(book: Book) {
+  const user = await getCurrentUser();
 
   const { error } = await supabase
     .from('books')
@@ -33,15 +41,14 @@ export async function saveBook(book: Book) {
       user_id: user.id
     });
 
-  if (error) throw error;
+  if (error) {
+    console.error('Erreur lors de la sauvegarde:', error);
+    throw error;
+  }
 }
 
 export async function loadBooks() {
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
-  if (userError || !user) {
-    throw new Error('Utilisateur non connecté');
-  }
+  const user = await getCurrentUser();
 
   const { data, error } = await supabase
     .from('books')
@@ -49,7 +56,11 @@ export async function loadBooks() {
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    console.error('Erreur lors du chargement des livres:', error);
+    throw error;
+  }
+
   return data?.map(row => row.book_data as Book) ?? [];
 }
 
@@ -58,11 +69,7 @@ export async function deleteBook(bookId: string) {
     throw new Error('ID du livre non fourni');
   }
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
-  if (userError || !user) {
-    throw new Error('Utilisateur non connecté');
-  }
+  const user = await getCurrentUser();
 
   const { error } = await supabase
     .from('books')
