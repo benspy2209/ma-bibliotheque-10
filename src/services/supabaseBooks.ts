@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import { Book } from '@/types/book';
 
@@ -48,28 +47,28 @@ export async function saveBook(book: Book) {
 export async function loadBooks() {
   const { data: { user } } = await supabase.auth.getUser();
   
-  console.log("Utilisateur actuel:", user); // Log pour vérifier l'utilisateur
+  console.log("Utilisateur actuel:", user);
   
   if (!user) {
-    console.log("Aucun utilisateur connecté"); // Log si pas d'utilisateur
+    console.log("Aucun utilisateur connecté");
     return [];
   }
 
   const { data, error } = await supabase
     .from('books')
-    .select('book_data')
+    .select('*')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
-  console.log("Données reçues:", data); // Log des données reçues
-  console.log("Erreur éventuelle:", error); // Log des erreurs
+  console.log("Données reçues:", data);
+  console.log("Erreur éventuelle:", error);
 
   if (error) {
     console.error('Erreur lors du chargement des livres:', error);
     throw error;
   }
 
-  return data?.map(row => row.book_data as Book) ?? [];
+  return data?.map(row => row.book_data || row) ?? [];
 }
 
 export async function deleteBook(bookId: string) {
