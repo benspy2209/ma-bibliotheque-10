@@ -20,11 +20,9 @@ export function useSupabaseAuth() {
   }, []);
 
   const signIn = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin
-      }
+    await supabase.auth.signInWithPassword({
+      email: "votre-email@example.com",  // Remplacez par votre email
+      password: "votre-mot-de-passe"     // Remplacez par votre mot de passe
     });
   };
 
