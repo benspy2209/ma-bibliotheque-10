@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/services/supabaseBooks';
 import { User } from '@supabase/supabase-js';
 
 export function useSupabaseAuth() {
   const [user, setUser] = useState<User | null>(null);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
@@ -19,16 +19,13 @@ export function useSupabaseAuth() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async () => {
-    await supabase.auth.signInWithPassword({
-      email: "votre-email@example.com",  // Remplacez par votre email
-      password: "votre-mot-de-passe"     // Remplacez par votre mot de passe
-    });
+  const signIn = () => {
+    setShowLoginDialog(true);
   };
 
   const signOut = async () => {
     await supabase.auth.signOut();
   };
 
-  return { user, signIn, signOut };
+  return { user, signIn, signOut, showLoginDialog, setShowLoginDialog };
 }

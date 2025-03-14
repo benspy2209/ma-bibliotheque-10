@@ -1,13 +1,13 @@
-
 import { NavLink } from "react-router-dom";
 import { Search, BookOpen, BarChart2, Sun, Moon, LogIn } from "lucide-react";
 import { Button } from "./ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
+import { LoginDialog } from "./auth/LoginDialog";
 
 const NavBar = () => {
   const { theme, toggleTheme } = useTheme();
-  const { signIn, signOut, user } = useSupabaseAuth();
+  const { signIn, signOut, user, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
 
   return (
     <nav className="w-full bg-background border-b py-4 px-6 transition-colors duration-300">
@@ -66,6 +66,7 @@ const NavBar = () => {
           </Button>
         </div>
       </div>
+      <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
     </nav>
   );
 };
