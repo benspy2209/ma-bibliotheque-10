@@ -6,7 +6,10 @@ const OPEN_LIBRARY_API = 'https://openlibrary.org';
 async function fetchBookDetails(key: string): Promise<any> {
   try {
     const response = await fetch(`${OPEN_LIBRARY_API}${key}.json`);
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.error(`Erreur OpenLibrary (${key}):`, response.status);
+      return null;
+    }
     return await response.json();
   } catch (error) {
     console.error('Erreur lors de la récupération des détails:', error);
@@ -17,7 +20,10 @@ async function fetchBookDetails(key: string): Promise<any> {
 async function fetchEditionDetails(editionKey: string): Promise<any> {
   try {
     const response = await fetch(`${OPEN_LIBRARY_API}/books/${editionKey}.json`);
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.error(`Erreur édition OpenLibrary (${editionKey}):`, response.status);
+      return null;
+    }
     return await response.json();
   } catch (error) {
     console.error('Erreur lors de la récupération des éditions:', error);
@@ -53,38 +59,43 @@ export async function searchBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
+    const encodedQuery = encodeURIComponent(query.replace(/['"]/g, ''));
     const openLibraryResponse = await fetch(
-      `${OPEN_LIBRARY_API}/search.json?q=${encodeURIComponent(query)}&language=fre&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key,language,publisher&limit=40`
+      `${OPEN_LIBRARY_API}/search.json?q=${encodedQuery}&language=fre&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key&limit=40`
     );
 
     if (!openLibraryResponse.ok) {
-      throw new Error('Erreur lors de la recherche OpenLibrary');
+      throw new Error(`Erreur OpenLibrary: ${openLibraryResponse.status}`);
     }
 
     const openLibraryData = await openLibraryResponse.json();
 
-    const openLibraryBooks = await Promise.all(
-      (openLibraryData.docs || [])
+    if (!openLibraryData.docs || openLibraryData.docs.length === 0) {
+      console.log('Aucun résultat OpenLibrary pour:', query);
+      return [];
+    }
+
+    const results = await Promise.all(
+      openLibraryData.docs
         .filter((doc: any) => {
-          const languages = doc.language || [];
-          return languages.some((lang: string) => 
-            ['fre', 'fra', 'fr'].includes(lang.toLowerCase())
-          );
+          const hasAuthor = doc.author_name && doc.author_name.length > 0;
+          const isInFrench = doc.language?.includes('fre') || doc.language?.includes('fra');
+          return hasAuthor && isInFrench;
         })
         .map(async (doc: any) => {
           const bookDetails = await fetchBookDetails(doc.key);
           let editionDetails = null;
+          
           if (doc.edition_key?.[0]) {
             editionDetails = await fetchEditionDetails(doc.edition_key[0]);
           }
 
-          let cover;
+          let cover = '/placeholder.svg';
           if (doc.cover_i) {
             cover = `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`;
-          } else if (doc.title && doc.author_name?.[0]) {
-            cover = await searchGoogleBooksCover(doc.title, doc.author_name[0]) || '/placeholder.svg';
           } else {
-            cover = '/placeholder.svg';
+            const googleCover = await searchGoogleBooksCover(doc.title, doc.author_name?.[0] || '');
+            if (googleCover) cover = googleCover;
           }
 
           return {
@@ -92,19 +103,19 @@ export async function searchBooks(query: string): Promise<Book[]> {
             title: doc.title,
             author: doc.author_name || ['Auteur inconnu'],
             cover: cover,
-            language: ['fr'],
+            language: doc.language || [],
             publishDate: doc.first_publish_date,
             description: bookDetails?.description?.value || bookDetails?.description || '',
             numberOfPages: editionDetails?.number_of_pages || bookDetails?.number_of_pages,
             subjects: bookDetails?.subjects || [],
-            publishers: editionDetails?.publishers || doc.publisher || []
+            publishers: editionDetails?.publishers || []
           };
         })
     );
 
-    return openLibraryBooks;
+    return results.filter(Boolean);
   } catch (error) {
-    console.error('Erreur lors de la recherche:', error);
+    console.error('Erreur lors de la recherche OpenLibrary:', error);
     return [];
   }
 }
