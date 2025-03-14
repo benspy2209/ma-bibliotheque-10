@@ -14,11 +14,10 @@ export function useSequentialQueries(debouncedQuery: string) {
       },
       {
         queryKey: ['googleBooks', debouncedQuery],
-        queryFn: async (context: QueryFunctionContext) => {
-          const queryClient = context.queryClient;
+        queryFn: ({ queryClient }: { queryKey: string[]; queryClient: QueryClient }) => {
           const openLibraryData = queryClient.getQueryData<Book[]>(['openLibrary', debouncedQuery]);
           if (openLibraryData && openLibraryData.length > 0) {
-            return [] as Book[];
+            return Promise.resolve([] as Book[]);
           }
           return searchGoogleBooks(debouncedQuery);
         },
