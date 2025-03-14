@@ -1,3 +1,4 @@
+
 import { Book } from '@/types/book';
 import { GOOGLE_BOOKS_API_KEY } from './googleBooks';
 
@@ -53,18 +54,22 @@ export async function searchBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
-    const response = await fetch(
-      `${OPEN_LIBRARY_API}/search.json?q=${encodeURIComponent(query)}&language=fre&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key&limit=40`
-    );
+    // Effectuer les deux recherches en parallèle
+    const [openLibraryResponse, googleBooksResponse] = await Promise.all([
+      fetch(
+        `${OPEN_LIBRARY_API}/search.json?q=${encodeURIComponent(query)}&language=fre&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key&limit=40`
+      ),
+      fetch(
+        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
+      )
+    ]);
 
-    if (!response.ok) {
-      throw new Error('Erreur lors de la recherche');
-    }
+    const openLibraryData = await openLibraryResponse.json();
+    const googleBooksData = await googleBooksResponse.json();
 
-    const data = await response.json();
-    
-    const books = await Promise.all(
-      data.docs
+    // Traitement des résultats d'OpenLibrary
+    const openLibraryBooks = await Promise.all(
+      openLibraryData.docs
         .filter((doc: any) => {
           const matchesAuthor = doc.author_name?.some((author: string) => 
             author.toLowerCase().includes(query.toLowerCase())
@@ -104,7 +109,32 @@ export async function searchBooks(query: string): Promise<Book[]> {
         })
     );
 
-    return books;
+    // Traitement des résultats de Google Books
+    const googleBooks = (googleBooksData.items || []).map((item: any) => {
+      const volumeInfo = item.volumeInfo;
+      let cover = 'https://images.unsplash.com/photo-1472396961693-142e6e269027?w=800';
+      
+      if (volumeInfo.imageLinks) {
+        cover = volumeInfo.imageLinks.thumbnail?.replace('http:', 'https:') ||
+                volumeInfo.imageLinks.smallThumbnail?.replace('http:', 'https:');
+      }
+
+      return {
+        id: item.id,
+        title: volumeInfo.title,
+        author: volumeInfo.authors || ['Auteur inconnu'],
+        cover: cover,
+        language: [volumeInfo.language],
+        publishDate: volumeInfo.publishedDate,
+        description: volumeInfo.description || '',
+        numberOfPages: volumeInfo.pageCount,
+        subjects: volumeInfo.categories || [],
+        publishers: [volumeInfo.publisher].filter(Boolean)
+      };
+    });
+
+    // Combiner et retourner les résultats des deux APIs
+    return [...openLibraryBooks, ...googleBooks];
   } catch (error) {
     console.error('Erreur lors de la recherche:', error);
     return [];
