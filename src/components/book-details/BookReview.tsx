@@ -34,9 +34,12 @@ export function BookReview({ book, isEditing, onReviewChange }: BookReviewProps)
   };
 
   const handleShareOnFacebook = () => {
-    const url = window.location.href;
+    const baseUrl = window.location.origin;
+    const bookUrl = `${baseUrl}/book/${book.id}`;
     const quote = `Ma critique de ${book.title}\n\n${book.review?.content || ''}`;
-    const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(quote)}&picture=${encodeURIComponent(book.cover || '')}`;
+    
+    const shareUrl = `https://www.facebook.com/dialog/share?app_id=671593115528982&display=popup&href=${encodeURIComponent(bookUrl)}&quote=${encodeURIComponent(quote)}`;
+    
     window.open(shareUrl, '_blank', 'width=600,height=400');
   };
 
