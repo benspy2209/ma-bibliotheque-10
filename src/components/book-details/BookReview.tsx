@@ -1,7 +1,7 @@
 import { Book } from '@/types/book';
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash, Share2 } from "lucide-react";
+import { Edit, Trash } from "lucide-react";
 import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 
@@ -30,16 +30,6 @@ export function BookReview({ book, isEditing, onReviewChange }: BookReviewProps)
   const handleDeleteReview = () => {
     setReviewContent('');
     onReviewChange(undefined);
-  };
-
-  const handleShareOnFacebook = () => {
-    const baseUrl = 'https://meslectures.lalibreplume.be';
-    const bookUrl = `${baseUrl}/book/${book.id}`;
-    const quote = `Découvrez ma critique de "${book.title}" sur Ma Bibliothèque\n\n${book.review?.content || ''}`;
-    
-    const shareUrl = `https://www.facebook.com/dialog/share?app_id=671593115528982&display=popup&href=${encodeURIComponent(bookUrl)}&quote=${encodeURIComponent(quote)}`;
-    
-    window.open(shareUrl, '_blank', 'width=600,height=400');
   };
 
   if (!isEditing && !book.review) {
@@ -90,15 +80,6 @@ export function BookReview({ book, isEditing, onReviewChange }: BookReviewProps)
               </div>
             </div>
             <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleShareOnFacebook}
-                className="hover:bg-muted"
-                title="Partager sur Facebook"
-              >
-                <Share2 className="h-4 w-4" />
-              </Button>
               <Button
                 variant="ghost"
                 size="icon"
