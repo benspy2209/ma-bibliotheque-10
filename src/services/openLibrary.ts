@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 import { GOOGLE_BOOKS_API_KEY } from './googleBooks';
 
@@ -7,7 +6,10 @@ const OPEN_LIBRARY_API = 'https://openlibrary.org';
 async function fetchBookDetails(key: string): Promise<any> {
   try {
     const response = await fetch(`${OPEN_LIBRARY_API}${key}.json`);
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.error(`Erreur OpenLibrary (${key}):`, response.status);
+      return null;
+    }
     return await response.json();
   } catch (error) {
     console.error('Erreur lors de la récupération des détails:', error);
@@ -18,7 +20,10 @@ async function fetchBookDetails(key: string): Promise<any> {
 async function fetchEditionDetails(editionKey: string): Promise<any> {
   try {
     const response = await fetch(`${OPEN_LIBRARY_API}/books/${editionKey}.json`);
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.error(`Erreur édition OpenLibrary (${editionKey}):`, response.status);
+      return null;
+    }
     return await response.json();
   } catch (error) {
     console.error('Erreur lors de la récupération des éditions:', error);
@@ -54,44 +59,43 @@ export async function searchBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
-    // Effectuer les deux recherches en parallèle
-    const [openLibraryResponse, googleBooksResponse] = await Promise.all([
-      fetch(
-        `${OPEN_LIBRARY_API}/search.json?q=${encodeURIComponent(query)}&language=fre&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key&limit=40`
-      ),
-      fetch(
-        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
-      )
-    ]);
+    const encodedQuery = encodeURIComponent(query.replace(/['"]/g, ''));
+    const openLibraryResponse = await fetch(
+      `${OPEN_LIBRARY_API}/search.json?q=${encodedQuery}&language=fre&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key&limit=40`
+    );
+
+    if (!openLibraryResponse.ok) {
+      throw new Error(`Erreur OpenLibrary: ${openLibraryResponse.status}`);
+    }
 
     const openLibraryData = await openLibraryResponse.json();
-    const googleBooksData = await googleBooksResponse.json();
 
-    // Traitement des résultats d'OpenLibrary
-    const openLibraryBooks = await Promise.all(
+    if (!openLibraryData.docs || openLibraryData.docs.length === 0) {
+      console.log('Aucun résultat OpenLibrary pour:', query);
+      return [];
+    }
+
+    const results = await Promise.all(
       openLibraryData.docs
         .filter((doc: any) => {
-          const matchesAuthor = doc.author_name?.some((author: string) => 
-            author.toLowerCase().includes(query.toLowerCase())
-          );
-          const matchesTitle = doc.title?.toLowerCase().includes(query.toLowerCase());
+          const hasAuthor = doc.author_name && doc.author_name.length > 0;
           const isInFrench = doc.language?.includes('fre') || doc.language?.includes('fra');
-          
-          return (matchesAuthor || matchesTitle) && isInFrench;
+          return hasAuthor && isInFrench;
         })
         .map(async (doc: any) => {
           const bookDetails = await fetchBookDetails(doc.key);
           let editionDetails = null;
+          
           if (doc.edition_key?.[0]) {
             editionDetails = await fetchEditionDetails(doc.edition_key[0]);
           }
 
-          let cover;
+          let cover = '/placeholder.svg';
           if (doc.cover_i) {
             cover = `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`;
           } else {
             const googleCover = await searchGoogleBooksCover(doc.title, doc.author_name?.[0] || '');
-            cover = googleCover || 'https://images.unsplash.com/photo-1472396961693-142e6e269027?w=800';
+            if (googleCover) cover = googleCover;
           }
 
           return {
@@ -109,34 +113,9 @@ export async function searchBooks(query: string): Promise<Book[]> {
         })
     );
 
-    // Traitement des résultats de Google Books
-    const googleBooks = (googleBooksData.items || []).map((item: any) => {
-      const volumeInfo = item.volumeInfo;
-      let cover = 'https://images.unsplash.com/photo-1472396961693-142e6e269027?w=800';
-      
-      if (volumeInfo.imageLinks) {
-        cover = volumeInfo.imageLinks.thumbnail?.replace('http:', 'https:') ||
-                volumeInfo.imageLinks.smallThumbnail?.replace('http:', 'https:');
-      }
-
-      return {
-        id: item.id,
-        title: volumeInfo.title,
-        author: volumeInfo.authors || ['Auteur inconnu'],
-        cover: cover,
-        language: [volumeInfo.language],
-        publishDate: volumeInfo.publishedDate,
-        description: volumeInfo.description || '',
-        numberOfPages: volumeInfo.pageCount,
-        subjects: volumeInfo.categories || [],
-        publishers: [volumeInfo.publisher].filter(Boolean)
-      };
-    });
-
-    // Combiner et retourner les résultats des deux APIs
-    return [...openLibraryBooks, ...googleBooks];
+    return results.filter(Boolean);
   } catch (error) {
-    console.error('Erreur lors de la recherche:', error);
+    console.error('Erreur lors de la recherche OpenLibrary:', error);
     return [];
   }
 }

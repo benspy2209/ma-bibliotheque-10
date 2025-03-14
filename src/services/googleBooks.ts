@@ -8,29 +8,31 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
 
   try {
     const response = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=inauthor:"${encodeURIComponent(query)}"&langRestrict=fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
     );
 
     if (!response.ok) {
-      throw new Error('Erreur lors de la recherche Google Books');
+      throw new Error(`Erreur Google Books: ${response.status}`);
     }
 
     const data = await response.json();
     
-    return data.items?.map((item: any) => {
+    if (!data.items) {
+      console.log('Aucun résultat Google Books pour:', query);
+      return [];
+    }
+    
+    return data.items.map((item: any) => {
       const volumeInfo = item.volumeInfo;
       
-      // Améliorons la gestion des couvertures
       let cover = '/placeholder.svg';
       if (volumeInfo.imageLinks) {
-        // Essayons d'abord d'obtenir la meilleure qualité possible
         cover = volumeInfo.imageLinks.extraLarge || 
                 volumeInfo.imageLinks.large || 
                 volumeInfo.imageLinks.medium || 
                 volumeInfo.imageLinks.thumbnail || 
                 volumeInfo.imageLinks.smallThumbnail;
                 
-        // Assurons-nous que l'URL est en HTTPS
         cover = cover.replace('http:', 'https:');
       }
 
@@ -47,13 +49,7 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
         language: [volumeInfo.language],
         isbn: volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_13')?.identifier
       };
-    })
-    ?.filter(book => {
-      const authors = Array.isArray(book.author) ? book.author : [book.author];
-      return authors.some(author => 
-        author.toLowerCase() === query.toLowerCase()
-      ) && book.language[0] === 'fr';
-    }) || [];
+    }).filter(book => book.language[0] === 'fr');
   } catch (error) {
     console.error('Erreur lors de la recherche Google Books:', error);
     return [];
