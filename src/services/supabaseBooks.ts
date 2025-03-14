@@ -48,7 +48,10 @@ export async function saveBook(book: Book) {
 export async function loadBooks() {
   const { data: { user } } = await supabase.auth.getUser();
   
+  console.log("Utilisateur actuel:", user); // Log pour vérifier l'utilisateur
+  
   if (!user) {
+    console.log("Aucun utilisateur connecté"); // Log si pas d'utilisateur
     return [];
   }
 
@@ -57,6 +60,9 @@ export async function loadBooks() {
     .select('book_data')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
+
+  console.log("Données reçues:", data); // Log des données reçues
+  console.log("Erreur éventuelle:", error); // Log des erreurs
 
   if (error) {
     console.error('Erreur lors du chargement des livres:', error);
