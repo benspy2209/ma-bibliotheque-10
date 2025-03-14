@@ -39,6 +39,7 @@ export function BookReview({ book, isEditing, onReviewChange }: BookReviewProps)
   if (isEditing || editingReview) {
     return (
       <div className="space-y-4">
+        <h3 className="text-lg font-semibold mb-2">Votre critique</h3>
         <Textarea
           placeholder="Écrivez votre critique ici..."
           value={reviewContent}
@@ -67,16 +68,20 @@ export function BookReview({ book, isEditing, onReviewChange }: BookReviewProps)
 
   if (book.review) {
     return (
-      <div className="space-y-4">
-        <div className="flex justify-between items-start">
-          <p className="text-sm text-muted-foreground">
-            Critique écrite le {new Date(book.review.date).toLocaleDateString('fr-FR')}
-          </p>
+      <article className="space-y-4 bg-muted/30 rounded-lg p-6">
+        <header className="flex justify-between items-start">
+          <div className="space-y-1">
+            <h3 className="text-lg font-semibold">Ma critique du livre</h3>
+            <p className="text-sm text-muted-foreground">
+              Écrite le {new Date(book.review.date).toLocaleDateString('fr-FR')}
+            </p>
+          </div>
           <div className="flex gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setEditingReview(true)}
+              className="hover:bg-muted"
             >
               <Edit className="h-4 w-4" />
             </Button>
@@ -84,19 +89,25 @@ export function BookReview({ book, isEditing, onReviewChange }: BookReviewProps)
               variant="ghost"
               size="icon"
               onClick={handleDeleteReview}
+              className="hover:bg-muted"
             >
               <Trash className="h-4 w-4" />
             </Button>
           </div>
+        </header>
+        <div className="prose prose-sm max-w-none">
+          <p className="whitespace-pre-wrap leading-relaxed">{book.review.content}</p>
         </div>
-        <p className="whitespace-pre-wrap">{book.review.content}</p>
-      </div>
+      </article>
     );
   }
 
   return (
-    <Button onClick={() => setEditingReview(true)}>
-      Ajouter une critique
-    </Button>
+    <div className="text-center py-8">
+      <h3 className="text-lg font-semibold mb-4">Aucune critique pour ce livre</h3>
+      <Button onClick={() => setEditingReview(true)}>
+        Ajouter une critique
+      </Button>
+    </div>
   );
 }
