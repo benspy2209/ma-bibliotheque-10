@@ -1,4 +1,3 @@
-
 export type ReadingStatus = 'to-read' | 'reading' | 'completed';
 
 export type Book = {
@@ -8,7 +7,7 @@ export type Book = {
   cover?: string;
   rating?: number;
   language: string[];
-  // Informations détaillées
+  purchased?: boolean;
   numberOfPages?: number;
   publishDate?: string;
   series?: string;
@@ -23,4 +22,3 @@ export type Book = {
     date: string;
   };
 };
-

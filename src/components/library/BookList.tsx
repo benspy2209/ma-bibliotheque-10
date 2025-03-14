@@ -3,6 +3,7 @@ import { Book } from '@/types/book';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StarRating } from '../StarRating';
+import { ShoppingCart } from 'lucide-react';
 
 interface BookListProps {
   books: Book[];
@@ -58,6 +59,12 @@ export const BookList = ({ books, onBookClick }: BookListProps) => {
               >
                 {statusLabels[book.status || 'to-read']}
               </Badge>
+              {(!book.purchased && (!book.status || book.status === 'to-read')) && (
+                <Badge variant="destructive" className="flex items-center gap-1">
+                  <ShoppingCart className="size-3" />
+                  À acheter
+                </Badge>
+              )}
               {book.status === 'completed' && book.completionDate && (
                 <Badge variant="outline" className="bg-muted/50">
                   Lu en {formatCompletionDate(book.completionDate)}

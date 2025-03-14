@@ -3,6 +3,7 @@ import { Book } from '@/types/book';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StarRating } from '../StarRating';
+import { ShoppingCart } from 'lucide-react';
 
 interface BookGridProps {
   books: Book[];
@@ -57,6 +58,15 @@ export const BookGrid = ({ books, onBookClick }: BookGridProps) => {
               >
                 {statusLabels[book.status || 'to-read']}
               </Badge>
+              {(!book.purchased && (!book.status || book.status === 'to-read')) && (
+                <Badge 
+                  variant="destructive" 
+                  className="flex items-center gap-1 w-fit"
+                >
+                  <ShoppingCart className="size-3" />
+                  À acheter
+                </Badge>
+              )}
               {book.status === 'completed' && book.completionDate && (
                 <Badge 
                   variant="outline" 
@@ -71,4 +81,4 @@ export const BookGrid = ({ books, onBookClick }: BookGridProps) => {
       ))}
     </div>
   );
-}
+};
