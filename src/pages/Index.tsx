@@ -1,19 +1,15 @@
-
 import { useState } from 'react';
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Search } from 'lucide-react';
-import { useQueries } from '@tanstack/react-query';
-import { searchBooks } from '@/services/openLibrary';
-import { searchGoogleBooks } from '@/services/googleBooks';
-import { getBookDetails } from '@/services/bookDetails';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
 import { removeDuplicateBooks } from '@/lib/utils';
 import { useToast } from "@/components/ui/use-toast";
 import NavBar from '@/components/NavBar';
+import { useSequentialQueries } from '@/hooks/useSequentialQueries';
 
 const BOOKS_PER_PAGE = 12;
 
@@ -25,33 +21,7 @@ const Index = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
 
-  // Premier appel pour OpenLibrary
-  const openLibraryQuery = {
-    queryKey: ['openLibrary', debouncedQuery],
-    queryFn: () => searchBooks(debouncedQuery),
-    enabled: debouncedQuery.length > 0
-  };
-
-  // Deuxième appel pour Google Books
-  const googleBooksQuery = {
-    queryKey: ['googleBooks', debouncedQuery],
-    queryFn: async () => {
-      const openLibraryResults = results[0].data;
-      if (openLibraryResults && openLibraryResults.length > 0) {
-        return [];
-      }
-      return searchGoogleBooks(debouncedQuery);
-    },
-    enabled: debouncedQuery.length > 0 && !results[0].isLoading
-  };
-
-  const results = useQueries({
-    queries: [openLibraryQuery, googleBooksQuery]
-  });
-
-  const isLoading = results.some(result => result.isLoading);
-  const allBooks = [...(results[0].data || []), ...(results[1].data || [])];
-  const books = removeDuplicateBooks(allBooks);
+  const results = useSequentialQueries(debouncedQuery);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -83,6 +53,10 @@ const Index = () => {
   const handleBookUpdate = () => {
     setRefreshKey(prev => prev + 1);
   };
+
+  const isLoading = results.some(result => result.isLoading);
+  const allBooks = [...(results[0].data || []), ...(results[1].data || [])];
+  const books = removeDuplicateBooks(allBooks);
 
   const visibleBooks = books.slice(0, displayedBooks);
   const hasMoreBooks = displayedBooks < books.length;
