@@ -1,4 +1,5 @@
 import { Book } from '@/types/book';
+import { GOOGLE_BOOKS_API_KEY } from './googleBooks';
 
 const OPEN_LIBRARY_API = 'https://openlibrary.org';
 
@@ -20,6 +21,30 @@ async function fetchEditionDetails(editionKey: string): Promise<any> {
     return await response.json();
   } catch (error) {
     console.error('Erreur lors de la récupération des éditions:', error);
+    return null;
+  }
+}
+
+async function searchGoogleBooksCover(title: string, author: string): Promise<string | null> {
+  try {
+    const query = `${title} ${author}`;
+    const response = await fetch(
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&fields=items(volumeInfo(imageLinks))&key=${GOOGLE_BOOKS_API_KEY}`
+    );
+
+    if (!response.ok) return null;
+    
+    const data = await response.json();
+    const imageLinks = data.items?.[0]?.volumeInfo?.imageLinks;
+    
+    if (imageLinks) {
+      return imageLinks.thumbnail?.replace('http:', 'https:') ||
+             imageLinks.smallThumbnail?.replace('http:', 'https:');
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Erreur lors de la recherche Google Books:', error);
     return null;
   }
 }
@@ -53,14 +78,14 @@ export async function searchBooks(query: string): Promise<Book[]> {
             editionDetails = await fetchEditionDetails(doc.edition_key[0]);
           }
 
-          // Amélioration de la gestion des couvertures
+          // Gestion améliorée des couvertures avec Google Books comme fallback
           let cover;
           if (doc.cover_i) {
-            // On essaie d'abord la couverture OpenLibrary
             cover = `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`;
           } else {
-            // Image par défaut pour les livres sans couverture
-            cover = 'https://images.unsplash.com/photo-1472396961693-142e6e269027?w=800';
+            // Essayer de trouver la couverture sur Google Books
+            const googleCover = await searchGoogleBooksCover(doc.title, doc.author_name?.[0] || '');
+            cover = googleCover || 'https://images.unsplash.com/photo-1472396961693-142e6e269027?w=800';
           }
 
           return {
