@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 
 export const GOOGLE_BOOKS_API_KEY = 'AIzaSyDUQ2dB8e_EnUp14DY9GnYAv2CmGiqBapY';
@@ -15,6 +14,12 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
       `https://www.googleapis.com/books/v1/volumes?q=intitle:"${encodedQuery}"&langRestrict=fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
     );
 
+    // Si on atteint la limite de requêtes (429)
+    if (response.status === 429) {
+      console.log('Limite de requêtes Google Books atteinte, recherche uniquement via OpenLibrary');
+      return [];
+    }
+
     if (!response.ok) {
       throw new Error(`Erreur Google Books: ${response.status}`);
     }
@@ -27,6 +32,11 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
       const secondResponse = await fetch(
         `https://www.googleapis.com/books/v1/volumes?q=${encodedQuery}&langRestrict=fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
       );
+      
+      if (secondResponse.status === 429) {
+        console.log('Limite de requêtes Google Books atteinte sur la 2ème tentative');
+        return [];
+      }
       
       if (!secondResponse.ok) {
         throw new Error(`Erreur Google Books (2ème tentative): ${secondResponse.status}`);

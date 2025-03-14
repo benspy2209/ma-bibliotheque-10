@@ -63,7 +63,7 @@ export async function searchBooks(query: string): Promise<Book[]> {
     const encodedQuery = encodeURIComponent(cleanQuery);
     
     const openLibraryResponse = await fetch(
-      `${OPEN_LIBRARY_API}/search.json?q=${encodedQuery}&language=fre&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key&limit=40&mode=everything`
+      `${OPEN_LIBRARY_API}/search.json?q=${encodedQuery}&language=fre&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key&limit=100&mode=everything`
     );
 
     if (!openLibraryResponse.ok) {
