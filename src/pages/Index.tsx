@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -33,8 +34,14 @@ const Index = () => {
       },
       {
         queryKey: ['googleBooks', debouncedQuery],
-        queryFn: () => searchGoogleBooks(debouncedQuery),
-        enabled: debouncedQuery.length > 0
+        queryFn: () => {
+          // N'interroger Google Books que si OpenLibrary n'a pas trouvé de résultats
+          if (results[0].data && results[0].data.length > 0) {
+            return [];
+          }
+          return searchGoogleBooks(debouncedQuery);
+        },
+        enabled: debouncedQuery.length > 0 && !results[0].isLoading
       }
     ]
   });
