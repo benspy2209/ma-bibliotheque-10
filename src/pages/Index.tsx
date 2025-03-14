@@ -10,6 +10,7 @@ import { removeDuplicateBooks } from '@/lib/utils';
 import { useToast } from "@/components/ui/use-toast";
 import NavBar from '@/components/NavBar';
 import { useSequentialQueries } from '@/hooks/useSequentialQueries';
+import { getBookDetails } from '@/services/bookDetails';
 
 const BOOKS_PER_PAGE = 12;
 
