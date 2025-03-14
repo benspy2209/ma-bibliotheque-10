@@ -1,5 +1,6 @@
 
 import { Book } from '@/types/book';
+import { translateToFrench } from '@/utils/translation';
 
 export const GOOGLE_BOOKS_API_KEY = 'AIzaSyDUQ2dB8e_EnUp14DY9GnYAv2CmGiqBapY';
 
@@ -8,7 +9,7 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
 
   try {
     const response = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
     );
 
     if (!response.ok) {
@@ -22,7 +23,7 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
       return [];
     }
     
-    return data.items.map((item: any) => {
+    const books = await Promise.all(data.items.map(async (item: any) => {
       const volumeInfo = item.volumeInfo;
       
       let cover = '/placeholder.svg';
@@ -36,12 +37,14 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
         cover = cover.replace('http:', 'https:');
       }
 
+      const description = await translateToFrench(volumeInfo.description || '');
+
       return {
         id: item.id,
         title: volumeInfo.title,
         author: volumeInfo.authors || ['Auteur inconnu'],
         cover: cover,
-        description: volumeInfo.description || '',
+        description,
         numberOfPages: volumeInfo.pageCount,
         publishDate: volumeInfo.publishedDate,
         publishers: [volumeInfo.publisher].filter(Boolean),
@@ -49,7 +52,9 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
         language: [volumeInfo.language],
         isbn: volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_13')?.identifier
       };
-    }).filter(book => book.language[0] === 'fr');
+    }));
+
+    return books;
   } catch (error) {
     console.error('Erreur lors de la recherche Google Books:', error);
     return [];

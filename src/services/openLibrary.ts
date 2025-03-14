@@ -1,5 +1,6 @@
 import { Book } from '@/types/book';
 import { GOOGLE_BOOKS_API_KEY } from './googleBooks';
+import { translateToFrench } from '@/utils/translation';
 
 const OPEN_LIBRARY_API = 'https://openlibrary.org';
 
@@ -61,7 +62,7 @@ export async function searchBooks(query: string): Promise<Book[]> {
   try {
     const encodedQuery = encodeURIComponent(query.replace(/['"]/g, ''));
     const openLibraryResponse = await fetch(
-      `${OPEN_LIBRARY_API}/search.json?q=${encodedQuery}&language=fre&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key&limit=40`
+      `${OPEN_LIBRARY_API}/search.json?q=${encodedQuery}&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key&limit=40`
     );
 
     if (!openLibraryResponse.ok) {
@@ -79,8 +80,7 @@ export async function searchBooks(query: string): Promise<Book[]> {
       openLibraryData.docs
         .filter((doc: any) => {
           const hasAuthor = doc.author_name && doc.author_name.length > 0;
-          const isInFrench = doc.language?.includes('fre') || doc.language?.includes('fra');
-          return hasAuthor && isInFrench;
+          return hasAuthor;
         })
         .map(async (doc: any) => {
           const bookDetails = await fetchBookDetails(doc.key);
@@ -98,6 +98,12 @@ export async function searchBooks(query: string): Promise<Book[]> {
             if (googleCover) cover = googleCover;
           }
 
+          const description = await translateToFrench(
+            bookDetails?.description?.value || 
+            bookDetails?.description || 
+            ''
+          );
+
           return {
             id: doc.key,
             title: doc.title,
@@ -105,7 +111,7 @@ export async function searchBooks(query: string): Promise<Book[]> {
             cover: cover,
             language: doc.language || [],
             publishDate: doc.first_publish_date,
-            description: bookDetails?.description?.value || bookDetails?.description || '',
+            description,
             numberOfPages: editionDetails?.number_of_pages || bookDetails?.number_of_pages,
             subjects: bookDetails?.subjects || [],
             publishers: editionDetails?.publishers || []
