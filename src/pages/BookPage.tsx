@@ -5,6 +5,7 @@ import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
 import { getBookById } from '@/services/supabaseBooks';
 import { useToast } from '@/hooks/use-toast';
+import { Helmet } from 'react-helmet-async';
 
 const BookPage = () => {
   const { id } = useParams();
@@ -57,14 +58,22 @@ const BookPage = () => {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <BookDetails
-        book={book}
-        isOpen={true}
-        onClose={() => {}}
-        onUpdate={() => {}}
-      />
-    </div>
+    <>
+      <Helmet>
+        <meta property="og:title" content={`${book.title} - Ma Bibliothèque`} />
+        <meta property="og:description" content={book.review?.content || `Découvrez "${book.title}" sur Ma Bibliothèque`} />
+        <meta property="og:image" content={book.cover || 'https://meslectures.lalibreplume.be/placeholder.svg'} />
+        <meta property="og:url" content={`https://meslectures.lalibreplume.be/book/${book.id}`} />
+      </Helmet>
+      <div className="container mx-auto py-8">
+        <BookDetails
+          book={book}
+          isOpen={true}
+          onClose={() => {}}
+          onUpdate={() => {}}
+        />
+      </div>
+    </>
   );
 };
 
