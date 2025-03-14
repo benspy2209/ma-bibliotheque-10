@@ -22,17 +22,26 @@ export function BookPreview({
   onDateChange
 }: BookPreviewProps) {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("handleImageUpload called"); // Debug log
+    console.log("handleImageUpload called");
     const file = event.target.files?.[0];
     if (file) {
-      console.log("File selected:", file.name); // Debug log
+      console.log("File selected:", file.name);
       const reader = new FileReader();
       reader.onloadend = () => {
-        console.log("File read completed"); // Debug log
-        onInputChange('cover', reader.result as string);
+        console.log("File read completed");
+        const result = reader.result as string;
+        console.log("Image data:", result.substring(0, 50) + "...");
+        onInputChange('cover', result);
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const triggerFileInput = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const fileInput = document.querySelector<HTMLInputElement>('#cover-upload');
+    fileInput?.click();
   };
 
   return (
@@ -45,18 +54,22 @@ export function BookPreview({
         />
         {isEditing && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
-            <label className="cursor-pointer">
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageUpload}
-              />
-              <Button variant="outline" size="sm" className="bg-background hover:bg-background/90">
-                <ImagePlus className="w-4 h-4 mr-1" />
-                Changer
-              </Button>
-            </label>
+            <input
+              id="cover-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageUpload}
+            />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="bg-background hover:bg-background/90"
+              onClick={triggerFileInput}
+            >
+              <ImagePlus className="w-4 h-4 mr-1" />
+              Changer
+            </Button>
           </div>
         )}
       </div>
