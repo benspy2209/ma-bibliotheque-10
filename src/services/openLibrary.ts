@@ -1,3 +1,4 @@
+
 import { Book } from '@/types/book';
 import { GOOGLE_BOOKS_API_KEY } from './googleBooks';
 
@@ -68,13 +69,12 @@ export async function searchBooks(query: string): Promise<Book[]> {
 
     // Traitement des résultats d'OpenLibrary avec filtre strict sur la langue
     const openLibraryBooks = await Promise.all(
-      openLibraryData.docs
-        .filter((doc: any) => {
-          const isInFrench = doc.language?.some((lang: string) => 
-            ['fre', 'fra'].includes(lang.toLowerCase())
-          );
-          return isInFrench;
-        })
+      (openLibraryData.docs || [])
+        .filter((doc: any) => 
+          doc.language?.some((lang: string) => 
+            ['fre', 'fra', 'fr'].includes(lang.toLowerCase())
+          )
+        )
         .map(async (doc: any) => {
           const bookDetails = await fetchBookDetails(doc.key);
           let editionDetails = null;
@@ -107,7 +107,10 @@ export async function searchBooks(query: string): Promise<Book[]> {
 
     // Traitement des résultats de Google Books avec filtre strict sur la langue
     const googleBooks = (googleBooksData.items || [])
-      .filter((item: any) => item.volumeInfo.language === 'fr')
+      .filter((item: any) => 
+        item.volumeInfo.language === 'fr' || 
+        item.volumeInfo.language === 'fre'
+      )
       .map((item: any) => {
         const volumeInfo = item.volumeInfo;
         let cover = 'https://images.unsplash.com/photo-1472396961693-142e6e269027?w=800';
