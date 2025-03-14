@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 import { Book } from '@/types/book';
 
@@ -8,7 +9,7 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error('Les variables d\'environnement Supabase ne sont pas configurées.');
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey, {
+export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     persistSession: true,
     storage: window.localStorage,

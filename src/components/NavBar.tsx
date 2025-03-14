@@ -1,11 +1,13 @@
 
 import { NavLink } from "react-router-dom";
-import { Search, BookOpen, BarChart2, Sun, Moon } from "lucide-react";
+import { Search, BookOpen, BarChart2, Sun, Moon, LogIn } from "lucide-react";
 import { Button } from "./ui/button";
 import { useTheme } from "@/hooks/use-theme";
+import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 
 const NavBar = () => {
   const { theme, toggleTheme } = useTheme();
+  const { signIn, signOut, user } = useSupabaseAuth();
 
   return (
     <nav className="w-full bg-background border-b py-4 px-6 transition-colors duration-300">
@@ -33,14 +35,36 @@ const NavBar = () => {
             Statistiques
           </NavLink>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleTheme}
-          className="transition-colors duration-300 order-1 sm:order-2 sm:ml-auto"
-        >
-          {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-        </Button>
+        <div className="flex items-center gap-4 order-1 sm:order-2 sm:ml-auto">
+          {user ? (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={signOut}
+              className="transition-colors duration-300"
+            >
+              Se déconnecter
+            </Button>
+          ) : (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={signIn}
+              className="transition-colors duration-300"
+            >
+              <LogIn className="h-4 w-4 mr-2" />
+              Se connecter
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            className="transition-colors duration-300"
+          >
+            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
+        </div>
       </div>
     </nav>
   );
