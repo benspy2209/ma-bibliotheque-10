@@ -1,5 +1,5 @@
 
-import { useQueries, QueryClient } from '@tanstack/react-query';
+import { useQueries, QueryFunction } from '@tanstack/react-query';
 import { searchBooks } from '@/services/openLibrary';
 import { searchGoogleBooks } from '@/services/googleBooks';
 import { Book } from '@/types/book';
@@ -9,15 +9,15 @@ export function useSequentialQueries(debouncedQuery: string) {
     queries: [
       {
         queryKey: ['openLibrary', debouncedQuery],
-        queryFn: () => searchBooks(debouncedQuery),
+        queryFn: () => searchBooks(debouncedQuery) as Promise<Book[]>,
         enabled: debouncedQuery.length > 0
       },
       {
         queryKey: ['googleBooks', debouncedQuery],
-        queryFn: async (context: { queryClient: QueryClient }) => {
-          const openLibraryData = context.queryClient.getQueryData<Book[]>(['openLibrary', debouncedQuery]);
+        queryFn: async ({ queryClient }) => {
+          const openLibraryData = queryClient.getQueryData<Book[]>(['openLibrary', debouncedQuery]);
           if (openLibraryData && openLibraryData.length > 0) {
-            return [];
+            return [] as Book[];
           }
           return searchGoogleBooks(debouncedQuery);
         },

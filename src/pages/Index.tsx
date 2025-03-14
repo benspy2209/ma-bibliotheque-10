@@ -56,7 +56,10 @@ const Index = () => {
   };
 
   const isLoading = results.some(result => result.isLoading);
-  const allBooks = [...(results[0].data || []), ...(results[1].data || [])];
+  const allBooks = [
+    ...(results[0].data as Book[] || []), 
+    ...(results[1].data as Book[] || [])
+  ];
   const books = removeDuplicateBooks(allBooks);
 
   const visibleBooks = books.slice(0, displayedBooks);
