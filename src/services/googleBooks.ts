@@ -7,8 +7,9 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
+    // Ajout du paramètre langRestrict=fr et recherche spécifique en français
     const response = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}+language:french&langRestrict=fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
     );
 
     if (!response.ok) {
@@ -19,25 +20,23 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
     
     if (!data.items) return [];
     
+    // Filtre strict sur la langue française
     return data.items
       .filter((item: any) => {
         const volumeInfo = item.volumeInfo;
-        return volumeInfo.language === 'fr' || volumeInfo.language === 'fre';
+        return volumeInfo.language === 'fr';
       })
       .map((item: any) => {
         const volumeInfo = item.volumeInfo;
       
-        // Améliorons la gestion des couvertures
         let cover = '/placeholder.svg';
         if (volumeInfo.imageLinks) {
-          // Essayons d'abord d'obtenir la meilleure qualité possible
           cover = volumeInfo.imageLinks.extraLarge || 
                   volumeInfo.imageLinks.large || 
                   volumeInfo.imageLinks.medium || 
                   volumeInfo.imageLinks.thumbnail || 
                   volumeInfo.imageLinks.smallThumbnail;
                   
-          // Assurons-nous que l'URL est en HTTPS
           cover = cover.replace('http:', 'https:');
         }
 

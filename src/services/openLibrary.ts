@@ -54,7 +54,7 @@ export async function searchBooks(query: string): Promise<Book[]> {
 
   try {
     const openLibraryResponse = await fetch(
-      `${OPEN_LIBRARY_API}/search.json?q=${encodeURIComponent(query)}&language=fre&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key&limit=40`
+      `${OPEN_LIBRARY_API}/search.json?q=${encodeURIComponent(query)}&language=fre&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key,language&limit=40`
     );
 
     if (!openLibraryResponse.ok) {
@@ -63,14 +63,15 @@ export async function searchBooks(query: string): Promise<Book[]> {
 
     const openLibraryData = await openLibraryResponse.json();
 
-    // Traitement des résultats d'OpenLibrary avec filtre strict sur la langue
+    // Filtre strict sur la langue française
     const openLibraryBooks = await Promise.all(
       (openLibraryData.docs || [])
-        .filter((doc: any) => 
-          doc.language?.some((lang: string) => 
+        .filter((doc: any) => {
+          const languages = doc.language || [];
+          return languages.some((lang: string) => 
             ['fre', 'fra', 'fr'].includes(lang.toLowerCase())
-          )
-        )
+          );
+        })
         .map(async (doc: any) => {
           const bookDetails = await fetchBookDetails(doc.key);
           let editionDetails = null;
@@ -82,8 +83,7 @@ export async function searchBooks(query: string): Promise<Book[]> {
           if (doc.cover_i) {
             cover = `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`;
           } else {
-            const googleCover = await searchGoogleBooksCover(doc.title, doc.author_name?.[0] || '');
-            cover = googleCover || 'https://images.unsplash.com/photo-1472396961693-142e6e269027?w=800';
+            cover = '/placeholder.svg';
           }
 
           return {
@@ -91,7 +91,7 @@ export async function searchBooks(query: string): Promise<Book[]> {
             title: doc.title,
             author: doc.author_name || ['Auteur inconnu'],
             cover: cover,
-            language: doc.language || [],
+            language: ['fr'],
             publishDate: doc.first_publish_date,
             description: bookDetails?.description?.value || bookDetails?.description || '',
             numberOfPages: editionDetails?.number_of_pages || bookDetails?.number_of_pages,
