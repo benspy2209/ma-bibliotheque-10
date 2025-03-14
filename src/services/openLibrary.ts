@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 
 const OPEN_LIBRARY_API = 'https://openlibrary.org';
@@ -54,10 +53,10 @@ export async function searchBooks(query: string): Promise<Book[]> {
             editionDetails = await fetchEditionDetails(doc.edition_key[0]);
           }
 
-          // Amélioration de la gestion des couvertures
           let cover = '/placeholder.svg';
-          if (doc.cover_i) {
-            // Essayons la plus grande taille d'abord
+          if (doc.title?.toLowerCase() === 'le marchand de sable') {
+            cover = 'https://images.unsplash.com/photo-1470813740244-df37b8c1edcb?w=800';
+          } else if (doc.cover_i) {
             cover = `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`;
           }
 

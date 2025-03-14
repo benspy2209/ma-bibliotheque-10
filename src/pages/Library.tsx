@@ -3,8 +3,6 @@ import { useState } from 'react';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
 import { useToast } from "@/hooks/use-toast";
-import { BookGrid } from '@/components/library/BookGrid';
-import { BookList } from '@/components/library/BookList';
 import { SortMenu, SortOption } from '@/components/library/SortMenu';
 import { ViewToggle } from '@/components/library/ViewToggle';
 import { useBookSort } from '@/hooks/use-book-sort';
@@ -12,6 +10,7 @@ import { useViewPreference } from '@/hooks/use-view-preference';
 import NavBar from '@/components/NavBar';
 import { loadBooks } from '@/services/supabaseBooks';
 import { useQuery } from '@tanstack/react-query';
+import { BookSections } from '@/components/library/BookSections';
 
 export default function Library() {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
@@ -52,15 +51,17 @@ export default function Library() {
               <ViewToggle viewMode={viewMode} onToggle={toggleView} />
             </div>
           </div>
-          
+
           {sortedBooks.length === 0 ? (
             <p className="text-center text-gray-600">
               Votre bibliothèque est vide. Ajoutez des livres depuis la recherche !
             </p>
-          ) : viewMode === 'grid' ? (
-            <BookGrid books={sortedBooks} onBookClick={setSelectedBook} />
           ) : (
-            <BookList books={sortedBooks} onBookClick={setSelectedBook} />
+            <BookSections 
+              books={sortedBooks}
+              viewMode={viewMode}
+              onBookClick={setSelectedBook}
+            />
           )}
 
           {selectedBook && (
