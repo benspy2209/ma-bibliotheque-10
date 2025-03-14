@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -34,7 +33,7 @@ export function BookReview({ book, isEditing, onReviewChange }: BookReviewProps)
   };
 
   const handleShareOnFacebook = () => {
-    const baseUrl = window.location.origin;
+    const baseUrl = 'https://meslectures.lalibreplume.be';
     const bookUrl = `${baseUrl}/book/${book.id}`;
     const quote = `Découvrez ma critique de "${book.title}" sur Ma Bibliothèque\n\n${book.review?.content || ''}`;
     
