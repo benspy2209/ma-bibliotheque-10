@@ -7,8 +7,12 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
+    // Encodage plus souple pour la recherche
+    const encodedQuery = encodeURIComponent(query.replace(/['"]/g, ''));
+    
+    // Recherche avec intitle pour privilégier les correspondances exactes
     const response = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
+      `https://www.googleapis.com/books/v1/volumes?q=intitle:"${encodedQuery}"&langRestrict=fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
     );
 
     if (!response.ok) {
@@ -19,7 +23,18 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
     
     if (!data.items) {
       console.log('Aucun résultat Google Books pour:', query);
-      return [];
+      // Deuxième tentative avec une recherche plus large si aucun résultat
+      const secondResponse = await fetch(
+        `https://www.googleapis.com/books/v1/volumes?q=${encodedQuery}&langRestrict=fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
+      );
+      
+      if (!secondResponse.ok) {
+        throw new Error(`Erreur Google Books (2ème tentative): ${secondResponse.status}`);
+      }
+      
+      const secondData = await secondResponse.json();
+      if (!secondData.items) return [];
+      data.items = secondData.items;
     }
     
     return data.items.map((item: any) => {

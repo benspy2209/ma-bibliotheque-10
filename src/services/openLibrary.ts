@@ -59,9 +59,11 @@ export async function searchBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
-    const encodedQuery = encodeURIComponent(query.replace(/['"]/g, ''));
+    const cleanQuery = query.replace(/['"]/g, '').trim();
+    const encodedQuery = encodeURIComponent(cleanQuery);
+    
     const openLibraryResponse = await fetch(
-      `${OPEN_LIBRARY_API}/search.json?q=${encodedQuery}&language=fre&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key&limit=40`
+      `${OPEN_LIBRARY_API}/search.json?q=${encodedQuery}&language=fre&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key&limit=40&mode=everything`
     );
 
     if (!openLibraryResponse.ok) {
@@ -71,8 +73,20 @@ export async function searchBooks(query: string): Promise<Book[]> {
     const openLibraryData = await openLibraryResponse.json();
 
     if (!openLibraryData.docs || openLibraryData.docs.length === 0) {
-      console.log('Aucun résultat OpenLibrary pour:', query);
-      return [];
+      const titleResponse = await fetch(
+        `${OPEN_LIBRARY_API}/search.json?title=${encodedQuery}&language=fre&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key&limit=40`
+      );
+
+      if (!titleResponse.ok) {
+        throw new Error(`Erreur OpenLibrary (2ème tentative): ${titleResponse.status}`);
+      }
+
+      const titleData = await titleResponse.json();
+      if (!titleData.docs || titleData.docs.length === 0) {
+        console.log('Aucun résultat OpenLibrary pour:', query);
+        return [];
+      }
+      openLibraryData.docs = titleData.docs;
     }
 
     const results = await Promise.all(
