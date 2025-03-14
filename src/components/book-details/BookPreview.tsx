@@ -22,10 +22,13 @@ export function BookPreview({
   onDateChange
 }: BookPreviewProps) {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("handleImageUpload called"); // Debug log
     const file = event.target.files?.[0];
     if (file) {
+      console.log("File selected:", file.name); // Debug log
       const reader = new FileReader();
       reader.onloadend = () => {
+        console.log("File read completed"); // Debug log
         onInputChange('cover', reader.result as string);
       };
       reader.readAsDataURL(file);
@@ -34,14 +37,14 @@ export function BookPreview({
 
   return (
     <div className="grid grid-cols-[150px,1fr] gap-4 py-2">
-      <div className="relative">
+      <div className="relative group">
         <img
-          src={book.cover}
+          src={book.cover || '/placeholder.svg'}
           alt={book.title}
           className="w-full rounded-lg shadow-lg object-cover h-[200px]"
         />
         {isEditing && (
-          <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
             <label className="cursor-pointer">
               <input
                 type="file"
@@ -49,7 +52,7 @@ export function BookPreview({
                 className="hidden"
                 onChange={handleImageUpload}
               />
-              <Button variant="outline" size="sm" className="bg-background/80">
+              <Button variant="outline" size="sm" className="bg-background hover:bg-background/90">
                 <ImagePlus className="w-4 h-4 mr-1" />
                 Changer
               </Button>
