@@ -11,21 +11,31 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     persistSession: true,
-    storage: window.localStorage
+    storage: window.localStorage,
+    autoRefreshToken: true
   }
 });
 
 export async function saveBook(book: Book) {
-  const { error } = await supabase
-    .from('books')
-    .upsert({
-      id: book.id,
-      book_data: book,
-      status: book.status,
-      completion_date: book.completionDate,
-    });
+  try {
+    const { error } = await supabase
+      .from('books')
+      .upsert({
+        id: book.id,
+        book_data: book,
+        status: book.status,
+        completion_date: book.completionDate,
+      });
 
-  if (error) {
+    if (error) {
+      console.error('Erreur Supabase lors de la sauvegarde:', error);
+      if (error.code === 'PGRST301') {
+        throw new Error('Vous devez être connecté pour effectuer cette action');
+      } else {
+        throw new Error(`Erreur lors de la sauvegarde : ${error.message}`);
+      }
+    }
+  } catch (error) {
     console.error('Erreur lors de la sauvegarde:', error);
     throw error;
   }
