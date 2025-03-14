@@ -25,25 +25,28 @@ const Index = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
 
-  const results = useQueries({
-    queries: [
-      {
-        queryKey: ['openLibrary', debouncedQuery],
-        queryFn: () => searchBooks(debouncedQuery),
-        enabled: debouncedQuery.length > 0
-      },
-      {
-        queryKey: ['googleBooks', debouncedQuery],
-        queryFn: () => {
-          // N'interroger Google Books que si OpenLibrary n'a pas trouvé de résultats
-          if (results[0].data && results[0].data.length > 0) {
-            return [];
-          }
-          return searchGoogleBooks(debouncedQuery);
-        },
-        enabled: debouncedQuery.length > 0 && !results[0].isLoading
+  // Premier appel pour OpenLibrary
+  const openLibraryQuery = {
+    queryKey: ['openLibrary', debouncedQuery],
+    queryFn: () => searchBooks(debouncedQuery),
+    enabled: debouncedQuery.length > 0
+  };
+
+  // Deuxième appel pour Google Books
+  const googleBooksQuery = {
+    queryKey: ['googleBooks', debouncedQuery],
+    queryFn: async () => {
+      const openLibraryResults = results[0].data;
+      if (openLibraryResults && openLibraryResults.length > 0) {
+        return [];
       }
-    ]
+      return searchGoogleBooks(debouncedQuery);
+    },
+    enabled: debouncedQuery.length > 0 && !results[0].isLoading
+  };
+
+  const results = useQueries({
+    queries: [openLibraryQuery, googleBooksQuery]
   });
 
   const isLoading = results.some(result => result.isLoading);
