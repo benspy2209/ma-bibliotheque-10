@@ -18,5 +18,9 @@ export type Book = {
   isbn?: string;
   status?: ReadingStatus;
   completionDate?: string; // Date de lecture
+  review?: {
+    content: string;
+    date: string;
+  };
 };
 

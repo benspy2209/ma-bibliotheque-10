@@ -1,4 +1,3 @@
-
 import { Book, ReadingStatus } from '@/types/book';
 import {
   Dialog,
@@ -14,7 +13,9 @@ import { saveBook, deleteBook } from '@/services/supabaseBooks';
 import { BookHeader } from './book-details/BookHeader';
 import { BookPreview } from './book-details/BookPreview';
 import { BookDescription } from './book-details/BookDescription';
+import { BookReview } from './book-details/BookReview';
 import { DeleteBookDialog } from './book-details/DeleteBookDialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProps) {
   const [currentBook, setCurrentBook] = useState(book);
@@ -41,6 +42,12 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
 
   const handleRatingChange = async (newRating: number) => {
     const updatedBook = { ...currentBook, rating: newRating };
+    setCurrentBook(updatedBook);
+    await saveToLibrary(updatedBook);
+  };
+
+  const handleReviewChange = async (review: { content: string; date: string; } | undefined) => {
+    const updatedBook = { ...currentBook, review };
     setCurrentBook(updatedBook);
     await saveToLibrary(updatedBook);
   };
@@ -109,16 +116,33 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
             onDateChange={handleCompletionDateChange}
           />
 
-          <Separator className="my-2" />
-          
-          <BookDescription
-            description={currentBook.description}
-            isEditing={isEditing}
-            onDescriptionChange={(value) => handleInputChange('description', value)}
-          />
+          <Separator className="my-4" />
+
+          <Tabs defaultValue="description" className="w-full">
+            <TabsList>
+              <TabsTrigger value="description">Description</TabsTrigger>
+              <TabsTrigger value="review">Critique</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="description">
+              <BookDescription
+                description={currentBook.description}
+                isEditing={isEditing}
+                onDescriptionChange={(value) => handleInputChange('description', value)}
+              />
+            </TabsContent>
+
+            <TabsContent value="review">
+              <BookReview
+                book={currentBook}
+                isEditing={isEditing}
+                onReviewChange={handleReviewChange}
+              />
+            </TabsContent>
+          </Tabs>
 
           {isEditing && (
-            <div className="flex justify-end mt-2">
+            <div className="flex justify-end mt-4">
               <Button onClick={handleSave}>
                 Enregistrer les modifications
               </Button>
