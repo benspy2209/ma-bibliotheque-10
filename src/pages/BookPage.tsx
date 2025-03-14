@@ -1,4 +1,3 @@
-
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Book } from '@/types/book';
@@ -60,10 +59,12 @@ const BookPage = () => {
   return (
     <>
       <Helmet>
+        <title>{`${book.title} - Ma Bibliothèque`}</title>
         <meta property="og:title" content={`${book.title} - Ma Bibliothèque`} />
         <meta property="og:description" content={book.review?.content || `Découvrez "${book.title}" sur Ma Bibliothèque`} />
-        <meta property="og:image" content={book.cover || 'https://meslectures.lalibreplume.be/placeholder.svg'} />
+        <meta property="og:image" content={book.cover} />
         <meta property="og:url" content={`https://meslectures.lalibreplume.be/book/${book.id}`} />
+        <meta property="og:type" content="book" />
       </Helmet>
       <div className="container mx-auto py-8">
         <BookDetails
