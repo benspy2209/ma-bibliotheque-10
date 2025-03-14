@@ -102,7 +102,7 @@ export function BookReview({ book, isEditing, onReviewChange }: BookReviewProps)
           
           <div className="prose prose-slate max-w-none">
             <div className="text-xl font-medium mb-6 text-primary">
-              {book.review.content.split('\n')[0]}
+              {book.review.content.split('\n')[0].replace(/^#\s*/, '')}
             </div>
             <div className="text-base leading-relaxed whitespace-pre-wrap">
               {book.review.content.split('\n').slice(1).join('\n').replace(/\*\*/g, '')}
