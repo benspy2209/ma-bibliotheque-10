@@ -4,13 +4,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Search } from 'lucide-react';
+import { useQueries } from '@tanstack/react-query';
+import { searchBooks } from '@/services/openLibrary';
+import { searchGoogleBooks } from '@/services/googleBooks';
+import { getBookDetails } from '@/services/bookDetails';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
 import { removeDuplicateBooks } from '@/lib/utils';
 import { useToast } from "@/components/ui/use-toast";
 import NavBar from '@/components/NavBar';
-import { useSequentialQueries } from '@/hooks/useSequentialQueries';
-import { getBookDetails } from '@/services/bookDetails';
 
 const BOOKS_PER_PAGE = 12;
 
@@ -22,7 +24,24 @@ const Index = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
 
-  const results = useSequentialQueries(debouncedQuery);
+  const results = useQueries({
+    queries: [
+      {
+        queryKey: ['openLibrary', debouncedQuery],
+        queryFn: () => searchBooks(debouncedQuery),
+        enabled: debouncedQuery.length > 0
+      },
+      {
+        queryKey: ['googleBooks', debouncedQuery],
+        queryFn: () => searchGoogleBooks(debouncedQuery),
+        enabled: debouncedQuery.length > 0
+      }
+    ]
+  });
+
+  const isLoading = results.some(result => result.isLoading);
+  const allBooks = [...(results[0].data || []), ...(results[1].data || [])];
+  const books = removeDuplicateBooks(allBooks);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -54,13 +73,6 @@ const Index = () => {
   const handleBookUpdate = () => {
     setRefreshKey(prev => prev + 1);
   };
-
-  const isLoading = results.some(result => result.isLoading);
-  const allBooks = [
-    ...(results[0].data as Book[] || []), 
-    ...(results[1].data as Book[] || [])
-  ];
-  const books = removeDuplicateBooks(allBooks);
 
   const visibleBooks = books.slice(0, displayedBooks);
   const hasMoreBooks = displayedBooks < books.length;
