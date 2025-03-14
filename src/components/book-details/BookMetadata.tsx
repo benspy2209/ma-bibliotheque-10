@@ -1,11 +1,17 @@
 import { Book } from '@/types/book';
-import { Input } from '@/components/ui/input';
-import { BookMetadataProps } from './types';
-import { Book as BookIcon, Calendar, ListTree, Layers, Users } from 'lucide-react';
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+
+interface BookMetadataProps {
+  book: Book;
+  isEditing: boolean;
+  onInputChange: (field: keyof Book, value: string) => void;
+}
 
 export function BookMetadata({ book, isEditing, onInputChange }: BookMetadataProps) {
   return (
-    <div className="space-y-2">
+    <div className="grid gap-4">
       <div>
         <h3 className="text-sm font-semibold flex items-center gap-2">
           <Users className="h-4 w-4" />
@@ -95,6 +101,17 @@ export function BookMetadata({ book, isEditing, onInputChange }: BookMetadataPro
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {isEditing && (
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="purchased"
+            checked={book.purchased}
+            onCheckedChange={(checked) => onInputChange('purchased', checked.toString())}
+          />
+          <Label htmlFor="purchased">Livre acheté</Label>
         </div>
       )}
     </div>

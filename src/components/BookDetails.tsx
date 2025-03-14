@@ -30,7 +30,10 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
   };
 
   const handleInputChange = (field: keyof Book, value: string) => {
-    setCurrentBook(prev => ({ ...prev, [field]: value }));
+    setCurrentBook(prev => ({
+      ...prev,
+      [field]: field === 'purchased' ? value === 'true' : value
+    }));
   };
 
   const handleCompletionDateChange = (date: Date | undefined) => {

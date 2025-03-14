@@ -1,3 +1,4 @@
+
 export type ReadingStatus = 'to-read' | 'reading' | 'completed';
 
 export type Book = {
@@ -16,7 +17,7 @@ export type Book = {
   subjects?: string[];
   isbn?: string;
   status?: ReadingStatus;
-  completionDate?: string; // Date de lecture
+  completionDate?: string;
   review?: {
     content: string;
     date: string;
