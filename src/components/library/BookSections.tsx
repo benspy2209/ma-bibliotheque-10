@@ -53,7 +53,7 @@ export const BookSections = ({ books, viewMode, onBookClick }: BookSectionsProps
 
       <TabsContent value="to-read">
         <div className="mb-6">
-          <Tabs defaultValue="all" className="w-fit">
+          <Tabs defaultValue="all" className="w-fit" onValueChange={(value) => setPurchaseFilter(value as 'all' | 'purchased' | 'not-purchased')}>
             <TabsList>
               <TabsTrigger value="all">Tous</TabsTrigger>
               <TabsTrigger value="purchased">Achetés</TabsTrigger>
