@@ -4,6 +4,7 @@ import { BookGrid } from './BookGrid';
 import { BookList } from './BookList';
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from 'react';
 
 interface BookSectionsProps {
   books: Book[];
@@ -12,9 +13,17 @@ interface BookSectionsProps {
 }
 
 export const BookSections = ({ books, viewMode, onBookClick }: BookSectionsProps) => {
+  const [purchaseFilter, setPurchaseFilter] = useState<'all' | 'purchased' | 'not-purchased'>('all');
+  
   const completedBooks = books.filter(book => book.status === 'completed');
   const readingBooks = books.filter(book => book.status === 'reading');
   const toReadBooks = books.filter(book => !book.status || book.status === 'to-read');
+
+  const filteredToReadBooks = toReadBooks.filter(book => {
+    if (purchaseFilter === 'purchased') return book.purchased;
+    if (purchaseFilter === 'not-purchased') return !book.purchased;
+    return true;
+  });
 
   const BookComponent = viewMode === 'grid' ? BookGrid : BookList;
 
@@ -43,7 +52,16 @@ export const BookSections = ({ books, viewMode, onBookClick }: BookSectionsProps
       </TabsContent>
 
       <TabsContent value="to-read">
-        <BookComponent books={toReadBooks} onBookClick={onBookClick} />
+        <div className="mb-6">
+          <Tabs defaultValue="all" className="w-fit">
+            <TabsList>
+              <TabsTrigger value="all">Tous</TabsTrigger>
+              <TabsTrigger value="purchased">Achetés</TabsTrigger>
+              <TabsTrigger value="not-purchased">À acheter</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+        <BookComponent books={filteredToReadBooks} onBookClick={onBookClick} />
       </TabsContent>
     </Tabs>
   );
