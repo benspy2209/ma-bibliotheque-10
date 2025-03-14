@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import { Book } from '@/types/book';
 
@@ -60,4 +59,19 @@ export async function deleteBook(bookId: string) {
     console.error('Erreur Supabase:', error);
     throw new Error(`Erreur lors de la suppression : ${error.message}`);
   }
+}
+
+export async function getBookById(id: string) {
+  const { data, error } = await supabase
+    .from('books')
+    .select('book_data')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error('Erreur lors du chargement du livre:', error);
+    throw error;
+  }
+
+  return data?.book_data as Book || null;
 }
