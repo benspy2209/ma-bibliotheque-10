@@ -39,9 +39,7 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
 
       // Ensure description is translated
       let description = volumeInfo.description || '';
-      if (description) {
-        description = await translateToFrench(description);
-      }
+      description = await translateToFrench(description);
 
       return {
         id: item.id,

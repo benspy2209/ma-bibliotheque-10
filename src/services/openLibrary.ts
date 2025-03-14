@@ -1,5 +1,6 @@
+
 import { Book } from '@/types/book';
-import { GOOGLE_BOOKS_API_KEY } from './googleBooks';
+import { GOOGLE_BOOKS_API_KEY } from './googleBooks'; 
 import { translateToFrench } from '@/utils/translation';
 
 const OPEN_LIBRARY_API = 'https://openlibrary.org';
