@@ -36,7 +36,7 @@ export function BookReview({ book, isEditing, onReviewChange }: BookReviewProps)
   const handleShareOnFacebook = () => {
     const baseUrl = window.location.origin;
     const bookUrl = `${baseUrl}/book/${book.id}`;
-    const quote = `Ma critique de ${book.title}\n\n${book.review?.content || ''}`;
+    const quote = `Découvrez ma critique de "${book.title}" sur Ma Bibliothèque\n\n${book.review?.content || ''}`;
     
     const shareUrl = `https://www.facebook.com/dialog/share?app_id=671593115528982&display=popup&href=${encodeURIComponent(bookUrl)}&quote=${encodeURIComponent(quote)}`;
     
