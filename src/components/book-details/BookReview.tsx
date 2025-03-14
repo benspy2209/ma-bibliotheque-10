@@ -1,3 +1,4 @@
+
 import { Book } from '@/types/book';
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -34,8 +35,8 @@ export function BookReview({ book, isEditing, onReviewChange }: BookReviewProps)
 
   const handleShareOnFacebook = () => {
     const url = window.location.href;
-    const title = `Ma critique de ${book.title}`;
-    const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(title)}`;
+    const quote = `Ma critique de ${book.title}\n\n${book.review?.content || ''}`;
+    const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(quote)}&picture=${encodeURIComponent(book.cover || '')}`;
     window.open(shareUrl, '_blank', 'width=600,height=400');
   };
 
