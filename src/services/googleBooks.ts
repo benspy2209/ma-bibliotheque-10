@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 
 export const GOOGLE_BOOKS_API_KEY = 'AIzaSyDUQ2dB8e_EnUp14DY9GnYAv2CmGiqBapY';
@@ -8,7 +7,7 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
 
   try {
     const response = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}+inlanguage:fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
     );
 
     if (!response.ok) {
@@ -22,8 +21,7 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
     return data.items
       .filter((item: any) => {
         const volumeInfo = item.volumeInfo;
-        // Accepter les codes de langue fr et fre
-        return volumeInfo.language === 'fr' || volumeInfo.language === 'fre';
+        return volumeInfo.language === 'fr' || volumeInfo.language === 'fre' || volumeInfo.language === 'fra';
       })
       .map((item: any) => {
         const volumeInfo = item.volumeInfo;
