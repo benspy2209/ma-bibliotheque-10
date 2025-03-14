@@ -19,6 +19,12 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
 
 export async function saveBook(book: Book) {
   try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      throw new Error('Vous devez être connecté pour effectuer cette action');
+    }
+
     const { error } = await supabase
       .from('books')
       .upsert({
@@ -26,15 +32,12 @@ export async function saveBook(book: Book) {
         book_data: book,
         status: book.status,
         completion_date: book.completionDate,
+        user_id: user.id
       });
 
     if (error) {
       console.error('Erreur Supabase lors de la sauvegarde:', error);
-      if (error.code === 'PGRST301') {
-        throw new Error('Vous devez être connecté pour effectuer cette action');
-      } else {
-        throw new Error(`Erreur lors de la sauvegarde : ${error.message}`);
-      }
+      throw new Error(`Erreur lors de la sauvegarde : ${error.message}`);
     }
   } catch (error) {
     console.error('Erreur lors de la sauvegarde:', error);
@@ -43,9 +46,16 @@ export async function saveBook(book: Book) {
 }
 
 export async function loadBooks() {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    return [];
+  }
+
   const { data, error } = await supabase
     .from('books')
     .select('book_data')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
   if (error) {
