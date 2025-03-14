@@ -81,25 +81,25 @@ const Index = () => {
     <>
       <div className="min-h-screen">
         <NavBar />
-        <div className="px-4 py-8 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center mb-12">
-            <div className="text-center flex-1">
-              <h1 className="mb-4 text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
+        <div className="px-4 py-6 sm:py-8 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mb-8 sm:mb-12">
+            <div className="text-center sm:text-left flex-1">
+              <h1 className="mb-3 text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900 dark:text-white">
                 Découvrez votre prochaine lecture
               </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-200">
+              <p className="text-base sm:text-lg text-gray-600 dark:text-gray-200">
                 Explorez, partagez et découvrez de nouveaux livres
               </p>
             </div>
             <Link 
               to="/library" 
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
             >
               Ma Bibliothèque
             </Link>
           </div>
 
-          <div className="relative mb-12 mx-auto max-w-2xl">
+          <div className="relative mb-8 sm:mb-12 mx-auto max-w-2xl">
             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
             <Input
               type="search"
