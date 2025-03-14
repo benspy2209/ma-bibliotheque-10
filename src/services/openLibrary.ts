@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 import { GOOGLE_BOOKS_API_KEY } from './googleBooks';
 
@@ -67,17 +66,14 @@ export async function searchBooks(query: string): Promise<Book[]> {
     const openLibraryData = await openLibraryResponse.json();
     const googleBooksData = await googleBooksResponse.json();
 
-    // Traitement des résultats d'OpenLibrary
+    // Traitement des résultats d'OpenLibrary avec filtre strict sur la langue
     const openLibraryBooks = await Promise.all(
       openLibraryData.docs
         .filter((doc: any) => {
-          const matchesAuthor = doc.author_name?.some((author: string) => 
-            author.toLowerCase().includes(query.toLowerCase())
+          const isInFrench = doc.language?.some((lang: string) => 
+            ['fre', 'fra'].includes(lang.toLowerCase())
           );
-          const matchesTitle = doc.title?.toLowerCase().includes(query.toLowerCase());
-          const isInFrench = doc.language?.includes('fre') || doc.language?.includes('fra');
-          
-          return (matchesAuthor || matchesTitle) && isInFrench;
+          return isInFrench;
         })
         .map(async (doc: any) => {
           const bookDetails = await fetchBookDetails(doc.key);
@@ -109,29 +105,31 @@ export async function searchBooks(query: string): Promise<Book[]> {
         })
     );
 
-    // Traitement des résultats de Google Books
-    const googleBooks = (googleBooksData.items || []).map((item: any) => {
-      const volumeInfo = item.volumeInfo;
-      let cover = 'https://images.unsplash.com/photo-1472396961693-142e6e269027?w=800';
-      
-      if (volumeInfo.imageLinks) {
-        cover = volumeInfo.imageLinks.thumbnail?.replace('http:', 'https:') ||
-                volumeInfo.imageLinks.smallThumbnail?.replace('http:', 'https:');
-      }
+    // Traitement des résultats de Google Books avec filtre strict sur la langue
+    const googleBooks = (googleBooksData.items || [])
+      .filter((item: any) => item.volumeInfo.language === 'fr')
+      .map((item: any) => {
+        const volumeInfo = item.volumeInfo;
+        let cover = 'https://images.unsplash.com/photo-1472396961693-142e6e269027?w=800';
+        
+        if (volumeInfo.imageLinks) {
+          cover = volumeInfo.imageLinks.thumbnail?.replace('http:', 'https:') ||
+                  volumeInfo.imageLinks.smallThumbnail?.replace('http:', 'https:');
+        }
 
-      return {
-        id: item.id,
-        title: volumeInfo.title,
-        author: volumeInfo.authors || ['Auteur inconnu'],
-        cover: cover,
-        language: [volumeInfo.language],
-        publishDate: volumeInfo.publishedDate,
-        description: volumeInfo.description || '',
-        numberOfPages: volumeInfo.pageCount,
-        subjects: volumeInfo.categories || [],
-        publishers: [volumeInfo.publisher].filter(Boolean)
-      };
-    });
+        return {
+          id: item.id,
+          title: volumeInfo.title,
+          author: volumeInfo.authors || ['Auteur inconnu'],
+          cover: cover,
+          language: [volumeInfo.language],
+          publishDate: volumeInfo.publishedDate,
+          description: volumeInfo.description || '',
+          numberOfPages: volumeInfo.pageCount,
+          subjects: volumeInfo.categories || [],
+          publishers: [volumeInfo.publisher].filter(Boolean)
+        };
+      });
 
     // Combiner et retourner les résultats des deux APIs
     return [...openLibraryBooks, ...googleBooks];

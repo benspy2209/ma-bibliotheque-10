@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 
 export const GOOGLE_BOOKS_API_KEY = 'AIzaSyDUQ2dB8e_EnUp14DY9GnYAv2CmGiqBapY';
@@ -17,8 +16,10 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
 
     const data = await response.json();
     
-    return data.items?.map((item: any) => {
-      const volumeInfo = item.volumeInfo;
+    return data.items
+      ?.filter((item: any) => item.volumeInfo.language === 'fr')
+      ?.map((item: any) => {
+        const volumeInfo = item.volumeInfo;
       
       // Améliorons la gestion des couvertures
       let cover = '/placeholder.svg';
@@ -47,13 +48,13 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
         language: [volumeInfo.language],
         isbn: volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_13')?.identifier
       };
-    })
-    ?.filter(book => {
-      const authors = Array.isArray(book.author) ? book.author : [book.author];
-      return authors.some(author => 
-        author.toLowerCase() === query.toLowerCase()
-      ) && book.language[0] === 'fr';
-    }) || [];
+      })
+      ?.filter(book => {
+        const authors = Array.isArray(book.author) ? book.author : [book.author];
+        return authors.some(author => 
+          author.toLowerCase().includes(query.toLowerCase())
+        );
+      }) || [];
   } catch (error) {
     console.error('Erreur lors de la recherche Google Books:', error);
     return [];
