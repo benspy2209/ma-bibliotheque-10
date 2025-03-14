@@ -65,12 +65,15 @@ export async function searchBooks(query: string): Promise<Book[]> {
     
     const books = await Promise.all(
       data.docs
-        .filter((doc: any) => 
-          doc.author_name?.some((author: string) => 
-            author.toLowerCase() === query.toLowerCase()
-          ) && 
-          (doc.language?.includes('fre') || doc.language?.includes('fra'))
-        )
+        .filter((doc: any) => {
+          const matchesAuthor = doc.author_name?.some((author: string) => 
+            author.toLowerCase().includes(query.toLowerCase())
+          );
+          const matchesTitle = doc.title?.toLowerCase().includes(query.toLowerCase());
+          const isInFrench = doc.language?.includes('fre') || doc.language?.includes('fra');
+          
+          return (matchesAuthor || matchesTitle) && isInFrench;
+        })
         .map(async (doc: any) => {
           const bookDetails = await fetchBookDetails(doc.key);
           let editionDetails = null;
@@ -78,12 +81,10 @@ export async function searchBooks(query: string): Promise<Book[]> {
             editionDetails = await fetchEditionDetails(doc.edition_key[0]);
           }
 
-          // Gestion améliorée des couvertures avec Google Books comme fallback
           let cover;
           if (doc.cover_i) {
             cover = `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`;
           } else {
-            // Essayer de trouver la couverture sur Google Books
             const googleCover = await searchGoogleBooksCover(doc.title, doc.author_name?.[0] || '');
             cover = googleCover || 'https://images.unsplash.com/photo-1472396961693-142e6e269027?w=800';
           }
