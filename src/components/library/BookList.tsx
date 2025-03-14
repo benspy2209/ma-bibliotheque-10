@@ -46,7 +46,7 @@ export const BookList = ({ books, onBookClick }: BookListProps) => {
           <div className="flex flex-col flex-grow p-4 gap-2">
             <div>
               <h3 className="font-semibold text-lg">{book.title}</h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground dark:text-white/70">
                 {Array.isArray(book.author) ? book.author[0] : book.author}
               </p>
             </div>

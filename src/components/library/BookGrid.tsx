@@ -45,7 +45,7 @@ export const BookGrid = ({ books, onBookClick }: BookGridProps) => {
           </div>
           <div className="flex flex-col flex-grow p-3 space-y-2">
             <h3 className="font-semibold text-sm line-clamp-1">{book.title}</h3>
-            <p className="text-xs text-gray-600 line-clamp-1">
+            <p className="text-xs text-gray-600 dark:text-white/70 line-clamp-1">
               {Array.isArray(book.author) ? book.author[0] : book.author}
             </p>
             {book.rating > 0 && (
