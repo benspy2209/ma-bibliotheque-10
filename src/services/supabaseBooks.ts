@@ -49,15 +49,9 @@ export async function loadBooks() {
   
   console.log("Utilisateur actuel:", user);
   
-  if (!user) {
-    console.log("Aucun utilisateur connecté");
-    return [];
-  }
-
   const { data, error } = await supabase
     .from('books')
     .select('*')
-    .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
   console.log("Données reçues:", data);
