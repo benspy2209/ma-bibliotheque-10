@@ -4,6 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash } from "lucide-react";
 import { useState } from 'react';
+import { Card } from "@/components/ui/card";
 
 interface BookReviewProps {
   book: Book;
@@ -39,12 +40,12 @@ export function BookReview({ book, isEditing, onReviewChange }: BookReviewProps)
   if (isEditing || editingReview) {
     return (
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold mb-2">Votre critique</h3>
+        <h3 className="text-2xl font-semibold tracking-tight mb-4">Votre critique</h3>
         <Textarea
           placeholder="Écrivez votre critique ici..."
           value={reviewContent}
           onChange={(e) => setReviewContent(e.target.value)}
-          className="min-h-[150px]"
+          className="min-h-[200px] text-base leading-relaxed"
         />
         <div className="flex justify-end gap-2">
           {editingReview && (
@@ -68,44 +69,54 @@ export function BookReview({ book, isEditing, onReviewChange }: BookReviewProps)
 
   if (book.review) {
     return (
-      <article className="space-y-4 bg-muted/30 rounded-lg p-6">
-        <header className="flex justify-between items-start">
-          <div className="space-y-1">
-            <h3 className="text-lg font-semibold">Ma critique du livre</h3>
-            <p className="text-sm text-muted-foreground">
-              Écrite le {new Date(book.review.date).toLocaleDateString('fr-FR')}
-            </p>
+      <Card className="overflow-hidden">
+        <article className="space-y-6 p-6">
+          <header className="flex justify-between items-start border-b pb-4">
+            <div className="space-y-1">
+              <h3 className="text-2xl font-semibold tracking-tight">Ma critique du livre</h3>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-muted-foreground">
+                  Écrite le {new Date(book.review.date).toLocaleDateString('fr-FR')}
+                </span>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setEditingReview(true)}
+                className="hover:bg-muted"
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleDeleteReview}
+                className="hover:bg-muted"
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
+            </div>
+          </header>
+          
+          <div className="prose prose-slate max-w-none">
+            <div className="text-xl font-medium mb-6 text-primary">
+              # {book.review.content.split('\n')[0]}
+            </div>
+            <div className="text-base leading-relaxed whitespace-pre-wrap">
+              {book.review.content.split('\n').slice(1).join('\n')}
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setEditingReview(true)}
-              className="hover:bg-muted"
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleDeleteReview}
-              className="hover:bg-muted"
-            >
-              <Trash className="h-4 w-4" />
-            </Button>
-          </div>
-        </header>
-        <div className="prose prose-sm max-w-none">
-          <p className="whitespace-pre-wrap leading-relaxed">{book.review.content}</p>
-        </div>
-      </article>
+        </article>
+      </Card>
     );
   }
 
   return (
-    <div className="text-center py-8">
-      <h3 className="text-lg font-semibold mb-4">Aucune critique pour ce livre</h3>
-      <Button onClick={() => setEditingReview(true)}>
+    <div className="text-center py-12">
+      <h3 className="text-xl font-semibold mb-4">Aucune critique pour ce livre</h3>
+      <Button onClick={() => setEditingReview(true)} variant="outline" size="lg">
         Ajouter une critique
       </Button>
     </div>
