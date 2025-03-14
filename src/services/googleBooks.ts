@@ -7,9 +7,8 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
-    // Ajout du paramètre langRestrict=fr et recherche spécifique en français
     const response = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}+language:french&langRestrict=fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}+inlanguage:fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
     );
 
     if (!response.ok) {
@@ -20,11 +19,11 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
     
     if (!data.items) return [];
     
-    // Filtre strict sur la langue française
     return data.items
       .filter((item: any) => {
         const volumeInfo = item.volumeInfo;
-        return volumeInfo.language === 'fr';
+        // Accepter les codes de langue fr et fre
+        return volumeInfo.language === 'fr' || volumeInfo.language === 'fre';
       })
       .map((item: any) => {
         const volumeInfo = item.volumeInfo;

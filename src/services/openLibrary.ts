@@ -54,7 +54,7 @@ export async function searchBooks(query: string): Promise<Book[]> {
 
   try {
     const openLibraryResponse = await fetch(
-      `${OPEN_LIBRARY_API}/search.json?q=${encodeURIComponent(query)}&language=fre&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key,language&limit=40`
+      `${OPEN_LIBRARY_API}/search.json?q=${encodeURIComponent(query)}&language=fra,fre,fr&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key,language,publisher&limit=40`
     );
 
     if (!openLibraryResponse.ok) {
@@ -63,7 +63,6 @@ export async function searchBooks(query: string): Promise<Book[]> {
 
     const openLibraryData = await openLibraryResponse.json();
 
-    // Filtre strict sur la langue française
     const openLibraryBooks = await Promise.all(
       (openLibraryData.docs || [])
         .filter((doc: any) => {
@@ -82,6 +81,8 @@ export async function searchBooks(query: string): Promise<Book[]> {
           let cover;
           if (doc.cover_i) {
             cover = `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`;
+          } else if (doc.title && doc.author_name?.[0]) {
+            cover = await searchGoogleBooksCover(doc.title, doc.author_name[0]) || '/placeholder.svg';
           } else {
             cover = '/placeholder.svg';
           }
@@ -96,7 +97,7 @@ export async function searchBooks(query: string): Promise<Book[]> {
             description: bookDetails?.description?.value || bookDetails?.description || '',
             numberOfPages: editionDetails?.number_of_pages || bookDetails?.number_of_pages,
             subjects: bookDetails?.subjects || [],
-            publishers: editionDetails?.publishers || []
+            publishers: editionDetails?.publishers || doc.publisher || []
           };
         })
     );
