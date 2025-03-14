@@ -81,95 +81,97 @@ const Index = () => {
     <>
       <div className="min-h-screen">
         <NavBar />
-        <div className="px-4 py-6 sm:py-8 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mb-8 sm:mb-12">
-            <div className="text-center sm:text-left flex-1">
-              <h1 className="mb-3 text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900 dark:text-white">
-                Découvrez votre prochaine lecture
-              </h1>
-              <p className="text-base sm:text-lg text-gray-600 dark:text-gray-200">
-                Explorez, partagez et découvrez de nouveaux livres
-              </p>
-            </div>
-            <Link 
-              to="/library" 
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-            >
-              Ma Bibliothèque
-            </Link>
-          </div>
-
-          <div className="relative mb-8 sm:mb-12 mx-auto max-w-2xl">
-            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-            <Input
-              type="search"
-              placeholder="Rechercher un livre, un auteur..."
-              className="pl-10 h-12"
-              value={searchQuery}
-              onChange={handleSearch}
-            />
-          </div>
-
-          {isLoading && (
-            <div className="text-center text-gray-600">
-              Recherche en cours...
-            </div>
-          )}
-
-          <div className="book-grid">
-            {(!debouncedQuery ? [] : visibleBooks).map((book) => (
-              <Card 
-                key={book.id} 
-                className="book-card group cursor-pointer"
-                onClick={() => handleBookClick(book)}
-              >
-                <img
-                  src={book.cover}
-                  alt={book.title}
-                  className="transition-transform duration-300 group-hover:scale-105"
-                />
-                <div className="book-info">
-                  <h3 className="text-lg font-semibold">{book.title}</h3>
-                  <p className="text-sm text-gray-600">
-                    {Array.isArray(book.author) ? book.author[0] : book.author}
-                  </p>
-                </div>
-              </Card>
-            ))}
-          </div>
-
-          {debouncedQuery && visibleBooks.length === 0 && !isLoading && (
-            <div className="text-center text-gray-600">
-              Aucun livre trouvé
-            </div>
-          )}
-
-          {selectedBook && (
-            <BookDetails
-              book={selectedBook}
-              isOpen={!!selectedBook}
-              onClose={() => setSelectedBook(null)}
-              onUpdate={handleBookUpdate}
-            />
-          )}
-
-          {debouncedQuery && visibleBooks.length > 0 && (
-            <div className="mt-12 text-center">
-              {hasMoreBooks ? (
-                <Button 
-                  variant="outline" 
-                  className="hover:bg-secondary"
-                  onClick={handleLoadMore}
-                >
-                  Voir plus de livres
-                </Button>
-              ) : books.length > BOOKS_PER_PAGE && (
-                <p className="text-gray-600">
-                  Tous les livres ont été affichés
+        <div className="container px-4 py-6 sm:py-8 sm:px-6 lg:px-8 mx-auto">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mb-8 sm:mb-12">
+              <div className="text-center sm:text-left flex-1">
+                <h1 className="mb-3 text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900 dark:text-white">
+                  Découvrez votre prochaine lecture
+                </h1>
+                <p className="text-base sm:text-lg text-gray-600 dark:text-gray-200">
+                  Explorez, partagez et découvrez de nouveaux livres
                 </p>
-              )}
+              </div>
+              <Link 
+                to="/library" 
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+              >
+                Ma Bibliothèque
+              </Link>
             </div>
-          )}
+
+            <div className="relative mb-8 sm:mb-12">
+              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+              <Input
+                type="search"
+                placeholder="Rechercher un livre, un auteur..."
+                className="pl-10 h-12"
+                value={searchQuery}
+                onChange={handleSearch}
+              />
+            </div>
+
+            {isLoading && (
+              <div className="text-center text-gray-600">
+                Recherche en cours...
+              </div>
+            )}
+
+            <div className="book-grid">
+              {(!debouncedQuery ? [] : visibleBooks).map((book) => (
+                <Card 
+                  key={book.id} 
+                  className="book-card group cursor-pointer"
+                  onClick={() => handleBookClick(book)}
+                >
+                  <img
+                    src={book.cover}
+                    alt={book.title}
+                    className="transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="book-info">
+                    <h3 className="text-lg font-semibold">{book.title}</h3>
+                    <p className="text-sm text-gray-600">
+                      {Array.isArray(book.author) ? book.author[0] : book.author}
+                    </p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            {debouncedQuery && visibleBooks.length === 0 && !isLoading && (
+              <div className="text-center text-gray-600">
+                Aucun livre trouvé
+              </div>
+            )}
+
+            {selectedBook && (
+              <BookDetails
+                book={selectedBook}
+                isOpen={!!selectedBook}
+                onClose={() => setSelectedBook(null)}
+                onUpdate={handleBookUpdate}
+              />
+            )}
+
+            {debouncedQuery && visibleBooks.length > 0 && (
+              <div className="mt-12 text-center">
+                {hasMoreBooks ? (
+                  <Button 
+                    variant="outline" 
+                    className="hover:bg-secondary"
+                    onClick={handleLoadMore}
+                  >
+                    Voir plus de livres
+                  </Button>
+                ) : books.length > BOOKS_PER_PAGE && (
+                  <p className="text-gray-600">
+                    Tous les livres ont été affichés
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </>
