@@ -74,7 +74,7 @@ async function searchGoogleBooksCover(title: string, author: string): Promise<st
   }
 }
 
-export async function searchBooks(query: string): Promise<Book[]> {
+export async function searchOpenLibrary(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
