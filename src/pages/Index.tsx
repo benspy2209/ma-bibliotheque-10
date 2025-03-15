@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Search } from 'lucide-react';
 import { useQueries } from '@tanstack/react-query';
-import { searchBooks } from '@/services/openLibrary';
 import { searchGoogleBooks } from '@/services/googleBooks';
 import { getBookDetails } from '@/services/bookDetails';
 import { Book } from '@/types/book';
@@ -13,7 +12,6 @@ import { BookDetails } from '@/components/BookDetails';
 import { removeDuplicateBooks } from '@/lib/utils';
 import { useToast } from "@/components/ui/use-toast";
 import NavBar from '@/components/NavBar';
-import { searchBnfBooks } from '@/services/bnfBooks';
 
 const BOOKS_PER_PAGE = 12;
 
@@ -25,47 +23,18 @@ const Index = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
 
-  const openLibraryQuery = useQueries({
-    queries: [
-      {
-        queryKey: ['openLibrary', debouncedQuery],
-        queryFn: () => searchBooks(debouncedQuery),
-        enabled: debouncedQuery.length > 0
-      }
-    ]
-  });
-
-  const googleBooksQuery = useQueries({
+  const [googleBooksQuery] = useQueries({
     queries: [
       {
         queryKey: ['googleBooks', debouncedQuery],
         queryFn: () => searchGoogleBooks(debouncedQuery),
-        enabled: debouncedQuery.length > 0 && openLibraryQuery[0].isSuccess
-      }
-    ]
-  });
-
-  const [bnfBooksQuery] = useQueries({
-    queries: [
-      {
-        queryKey: ['bnfBooks', debouncedQuery],
-        queryFn: () => searchBnfBooks(debouncedQuery),
         enabled: debouncedQuery.length > 0
       }
     ]
   });
 
-  const isLoading = openLibraryQuery[0].isLoading || 
-                    googleBooksQuery[0].isLoading || 
-                    bnfBooksQuery.isLoading;
-
-  const allBooks = [
-    ...(openLibraryQuery[0].data || []), 
-    ...(googleBooksQuery[0].data || []),
-    ...(bnfBooksQuery.data || [])
-  ];
-
-  const books = removeDuplicateBooks(allBooks);
+  const isLoading = googleBooksQuery.isLoading;
+  const books = removeDuplicateBooks(googleBooksQuery.data || []);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
