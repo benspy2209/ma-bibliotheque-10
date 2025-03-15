@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 import { translateToFrench } from '@/utils/translation';
 import { getCachedSearch, cacheSearchResults } from './searchCache';
@@ -14,6 +13,7 @@ let isProcessing = false;
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 2000;
 const BATCH_SIZE = 40;
+const MAX_RESULTS = 400; // Augmenté pour récupérer plus de résultats
 
 async function processQueue() {
   if (isProcessing) return;
@@ -68,7 +68,9 @@ async function fetchGoogleBooksPage(query: string, startIndex: number): Promise<
 
   if (!response.ok) {
     if (response.status === 429) {
-      throw new Error('Rate limit atteint');
+      console.log('Rate limit atteint, attente avant réessai...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      return fetchGoogleBooksPage(query, startIndex);
     }
     throw new Error(`Erreur Google Books: ${response.status}`);
   }
@@ -90,8 +92,9 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
     let startIndex = 0;
     let totalItems = Infinity;
 
-    while (startIndex < totalItems && startIndex < 200) { // Limite à 200 résultats maximum
+    while (startIndex < totalItems && startIndex < MAX_RESULTS) {
       try {
+        console.log(`Récupération des résultats ${startIndex} à ${startIndex + BATCH_SIZE}`);
         const data = await fetchGoogleBooksPage(query, startIndex);
         totalItems = data.totalItems || 0;
 
@@ -133,11 +136,21 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
           }
         }));
 
-        allBooks = [...allBooks, ...pageBooks.filter(Boolean)];
+        const validBooks = pageBooks.filter(Boolean);
+        if (validBooks.length === 0) break; // Si aucun livre valide sur cette page, on arrête
+
+        allBooks = [...allBooks, ...validBooks];
         startIndex += BATCH_SIZE;
+
+        // Petit délai entre les requêtes pour éviter le rate limiting
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
       } catch (error) {
         console.error('Erreur lors de la récupération de la page:', error);
+        if (error.message.includes('Rate limit')) {
+          await new Promise(resolve => setTimeout(resolve, 5000));
+          continue; // Réessayer cette page
+        }
         break;
       }
     }
