@@ -13,6 +13,7 @@ import { BookDetails } from '@/components/BookDetails';
 import { removeDuplicateBooks } from '@/lib/utils';
 import { useToast } from "@/components/ui/use-toast";
 import NavBar from '@/components/NavBar';
+import { searchGallicaBooks } from '@/services/gallicaBooks';
 
 const BOOKS_PER_PAGE = 12;
 
@@ -24,7 +25,7 @@ const Index = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
 
-  const [googleBooksQuery, openLibraryQuery] = useQueries({
+  const [googleBooksQuery, openLibraryQuery, gallicaQuery] = useQueries({
     queries: [
       {
         queryKey: ['googleBooks', debouncedQuery],
@@ -35,15 +36,21 @@ const Index = () => {
         queryKey: ['openLibrary', debouncedQuery],
         queryFn: () => searchOpenLibrary(debouncedQuery),
         enabled: debouncedQuery.length > 0
+      },
+      {
+        queryKey: ['gallica', debouncedQuery],
+        queryFn: () => searchGallicaBooks(debouncedQuery),
+        enabled: debouncedQuery.length > 0
       }
     ]
   });
 
-  const isLoading = googleBooksQuery.isLoading || openLibraryQuery.isLoading;
+  const isLoading = googleBooksQuery.isLoading || openLibraryQuery.isLoading || gallicaQuery.isLoading;
   
   const allBooks = [
     ...(googleBooksQuery.data || []),
-    ...(openLibraryQuery.data || [])
+    ...(openLibraryQuery.data || []),
+    ...(gallicaQuery.data || [])
   ];
   
   const books = removeDuplicateBooks(allBooks);
@@ -118,7 +125,7 @@ const Index = () => {
 
             {isLoading && (
               <div className="text-center text-gray-600">
-                Recherche en cours dans Google Books et OpenLibrary...
+                Recherche en cours dans Google Books, OpenLibrary et Gallica...
               </div>
             )}
 
