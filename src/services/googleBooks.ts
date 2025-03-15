@@ -1,3 +1,4 @@
+
 import { Book } from '@/types/book';
 import { translateToFrench } from '@/utils/translation';
 
@@ -9,7 +10,7 @@ const RETRY_DELAY = 2000;
 const MAX_RETRIES = 5;
 
 async function fetchGoogleBooksPage(query: string, startIndex: number): Promise<any> {
-  const enhancedQuery = `${query}+subject:thriller`;
+  const enhancedQuery = `${query}+subject:thriller+inlanguage:fr`;
   
   const url = `https://www.googleapis.com/books/v1/volumes?` +
     `q=${encodeURIComponent(enhancedQuery)}` +
@@ -78,12 +79,14 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
         cover = cover.replace('http:', 'https:');
       }
 
+      const description = await translateToFrench(volumeInfo.description || '');
+
       books.push({
         id: item.id,
         title: volumeInfo.title,
         author: volumeInfo.authors || ['Auteur inconnu'],
         cover,
-        description: volumeInfo.description || '',
+        description,
         numberOfPages: volumeInfo.pageCount,
         publishDate: volumeInfo.publishedDate,
         publishers: [volumeInfo.publisher].filter(Boolean),
@@ -92,8 +95,6 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
         isbn: volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_13')?.identifier
       });
     }
-
-    await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
   }
 
   console.log(`[Google Books] Total results: ${books.length}`);

@@ -10,7 +10,7 @@ import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
 import { useToast } from "@/components/ui/use-toast";
 import NavBar from '@/components/NavBar';
-import { searchGallicaBooks } from '@/services/gallicaBooks';
+import { searchBooks } from '@/services/bookSearch';
 
 const BOOKS_PER_PAGE = 12;
 
@@ -23,8 +23,8 @@ const Index = () => {
   const { toast } = useToast();
 
   const { data: books = [], isLoading } = useQuery({
-    queryKey: ['gallica', debouncedQuery],
-    queryFn: () => searchGallicaBooks(debouncedQuery),
+    queryKey: ['books', debouncedQuery],
+    queryFn: () => searchBooks(debouncedQuery),
     enabled: debouncedQuery.length > 0
   });
 
