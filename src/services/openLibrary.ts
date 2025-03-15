@@ -4,27 +4,10 @@ import { translateToFrench } from '@/utils/translation';
 import { getCachedSearch, cacheSearchResults } from './searchCache';
 
 const OPEN_LIBRARY_API = 'https://openlibrary.org';
-const FETCH_TIMEOUT = 5000; // 5 secondes timeout
-
-async function fetchWithTimeout(url: string, options = {}): Promise<Response> {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
-  try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal,
-    });
-    clearTimeout(id);
-    return response;
-  } catch (error) {
-    clearTimeout(id);
-    throw error;
-  }
-}
 
 async function fetchBookDetails(key: string): Promise<any> {
   try {
-    const response = await fetchWithTimeout(`${OPEN_LIBRARY_API}${key}.json`);
+    const response = await fetch(`${OPEN_LIBRARY_API}${key}.json`);
     if (!response.ok) {
       console.error(`Erreur OpenLibrary (${key}):`, response.status);
       return null;
@@ -38,7 +21,7 @@ async function fetchBookDetails(key: string): Promise<any> {
 
 async function fetchEditionDetails(editionKey: string): Promise<any> {
   try {
-    const response = await fetchWithTimeout(`${OPEN_LIBRARY_API}/books/${editionKey}.json`);
+    const response = await fetch(`${OPEN_LIBRARY_API}/books/${editionKey}.json`);
     if (!response.ok) {
       console.error(`Erreur édition OpenLibrary (${editionKey}):`, response.status);
       return null;
@@ -74,92 +57,82 @@ async function searchGoogleBooksCover(title: string, author: string): Promise<st
   }
 }
 
-const BATCH_SIZE = 10;
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
-
-export async function searchOpenLibrary(query: string): Promise<Book[]> {
+export async function searchBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
-  let retries = MAX_RETRIES;
-
-  while (retries > 0) {
-    try {
-      const encodedQuery = encodeURIComponent(query.replace(/['"]/g, ''));
-      
-      const openLibraryResponse = await fetch(
-        `${OPEN_LIBRARY_API}/search.json?q=${encodedQuery}` +
-        `&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key` +
-        `&limit=${BATCH_SIZE}` +
-        `&type=work`
-      );
-
-      if (!openLibraryResponse.ok) {
-        throw new Error(`Erreur OpenLibrary: ${openLibraryResponse.status}`);
-      }
-
-      const openLibraryData = await openLibraryResponse.json();
-
-      if (!openLibraryData.docs || openLibraryData.docs.length === 0) {
-        console.log('Aucun résultat OpenLibrary pour:', query);
-        return [];
-      }
-
-      const results = await Promise.all(
-        openLibraryData.docs
-          .filter((doc: any) => doc.author_name?.length > 0)
-          .map(async (doc: any) => {
-            try {
-              const [bookDetails, editionDetails] = await Promise.all([
-                fetchBookDetails(doc.key),
-                doc.edition_key?.[0] ? fetchEditionDetails(doc.edition_key[0]) : null
-              ]);
-  
-              let cover = '/placeholder.svg';
-              if (doc.cover_i) {
-                cover = `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`;
-              } else {
-                const googleCover = await searchGoogleBooksCover(doc.title, doc.author_name?.[0] || '');
-                if (googleCover) cover = googleCover;
-              }
-  
-              const description = await translateToFrench(
-                bookDetails?.description?.value || 
-                bookDetails?.description || 
-                ''
-              );
-  
-              return {
-                id: doc.key,
-                title: doc.title,
-                author: doc.author_name || ['Auteur inconnu'],
-                cover,
-                language: doc.language || [],
-                publishDate: doc.first_publish_date,
-                description,
-                numberOfPages: editionDetails?.number_of_pages || bookDetails?.number_of_pages,
-                subjects: bookDetails?.subjects || [],
-                publishers: editionDetails?.publishers || []
-              };
-            } catch (error) {
-              console.error('Erreur lors du traitement du livre:', error);
-              return null;
-            }
-          })
-      );
-      
-      return results.filter(Boolean) as Book[];
-
-    } catch (error) {
-      console.error(`Tentative ${MAX_RETRIES - retries + 1}/${MAX_RETRIES} échouée:`, error);
-      retries--;
-      if (retries > 0) {
-        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-        continue;
-      }
-      throw error;
+  try {
+    const cachedResults = await getCachedSearch(query);
+    if (cachedResults) {
+      console.log('Résultats trouvés dans le cache pour:', query);
+      return cachedResults;
     }
-  }
 
-  return [];
+    const encodedQuery = encodeURIComponent(query.replace(/['"]/g, ''));
+    const openLibraryResponse = await fetch(
+      `${OPEN_LIBRARY_API}/search.json?q=${encodedQuery}&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key&limit=40`
+    );
+
+    if (!openLibraryResponse.ok) {
+      throw new Error(`Erreur OpenLibrary: ${openLibraryResponse.status}`);
+    }
+
+    const openLibraryData = await openLibraryResponse.json();
+
+    if (!openLibraryData.docs || openLibraryData.docs.length === 0) {
+      console.log('Aucun résultat OpenLibrary pour:', query);
+      return [];
+    }
+
+    const results = await Promise.all(
+      openLibraryData.docs
+        .filter((doc: any) => {
+          const hasAuthor = doc.author_name && doc.author_name.length > 0;
+          return hasAuthor;
+        })
+        .map(async (doc: any) => {
+          const bookDetails = await fetchBookDetails(doc.key);
+          let editionDetails = null;
+          
+          if (doc.edition_key?.[0]) {
+            editionDetails = await fetchEditionDetails(doc.edition_key[0]);
+          }
+
+          let cover = '/placeholder.svg';
+          if (doc.cover_i) {
+            cover = `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`;
+          } else {
+            const googleCover = await searchGoogleBooksCover(doc.title, doc.author_name?.[0] || '');
+            if (googleCover) cover = googleCover;
+          }
+
+          const description = await translateToFrench(
+            bookDetails?.description?.value || 
+            bookDetails?.description || 
+            ''
+          );
+
+          return {
+            id: doc.key,
+            title: doc.title,
+            author: doc.author_name || ['Auteur inconnu'],
+            cover: cover,
+            language: doc.language || [],
+            publishDate: doc.first_publish_date,
+            description,
+            numberOfPages: editionDetails?.number_of_pages || bookDetails?.number_of_pages,
+            subjects: bookDetails?.subjects || [],
+            publishers: editionDetails?.publishers || []
+          };
+        })
+    );
+
+    const filteredResults = results.filter(Boolean);
+    
+    await cacheSearchResults(query, filteredResults);
+
+    return filteredResults;
+  } catch (error) {
+    console.error('Erreur lors de la recherche OpenLibrary:', error);
+    return [];
+  }
 }

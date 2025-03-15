@@ -1,16 +1,18 @@
-
 import { useState } from 'react';
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Search } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQueries } from '@tanstack/react-query';
+import { searchBooks } from '@/services/openLibrary';
+import { searchGoogleBooks } from '@/services/googleBooks';
+import { getBookDetails } from '@/services/bookDetails';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
+import { removeDuplicateBooks } from '@/lib/utils';
 import { useToast } from "@/components/ui/use-toast";
 import NavBar from '@/components/NavBar';
-import { searchBooks } from '@/services/bookSearch';
 
 const BOOKS_PER_PAGE = 12;
 
@@ -22,11 +24,24 @@ const Index = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
 
-  const { data: books = [], isLoading } = useQuery({
-    queryKey: ['books', debouncedQuery],
-    queryFn: () => searchBooks(debouncedQuery),
-    enabled: debouncedQuery.length > 0
+  const results = useQueries({
+    queries: [
+      {
+        queryKey: ['openLibrary', debouncedQuery],
+        queryFn: () => searchBooks(debouncedQuery),
+        enabled: debouncedQuery.length > 0
+      },
+      {
+        queryKey: ['googleBooks', debouncedQuery],
+        queryFn: () => searchGoogleBooks(debouncedQuery),
+        enabled: debouncedQuery.length > 0
+      }
+    ]
   });
+
+  const isLoading = results.some(result => result.isLoading);
+  const allBooks = [...(results[0].data || []), ...(results[1].data || [])];
+  const books = removeDuplicateBooks(allBooks);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -41,7 +56,8 @@ const Index = () => {
   };
 
   const handleBookClick = async (book: Book) => {
-    setSelectedBook(book);
+    const details = await getBookDetails(book.id);
+    setSelectedBook({ ...book, ...details });
   };
 
   const handleLoadMore = () => {
@@ -73,7 +89,7 @@ const Index = () => {
                   Découvrez votre prochaine lecture
                 </h1>
                 <p className="text-base sm:text-lg text-gray-600 dark:text-gray-200">
-                  Explorez la collection Gallica
+                  Explorez, partagez et découvrez de nouveaux livres
                 </p>
               </div>
               <Link 
@@ -97,7 +113,7 @@ const Index = () => {
 
             {isLoading && (
               <div className="text-center text-gray-600">
-                Recherche dans Gallica...
+                Recherche en cours...
               </div>
             )}
 
