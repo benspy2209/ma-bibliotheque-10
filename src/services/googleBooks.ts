@@ -62,7 +62,13 @@ async function enqueueRequest<T>(request: () => Promise<T>): Promise<T> {
 async function fetchGoogleBooksPage(query: string, startIndex: number): Promise<any> {
   const response = await enqueueRequest(() => 
     fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=${BATCH_SIZE}&startIndex=${startIndex}&fields=items(id,volumeInfo),totalItems&key=${GOOGLE_BOOKS_API_KEY}`
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}` +
+      `+subject:fiction|literature` + // Ajout des filtres de type
+      `&printType=books` + // Uniquement les livres
+      `&maxResults=${BATCH_SIZE}` +
+      `&startIndex=${startIndex}` +
+      `&fields=items(id,volumeInfo),totalItems` +
+      `&key=${GOOGLE_BOOKS_API_KEY}`
     )
   );
 

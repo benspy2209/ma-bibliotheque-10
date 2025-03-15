@@ -88,7 +88,10 @@ export async function searchBooks(query: string): Promise<Book[]> {
     
     try {
       const openLibraryResponse = await fetchWithTimeout(
-        `${OPEN_LIBRARY_API}/search.json?q=${encodedQuery}&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key&limit=100`
+        `${OPEN_LIBRARY_API}/search.json?q=${encodedQuery}` +
+        `&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key` +
+        `&limit=100` +
+        `&type=work`
       );
 
       if (!openLibraryResponse.ok) {
