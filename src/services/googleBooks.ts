@@ -11,9 +11,9 @@ const queue: Array<{
 }> = [];
 let isProcessing = false;
 const MAX_RETRIES = 3;
-const RETRY_DELAY = 2000;
-const BATCH_SIZE = 20; // Réduit pour éviter les limites de quota
-const MAX_RESULTS = 200;
+const RETRY_DELAY = 5000;
+const BATCH_SIZE = 40; // Augmenté pour récupérer plus de résultats par requête
+const MAX_RESULTS = 200; // Augmenté pour plus de résultats au total
 
 async function processQueue() {
   if (isProcessing) return;
@@ -60,11 +60,10 @@ async function enqueueRequest<T>(request: () => Promise<T>): Promise<T> {
 }
 
 async function fetchGoogleBooksPage(query: string, startIndex: number): Promise<any> {
-  // Essayer différentes variantes de recherche
   const searchQueries = [
     `inauthor:"${query}"`,
-    `inauthor:${query}`,
-    `"${query}"`,
+    `intitle:"${query}"`,
+    query
   ];
   
   for (const searchQuery of searchQueries) {
@@ -83,8 +82,8 @@ async function fetchGoogleBooksPage(query: string, startIndex: number): Promise<
 
       if (!response.ok) {
         if (response.status === 429) {
-          console.log('Rate limit atteint, attente avant réessai...');
-          await new Promise(resolve => setTimeout(resolve, 5000));
+          console.log('Rate limit atteint, attente plus longue...');
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
           continue;
         }
         throw new Error(`Erreur Google Books: ${response.status}`);
@@ -96,7 +95,7 @@ async function fetchGoogleBooksPage(query: string, startIndex: number): Promise<
       }
     } catch (error) {
       console.error('Erreur lors de la recherche:', error);
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
     }
   }
 
