@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 import { translateToFrench } from '@/utils/translation';
 
@@ -57,7 +56,7 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
   const seenIds = new Set();
 
   for (let startIndex = 0; startIndex < MAX_RESULTS; startIndex += BATCH_SIZE) {
-    console.log(`Récupération des résultats ${startIndex} à ${startIndex + BATCH_SIZE} pour "${query}"`);
+    console.log(`[Google Books] Récupération des résultats ${startIndex} à ${startIndex + BATCH_SIZE}`);
     
     const data = await fetchGoogleBooksPage(query, startIndex);
     if (!data.items || data.items.length === 0) break;
@@ -96,5 +95,6 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
     await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
   }
 
+  console.log(`[Google Books] Total results: ${books.length}`);
   return books;
 }

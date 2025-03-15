@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Search } from 'lucide-react';
 import { useQueries } from '@tanstack/react-query';
 import { searchGoogleBooks } from '@/services/googleBooks';
+import { searchBooks as searchOpenLibrary } from '@/services/openLibrary';
 import { getBookDetails } from '@/services/bookDetails';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
@@ -23,18 +24,29 @@ const Index = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
 
-  const [googleBooksQuery] = useQueries({
+  const [googleBooksQuery, openLibraryQuery] = useQueries({
     queries: [
       {
         queryKey: ['googleBooks', debouncedQuery],
         queryFn: () => searchGoogleBooks(debouncedQuery),
         enabled: debouncedQuery.length > 0
+      },
+      {
+        queryKey: ['openLibrary', debouncedQuery],
+        queryFn: () => searchOpenLibrary(debouncedQuery),
+        enabled: debouncedQuery.length > 0
       }
     ]
   });
 
-  const isLoading = googleBooksQuery.isLoading;
-  const books = removeDuplicateBooks(googleBooksQuery.data || []);
+  const isLoading = googleBooksQuery.isLoading || openLibraryQuery.isLoading;
+  
+  const allBooks = [
+    ...(googleBooksQuery.data || []),
+    ...(openLibraryQuery.data || [])
+  ];
+  
+  const books = removeDuplicateBooks(allBooks);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -106,7 +118,7 @@ const Index = () => {
 
             {isLoading && (
               <div className="text-center text-gray-600">
-                Recherche en cours...
+                Recherche en cours dans Google Books et OpenLibrary...
               </div>
             )}
 
