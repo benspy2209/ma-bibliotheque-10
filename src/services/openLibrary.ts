@@ -1,7 +1,7 @@
-
 import { Book } from '@/types/book';
 import { GOOGLE_BOOKS_API_KEY } from './googleBooks'; 
 import { translateToFrench } from '@/utils/translation';
+import { getCachedSearch, cacheSearchResults } from './searchCache';
 
 const OPEN_LIBRARY_API = 'https://openlibrary.org';
 
@@ -61,6 +61,12 @@ export async function searchBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
+    const cachedResults = await getCachedSearch(query);
+    if (cachedResults) {
+      console.log('Résultats trouvés dans le cache pour:', query);
+      return cachedResults;
+    }
+
     const encodedQuery = encodeURIComponent(query.replace(/['"]/g, ''));
     const openLibraryResponse = await fetch(
       `${OPEN_LIBRARY_API}/search.json?q=${encodedQuery}&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key&limit=40`
@@ -120,7 +126,11 @@ export async function searchBooks(query: string): Promise<Book[]> {
         })
     );
 
-    return results.filter(Boolean);
+    const filteredResults = results.filter(Boolean);
+    
+    await cacheSearchResults(query, filteredResults);
+
+    return filteredResults;
   } catch (error) {
     console.error('Erreur lors de la recherche OpenLibrary:', error);
     return [];
