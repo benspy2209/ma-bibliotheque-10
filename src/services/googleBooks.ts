@@ -1,3 +1,4 @@
+
 import { Book } from '@/types/book';
 import { translateToFrench } from '@/utils/translation';
 import { getCachedSearch, cacheSearchResults } from './searchCache';
@@ -60,13 +61,14 @@ async function enqueueRequest<T>(request: () => Promise<T>): Promise<T> {
 }
 
 async function fetchGoogleBooksPage(query: string, startIndex: number): Promise<any> {
+  const authorQuery = `inauthor:"${query}"`;  // Recherche spécifique par auteur
   const response = await enqueueRequest(() => 
     fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}` +
-      `+subject:fiction|literature` + // Ajout des filtres de type
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(authorQuery)}` +
       `&printType=books` + // Uniquement les livres
       `&maxResults=${BATCH_SIZE}` +
       `&startIndex=${startIndex}` +
+      `&langRestrict=fr` + // Privilégier les résultats en français
       `&fields=items(id,volumeInfo),totalItems` +
       `&key=${GOOGLE_BOOKS_API_KEY}`
     )
@@ -97,16 +99,20 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
     let allBooks: Book[] = [];
     let startIndex = 0;
     let totalItems = Infinity;
+    let seenIds = new Set(); // Pour éviter les doublons
 
     while (startIndex < totalItems && startIndex < MAX_RESULTS) {
       try {
-        console.log(`Récupération des résultats ${startIndex} à ${startIndex + BATCH_SIZE}`);
+        console.log(`Récupération des résultats ${startIndex} à ${startIndex + BATCH_SIZE} pour ${query}`);
         const data = await fetchGoogleBooksPage(query, startIndex);
         totalItems = data.totalItems || 0;
 
         if (!data.items) break;
 
         const pageBooks = await Promise.all(data.items.map(async (item: any) => {
+          if (seenIds.has(item.id)) return null; // Ignorer les doublons
+          seenIds.add(item.id);
+
           try {
             const volumeInfo = item.volumeInfo;
             
@@ -143,19 +149,17 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
         }));
 
         const validBooks = pageBooks.filter(Boolean);
-        if (validBooks.length === 0) break; // Si aucun livre valide sur cette page, on arrête
-
         allBooks = [...allBooks, ...validBooks];
         startIndex += BATCH_SIZE;
 
-        // Petit délai entre les requêtes pour éviter le rate limiting
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Petit délai entre les requêtes
+        await new Promise(resolve => setTimeout(resolve, 1500)); // Augmenté le délai
 
       } catch (error) {
         console.error('Erreur lors de la récupération de la page:', error);
         if (error.message.includes('Rate limit')) {
           await new Promise(resolve => setTimeout(resolve, 5000));
-          continue; // Réessayer cette page
+          continue;
         }
         break;
       }
