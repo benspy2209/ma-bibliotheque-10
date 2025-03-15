@@ -79,14 +79,10 @@ export async function searchBooks(query: string): Promise<Book[]> {
 
   try {
     const cachedResults = await getCachedSearch(query);
-    if (cachedResults) {
-      console.log('Résultats trouvés dans le cache pour:', query);
-      return cachedResults;
-    }
-
-    const encodedQuery = encodeURIComponent(query.replace(/['"]/g, ''));
     
     try {
+      const encodedQuery = encodeURIComponent(query.replace(/['"]/g, ''));
+      
       const openLibraryResponse = await fetchWithTimeout(
         `${OPEN_LIBRARY_API}/search.json?q=${encodedQuery}` +
         `&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key` +
@@ -96,14 +92,14 @@ export async function searchBooks(query: string): Promise<Book[]> {
 
       if (!openLibraryResponse.ok) {
         console.error(`Erreur OpenLibrary: ${openLibraryResponse.status}`);
-        return [];
+        return cachedResults || [];
       }
 
       const openLibraryData = await openLibraryResponse.json();
 
       if (!openLibraryData.docs || openLibraryData.docs.length === 0) {
         console.log('Aucun résultat OpenLibrary pour:', query);
-        return [];
+        return cachedResults || [];
       }
 
       const results = await Promise.all(
@@ -151,15 +147,16 @@ export async function searchBooks(query: string): Promise<Book[]> {
 
       const filteredResults = results.filter(Boolean) as Book[];
       
-      if (filteredResults.length > 0) {
+      if (filteredResults.length > (cachedResults?.length || 0)) {
         await cacheSearchResults(query, filteredResults);
+        return filteredResults;
       }
+      
+      return cachedResults || filteredResults;
 
-      return filteredResults;
     } catch (error) {
       console.error('Erreur lors de la recherche OpenLibrary:', error);
-      const cachedFallback = await getCachedSearch(query);
-      return cachedFallback || [];
+      return cachedResults || [];
     }
   } catch (error) {
     console.error('Erreur critique lors de la recherche:', error);
