@@ -130,8 +130,8 @@ const Index = () => {
                     className="transition-transform duration-300 group-hover:scale-105"
                   />
                   <div className="book-info">
-                    <h3 className="text-lg font-semibold">{book.title}</h3>
-                    <p className="text-sm text-gray-600">
+                    <h3 className="text-lg font-semibold dark:text-black">{book.title}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-800">
                       {Array.isArray(book.author) ? book.author[0] : book.author}
                     </p>
                   </div>
