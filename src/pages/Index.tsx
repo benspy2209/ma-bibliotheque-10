@@ -1,16 +1,13 @@
+
 import { useState } from 'react';
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Search } from 'lucide-react';
-import { useQueries } from '@tanstack/react-query';
-import { searchGoogleBooks } from '@/services/googleBooks';
-import { searchBooks as searchOpenLibrary } from '@/services/openLibrary';
-import { getBookDetails } from '@/services/bookDetails';
+import { useQuery } from '@tanstack/react-query';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
-import { removeDuplicateBooks } from '@/lib/utils';
 import { useToast } from "@/components/ui/use-toast";
 import NavBar from '@/components/NavBar';
 import { searchGallicaBooks } from '@/services/gallicaBooks';
@@ -25,35 +22,11 @@ const Index = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
 
-  const [googleBooksQuery, openLibraryQuery, gallicaQuery] = useQueries({
-    queries: [
-      {
-        queryKey: ['googleBooks', debouncedQuery],
-        queryFn: () => searchGoogleBooks(debouncedQuery),
-        enabled: debouncedQuery.length > 0
-      },
-      {
-        queryKey: ['openLibrary', debouncedQuery],
-        queryFn: () => searchOpenLibrary(debouncedQuery),
-        enabled: debouncedQuery.length > 0
-      },
-      {
-        queryKey: ['gallica', debouncedQuery],
-        queryFn: () => searchGallicaBooks(debouncedQuery),
-        enabled: debouncedQuery.length > 0
-      }
-    ]
+  const { data: books = [], isLoading } = useQuery({
+    queryKey: ['gallica', debouncedQuery],
+    queryFn: () => searchGallicaBooks(debouncedQuery),
+    enabled: debouncedQuery.length > 0
   });
-
-  const isLoading = googleBooksQuery.isLoading || openLibraryQuery.isLoading || gallicaQuery.isLoading;
-  
-  const allBooks = [
-    ...(googleBooksQuery.data || []),
-    ...(openLibraryQuery.data || []),
-    ...(gallicaQuery.data || [])
-  ];
-  
-  const books = removeDuplicateBooks(allBooks);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -68,8 +41,7 @@ const Index = () => {
   };
 
   const handleBookClick = async (book: Book) => {
-    const details = await getBookDetails(book.id);
-    setSelectedBook({ ...book, ...details });
+    setSelectedBook(book);
   };
 
   const handleLoadMore = () => {
@@ -101,7 +73,7 @@ const Index = () => {
                   Découvrez votre prochaine lecture
                 </h1>
                 <p className="text-base sm:text-lg text-gray-600 dark:text-gray-200">
-                  Explorez, partagez et découvrez de nouveaux livres
+                  Explorez la collection Gallica
                 </p>
               </div>
               <Link 
@@ -125,7 +97,7 @@ const Index = () => {
 
             {isLoading && (
               <div className="text-center text-gray-600">
-                Recherche en cours dans Google Books, OpenLibrary et Gallica...
+                Recherche dans Gallica...
               </div>
             )}
 
