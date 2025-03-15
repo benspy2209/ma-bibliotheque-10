@@ -24,23 +24,28 @@ const Index = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
 
-  const results = useQueries({
+  const openLibraryQuery = useQueries({
     queries: [
       {
         queryKey: ['openLibrary', debouncedQuery],
         queryFn: () => searchBooks(debouncedQuery),
         enabled: debouncedQuery.length > 0
-      },
-      {
-        queryKey: ['googleBooks', debouncedQuery],
-        queryFn: () => searchGoogleBooks(debouncedQuery),
-        enabled: debouncedQuery.length > 0
       }
     ]
   });
 
-  const isLoading = results.some(result => result.isLoading);
-  const allBooks = [...(results[0].data || []), ...(results[1].data || [])];
+  const googleBooksQuery = useQueries({
+    queries: [
+      {
+        queryKey: ['googleBooks', debouncedQuery],
+        queryFn: () => searchGoogleBooks(debouncedQuery),
+        enabled: debouncedQuery.length > 0 && openLibraryQuery[0].isSuccess
+      }
+    ]
+  });
+
+  const isLoading = openLibraryQuery[0].isLoading || googleBooksQuery[0].isLoading;
+  const allBooks = [...(openLibraryQuery[0].data || []), ...(googleBooksQuery[0].data || [])];
   const books = removeDuplicateBooks(allBooks);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
