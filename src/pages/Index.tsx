@@ -13,6 +13,7 @@ import { BookDetails } from '@/components/BookDetails';
 import { removeDuplicateBooks } from '@/lib/utils';
 import { useToast } from "@/components/ui/use-toast";
 import NavBar from '@/components/NavBar';
+import { searchBnfBooks } from '@/services/bnfBooks';
 
 const BOOKS_PER_PAGE = 12;
 
@@ -44,8 +45,26 @@ const Index = () => {
     ]
   });
 
-  const isLoading = openLibraryQuery[0].isLoading || googleBooksQuery[0].isLoading;
-  const allBooks = [...(openLibraryQuery[0].data || []), ...(googleBooksQuery[0].data || [])];
+  const [bnfBooksQuery] = useQueries({
+    queries: [
+      {
+        queryKey: ['bnfBooks', debouncedQuery],
+        queryFn: () => searchBnfBooks(debouncedQuery),
+        enabled: debouncedQuery.length > 0
+      }
+    ]
+  });
+
+  const isLoading = openLibraryQuery[0].isLoading || 
+                    googleBooksQuery[0].isLoading || 
+                    bnfBooksQuery.isLoading;
+
+  const allBooks = [
+    ...(openLibraryQuery[0].data || []), 
+    ...(googleBooksQuery[0].data || []),
+    ...(bnfBooksQuery.data || [])
+  ];
+
   const books = removeDuplicateBooks(allBooks);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
