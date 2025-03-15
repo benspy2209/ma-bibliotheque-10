@@ -1,6 +1,7 @@
 
 import { Book } from '@/types/book';
 
+const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
 const GALLICA_SRU_API = 'https://gallica.bnf.fr/SRU';
 const IIIF_API = 'https://gallica.bnf.fr/iiif';
 
@@ -9,9 +10,16 @@ export async function searchGallicaBooks(query: string): Promise<Book[]> {
 
   try {
     const encodedQuery = encodeURIComponent(query);
-    const url = `${GALLICA_SRU_API}?operation=searchRetrieve&version=1.2&query=dc.title all "${encodedQuery}" or dc.creator all "${encodedQuery}"&maximumRecords=20&startRecord=1&recordSchema=dc`;
+    const url = `${CORS_PROXY}${GALLICA_SRU_API}?operation=searchRetrieve&version=1.2&query=dc.title all "${encodedQuery}" or dc.creator all "${encodedQuery}"&maximumRecords=20&startRecord=1&recordSchema=dc`;
 
-    const response = await fetch(url);
+    console.log('Fetching from Gallica:', url);
+    
+    const response = await fetch(url, {
+      headers: {
+        'Origin': window.location.origin
+      }
+    });
+    
     if (!response.ok) {
       console.error('Erreur Gallica:', response.status);
       return [];
@@ -21,6 +29,8 @@ export async function searchGallicaBooks(query: string): Promise<Book[]> {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(text, 'text/xml');
     const records = xmlDoc.getElementsByTagName('record');
+
+    console.log('Nombre de résultats:', records.length);
 
     const books: Book[] = [];
 
