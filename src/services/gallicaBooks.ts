@@ -28,7 +28,7 @@ export async function searchGallicaBooks(query: string): Promise<Book[]> {
     const text = await response.text();
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(text, 'text/xml');
-    const records = xmlDoc.getElementsByTagName('record');
+    const records = xmlDoc.getElementsByTagName('srw:record');
 
     console.log('Nombre de résultats:', records.length);
 
@@ -36,32 +36,42 @@ export async function searchGallicaBooks(query: string): Promise<Book[]> {
 
     for (let i = 0; i < records.length; i++) {
       const record = records[i];
-      const getElementText = (tagName: string) => {
+      const getData = (tagName: string): string => {
         const elements = record.getElementsByTagName(tagName);
-        return elements.length > 0 ? elements[0].textContent || '' : '';
+        for (let j = 0; j < elements.length; j++) {
+          const content = elements[j].textContent;
+          if (content && content.trim()) return content.trim();
+        }
+        return '';
       };
 
-      const title = getElementText('dc:title');
+      const identifier = getData('dc:identifier') || '';
+      const arkMatch = identifier.match(/ark:\/([^\/]+\/[^\/]+)/);
+      if (!arkMatch) continue;
+
+      const arkId = arkMatch[1];
+      const title = getData('dc:title');
       if (!title) continue;
 
-      const arkId = getElementText('dc:identifier').split('ark:/')[1];
-      if (!arkId) continue;
-
+      const author = getData('dc:creator') || 'Auteur inconnu';
+      const date = getData('dc:date');
+      const description = getData('dc:description');
       const thumbnailUrl = `${IIIF_API}/ark:/${arkId}/f1/full/150,/0/native.jpg`;
 
       books.push({
         id: `gallica-${arkId}`,
         title,
-        author: [getElementText('dc:creator') || 'Auteur inconnu'],
+        author: [author],
         cover: thumbnailUrl,
-        description: getElementText('dc:description'),
-        publishDate: getElementText('dc:date'),
-        publishers: [getElementText('dc:publisher')].filter(Boolean),
-        language: [getElementText('dc:language') || 'fr'],
-        subjects: getElementText('dc:subject').split(';').filter(Boolean)
+        description: description || '',
+        publishDate: date || '',
+        publishers: [],
+        language: [getData('dc:language') || 'fr'],
+        subjects: getData('dc:subject').split(';').filter(Boolean)
       });
     }
 
+    console.log('Livres trouvés:', books.length);
     return books;
   } catch (error) {
     console.error('Erreur lors de la recherche Gallica:', error);
