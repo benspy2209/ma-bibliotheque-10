@@ -9,8 +9,10 @@ const RETRY_DELAY = 2000;
 const MAX_RETRIES = 5;
 
 async function fetchGoogleBooksPage(query: string, startIndex: number): Promise<any> {
+  const enhancedQuery = `${query}+subject:thriller`;
+  
   const url = `https://www.googleapis.com/books/v1/volumes?` +
-    `q=${encodeURIComponent(query)}` +
+    `q=${encodeURIComponent(enhancedQuery)}` +
     `&startIndex=${startIndex}` +
     `&maxResults=${BATCH_SIZE}` +
     `&langRestrict=fr` +
@@ -91,7 +93,6 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
       });
     }
 
-    // Pause entre les requêtes pour éviter le rate limiting
     await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
   }
 
