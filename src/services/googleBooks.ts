@@ -1,3 +1,4 @@
+
 import { Book } from '@/types/book';
 import { translateToFrench } from '@/utils/translation';
 import { getCachedSearch, cacheSearchResults } from './searchCache';
@@ -11,12 +12,12 @@ export async function searchFrenchBooks(query: string): Promise<Book[]> {
   try {
     console.log('Recherche dans la base de données livres_francais pour:', query);
     
-    // Recherche dans la table livres_francais (adapt your query based on the actual schema)
+    // Recherche dans la table livres_francais (en utilisant le champ 'titre' au lieu de 'title')
     const { data, error } = await supabase
       .from('livres_francais')
       .select('*')
-      .ilike('title', `%${query}%`)
-      .order('title');
+      .ilike('titre', `%${query}%`)
+      .order('titre');
     
     if (error) {
       console.error('Erreur lors de la recherche dans livres_francais:', error);
@@ -33,10 +34,10 @@ export async function searchFrenchBooks(query: string): Promise<Book[]> {
     // Convertir les résultats au format Book
     return data.map(book => ({
       id: book.id || book.isbn || String(book.id_livre),
-      title: book.title || book.titre,
-      author: book.author ? [book.author] : book.auteur ? [book.auteur] : ['Auteur inconnu'],
-      cover: book.cover || book.couverture || '/placeholder.svg',
-      description: book.description || book.resume || '',
+      title: book.titre || book.title,
+      author: book.auteur ? [book.auteur] : book.author ? [book.author] : ['Auteur inconnu'],
+      cover: book.couverture || book.cover || '/placeholder.svg',
+      description: book.resume || book.description || '',
       numberOfPages: book.nombre_pages || book.page_count,
       publishDate: book.date_publication || book.publish_date,
       publishers: [book.editeur || book.publisher].filter(Boolean),
@@ -131,10 +132,10 @@ export async function searchByISBN(isbn: string): Promise<Book[]> {
       console.log('Livre trouvé dans livres_francais pour ISBN:', isbn);
       return supabaseData.map(book => ({
         id: book.id || book.isbn || String(book.id_livre),
-        title: book.title || book.titre,
-        author: book.author ? [book.author] : book.auteur ? [book.auteur] : ['Auteur inconnu'],
-        cover: book.cover || book.couverture || '/placeholder.svg',
-        description: book.description || book.resume || '',
+        title: book.titre || book.title,
+        author: book.auteur ? [book.auteur] : book.author ? [book.author] : ['Auteur inconnu'],
+        cover: book.couverture || book.cover || '/placeholder.svg',
+        description: book.resume || book.description || '',
         numberOfPages: book.nombre_pages || book.page_count,
         publishDate: book.date_publication || book.publish_date,
         publishers: [book.editeur || book.publisher].filter(Boolean),
