@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -26,13 +25,13 @@ const Index = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
 
-  const results = useQueries({
-    queries: [
-      ...(isbnQuery ? [{
+  const queries = isbnQuery
+    ? [{
         queryKey: ['isbn', isbnQuery] as const,
         queryFn: () => searchByISBN(isbnQuery),
         enabled: isbnQuery.length === 10 || isbnQuery.length === 13
-      }] : [
+      }]
+    : [
         {
           queryKey: ['openLibrary', debouncedQuery] as const,
           queryFn: () => searchBooks(debouncedQuery),
@@ -43,8 +42,10 @@ const Index = () => {
           queryFn: () => searchGoogleBooks(debouncedQuery),
           enabled: debouncedQuery.length > 0
         }
-      ])
-    ]
+      ];
+
+  const results = useQueries({
+    queries
   });
 
   const isLoading = results.some(result => result.isLoading);
