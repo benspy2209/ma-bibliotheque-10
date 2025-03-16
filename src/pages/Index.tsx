@@ -3,11 +3,10 @@ import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Search } from 'lucide-react';
+import { Search, Barcode } from 'lucide-react';
 import { useQueries } from '@tanstack/react-query';
 import { searchBooks } from '@/services/openLibrary';
 import { searchGoogleBooks } from '@/services/googleBooks';
-import { getBookDetails } from '@/services/bookDetails';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
 import { removeDuplicateBooks } from '@/lib/utils';
@@ -18,6 +17,7 @@ const BOOKS_PER_PAGE = 12;
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [isbnQuery, setIsbnQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [displayedBooks, setDisplayedBooks] = useState(BOOKS_PER_PAGE);
@@ -46,6 +46,7 @@ const Index = () => {
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
+    setIsbnQuery(''); // Réinitialiser l'ISBN lors d'une recherche normale
     setDisplayedBooks(BOOKS_PER_PAGE);
     
     const timeoutId = setTimeout(() => {
@@ -53,6 +54,16 @@ const Index = () => {
     }, 500);
 
     return () => clearTimeout(timeoutId);
+  };
+
+  const handleIsbnSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9]/g, '');
+    setIsbnQuery(value);
+    setSearchQuery(''); // Réinitialiser la recherche normale lors d'une recherche ISBN
+    
+    if (value.length === 13 || value.length === 10) {
+      setDebouncedQuery(value);
+    }
   };
 
   const handleBookClick = async (book: Book) => {
@@ -100,15 +111,28 @@ const Index = () => {
               </Link>
             </div>
 
-            <div className="relative mb-8 sm:mb-12">
-              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-              <Input
-                type="search"
-                placeholder="Rechercher un livre, un auteur..."
-                className="pl-10 h-12"
-                value={searchQuery}
-                onChange={handleSearch}
-              />
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                <Input
+                  type="search"
+                  placeholder="Rechercher un livre, un auteur..."
+                  className="pl-10 h-12"
+                  value={searchQuery}
+                  onChange={handleSearch}
+                />
+              </div>
+              <div className="relative">
+                <Barcode className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Rechercher par ISBN"
+                  className="pl-10 h-12 w-full sm:w-48"
+                  value={isbnQuery}
+                  onChange={handleIsbnSearch}
+                  maxLength={13}
+                />
+              </div>
             </div>
 
             {isLoading && (
