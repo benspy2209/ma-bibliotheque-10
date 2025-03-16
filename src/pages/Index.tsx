@@ -4,14 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Search, Barcode } from 'lucide-react';
-import { useQueries } from '@tanstack/react-query';
-import { searchBooks } from '@/services/openLibrary';
-import { searchGoogleBooks, searchByISBN } from '@/services/googleBooks';
-import { getBookDetails } from '@/services/bookDetails';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
 import { removeDuplicateBooks } from '@/lib/utils';
 import { useToast } from "@/components/ui/use-toast";
+import { useSearchQueries } from '@/hooks/useSearchQueries';
 import NavBar from '@/components/NavBar';
 
 const BOOKS_PER_PAGE = 12;
@@ -25,28 +22,7 @@ const Index = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
 
-  const queries = isbnQuery
-    ? [{
-        queryKey: ['isbn', isbnQuery] as const,
-        queryFn: () => searchByISBN(isbnQuery),
-        enabled: isbnQuery.length === 10 || isbnQuery.length === 13
-      }]
-    : [
-        {
-          queryKey: ['openLibrary', debouncedQuery] as const,
-          queryFn: () => searchBooks(debouncedQuery),
-          enabled: debouncedQuery.length > 0
-        },
-        {
-          queryKey: ['googleBooks', debouncedQuery] as const,
-          queryFn: () => searchGoogleBooks(debouncedQuery),
-          enabled: debouncedQuery.length > 0
-        }
-      ];
-
-  const results = useQueries({
-    queries
-  });
+  const results = useSearchQueries(isbnQuery, debouncedQuery);
 
   const isLoading = results.some(result => result.isLoading);
   const books = removeDuplicateBooks(
