@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Search, Barcode } from 'lucide-react';
 import { useQueries } from '@tanstack/react-query';
 import { searchBooks } from '@/services/openLibrary';
-import { searchGoogleBooks } from '@/services/googleBooks';
+import { searchGoogleBooks, searchByISBN } from '@/services/googleBooks';
 import { getBookDetails } from '@/services/bookDetails';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
@@ -27,7 +27,13 @@ const Index = () => {
   const { toast } = useToast();
 
   const results = useQueries({
-    queries: [
+    queries: isbnQuery ? [
+      {
+        queryKey: ['isbn', isbnQuery],
+        queryFn: () => searchByISBN(isbnQuery),
+        enabled: isbnQuery.length === 10 || isbnQuery.length === 13
+      }
+    ] : [
       {
         queryKey: ['openLibrary', debouncedQuery],
         queryFn: () => searchBooks(debouncedQuery),
