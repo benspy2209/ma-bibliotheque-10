@@ -2,8 +2,54 @@
 import { Book } from '@/types/book';
 import { translateToFrench } from '@/utils/translation';
 import { getCachedSearch, cacheSearchResults } from './searchCache';
+import { supabase } from './supabaseBooks';
 
 export const GOOGLE_BOOKS_API_KEY = 'AIzaSyDUQ2dB8e_EnUp14DY9GnYAv2CmGiqBapY';
+
+export async function searchFrenchBooks(query: string): Promise<Book[]> {
+  if (!query.trim()) return [];
+
+  try {
+    console.log('Recherche dans la base de données livres_francais pour:', query);
+    
+    // Recherche dans la table livres_francais (adapt your query based on the actual schema)
+    const { data, error } = await supabase
+      .from('livres_francais')
+      .select('*')
+      .ilike('title', `%${query}%`)
+      .order('title');
+    
+    if (error) {
+      console.error('Erreur lors de la recherche dans livres_francais:', error);
+      return [];
+    }
+
+    if (!data || data.length === 0) {
+      console.log('Aucun résultat trouvé dans livres_francais pour:', query);
+      return [];
+    }
+
+    console.log('Résultats trouvés dans livres_francais:', data.length);
+    
+    // Convertir les résultats au format Book
+    return data.map(book => ({
+      id: book.id || book.isbn || String(book.id_livre),
+      title: book.title || book.titre,
+      author: book.author ? [book.author] : book.auteur ? [book.auteur] : ['Auteur inconnu'],
+      cover: book.cover || book.couverture || '/placeholder.svg',
+      description: book.description || book.resume || '',
+      numberOfPages: book.nombre_pages || book.page_count,
+      publishDate: book.date_publication || book.publish_date,
+      publishers: [book.editeur || book.publisher].filter(Boolean),
+      subjects: book.categories ? (Array.isArray(book.categories) ? book.categories : [book.categories]) : [],
+      language: ['fr'],
+      isbn: book.isbn || ''
+    }));
+  } catch (error) {
+    console.error('Erreur lors de la recherche dans livres_francais:', error);
+    return [];
+  }
+}
 
 export async function searchGoogleBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
@@ -75,12 +121,38 @@ export async function searchByISBN(isbn: string): Promise<Book[]> {
   if (!isbn.trim()) return [];
 
   try {
+    // D'abord, chercher dans la base de données livres_francais
+    console.log('Recherche ISBN dans livres_francais:', isbn);
+    const { data, error } = await supabase
+      .from('livres_francais')
+      .select('*')
+      .eq('isbn', isbn);
+
+    if (!error && data && data.length > 0) {
+      console.log('Livre trouvé dans livres_francais pour ISBN:', isbn);
+      return data.map(book => ({
+        id: book.id || book.isbn || String(book.id_livre),
+        title: book.title || book.titre,
+        author: book.author ? [book.author] : book.auteur ? [book.auteur] : ['Auteur inconnu'],
+        cover: book.cover || book.couverture || '/placeholder.svg',
+        description: book.description || book.resume || '',
+        numberOfPages: book.nombre_pages || book.page_count,
+        publishDate: book.date_publication || book.publish_date,
+        publishers: [book.editeur || book.publisher].filter(Boolean),
+        subjects: book.categories ? (Array.isArray(book.categories) ? book.categories : [book.categories]) : [],
+        language: ['fr'],
+        isbn: isbn
+      }));
+    }
+
+    // Si non trouvé dans livres_francais, vérifier le cache
     const cachedResults = await getCachedSearch(isbn);
     if (cachedResults) {
       console.log('Résultats trouvés dans le cache pour ISBN:', isbn);
       return cachedResults;
     }
 
+    // Sinon, utiliser l'API Google Books
     const response = await fetch(
       `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&langRestrict=fr&maxResults=1&key=${GOOGLE_BOOKS_API_KEY}`
     );

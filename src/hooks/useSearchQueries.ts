@@ -1,7 +1,7 @@
 
 import { useQueries } from '@tanstack/react-query';
 import { searchBooks } from '@/services/openLibrary';
-import { searchGoogleBooks, searchByISBN } from '@/services/googleBooks';
+import { searchGoogleBooks, searchByISBN, searchFrenchBooks } from '@/services/googleBooks';
 import { Book } from '@/types/book';
 
 export function useSearchQueries(isbnQuery: string, debouncedQuery: string) {
@@ -22,15 +22,21 @@ export function useSearchQueries(isbnQuery: string, debouncedQuery: string) {
 
     return [
       {
-        queryKey: ['openLibrary', debouncedQuery] as const,
-        queryFn: () => searchBooks(debouncedQuery),
-        enabled: debouncedQuery.length > 0
-      },
-      {
-        queryKey: ['googleBooks', debouncedQuery] as const,
-        queryFn: () => searchGoogleBooks(debouncedQuery),
+        queryKey: ['livres_francais', debouncedQuery] as const,
+        queryFn: () => searchFrenchBooks(debouncedQuery),
         enabled: debouncedQuery.length > 0
       }
+      // Commenté pour utiliser uniquement la base de données livres_francais
+      // {
+      //   queryKey: ['openLibrary', debouncedQuery] as const,
+      //   queryFn: () => searchBooks(debouncedQuery),
+      //   enabled: debouncedQuery.length > 0
+      // },
+      // {
+      //   queryKey: ['googleBooks', debouncedQuery] as const,
+      //   queryFn: () => searchGoogleBooks(debouncedQuery),
+      //   enabled: debouncedQuery.length > 0
+      // }
     ];
   };
 
