@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -29,18 +28,18 @@ const Index = () => {
   const results = useQueries({
     queries: isbnQuery ? [
       {
-        queryKey: ['isbn', isbnQuery],
+        queryKey: ['isbn', isbnQuery] as const,
         queryFn: () => searchByISBN(isbnQuery),
         enabled: isbnQuery.length === 10 || isbnQuery.length === 13
       }
     ] : [
       {
-        queryKey: ['openLibrary', debouncedQuery],
+        queryKey: ['openLibrary', debouncedQuery] as const,
         queryFn: () => searchBooks(debouncedQuery),
         enabled: debouncedQuery.length > 0
       },
       {
-        queryKey: ['googleBooks', debouncedQuery],
+        queryKey: ['googleBooks', debouncedQuery] as const,
         queryFn: () => searchGoogleBooks(debouncedQuery),
         enabled: debouncedQuery.length > 0
       }
@@ -48,8 +47,14 @@ const Index = () => {
   });
 
   const isLoading = results.some(result => result.isLoading);
-  const allBooks = [...(results[0].data || []), ...(results[1].data || [])];
-  const books = removeDuplicateBooks(allBooks);
+  const books = removeDuplicateBooks(
+    results.reduce<Book[]>((acc, result) => {
+      if (result.data) {
+        return [...acc, ...result.data];
+      }
+      return acc;
+    }, [])
+  );
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
