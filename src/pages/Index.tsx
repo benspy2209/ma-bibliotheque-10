@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,7 @@ import { BookDetails } from '@/components/BookDetails';
 import { removeDuplicateBooks } from '@/lib/utils';
 import { useToast } from "@/components/ui/use-toast";
 import { useSearchQueries } from '@/hooks/useSearchQueries';
+import { getBookDetails } from '@/services/bookDetails';
 import NavBar from '@/components/NavBar';
 
 const BOOKS_PER_PAGE = 12;
