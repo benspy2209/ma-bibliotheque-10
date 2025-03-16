@@ -12,12 +12,11 @@ export async function searchFrenchBooks(query: string): Promise<Book[]> {
   try {
     console.log('Recherche dans la base de données livres_francais pour:', query);
     
-    // Recherche dans la table livres_francais (en utilisant le champ 'titre' au lieu de 'title')
+    // Recherche dans plusieurs champs pour maximiser les chances de trouver des résultats
     const { data, error } = await supabase
       .from('livres_francais')
       .select('*')
-      .ilike('titre', `%${query}%`)
-      .order('titre');
+      .or(`titre.ilike.%${query}%, auteur.ilike.%${query}%`);
     
     if (error) {
       console.error('Erreur lors de la recherche dans livres_francais:', error);
@@ -30,18 +29,19 @@ export async function searchFrenchBooks(query: string): Promise<Book[]> {
     }
 
     console.log('Résultats trouvés dans livres_francais:', data.length);
+    console.log('Premier résultat:', data[0]);
     
     // Convertir les résultats au format Book
     return data.map(book => ({
-      id: book.id || book.isbn || String(book.id_livre),
-      title: book.titre || book.title,
-      author: book.auteur ? [book.auteur] : book.author ? [book.author] : ['Auteur inconnu'],
-      cover: book.couverture || book.cover || '/placeholder.svg',
-      description: book.resume || book.description || '',
-      numberOfPages: book.nombre_pages || book.page_count,
-      publishDate: book.date_publication || book.publish_date,
-      publishers: [book.editeur || book.publisher].filter(Boolean),
-      subjects: book.categories ? (Array.isArray(book.categories) ? book.categories : [book.categories]) : [],
+      id: book.id || `/books/${book.id}`,
+      title: book.titre || '',
+      author: book.auteur ? [book.auteur] : ['Auteur inconnu'],
+      cover: book.couverture_url || 'https://covers.openlibrary.org/b/id/' + book.isbn + '-L.jpg' || '/placeholder.svg',
+      description: book.description || '',
+      numberOfPages: book.nombre_pages,
+      publishDate: book.date_publication,
+      publishers: [book.editeur].filter(Boolean),
+      subjects: [],
       language: ['fr'],
       isbn: book.isbn || ''
     }));
@@ -131,15 +131,15 @@ export async function searchByISBN(isbn: string): Promise<Book[]> {
     if (!error && supabaseData && supabaseData.length > 0) {
       console.log('Livre trouvé dans livres_francais pour ISBN:', isbn);
       return supabaseData.map(book => ({
-        id: book.id || book.isbn || String(book.id_livre),
-        title: book.titre || book.title,
-        author: book.auteur ? [book.auteur] : book.author ? [book.author] : ['Auteur inconnu'],
-        cover: book.couverture || book.cover || '/placeholder.svg',
-        description: book.resume || book.description || '',
-        numberOfPages: book.nombre_pages || book.page_count,
-        publishDate: book.date_publication || book.publish_date,
-        publishers: [book.editeur || book.publisher].filter(Boolean),
-        subjects: book.categories ? (Array.isArray(book.categories) ? book.categories : [book.categories]) : [],
+        id: book.id || `/books/${book.id}`,
+        title: book.titre || '',
+        author: book.auteur ? [book.auteur] : ['Auteur inconnu'],
+        cover: book.couverture_url || 'https://covers.openlibrary.org/b/id/' + book.isbn + '-L.jpg' || '/placeholder.svg',
+        description: book.description || '',
+        numberOfPages: book.nombre_pages,
+        publishDate: book.date_publication,
+        publishers: [book.editeur].filter(Boolean),
+        subjects: [],
         language: ['fr'],
         isbn: isbn
       }));
