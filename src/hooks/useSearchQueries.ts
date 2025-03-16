@@ -1,6 +1,7 @@
 
 import { useQueries } from '@tanstack/react-query';
-import { searchFrenchBooks, searchByISBN } from '@/services/googleBooks';
+import { searchBooks } from '@/services/openLibrary';
+import { searchGoogleBooks, searchByISBN } from '@/services/googleBooks';
 import { Book } from '@/types/book';
 
 export function useSearchQueries(isbnQuery: string, debouncedQuery: string) {
@@ -15,14 +16,19 @@ export function useSearchQueries(isbnQuery: string, debouncedQuery: string) {
       return [{
         queryKey: ['isbn', isbnQuery] as const,
         queryFn: () => searchByISBN(isbnQuery),
-        enabled: isbnQuery.length > 0
+        enabled: isbnQuery.length === 10 || isbnQuery.length === 13
       }];
     }
 
     return [
       {
-        queryKey: ['livres_francais', debouncedQuery] as const,
-        queryFn: () => searchFrenchBooks(debouncedQuery),
+        queryKey: ['openLibrary', debouncedQuery] as const,
+        queryFn: () => searchBooks(debouncedQuery),
+        enabled: debouncedQuery.length > 0
+      },
+      {
+        queryKey: ['googleBooks', debouncedQuery] as const,
+        queryFn: () => searchGoogleBooks(debouncedQuery),
         enabled: debouncedQuery.length > 0
       }
     ];
