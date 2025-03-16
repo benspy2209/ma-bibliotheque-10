@@ -1,3 +1,4 @@
+
 import { Book } from '@/types/book';
 import { translateToFrench } from '@/utils/translation';
 import { getCachedSearch, cacheSearchResults } from './searchCache';
@@ -81,7 +82,7 @@ export async function searchByISBN(isbn: string): Promise<Book[]> {
     }
 
     const response = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&key=${GOOGLE_BOOKS_API_KEY}`
+      `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&langRestrict=fr&maxResults=1&key=${GOOGLE_BOOKS_API_KEY}`
     );
 
     if (!response.ok) {
@@ -134,3 +135,4 @@ export async function searchByISBN(isbn: string): Promise<Book[]> {
     return [];
   }
 }
+
