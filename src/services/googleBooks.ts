@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 import { translateToFrench } from '@/utils/translation';
 import { getCachedSearch, cacheSearchResults } from './searchCache';
@@ -123,14 +122,14 @@ export async function searchByISBN(isbn: string): Promise<Book[]> {
   try {
     // D'abord, chercher dans la base de données livres_francais
     console.log('Recherche ISBN dans livres_francais:', isbn);
-    const { data, error } = await supabase
+    const { data: supabaseData, error } = await supabase
       .from('livres_francais')
       .select('*')
       .eq('isbn', isbn);
 
-    if (!error && data && data.length > 0) {
+    if (!error && supabaseData && supabaseData.length > 0) {
       console.log('Livre trouvé dans livres_francais pour ISBN:', isbn);
-      return data.map(book => ({
+      return supabaseData.map(book => ({
         id: book.id || book.isbn || String(book.id_livre),
         title: book.title || book.titre,
         author: book.author ? [book.author] : book.auteur ? [book.auteur] : ['Auteur inconnu'],
@@ -161,14 +160,14 @@ export async function searchByISBN(isbn: string): Promise<Book[]> {
       throw new Error(`Erreur Google Books: ${response.status}`);
     }
 
-    const data = await response.json();
+    const googleData = await response.json();
     
-    if (!data.items) {
+    if (!googleData.items) {
       console.log('Aucun résultat Google Books pour ISBN:', isbn);
       return [];
     }
 
-    const books = await Promise.all(data.items.map(async (item: any) => {
+    const books = await Promise.all(googleData.items.map(async (item: any) => {
       const volumeInfo = item.volumeInfo;
       
       let cover = '/placeholder.svg';
@@ -207,4 +206,3 @@ export async function searchByISBN(isbn: string): Promise<Book[]> {
     return [];
   }
 }
-
