@@ -1,3 +1,4 @@
+
 import { Book, ReadingStatus } from '@/types/book';
 import {
   Dialog,
@@ -29,11 +30,29 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
     await saveToLibrary(updatedBook);
   };
 
-  const handleInputChange = (field: keyof Book, value: string) => {
-    setCurrentBook(prev => ({
-      ...prev,
-      [field]: field === 'purchased' ? value === 'true' : value
-    }));
+  const handleInputChange = (field: keyof Book, value: string | boolean) => {
+    setCurrentBook(prev => {
+      // Handle special cases for different field types
+      if (field === 'subjects' && typeof value === 'string') {
+        // Convert comma-separated string to array for subjects field
+        return {
+          ...prev,
+          subjects: value ? value.split(',').map(s => s.trim()) : []
+        };
+      } else if (field === 'purchased') {
+        // Handle boolean values directly
+        return {
+          ...prev,
+          [field]: value
+        };
+      } else {
+        // Handle string values
+        return {
+          ...prev,
+          [field]: value
+        };
+      }
+    });
   };
 
   const handleCompletionDateChange = (date: Date | undefined) => {

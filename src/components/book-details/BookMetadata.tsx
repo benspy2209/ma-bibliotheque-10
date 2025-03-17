@@ -1,3 +1,4 @@
+
 import { Book } from '@/types/book';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -7,7 +8,7 @@ import { Users, Calendar, Book as BookIcon, ListTree, Layers } from 'lucide-reac
 interface BookMetadataProps {
   book: Book;
   isEditing: boolean;
-  onInputChange: (field: keyof Book, value: string) => void;
+  onInputChange: (field: keyof Book, value: string | boolean) => void;
 }
 
 export function BookMetadata({ book, isEditing, onInputChange }: BookMetadataProps) {
@@ -87,7 +88,11 @@ export function BookMetadata({ book, isEditing, onInputChange }: BookMetadataPro
           {isEditing ? (
             <Input
               value={book.subjects?.join(', ') || ''}
-              onChange={(e) => onInputChange('subjects', e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                const subjects = value ? value.split(',').map(s => s.trim()) : [];
+                onInputChange('subjects', subjects.length > 0 ? value : '');
+              }}
               placeholder="Catégories (séparées par des virgules)"
             />
           ) : (
@@ -110,7 +115,7 @@ export function BookMetadata({ book, isEditing, onInputChange }: BookMetadataPro
           <Switch
             id="purchased"
             checked={book.purchased}
-            onCheckedChange={(checked) => onInputChange('purchased', checked.toString())}
+            onCheckedChange={(checked) => onInputChange('purchased', checked)}
           />
           <Label htmlFor="purchased">Livre acheté</Label>
         </div>

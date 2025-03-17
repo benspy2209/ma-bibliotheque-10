@@ -10,7 +10,7 @@ interface BookPreviewProps {
   book: Book;
   isEditing: boolean;
   onRatingChange: (rating: number) => void;
-  onInputChange: (field: keyof Book, value: string) => void;
+  onInputChange: (field: keyof Book, value: string | boolean) => void;
   onDateChange: (date: Date | undefined) => void;
 }
 
