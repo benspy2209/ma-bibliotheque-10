@@ -88,11 +88,7 @@ export function BookMetadata({ book, isEditing, onInputChange }: BookMetadataPro
           {isEditing ? (
             <Input
               value={book.subjects?.join(', ') || ''}
-              onChange={(e) => {
-                const value = e.target.value;
-                const subjects = value ? value.split(',').map(s => s.trim()) : [];
-                onInputChange('subjects', subjects.length > 0 ? value : '');
-              }}
+              onChange={(e) => onInputChange('subjects', e.target.value)}
               placeholder="Catégories (séparées par des virgules)"
             />
           ) : (

@@ -40,10 +40,10 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
           subjects: value ? value.split(',').map(s => s.trim()) : []
         };
       } else if (field === 'purchased') {
-        // Handle boolean values directly
+        // Handle boolean values directly, ensure it's always a boolean
         return {
           ...prev,
-          [field]: value
+          [field]: Boolean(value)
         };
       } else {
         // Handle string values
