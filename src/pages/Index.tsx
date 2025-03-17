@@ -4,42 +4,33 @@ import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Search, Barcode } from 'lucide-react';
+import { Search } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
-import { removeDuplicateBooks } from '@/lib/utils';
 import { useToast } from "@/components/ui/use-toast";
-import { useSearchQueries } from '@/hooks/useSearchQueries';
-import { getBookDetails } from '@/services/bookDetails';
 import NavBar from '@/components/NavBar';
+import { searchBooks } from '@/services/bookSearch';
 
 const BOOKS_PER_PAGE = 12;
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [isbnQuery, setIsbnQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [displayedBooks, setDisplayedBooks] = useState(BOOKS_PER_PAGE);
   const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
 
-  const results = useSearchQueries(isbnQuery, debouncedQuery);
-
-  const isLoading = results.some(result => result.isLoading);
-  const books = removeDuplicateBooks(
-    results.reduce<Book[]>((acc, result) => {
-      if (result.data) {
-        return [...acc, ...result.data];
-      }
-      return acc;
-    }, [])
-  );
+  const { data: books = [], isLoading } = useQuery({
+    queryKey: ['books', debouncedQuery],
+    queryFn: () => searchBooks(debouncedQuery),
+    enabled: debouncedQuery.length > 0
+  });
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
-    setIsbnQuery(''); // Réinitialiser l'ISBN lors d'une recherche normale
     setDisplayedBooks(BOOKS_PER_PAGE);
     
     const timeoutId = setTimeout(() => {
@@ -49,19 +40,8 @@ const Index = () => {
     return () => clearTimeout(timeoutId);
   };
 
-  const handleIsbnSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^0-9]/g, '');
-    setIsbnQuery(value);
-    setSearchQuery(''); // Réinitialiser la recherche normale lors d'une recherche ISBN
-    
-    if (value.length === 13 || value.length === 10) {
-      setDebouncedQuery(value);
-    }
-  };
-
   const handleBookClick = async (book: Book) => {
-    const details = await getBookDetails(book.id);
-    setSelectedBook({ ...book, ...details });
+    setSelectedBook(book);
   };
 
   const handleLoadMore = () => {
@@ -93,7 +73,7 @@ const Index = () => {
                   Découvrez votre prochaine lecture
                 </h1>
                 <p className="text-base sm:text-lg text-gray-600 dark:text-gray-200">
-                  Explorez, partagez et découvrez de nouveaux livres
+                  Explorez la collection Gallica
                 </p>
               </div>
               <Link 
@@ -104,33 +84,20 @@ const Index = () => {
               </Link>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 mb-8">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                <Input
-                  type="search"
-                  placeholder="Rechercher un livre, un auteur..."
-                  className="pl-10 h-12"
-                  value={searchQuery}
-                  onChange={handleSearch}
-                />
-              </div>
-              <div className="relative">
-                <Barcode className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                <Input
-                  type="text"
-                  placeholder="Rechercher par ISBN"
-                  className="pl-10 h-12 w-full sm:w-48"
-                  value={isbnQuery}
-                  onChange={handleIsbnSearch}
-                  maxLength={13}
-                />
-              </div>
+            <div className="relative mb-8 sm:mb-12">
+              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+              <Input
+                type="search"
+                placeholder="Rechercher un livre, un auteur..."
+                className="pl-10 h-12"
+                value={searchQuery}
+                onChange={handleSearch}
+              />
             </div>
 
             {isLoading && (
               <div className="text-center text-gray-600">
-                Recherche en cours...
+                Recherche dans Gallica...
               </div>
             )}
 

@@ -11,18 +11,7 @@ import Statistics from "./pages/Statistics";
 import BookPage from "./pages/BookPage";
 import NotFound from "./pages/NotFound";
 
-// Configuration du client de requête avec des options de résilience améliorées
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 2,
-      retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
-      staleTime: 5 * 60 * 1000,
-      refetchOnWindowFocus: false,
-      useErrorBoundary: false
-    }
-  }
-});
+const queryClient = new QueryClient();
 
 const App = () => (
   <HelmetProvider>
