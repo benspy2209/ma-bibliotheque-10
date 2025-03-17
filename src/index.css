@@ -59,7 +59,7 @@
     -webkit-tap-highlight-color: transparent;
   }
   
-  /* Fix for mobile viewport height issues */
+  /* Fix for viewport height issues on both mobile and desktop */
   html, body, #root {
     height: 100%;
     overflow-x: hidden;
@@ -154,7 +154,7 @@
   @apply opacity-0;
 }
 
-/* Prevent black flash on mobile */
+/* Prevent black flash on all devices */
 @keyframes avoid-flash {
   0% { background-color: var(--background); }
   100% { background-color: var(--background); }
@@ -170,4 +170,16 @@ body::before {
   background-color: hsl(var(--background));
   z-index: -1;
   animation: avoid-flash 0.1s forwards;
+  pointer-events: none;
+}
+
+/* Improved stability for desktop and mobile views */
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

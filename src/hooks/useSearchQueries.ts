@@ -16,6 +16,10 @@ export function useSearchQueries(isbnQuery: string, debouncedQuery: string) {
     retryDelay: (attempt: number) => number;
     staleTime: number;
     keepPreviousData: boolean;
+    useErrorBoundary: boolean;
+    meta?: {
+      onError?: (error: Error) => void;
+    };
   };
 
   const getQueries = (): SearchQuery[] => {
@@ -24,7 +28,14 @@ export function useSearchQueries(isbnQuery: string, debouncedQuery: string) {
       retry: isMobile ? 1 : 2,  // Moins de tentatives sur mobile
       retryDelay: (attempt: number) => Math.min(1000 * 2 ** attempt, 30000),
       staleTime: 5 * 60 * 1000, // 5 minutes
-      keepPreviousData: true
+      keepPreviousData: true,
+      useErrorBoundary: false,
+      meta: {
+        onError: (error: Error) => {
+          console.error("Erreur de requête:", error);
+          // L'erreur est enregistrée mais n'interrompt pas le cycle de vie React
+        }
+      }
     };
     
     if (isbnQuery) {
