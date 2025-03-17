@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -53,20 +54,41 @@
   }
 
   body {
-    @apply bg-background text-foreground transition-colors duration-300;
+    @apply bg-background text-foreground transition-colors duration-300 min-h-screen overscroll-none;
     font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Fix for mobile viewport height issues */
+  html, body, #root {
+    height: 100%;
+    overflow-x: hidden;
+    position: relative;
   }
 }
 
 .book-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .book-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 2rem;
+  }
 }
 
 .book-card {
   @apply relative overflow-hidden rounded-lg transition-all duration-300 hover:shadow-lg;
-  height: 360px;
+  height: 280px;
+}
+
+@media (min-width: 640px) {
+  .book-card {
+    height: 360px;
+  }
 }
 
 .book-card img {
@@ -78,7 +100,18 @@
 }
 
 .book-info {
-  @apply absolute bottom-0 left-0 right-0 bg-white/90 p-4 backdrop-blur-sm transition-all duration-300;
+  @apply absolute bottom-0 left-0 right-0 bg-white/90 p-2 sm:p-4 backdrop-blur-sm transition-all duration-300;
+}
+
+@media (max-width: 640px) {
+  .book-info h3 {
+    font-size: 0.9rem;
+    line-height: 1.2;
+  }
+  
+  .book-info p {
+    font-size: 0.8rem;
+  }
 }
 
 /* Animations */
@@ -119,4 +152,22 @@
 
 .page-exit-active {
   @apply opacity-0;
+}
+
+/* Prevent black flash on mobile */
+@keyframes avoid-flash {
+  0% { background-color: var(--background); }
+  100% { background-color: var(--background); }
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: hsl(var(--background));
+  z-index: -1;
+  animation: avoid-flash 0.1s forwards;
 }
