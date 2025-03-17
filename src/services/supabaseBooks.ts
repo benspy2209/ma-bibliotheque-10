@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 import { Book } from '@/types/book';
 
@@ -45,24 +46,30 @@ export async function saveBook(book: Book) {
 }
 
 export async function loadBooks() {
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  console.log("Utilisateur actuel:", user);
-  
-  const { data, error } = await supabase
-    .from('books')
-    .select('*')
-    .order('created_at', { ascending: false });
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    console.log("Utilisateur actuel:", user);
+    
+    const { data, error } = await supabase
+      .from('books')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-  console.log("Données reçues:", data);
-  console.log("Erreur éventuelle:", error);
+    console.log("Données reçues:", data);
+    console.log("Erreur éventuelle:", error);
 
-  if (error) {
+    if (error) {
+      console.error('Erreur lors du chargement des livres:', error);
+      throw error;
+    }
+
+    return data?.map(row => row.book_data || row) ?? [];
+  } catch (error) {
     console.error('Erreur lors du chargement des livres:', error);
-    throw error;
+    // Retourner un tableau vide en cas d'erreur plutôt que de faire échouer la requête
+    return [];
   }
-
-  return data?.map(row => row.book_data || row) ?? [];
 }
 
 export async function deleteBook(bookId: string) {
@@ -82,16 +89,21 @@ export async function deleteBook(bookId: string) {
 }
 
 export async function getBookById(id: string) {
-  const { data, error } = await supabase
-    .from('books')
-    .select('book_data')
-    .eq('id', id)
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from('books')
+      .select('book_data')
+      .eq('id', id)
+      .single();
 
-  if (error) {
-    console.error('Erreur lors du chargement du livre:', error);
-    throw error;
+    if (error) {
+      console.error('Erreur lors du chargement du livre:', error);
+      throw error;
+    }
+
+    return data?.book_data as Book || null;
+  } catch (error) {
+    console.error('Erreur lors du chargement du livre par ID:', error);
+    return null;
   }
-
-  return data?.book_data as Book || null;
 }
