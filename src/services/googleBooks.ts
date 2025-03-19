@@ -23,38 +23,41 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
       return [];
     }
     
-    const books = await Promise.all(data.items.map(async (item: any) => {
-      const volumeInfo = item.volumeInfo;
-      
-      let cover = '/placeholder.svg';
-      if (volumeInfo.imageLinks) {
-        cover = volumeInfo.imageLinks.extraLarge || 
-                volumeInfo.imageLinks.large || 
-                volumeInfo.imageLinks.medium || 
-                volumeInfo.imageLinks.thumbnail || 
-                volumeInfo.imageLinks.smallThumbnail;
-                
-        cover = cover.replace('http:', 'https:');
-      }
+    const books = await Promise.all(data.items
+      // Filtrer les livres sans titre
+      .filter((item: any) => item.volumeInfo && item.volumeInfo.title)
+      .map(async (item: any) => {
+        const volumeInfo = item.volumeInfo;
+        
+        let cover = '/placeholder.svg';
+        if (volumeInfo.imageLinks) {
+          cover = volumeInfo.imageLinks.extraLarge || 
+                  volumeInfo.imageLinks.large || 
+                  volumeInfo.imageLinks.medium || 
+                  volumeInfo.imageLinks.thumbnail || 
+                  volumeInfo.imageLinks.smallThumbnail;
+                  
+          cover = cover.replace('http:', 'https:');
+        }
 
-      // Ensure description is translated
-      let description = volumeInfo.description || '';
-      description = await translateToFrench(description);
+        // Ensure description is translated
+        let description = volumeInfo.description || '';
+        description = await translateToFrench(description);
 
-      return {
-        id: item.id,
-        title: volumeInfo.title,
-        author: volumeInfo.authors || ['Auteur inconnu'],
-        cover: cover,
-        description,
-        numberOfPages: volumeInfo.pageCount,
-        publishDate: volumeInfo.publishedDate,
-        publishers: [volumeInfo.publisher].filter(Boolean),
-        subjects: volumeInfo.categories || [],
-        language: [volumeInfo.language],
-        isbn: volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_13')?.identifier
-      };
-    }));
+        return {
+          id: item.id,
+          title: volumeInfo.title,
+          author: volumeInfo.authors || ['Auteur inconnu'],
+          cover: cover,
+          description,
+          numberOfPages: volumeInfo.pageCount,
+          publishDate: volumeInfo.publishedDate,
+          publishers: [volumeInfo.publisher].filter(Boolean),
+          subjects: volumeInfo.categories || [],
+          language: [volumeInfo.language],
+          isbn: volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_13')?.identifier
+        };
+      }));
 
     return books;
   } catch (error) {

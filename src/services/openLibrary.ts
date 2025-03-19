@@ -80,8 +80,10 @@ export async function searchBooks(query: string): Promise<Book[]> {
     const results = await Promise.all(
       openLibraryData.docs
         .filter((doc: any) => {
+          // Filtrer les résultats sans titre ou auteur
+          const hasTitle = doc.title && typeof doc.title === 'string';
           const hasAuthor = doc.author_name && doc.author_name.length > 0;
-          return hasAuthor;
+          return hasTitle && hasAuthor;
         })
         .map(async (doc: any) => {
           const bookDetails = await fetchBookDetails(doc.key);

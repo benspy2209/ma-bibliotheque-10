@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -40,7 +41,10 @@ const Index = () => {
   });
 
   const isLoading = results.some(result => result.isLoading);
-  const allBooks = [...(results[0].data || []), ...(results[1].data || [])];
+  const allBooks = [
+    ...(results[0].data || []), 
+    ...(results[1].data || [])
+  ].filter(book => book && book.title); // S'assurer que tous les livres ont un titre
   const books = removeDuplicateBooks(allBooks);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,8 +60,23 @@ const Index = () => {
   };
 
   const handleBookClick = async (book: Book) => {
-    const details = await getBookDetails(book.id);
-    setSelectedBook({ ...book, ...details });
+    try {
+      if (!book || !book.id) {
+        toast({
+          description: "Impossible d'afficher les détails de ce livre.",
+          variant: "destructive"
+        });
+        return;
+      }
+      const details = await getBookDetails(book.id);
+      setSelectedBook({ ...book, ...details });
+    } catch (error) {
+      console.error("Erreur lors du chargement des détails:", error);
+      toast({
+        description: "Erreur lors du chargement des détails du livre.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleLoadMore = () => {
@@ -77,6 +96,7 @@ const Index = () => {
   const visibleBooks = books.slice(0, displayedBooks);
   const hasMoreBooks = displayedBooks < books.length;
 
+  // Reste du code inchangé
   return (
     <>
       <div className="min-h-screen">
