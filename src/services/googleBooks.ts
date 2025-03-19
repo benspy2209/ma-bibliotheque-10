@@ -4,6 +4,20 @@ import { translateToFrench } from '@/utils/translation';
 
 export const GOOGLE_BOOKS_API_KEY = 'AIzaSyDUQ2dB8e_EnUp14DY9GnYAv2CmGiqBapY';
 
+// Liste de mots-clés techniques à exclure
+const TECHNICAL_KEYWORDS = [
+  'manuel', 'guide', 'prospection', 'minier', 'minière', 'géologie', 'scientifique',
+  'technique', 'rapport', 'étude', 'ingénierie', 'document', 'actes', 'conférence',
+  'colloque', 'symposium', 'proceedings', 'thèse', 'mémoire', 'doctorat'
+];
+
+function isTechnicalBook(title: string, description: string = '', subjects: string[] = []): boolean {
+  const allText = `${title} ${description} ${subjects.join(' ')}`.toLowerCase();
+  
+  // Vérifier si le titre ou la description contient des mots-clés techniques
+  return TECHNICAL_KEYWORDS.some(keyword => allText.includes(keyword.toLowerCase()));
+}
+
 export async function searchGoogleBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
@@ -49,7 +63,8 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
         let description = volumeInfo.description || '';
         description = await translateToFrench(description);
 
-        return {
+        // Créer l'objet livre
+        const book = {
           id: item.id,
           title: volumeInfo.title,
           author: volumeInfo.authors || ['Auteur inconnu'],
@@ -62,10 +77,19 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
           language: ['fr'], // Forcer la langue à français
           isbn: volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_13')?.identifier
         };
+
+        // Vérifier si c'est un livre technique
+        if (isTechnicalBook(book.title, book.description, book.subjects)) {
+          return null; // Exclure les livres techniques
+        }
+        
+        return book;
       }));
 
-    console.log(`Google Books: Trouvé ${books.length} livres en français pour "${query}"`);
-    return books;
+    // Filtrer les nulls (livres techniques exclus)
+    const filteredBooks = books.filter(Boolean);
+    console.log(`Google Books: Trouvé ${filteredBooks.length} livres en français non-techniques pour "${query}"`);
+    return filteredBooks;
   } catch (error) {
     console.error('Erreur lors de la recherche Google Books:', error);
     return [];

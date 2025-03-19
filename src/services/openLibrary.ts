@@ -5,6 +5,20 @@ import { translateToFrench } from '@/utils/translation';
 
 const OPEN_LIBRARY_API = 'https://openlibrary.org';
 
+// Liste de mots-clés techniques à exclure
+const TECHNICAL_KEYWORDS = [
+  'manuel', 'guide', 'prospection', 'minier', 'minière', 'géologie', 'scientifique',
+  'technique', 'rapport', 'étude', 'ingénierie', 'document', 'actes', 'conférence',
+  'colloque', 'symposium', 'proceedings', 'thèse', 'mémoire', 'doctorat'
+];
+
+function isTechnicalBook(title: string, description: string = '', subjects: string[] = []): boolean {
+  const allText = `${title} ${description} ${subjects.join(' ')}`.toLowerCase();
+  
+  // Vérifier si le titre ou la description contient des mots-clés techniques
+  return TECHNICAL_KEYWORDS.some(keyword => allText.includes(keyword.toLowerCase()));
+}
+
 async function fetchBookDetails(key: string): Promise<any> {
   try {
     const response = await fetch(`${OPEN_LIBRARY_API}${key}.json`);
@@ -61,10 +75,11 @@ export async function searchBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
-    // Ajout du filtre de langue 'language:fre' pour récupérer seulement des livres en français
+    // Ajouter une exclusion pour certains sujets techniques avec -subject:
+    // et exclure les revues et journaux
     const encodedQuery = encodeURIComponent(query.replace(/['"]/g, ''));
     const openLibraryResponse = await fetch(
-      `${OPEN_LIBRARY_API}/search.json?q=${encodedQuery}+language:fre&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key&limit=40`
+      `${OPEN_LIBRARY_API}/search.json?q=${encodedQuery}+language:fre&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key,subject&limit=40`
     );
 
     if (!openLibraryResponse.ok) {
@@ -88,6 +103,12 @@ export async function searchBooks(query: string): Promise<Book[]> {
                           (doc.language.includes('fre') || 
                            doc.language.includes('fra') || 
                            doc.language.includes('fr'));
+                           
+          // Vérifier si le titre contient des mots-clés techniques
+          if (hasTitle && isTechnicalBook(doc.title, '', doc.subject || [])) {
+            return false; // Exclure les documents techniques
+          }
+          
           return hasTitle && hasAuthor && isFrench;
         })
         .map(async (doc: any) => {
@@ -112,7 +133,7 @@ export async function searchBooks(query: string): Promise<Book[]> {
             ''
           );
 
-          return {
+          const book = {
             id: doc.key,
             title: doc.title,
             author: doc.author_name || ['Auteur inconnu'],
@@ -124,11 +145,18 @@ export async function searchBooks(query: string): Promise<Book[]> {
             subjects: bookDetails?.subjects || [],
             publishers: editionDetails?.publishers || []
           };
+
+          // Vérifier à nouveau avec la description complète
+          if (isTechnicalBook(book.title, book.description, book.subjects)) {
+            return null; // Exclure les livres techniques
+          }
+          
+          return book;
         })
     );
 
     const frenchResults = results.filter(Boolean);
-    console.log(`OpenLibrary: Trouvé ${frenchResults.length} livres en français pour "${query}"`);
+    console.log(`OpenLibrary: Trouvé ${frenchResults.length} livres en français non-techniques pour "${query}"`);
     return frenchResults;
   } catch (error) {
     console.error('Erreur lors de la recherche OpenLibrary:', error);
