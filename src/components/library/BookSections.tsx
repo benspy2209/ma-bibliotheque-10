@@ -28,12 +28,23 @@ export const BookSections = ({ books, viewMode, onBookClick }: BookSectionsProps
   const BookComponent = viewMode === 'grid' ? BookGrid : BookList;
 
   return (
-    <Tabs defaultValue="reading" className="w-full">
+    <Tabs defaultValue="all" className="w-full">
       <TabsList className="mb-8">
+        <TabsTrigger value="all">Tous les livres ({books.length})</TabsTrigger>
         <TabsTrigger value="reading">En cours ({readingBooks.length})</TabsTrigger>
         <TabsTrigger value="completed">Lu ({completedBooks.length})</TabsTrigger>
         <TabsTrigger value="to-read">À lire ({toReadBooks.length})</TabsTrigger>
       </TabsList>
+
+      <TabsContent value="all" className="space-y-8">
+        {books.length === 0 ? (
+          <p className="text-center text-gray-600 mt-8">
+            Votre bibliothèque est vide. Ajoutez des livres depuis la recherche !
+          </p>
+        ) : (
+          <BookComponent books={books} onBookClick={onBookClick} />
+        )}
+      </TabsContent>
 
       <TabsContent value="reading" className="space-y-8">
         {readingBooks.length === 0 ? (
