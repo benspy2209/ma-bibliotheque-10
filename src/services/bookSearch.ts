@@ -3,9 +3,9 @@ import { Book } from '@/types/book';
 import { searchGoogleBooks } from './googleBooks';
 import { searchBnfBooks } from './bnfBooks';
 import { searchOpenLibrary } from './openLibrary';
+import { searchLocalBooks } from './localBooks';
 import { getCachedSearch, cacheSearchResults } from './searchCache';
 import { removeDuplicateBooks } from '@/lib/utils';
-import { useToast } from "@/components/ui/use-toast";
 
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 heures
 const MIN_RESULTS = 5;
@@ -30,18 +30,29 @@ export async function searchBooks(query: string, options = { forceRefresh: false
     let results: Book[] = [];
     let errors = [];
 
-    // 2a. Recherche Google Books (source principale)
+    // 2a. Recherche dans la base de données locale (PRIORITAIRE)
+    try {
+      console.log('Recherche dans la base de données locale...');
+      const localResults = await searchLocalBooks(query);
+      results = [...localResults];
+      console.log(`Base locale: ${localResults.length} résultats`);
+    } catch (error) {
+      console.error('Erreur recherche locale:', error);
+      errors.push('Base locale');
+    }
+
+    // 2b. Recherche Google Books
     try {
       console.log('Recherche via Google Books...');
       const googleResults = await searchGoogleBooks(query);
-      results = [...googleResults];
-      console.log(`Google Books: ${googleResults.length} résultats`);
+      results = removeDuplicateBooks([...results, ...googleResults]);
+      console.log(`Google Books: ${googleResults.length} résultats ajoutés, total: ${results.length}`);
     } catch (error) {
       console.error('Erreur Google Books:', error);
       errors.push('Google Books');
     }
 
-    // 2b. Recherche BnF (toujours effectuée pour enrichir les résultats)
+    // 2c. Recherche BnF 
     try {
       console.log('Enrichissement avec BnF...');
       const bnfResults = await searchBnfBooks(query);
@@ -52,7 +63,7 @@ export async function searchBooks(query: string, options = { forceRefresh: false
       errors.push('BnF');
     }
 
-    // 2c. Recherche OpenLibrary (toujours effectuée pour compléter)
+    // 2d. Recherche OpenLibrary
     try {
       console.log('Recherche complémentaire via OpenLibrary...');
       const openLibraryResults = await searchOpenLibrary(query);
