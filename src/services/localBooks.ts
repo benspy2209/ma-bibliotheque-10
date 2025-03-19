@@ -7,11 +7,11 @@ export async function searchLocalBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
-    console.log('Recherche dans la base de données locale...');
+    console.log('Recherche dans la base de données locale "livres_francais"...');
     
     // Recherche par titre, auteur ou description
     const { data, error } = await supabase
-      .from('books_collection') // Remplacez par le nom réel de votre table
+      .from('livres_francais') // Utilisation de la table correcte
       .select('*')
       .or(`titre.ilike.%${query}%,auteur.ilike.%${query}%,description.ilike.%${query}%`)
       .limit(50);
