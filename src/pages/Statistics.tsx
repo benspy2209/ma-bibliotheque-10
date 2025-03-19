@@ -1,13 +1,53 @@
+
 import { useMemo } from 'react';
 import { Book } from '@/types/book';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Book as BookIcon, BookOpen, Library } from 'lucide-react';
-import { format } from 'date-fns';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend
+} from 'recharts';
+import { 
+  Book as BookIcon, 
+  BookOpen, 
+  Library, 
+  Calendar, 
+  Clock, 
+  TrendingUp,
+  BookMarked,
+  Languages,
+  Award
+} from 'lucide-react';
+import { format, differenceInDays, parseISO, getYear, differenceInMonths } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import NavBar from '@/components/NavBar';
 import { loadBooks } from '@/services/supabaseBooks';
 import { useQuery } from '@tanstack/react-query';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Progress } from "@/components/ui/progress";
+import { 
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
+
+// Couleurs pour les graphiques
+const COLORS = [
+  '#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE', '#00C49F',
+  '#FFBB28', '#FF8042', '#a4de6c', '#d0ed57', '#83a6ed', '#8dd1e1'
+];
 
 export default function Statistics() {
   const { data: books = [] } = useQuery({
@@ -19,41 +59,64 @@ export default function Statistics() {
     book !== null && book.status === 'completed' && book.completionDate != null
   );
 
+  const readingBooks = books.filter((book): book is Book =>
+    book !== null && book.status === 'reading'
+  );
+
+  const toReadBooks = books.filter((book): book is Book =>
+    book !== null && (!book.status || book.status === 'to-read')
+  );
+
   const stats = useMemo(() => {
     const totalBooks = completedBooks.length;
     
-    // Log each book's pages to debug
-    completedBooks.forEach(book => {
-      console.log(`Book "${book.title}": ${book.numberOfPages} pages`);
-    });
-    
+    // Calculer le nombre total de pages
     const totalPages = completedBooks.reduce((sum, book) => {
       if (!book.numberOfPages) {
-        console.log(`Book "${book.title}" has no pages defined`);
         return sum;
       }
       
       const pages = Number(book.numberOfPages);
       if (isNaN(pages)) {
-        console.log(`Book "${book.title}" has invalid number of pages:`, book.numberOfPages);
         return sum;
       }
       
-      console.log(`Adding ${pages} pages from "${book.title}"`);
       return sum + pages;
     }, 0);
     
     const avgPagesPerBook = totalBooks > 0 ? Math.round(totalPages / totalBooks) : 0;
 
+    // Calculer la vitesse moyenne de lecture (pages/jour)
+    let totalReadingDays = 0;
+    let readingSpeed = 0;
+
+    if (completedBooks.length > 0) {
+      totalReadingDays = completedBooks.reduce((sum, book) => {
+        if (!book.completionDate) return sum;
+        const completionDate = new Date(book.completionDate);
+        // On estime qu'un livre prend en moyenne 2 semaines à lire, à ajuster si on a une date de début
+        const averageReadingDays = 14;
+        return sum + averageReadingDays;
+      }, 0);
+      
+      readingSpeed = totalPages / (totalReadingDays || 1);
+    }
+
+    // Calculer le temps total estimé pour lire tous les livres (en heures)
+    // On estime une vitesse de lecture moyenne de 30 pages/heure
+    const totalReadingTime = totalPages / 30;
+
     // Grouper les livres par mois
     const booksByMonth = completedBooks.reduce((acc, book) => {
-      const monthKey = format(new Date(book.completionDate!), 'MMMM yyyy', { locale: fr });
+      if (!book.completionDate) return acc;
+      
+      const monthKey = format(new Date(book.completionDate), 'MMMM yyyy', { locale: fr });
       if (!acc[monthKey]) {
         acc[monthKey] = {
           name: monthKey,
           books: 0,
           pages: 0,
-          date: new Date(book.completionDate!) 
+          date: new Date(book.completionDate) 
         };
       }
       acc[monthKey].books += 1;
@@ -69,13 +132,94 @@ export default function Statistics() {
       .sort((a, b) => a.date.getTime() - b.date.getTime())
       .slice(-6);
 
+    // Calculer les auteurs les plus lus
+    const authorCounts = completedBooks.reduce((acc, book) => {
+      const authors = Array.isArray(book.author) ? book.author : [book.author];
+      
+      authors.forEach(author => {
+        if (!author) return;
+        if (!acc[author]) {
+          acc[author] = { name: author, count: 0 };
+        }
+        acc[author].count += 1;
+      });
+      
+      return acc;
+    }, {} as Record<string, { name: string; count: number }>);
+    
+    // Trier et limiter à 5 auteurs
+    const topAuthors = Object.values(authorCounts)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    // Calculer les langues de lecture
+    const languageCounts = completedBooks.reduce((acc, book) => {
+      const languages = book.language || [];
+      
+      languages.forEach(lang => {
+        if (!acc[lang]) {
+          acc[lang] = { name: lang, count: 0 };
+        }
+        acc[lang].count += 1;
+      });
+      
+      return acc;
+    }, {} as Record<string, { name: string; count: number }>);
+    
+    const languageData = Object.values(languageCounts).sort((a, b) => b.count - a.count);
+
+    // Calculer progression annuelle
+    const currentYear = getYear(new Date());
+    const booksThisYear = completedBooks.filter(book => 
+      book.completionDate && getYear(new Date(book.completionDate)) === currentYear
+    ).length;
+
+    // Objectif de lecture annuel (estimation: 12 livres par an)
+    const yearlyGoal = 12;
+    const yearlyProgressPercentage = Math.min(100, (booksThisYear / yearlyGoal) * 100);
+
+    // Calculer progression mensuelle
+    const currentMonth = new Date();
+    const booksThisMonth = completedBooks.filter(book => 
+      book.completionDate && 
+      differenceInMonths(currentMonth, new Date(book.completionDate)) === 0
+    ).length;
+
+    // Objectif mensuel (1 livre par mois)
+    const monthlyGoal = 1;
+    const monthlyProgressPercentage = Math.min(100, (booksThisMonth / monthlyGoal) * 100);
+
     return {
       totalBooks,
       totalPages,
       avgPagesPerBook,
-      monthlyData
+      monthlyData,
+      readingSpeed: readingSpeed.toFixed(1),
+      totalReadingTime: totalReadingTime.toFixed(1),
+      topAuthors,
+      languageData,
+      booksThisYear,
+      yearlyGoal,
+      yearlyProgressPercentage,
+      booksThisMonth,
+      monthlyGoal,
+      monthlyProgressPercentage,
+      readingBooks: readingBooks.length,
+      toReadBooks: toReadBooks.length
     };
-  }, [completedBooks]);
+  }, [completedBooks, readingBooks, toReadBooks]);
+
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }: any) => {
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
+    const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
+  
+    return percent > 0.05 ? (
+      <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central">
+        {name}
+      </text>
+    ) : null;
+  };
 
   return (
     <>
@@ -83,9 +227,15 @@ export default function Statistics() {
         <NavBar />
         <div className="px-4 py-8 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto space-y-8">
-            <h1 className="text-3xl font-bold">Statistiques de lecture</h1>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+              <h1 className="text-3xl font-bold">Statistiques de lecture</h1>
+              <p className="text-muted-foreground">
+                Analyse de vos habitudes de lecture
+              </p>
+            </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            {/* Vue d'ensemble */}
+            <div className="grid gap-4 md:grid-cols-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total des livres lus</CardTitle>
@@ -93,6 +243,7 @@ export default function Statistics() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.totalBooks}</div>
+                  <p className="text-xs text-muted-foreground mt-1">Livres terminés</p>
                 </CardContent>
               </Card>
 
@@ -103,79 +254,307 @@ export default function Statistics() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.totalPages}</div>
+                  <p className="text-xs text-muted-foreground mt-1">Total de pages</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Moyenne de pages par livre</CardTitle>
+                  <CardTitle className="text-sm font-medium">En cours</CardTitle>
+                  <BookMarked className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.readingBooks}</div>
+                  <p className="text-xs text-muted-foreground mt-1">Livres en cours de lecture</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">À lire</CardTitle>
                   <Library className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.avgPagesPerBook}</div>
+                  <div className="text-2xl font-bold">{stats.toReadBooks}</div>
+                  <p className="text-xs text-muted-foreground mt-1">Livres dans la file d'attente</p>
                 </CardContent>
               </Card>
             </div>
 
-            <Card className="p-4">
-              <CardHeader>
-                <CardTitle>Livres lus par mois</CardTitle>
-              </CardHeader>
-              <CardContent className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={stats.monthlyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="name"
-                      tick={{ fontSize: 12 }}
-                      interval={0}
-                      angle={-45}
-                      textAnchor="end"
-                    />
-                    <YAxis />
-                    <Tooltip 
-                      formatter={(value: number) => [value, 'Livres']}
-                      labelStyle={{ color: 'black' }}
-                    />
-                    <Bar 
-                      dataKey="books"
-                      fill="#8884d8"
-                      name="Livres lus"
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
+            {/* Statistiques détaillées */}
+            <Tabs defaultValue="overview" className="w-full">
+              <TabsList className="mb-4">
+                <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
+                <TabsTrigger value="monthly">Données mensuelles</TabsTrigger>
+                <TabsTrigger value="authors">Auteurs & Langues</TabsTrigger>
+              </TabsList>
 
-            <Card className="p-4">
-              <CardHeader>
-                <CardTitle>Pages lues par mois</CardTitle>
-              </CardHeader>
-              <CardContent className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={stats.monthlyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="name"
-                      tick={{ fontSize: 12 }}
-                      interval={0}
-                      angle={-45}
-                      textAnchor="end"
-                    />
-                    <YAxis />
-                    <Tooltip 
-                      formatter={(value: number) => [value, 'Pages']}
-                      labelStyle={{ color: 'black' }}
-                    />
-                    <Bar 
-                      dataKey="pages"
-                      fill="#82ca9d"
-                      name="Pages lues"
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
+              <TabsContent value="overview" className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-3">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Moyenne par livre</CardTitle>
+                      <CardDescription>Statistiques moyennes par livre</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium text-muted-foreground">
+                            Pages par livre
+                          </p>
+                          <p className="text-2xl font-bold">{stats.avgPagesPerBook}</p>
+                        </div>
+                        <BookOpen className="h-8 w-8 text-muted-foreground" />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium text-muted-foreground">
+                            Vitesse de lecture
+                          </p>
+                          <p className="text-2xl font-bold">{stats.readingSpeed}</p>
+                        </div>
+                        <TrendingUp className="h-8 w-8 text-muted-foreground" />
+                      </div>
+                      <p className="text-xs text-muted-foreground">Pages par jour en moyenne</p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Objectifs de lecture</CardTitle>
+                      <CardDescription>Progression vers vos objectifs</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-medium">Objectif annuel</p>
+                          <p className="text-sm font-medium">
+                            {stats.booksThisYear} / {stats.yearlyGoal} livres
+                          </p>
+                        </div>
+                        <Progress value={stats.yearlyProgressPercentage} />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-medium">Objectif mensuel</p>
+                          <p className="text-sm font-medium">
+                            {stats.booksThisMonth} / {stats.monthlyGoal} livre
+                          </p>
+                        </div>
+                        <Progress value={stats.monthlyProgressPercentage} />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Temps de lecture</CardTitle>
+                      <CardDescription>Estimation du temps passé à lire</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-8 flex flex-col justify-center h-full">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium text-muted-foreground">
+                            Temps total estimé
+                          </p>
+                          <p className="text-2xl font-bold">{stats.totalReadingTime} h</p>
+                        </div>
+                        <Clock className="h-8 w-8 text-muted-foreground" />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Basé sur une vitesse moyenne de 30 pages par heure
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="monthly" className="space-y-6">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Card className="col-span-2 md:col-span-1">
+                    <CardHeader>
+                      <CardTitle>Livres lus par mois</CardTitle>
+                    </CardHeader>
+                    <CardContent className="h-[300px]">
+                      <ChartContainer config={{ books: { color: "#8884d8", label: "Livres lus" }}}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={stats.monthlyData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis 
+                              dataKey="name"
+                              tick={{ fontSize: 12 }}
+                              interval={0}
+                              angle={-45}
+                              textAnchor="end"
+                            />
+                            <YAxis />
+                            <ChartTooltip 
+                              content={<ChartTooltipContent />}
+                            />
+                            <Bar 
+                              dataKey="books"
+                              name="Livres"
+                              fill="#8884d8"
+                              radius={[4, 4, 0, 0]}
+                            />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </ChartContainer>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="col-span-2 md:col-span-1">
+                    <CardHeader>
+                      <CardTitle>Pages lues par mois</CardTitle>
+                    </CardHeader>
+                    <CardContent className="h-[300px]">
+                      <ChartContainer config={{ pages: { color: "#82ca9d", label: "Pages lues" }}}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={stats.monthlyData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis 
+                              dataKey="name"
+                              tick={{ fontSize: 12 }}
+                              interval={0}
+                              angle={-45}
+                              textAnchor="end"
+                            />
+                            <YAxis />
+                            <ChartTooltip
+                              content={<ChartTooltipContent />}
+                            />
+                            <Bar 
+                              dataKey="pages"
+                              name="Pages"
+                              fill="#82ca9d"
+                              radius={[4, 4, 0, 0]}
+                            />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </ChartContainer>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Détails mensuels</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Mois</TableHead>
+                          <TableHead className="text-right">Livres</TableHead>
+                          <TableHead className="text-right">Pages</TableHead>
+                          <TableHead className="text-right">Pages/Livre</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {stats.monthlyData.map((month) => (
+                          <TableRow key={month.name}>
+                            <TableCell>{month.name}</TableCell>
+                            <TableCell className="text-right">{month.books}</TableCell>
+                            <TableCell className="text-right">{month.pages}</TableCell>
+                            <TableCell className="text-right">
+                              {month.books > 0 ? Math.round(month.pages / month.books) : '-'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="authors" className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Auteurs les plus lus</CardTitle>
+                    </CardHeader>
+                    <CardContent className="h-[300px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={stats.topAuthors}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={renderCustomizedLabel}
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="count"
+                          >
+                            {stats.topAuthors.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Legend />
+                          <Tooltip formatter={(value, name, props) => [`${value} livre(s)`, props.payload.name]} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Langues de lecture</CardTitle>
+                    </CardHeader>
+                    <CardContent className="h-[300px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={stats.languageData}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={renderCustomizedLabel}
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="count"
+                          >
+                            {stats.languageData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[(index + 4) % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Legend />
+                          <Tooltip formatter={(value, name, props) => [`${value} livre(s)`, props.payload.name]} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Top 5 des auteurs</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Rang</TableHead>
+                          <TableHead>Auteur</TableHead>
+                          <TableHead className="text-right">Livres lus</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {stats.topAuthors.map((author, index) => (
+                          <TableRow key={author.name}>
+                            <TableCell>{index + 1}</TableCell>
+                            <TableCell>{author.name}</TableCell>
+                            <TableCell className="text-right">{author.count}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </div>
