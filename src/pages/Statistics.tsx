@@ -88,10 +88,12 @@ export default function Statistics() {
 
     if (completedBooks.length > 0) {
       totalReadingDays = completedBooks.reduce((sum, book) => {
-        if (!book.completionDate) return sum;
-        const completionDate = new Date(book.completionDate);
-        const averageReadingDays = 14;
-        return sum + averageReadingDays;
+        if (book.readingTimeDays) {
+          return sum + book.readingTimeDays;
+        } else if (book.completionDate) {
+          return sum + 14;
+        }
+        return sum;
       }, 0);
       
       readingSpeed = totalPages / (totalReadingDays || 1);
@@ -173,6 +175,29 @@ export default function Statistics() {
     const monthlyGoal = 4;
     const monthlyProgressPercentage = Math.min(100, (booksThisMonth / monthlyGoal) * 100);
 
+    const avgReadingTime = totalReadingDays / Math.max(1, completedBooks.length);
+    
+    const readingTimeDistribution = [
+      { name: '1-7 jours', value: 0 },
+      { name: '8-14 jours', value: 0 },
+      { name: '15-30 jours', value: 0 },
+      { name: '31+ jours', value: 0 }
+    ];
+    
+    completedBooks.forEach(book => {
+      if (book.readingTimeDays) {
+        if (book.readingTimeDays <= 7) {
+          readingTimeDistribution[0].value++;
+        } else if (book.readingTimeDays <= 14) {
+          readingTimeDistribution[1].value++;
+        } else if (book.readingTimeDays <= 30) {
+          readingTimeDistribution[2].value++;
+        } else {
+          readingTimeDistribution[3].value++;
+        }
+      }
+    });
+
     return {
       totalBooks,
       totalPages,
@@ -189,7 +214,10 @@ export default function Statistics() {
       monthlyGoal,
       monthlyProgressPercentage,
       readingBooks: readingBooks.length,
-      toReadBooks: toReadBooks.length
+      toReadBooks: toReadBooks.length,
+      totalReadingDays,
+      avgReadingTime: avgReadingTime.toFixed(1),
+      readingTimeDistribution
     };
   }, [completedBooks, readingBooks, toReadBooks]);
 
@@ -243,12 +271,12 @@ export default function Statistics() {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">En cours</CardTitle>
-                  <BookMarked className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium">Jours de lecture</CardTitle>
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.readingBooks}</div>
-                  <p className="text-xs text-muted-foreground mt-1">Livres en cours de lecture</p>
+                  <div className="text-2xl font-bold">{stats.totalReadingDays}</div>
+                  <p className="text-xs text-muted-foreground mt-1">Temps total de lecture</p>
                 </CardContent>
               </Card>
 
@@ -269,6 +297,7 @@ export default function Statistics() {
                 <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
                 <TabsTrigger value="monthly">Données mensuelles</TabsTrigger>
                 <TabsTrigger value="authors">Auteurs & Langues</TabsTrigger>
+                <TabsTrigger value="reading-time">Temps de lecture</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-4">
@@ -299,6 +328,16 @@ export default function Statistics() {
                         <TrendingUp className="h-8 w-8 text-muted-foreground" />
                       </div>
                       <p className="text-xs text-muted-foreground">Pages par jour en moyenne</p>
+
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium text-muted-foreground">
+                            Jours par livre
+                          </p>
+                          <p className="text-2xl font-bold">{stats.avgReadingTime}</p>
+                        </div>
+                        <Clock className="h-8 w-8 text-muted-foreground" />
+                      </div>
                     </CardContent>
                   </Card>
                   
@@ -531,6 +570,116 @@ export default function Statistics() {
                             <TableCell className="text-right">{author.count}</TableCell>
                           </TableRow>
                         ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="reading-time" className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Distribution des temps de lecture</CardTitle>
+                      <CardDescription>Nombre de livres par durée de lecture</CardDescription>
+                    </CardHeader>
+                    <CardContent className="h-[300px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={stats.readingTimeDistribution}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={renderCustomizedLabel}
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="value"
+                          >
+                            {stats.readingTimeDistribution.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Legend />
+                          <Tooltip formatter={(value, name) => [`${value} livre(s)`, name]} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Temps de lecture total</CardTitle>
+                      <CardDescription>Répartition par livre</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {completedBooks
+                          .filter(book => book.readingTimeDays !== undefined)
+                          .sort((a, b) => (b.readingTimeDays || 0) - (a.readingTimeDays || 0))
+                          .slice(0, 5)
+                          .map(book => (
+                            <div key={book.id} className="space-y-2">
+                              <div className="flex justify-between">
+                                <p className="font-medium text-sm truncate" title={book.title}>
+                                  {book.title}
+                                </p>
+                                <span className="text-sm font-medium">
+                                  {book.readingTimeDays} jour{book.readingTimeDays !== 1 ? 's' : ''}
+                                </span>
+                              </div>
+                              <Progress 
+                                value={Math.min(100, (book.readingTimeDays || 0) / 0.3)} 
+                                className="h-2"
+                              />
+                            </div>
+                          ))}
+                        
+                        {completedBooks.filter(book => book.readingTimeDays !== undefined).length === 0 && (
+                          <p className="text-center text-muted-foreground py-4">
+                            Aucune donnée de temps de lecture disponible.
+                            Ajoutez le temps de lecture à vos livres pour voir les statistiques.
+                          </p>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Livres par temps de lecture</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Titre</TableHead>
+                          <TableHead>Auteur</TableHead>
+                          <TableHead className="text-right">Pages</TableHead>
+                          <TableHead className="text-right">Temps (jours)</TableHead>
+                          <TableHead className="text-right">Pages/jour</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {completedBooks
+                          .filter(book => book.readingTimeDays !== undefined)
+                          .slice(0, 10)
+                          .map((book) => (
+                            <TableRow key={book.id}>
+                              <TableCell className="font-medium">{book.title}</TableCell>
+                              <TableCell>
+                                {Array.isArray(book.author) ? book.author[0] : book.author}
+                              </TableCell>
+                              <TableCell className="text-right">{book.numberOfPages || '-'}</TableCell>
+                              <TableCell className="text-right">{book.readingTimeDays}</TableCell>
+                              <TableCell className="text-right">
+                                {book.numberOfPages && book.readingTimeDays
+                                  ? Math.round(book.numberOfPages / book.readingTimeDays)
+                                  : '-'}
+                              </TableCell>
+                            </TableRow>
+                          ))}
                       </TableBody>
                     </Table>
                   </CardContent>

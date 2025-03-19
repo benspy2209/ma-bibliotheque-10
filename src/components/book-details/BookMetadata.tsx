@@ -1,8 +1,9 @@
+
 import { Book } from '@/types/book';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Users, Calendar, Book as BookIcon, ListTree, Layers } from 'lucide-react';
+import { Users, Calendar, Book as BookIcon, ListTree, Layers, Clock } from 'lucide-react';
 
 interface BookMetadataProps {
   book: Book;
@@ -59,6 +60,23 @@ export function BookMetadata({ book, isEditing, onInputChange }: BookMetadataPro
           />
         ) : (
           <p>{book.numberOfPages ? `${book.numberOfPages} pages` : "Information non disponible"}</p>
+        )}
+      </div>
+
+      <div>
+        <h3 className="text-sm font-semibold flex items-center gap-2">
+          <Clock className="h-4 w-4" />
+          Temps de lecture
+        </h3>
+        {isEditing ? (
+          <Input
+            type="number"
+            value={book.readingTimeDays || ''}
+            onChange={(e) => onInputChange('readingTimeDays', e.target.value)}
+            placeholder="Nombre de jours"
+          />
+        ) : (
+          <p>{book.readingTimeDays ? `${book.readingTimeDays} jour${book.readingTimeDays > 1 ? 's' : ''}` : "Non spécifié"}</p>
         )}
       </div>
 
