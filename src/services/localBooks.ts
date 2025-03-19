@@ -7,11 +7,14 @@ export async function searchLocalBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
-    console.log('Recherche dans la base de données locale "livres_francais"...');
+    console.log(`Recherche pour "${query}" dans la base de données locale "livres_francais"...`);
+    
+    // Log de la requête pour le débogage
+    console.log(`Exécution de la requête: SELECT * FROM livres_francais WHERE titre ILIKE %${query}% OR auteur ILIKE %${query}% OR description ILIKE %${query}%`);
     
     // Recherche par titre, auteur ou description
     const { data, error } = await supabase
-      .from('livres_francais') // Utilisation de la table correcte
+      .from('livres_francais')
       .select('*')
       .or(`titre.ilike.%${query}%,auteur.ilike.%${query}%,description.ilike.%${query}%`)
       .limit(50);
@@ -22,6 +25,9 @@ export async function searchLocalBooks(query: string): Promise<Book[]> {
     }
 
     console.log(`Résultats locaux trouvés: ${data?.length || 0}`);
+    if (data && data.length > 0) {
+      console.log('Premier résultat:', data[0]);
+    }
     
     // Conversion du format de la base de données au format Book utilisé par l'application
     return (data || []).map(item => ({

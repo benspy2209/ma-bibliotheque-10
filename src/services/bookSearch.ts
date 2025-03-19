@@ -14,6 +14,8 @@ export async function searchBooks(query: string, options = { forceRefresh: false
   if (!query.trim()) return [];
 
   try {
+    console.log(`Recherche lancée pour: "${query}"`);
+    
     // 1. Vérifier le cache d'abord, sauf si forceRefresh est activé
     if (!options.forceRefresh) {
       const cachedResults = await getCachedSearch(query);
@@ -36,12 +38,19 @@ export async function searchBooks(query: string, options = { forceRefresh: false
       const localResults = await searchLocalBooks(query);
       results = [...localResults];
       console.log(`Base locale: ${localResults.length} résultats`);
+      
+      // Si on a suffisamment de résultats locaux, on peut s'arrêter là
+      if (localResults.length >= MIN_RESULTS) {
+        console.log(`Assez de résultats locaux (${localResults.length}), pas besoin de sources externes`);
+        await cacheSearchResults(query, results, MIN_RESULTS);
+        return results;
+      }
     } catch (error) {
       console.error('Erreur recherche locale:', error);
       errors.push('Base locale');
     }
 
-    // 2b. Recherche Google Books
+    // 2b. Recherche Google Books si pas assez de résultats locaux
     try {
       console.log('Recherche via Google Books...');
       const googleResults = await searchGoogleBooks(query);
