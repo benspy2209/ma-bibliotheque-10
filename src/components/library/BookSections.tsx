@@ -30,24 +30,28 @@ export const BookSections = ({ books, viewMode, onBookClick }: BookSectionsProps
   return (
     <Tabs defaultValue="reading" className="w-full">
       <TabsList className="mb-8">
-        <TabsTrigger value="reading">En cours & Lu ({completedBooks.length + readingBooks.length})</TabsTrigger>
+        <TabsTrigger value="reading">En cours ({readingBooks.length})</TabsTrigger>
+        <TabsTrigger value="completed">Lu ({completedBooks.length})</TabsTrigger>
         <TabsTrigger value="to-read">À lire ({toReadBooks.length})</TabsTrigger>
       </TabsList>
 
       <TabsContent value="reading" className="space-y-8">
-        {readingBooks.length > 0 && (
-          <div>
-            <h2 className="text-xl font-semibold mb-4">En cours de lecture ({readingBooks.length})</h2>
-            <BookComponent books={readingBooks} onBookClick={onBookClick} />
-          </div>
+        {readingBooks.length === 0 ? (
+          <p className="text-center text-gray-600 mt-8">
+            Aucun livre en cours de lecture.
+          </p>
+        ) : (
+          <BookComponent books={readingBooks} onBookClick={onBookClick} />
         )}
-        
-        {completedBooks.length > 0 && (
-          <div>
-            {readingBooks.length > 0 && <Separator className="my-8" />}
-            <h2 className="text-xl font-semibold mb-4">Livres lus ({completedBooks.length})</h2>
-            <BookComponent books={completedBooks} onBookClick={onBookClick} />
-          </div>
+      </TabsContent>
+      
+      <TabsContent value="completed" className="space-y-8">
+        {completedBooks.length === 0 ? (
+          <p className="text-center text-gray-600 mt-8">
+            Aucun livre terminé dans votre bibliothèque.
+          </p>
+        ) : (
+          <BookComponent books={completedBooks} onBookClick={onBookClick} />
         )}
       </TabsContent>
 
@@ -61,7 +65,16 @@ export const BookSections = ({ books, viewMode, onBookClick }: BookSectionsProps
             </TabsList>
           </Tabs>
         </div>
-        <BookComponent books={filteredToReadBooks} onBookClick={onBookClick} />
+        
+        {filteredToReadBooks.length === 0 ? (
+          <p className="text-center text-gray-600 mt-8">
+            {purchaseFilter !== 'all' 
+              ? `Aucun livre ${purchaseFilter === 'purchased' ? 'acheté' : 'à acheter'} dans votre liste de lecture.`
+              : "Aucun livre dans votre liste de lecture."}
+          </p>
+        ) : (
+          <BookComponent books={filteredToReadBooks} onBookClick={onBookClick} />
+        )}
       </TabsContent>
     </Tabs>
   );
