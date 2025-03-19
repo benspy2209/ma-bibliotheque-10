@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 import { GOOGLE_BOOKS_API_KEY } from './googleBooks'; 
 import { translateToFrench } from '@/utils/translation';
@@ -17,6 +16,20 @@ function isTechnicalBook(title: string, description: string = '', subjects: stri
   
   // Vérifier si le titre ou la description contient des mots-clés techniques
   return TECHNICAL_KEYWORDS.some(keyword => allText.includes(keyword.toLowerCase()));
+}
+
+function isAuthorMatch(authorNames: string[], searchQuery: string): boolean {
+  if (!authorNames || authorNames.length === 0) return false;
+  
+  const searchTerms = searchQuery.toLowerCase().split(' ');
+  
+  return authorNames.some(author => {
+    if (!author) return false;
+    const authorLower = author.toLowerCase();
+    
+    // Si le nom de l'auteur contient tous les termes de recherche
+    return searchTerms.every(term => authorLower.includes(term));
+  });
 }
 
 async function fetchBookDetails(key: string): Promise<any> {
@@ -75,9 +88,8 @@ export async function searchBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
-    // Ajouter une exclusion pour certains sujets techniques avec -subject:
-    // et exclure les revues et journaux
-    const encodedQuery = encodeURIComponent(query.replace(/['"]/g, ''));
+    // Rechercher par auteur avec 'author:'
+    const encodedQuery = encodeURIComponent(`author:${query.replace(/['"]/g, '')}`);
     const openLibraryResponse = await fetch(
       `${OPEN_LIBRARY_API}/search.json?q=${encodedQuery}+language:fre&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key,subject&limit=40`
     );
@@ -107,6 +119,11 @@ export async function searchBooks(query: string): Promise<Book[]> {
           // Vérifier si le titre contient des mots-clés techniques
           if (hasTitle && isTechnicalBook(doc.title, '', doc.subject || [])) {
             return false; // Exclure les documents techniques
+          }
+          
+          // Vérifier si l'auteur correspond à la recherche
+          if (hasAuthor && !isAuthorMatch(doc.author_name, query)) {
+            return false; // Exclure les livres d'autres auteurs
           }
           
           return hasTitle && hasAuthor && isFrench;
@@ -156,7 +173,7 @@ export async function searchBooks(query: string): Promise<Book[]> {
     );
 
     const frenchResults = results.filter(Boolean);
-    console.log(`OpenLibrary: Trouvé ${frenchResults.length} livres en français non-techniques pour "${query}"`);
+    console.log(`OpenLibrary: Trouvé ${frenchResults.length} livres en français de l'auteur "${query}"`);
     return frenchResults;
   } catch (error) {
     console.error('Erreur lors de la recherche OpenLibrary:', error);

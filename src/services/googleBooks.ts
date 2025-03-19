@@ -18,13 +18,30 @@ function isTechnicalBook(title: string, description: string = '', subjects: stri
   return TECHNICAL_KEYWORDS.some(keyword => allText.includes(keyword.toLowerCase()));
 }
 
+function isAuthorMatch(authorNames: string[], searchQuery: string): boolean {
+  if (!authorNames || authorNames.length === 0) return false;
+  
+  const searchTerms = searchQuery.toLowerCase().split(' ');
+  
+  return authorNames.some(author => {
+    if (!author) return false;
+    const authorLower = author.toLowerCase();
+    
+    // Si le nom de l'auteur contient tous les termes de recherche
+    return searchTerms.every(term => authorLower.includes(term));
+  });
+}
+
 export async function searchGoogleBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
+    // Construire la requête avec "inauthor:" pour cibler les auteurs
+    const authorQuery = `inauthor:"${query}"`;
+    
     // Ajout du filtre de langue 'fr' pour récupérer seulement des livres en français
     const response = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(authorQuery)}&langRestrict=fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
     );
 
     if (!response.ok) {
@@ -83,12 +100,17 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
           return null; // Exclure les livres techniques
         }
         
+        // Vérifier si l'auteur correspond à la recherche
+        if (!isAuthorMatch(book.author, query)) {
+          return null; // Exclure les livres d'autres auteurs
+        }
+        
         return book;
       }));
 
-    // Filtrer les nulls (livres techniques exclus)
+    // Filtrer les nulls (livres techniques exclus et auteurs ne correspondant pas)
     const filteredBooks = books.filter(Boolean);
-    console.log(`Google Books: Trouvé ${filteredBooks.length} livres en français non-techniques pour "${query}"`);
+    console.log(`Google Books: Trouvé ${filteredBooks.length} livres en français de l'auteur "${query}"`);
     return filteredBooks;
   } catch (error) {
     console.error('Erreur lors de la recherche Google Books:', error);

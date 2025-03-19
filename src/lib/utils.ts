@@ -48,3 +48,21 @@ export function filterNonBookResults(books: Book[]): Book[] {
     return !TECHNICAL_KEYWORDS.some(keyword => allText.includes(keyword.toLowerCase()));
   });
 }
+
+// Vérifie si un livre correspond à l'auteur recherché
+export function isAuthorMatch(book: Book, searchQuery: string): boolean {
+  if (!book.author || (Array.isArray(book.author) && book.author.length === 0)) {
+    return false;
+  }
+  
+  const searchTerms = searchQuery.toLowerCase().split(' ');
+  const authors = Array.isArray(book.author) ? book.author : [book.author];
+  
+  return authors.some(author => {
+    if (!author) return false;
+    const authorLower = author.toLowerCase();
+    
+    // Vérifie si le nom de l'auteur contient tous les termes de la recherche
+    return searchTerms.every(term => authorLower.includes(term));
+  });
+}
