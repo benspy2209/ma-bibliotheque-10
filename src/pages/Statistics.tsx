@@ -1,3 +1,4 @@
+
 import { useMemo } from 'react';
 import { Book } from '@/types/book';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -338,7 +339,7 @@ export default function Statistics() {
                           <p className="text-sm font-medium text-muted-foreground">
                             Vitesse de lecture
                           </p>
-                          <p className="text-2xl font-bold">{stats.readingSpeed}</p>
+                          <p className="text-2xl font-bold">{stats.readingSpeed} <span className="text-sm font-normal">pages/jour</span></p>
                         </div>
                         <TrendingUp className="h-8 w-8 text-muted-foreground" />
                       </div>
