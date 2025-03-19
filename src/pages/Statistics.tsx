@@ -338,7 +338,7 @@ export default function Statistics() {
                           <p className="text-sm font-medium text-muted-foreground">
                             Vitesse de lecture
                           </p>
-                          <p className="text-2xl font-bold">{stats.readingSpeed}</p>
+                          <p className="text-2xl font-bold">{stats.readingSpeed} pages/jour</p>
                         </div>
                         <TrendingUp className="h-8 w-8 text-muted-foreground" />
                       </div>
