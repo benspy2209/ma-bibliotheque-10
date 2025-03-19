@@ -11,7 +11,7 @@ export interface BookDetailsProps {
 export interface BookMetadataProps {
   book: Book;
   isEditing: boolean;
-  onInputChange: (field: keyof Book, value: string | boolean) => void;
+  onInputChange: (field: keyof Book, value: string) => void;
 }
 
 export interface CompletionDateProps {

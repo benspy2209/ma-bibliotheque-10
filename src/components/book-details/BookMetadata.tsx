@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -8,7 +7,7 @@ import { Users, Calendar, Book as BookIcon, ListTree, Layers } from 'lucide-reac
 interface BookMetadataProps {
   book: Book;
   isEditing: boolean;
-  onInputChange: (field: keyof Book, value: string | boolean) => void;
+  onInputChange: (field: keyof Book, value: string) => void;
 }
 
 export function BookMetadata({ book, isEditing, onInputChange }: BookMetadataProps) {
@@ -111,7 +110,7 @@ export function BookMetadata({ book, isEditing, onInputChange }: BookMetadataPro
           <Switch
             id="purchased"
             checked={book.purchased}
-            onCheckedChange={(checked) => onInputChange('purchased', checked)}
+            onCheckedChange={(checked) => onInputChange('purchased', checked.toString())}
           />
           <Label htmlFor="purchased">Livre acheté</Label>
         </div>

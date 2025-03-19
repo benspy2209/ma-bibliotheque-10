@@ -1,17 +1,18 @@
-
 import { useState } from 'react';
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Search, RefreshCw } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { Search } from 'lucide-react';
+import { useQueries } from '@tanstack/react-query';
+import { searchBooks } from '@/services/openLibrary';
+import { searchGoogleBooks } from '@/services/googleBooks';
+import { getBookDetails } from '@/services/bookDetails';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
+import { removeDuplicateBooks } from '@/lib/utils';
 import { useToast } from "@/components/ui/use-toast";
 import NavBar from '@/components/NavBar';
-import { searchBooks } from '@/services/bookSearch';
-import { invalidateCache } from '@/services/searchCache';
 
 const BOOKS_PER_PAGE = 12;
 
@@ -21,20 +22,31 @@ const Index = () => {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [displayedBooks, setDisplayedBooks] = useState(BOOKS_PER_PAGE);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [forceRefresh, setForceRefresh] = useState(false);
   const { toast } = useToast();
 
-  const { data: books = [], isLoading, refetch } = useQuery({
-    queryKey: ['books', debouncedQuery, refreshKey, forceRefresh],
-    queryFn: () => searchBooks(debouncedQuery, { forceRefresh }),
-    enabled: debouncedQuery.length > 0
+  const results = useQueries({
+    queries: [
+      {
+        queryKey: ['openLibrary', debouncedQuery],
+        queryFn: () => searchBooks(debouncedQuery),
+        enabled: debouncedQuery.length > 0
+      },
+      {
+        queryKey: ['googleBooks', debouncedQuery],
+        queryFn: () => searchGoogleBooks(debouncedQuery),
+        enabled: debouncedQuery.length > 0
+      }
+    ]
   });
+
+  const isLoading = results.some(result => result.isLoading);
+  const allBooks = [...(results[0].data || []), ...(results[1].data || [])];
+  const books = removeDuplicateBooks(allBooks);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
     setDisplayedBooks(BOOKS_PER_PAGE);
-    setForceRefresh(false); // Réinitialiser forceRefresh quand une nouvelle recherche est lancée
     
     const timeoutId = setTimeout(() => {
       setDebouncedQuery(value);
@@ -43,19 +55,9 @@ const Index = () => {
     return () => clearTimeout(timeoutId);
   };
 
-  const handleRefresh = async () => {
-    if (!debouncedQuery) return;
-    
-    toast({
-      description: "Recherche forcée en cours...",
-    });
-    
-    setForceRefresh(true);
-    await refetch();
-  };
-
   const handleBookClick = async (book: Book) => {
-    setSelectedBook(book);
+    const details = await getBookDetails(book.id);
+    setSelectedBook({ ...book, ...details });
   };
 
   const handleLoadMore = () => {
@@ -87,7 +89,7 @@ const Index = () => {
                   Découvrez votre prochaine lecture
                 </h1>
                 <p className="text-base sm:text-lg text-gray-600 dark:text-gray-200">
-                  Explorez la collection Gallica
+                  Explorez, partagez et découvrez de nouveaux livres
                 </p>
               </div>
               <Link 
@@ -107,23 +109,11 @@ const Index = () => {
                 value={searchQuery}
                 onChange={handleSearch}
               />
-              {debouncedQuery && (
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  className="absolute right-2 top-1/2 -translate-y-1/2"
-                  onClick={handleRefresh}
-                  disabled={isLoading}
-                  title="Forcer une nouvelle recherche (ignorer le cache)"
-                >
-                  <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-                </Button>
-              )}
             </div>
 
             {isLoading && (
               <div className="text-center text-gray-600">
-                Recherche dans les bases de données...
+                Recherche en cours...
               </div>
             )}
 
