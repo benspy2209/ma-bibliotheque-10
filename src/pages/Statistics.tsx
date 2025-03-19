@@ -1,4 +1,3 @@
-
 import { useMemo } from 'react';
 import { Book } from '@/types/book';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -43,7 +42,6 @@ import {
   TableRow
 } from "@/components/ui/table";
 
-// Couleurs pour les graphiques
 const COLORS = [
   '#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE', '#00C49F',
   '#FFBB28', '#FF8042', '#a4de6c', '#d0ed57', '#83a6ed', '#8dd1e1'
@@ -70,7 +68,6 @@ export default function Statistics() {
   const stats = useMemo(() => {
     const totalBooks = completedBooks.length;
     
-    // Calculer le nombre total de pages
     const totalPages = completedBooks.reduce((sum, book) => {
       if (!book.numberOfPages) {
         return sum;
@@ -86,7 +83,6 @@ export default function Statistics() {
     
     const avgPagesPerBook = totalBooks > 0 ? Math.round(totalPages / totalBooks) : 0;
 
-    // Calculer la vitesse moyenne de lecture (pages/jour)
     let totalReadingDays = 0;
     let readingSpeed = 0;
 
@@ -94,7 +90,6 @@ export default function Statistics() {
       totalReadingDays = completedBooks.reduce((sum, book) => {
         if (!book.completionDate) return sum;
         const completionDate = new Date(book.completionDate);
-        // On estime qu'un livre prend en moyenne 2 semaines à lire, à ajuster si on a une date de début
         const averageReadingDays = 14;
         return sum + averageReadingDays;
       }, 0);
@@ -102,11 +97,8 @@ export default function Statistics() {
       readingSpeed = totalPages / (totalReadingDays || 1);
     }
 
-    // Calculer le temps total estimé pour lire tous les livres (en heures)
-    // On estime une vitesse de lecture moyenne de 30 pages/heure
     const totalReadingTime = totalPages / 30;
 
-    // Grouper les livres par mois
     const booksByMonth = completedBooks.reduce((acc, book) => {
       if (!book.completionDate) return acc;
       
@@ -127,12 +119,10 @@ export default function Statistics() {
       return acc;
     }, {} as Record<string, { name: string; books: number; pages: number; date: Date }>);
 
-    // Trier les données par date
     const monthlyData = Object.values(booksByMonth)
       .sort((a, b) => a.date.getTime() - b.date.getTime())
       .slice(-6);
 
-    // Calculer les auteurs les plus lus
     const authorCounts = completedBooks.reduce((acc, book) => {
       const authors = Array.isArray(book.author) ? book.author : [book.author];
       
@@ -147,12 +137,10 @@ export default function Statistics() {
       return acc;
     }, {} as Record<string, { name: string; count: number }>);
     
-    // Trier et limiter à 5 auteurs
     const topAuthors = Object.values(authorCounts)
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
-    // Calculer les langues de lecture
     const languageCounts = completedBooks.reduce((acc, book) => {
       const languages = book.language || [];
       
@@ -168,25 +156,21 @@ export default function Statistics() {
     
     const languageData = Object.values(languageCounts).sort((a, b) => b.count - a.count);
 
-    // Calculer progression annuelle
     const currentYear = getYear(new Date());
     const booksThisYear = completedBooks.filter(book => 
       book.completionDate && getYear(new Date(book.completionDate)) === currentYear
     ).length;
 
-    // Objectif de lecture annuel (estimation: 12 livres par an)
-    const yearlyGoal = 12;
+    const yearlyGoal = 50;
     const yearlyProgressPercentage = Math.min(100, (booksThisYear / yearlyGoal) * 100);
 
-    // Calculer progression mensuelle
     const currentMonth = new Date();
     const booksThisMonth = completedBooks.filter(book => 
       book.completionDate && 
       differenceInMonths(currentMonth, new Date(book.completionDate)) === 0
     ).length;
 
-    // Objectif mensuel (1 livre par mois)
-    const monthlyGoal = 1;
+    const monthlyGoal = 4;
     const monthlyProgressPercentage = Math.min(100, (booksThisMonth / monthlyGoal) * 100);
 
     return {
@@ -234,7 +218,6 @@ export default function Statistics() {
               </p>
             </div>
 
-            {/* Vue d'ensemble */}
             <div className="grid gap-4 md:grid-cols-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -281,7 +264,6 @@ export default function Statistics() {
               </Card>
             </div>
 
-            {/* Statistiques détaillées */}
             <Tabs defaultValue="overview" className="w-full">
               <TabsList className="mb-4">
                 <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
@@ -340,7 +322,7 @@ export default function Statistics() {
                         <div className="flex items-center justify-between">
                           <p className="text-sm font-medium">Objectif mensuel</p>
                           <p className="text-sm font-medium">
-                            {stats.booksThisMonth} / {stats.monthlyGoal} livre
+                            {stats.booksThisMonth} / {stats.monthlyGoal} livres
                           </p>
                         </div>
                         <Progress value={stats.monthlyProgressPercentage} />
