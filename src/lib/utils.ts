@@ -1,4 +1,3 @@
-
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { Book } from '@/types/book'
@@ -49,7 +48,6 @@ export function filterNonBookResults(books: Book[]): Book[] {
   });
 }
 
-// Vérifie si un livre correspond à l'auteur recherché
 export function isAuthorMatch(book: Book, searchQuery: string): boolean {
   if (!book.author || (Array.isArray(book.author) && book.author.length === 0)) {
     return false;
@@ -64,5 +62,18 @@ export function isAuthorMatch(book: Book, searchQuery: string): boolean {
     
     // Vérifie si le nom de l'auteur contient tous les termes de la recherche
     return searchTerms.every(term => authorLower.includes(term));
+  });
+}
+
+export function isDuplicateBook(existingBooks: Book[], newBook: Book): boolean {
+  if (!newBook || !newBook.title || !newBook.author) return false;
+  
+  const newBookKey = `${newBook.title.toLowerCase()}_${Array.isArray(newBook.author) ? newBook.author[0].toLowerCase() : newBook.author.toLowerCase()}`;
+  
+  return existingBooks.some(book => {
+    if (!book || !book.title || !book.author) return false;
+    
+    const existingBookKey = `${book.title.toLowerCase()}_${Array.isArray(book.author) ? book.author[0].toLowerCase() : book.author.toLowerCase()}`;
+    return existingBookKey === newBookKey && book.id !== newBook.id;
   });
 }

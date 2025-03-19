@@ -10,28 +10,59 @@ import {
 import { BookPlus } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { loadBooks } from "@/services/supabaseBooks";
+import { removeDuplicateBooks } from "@/lib/utils";
 
 interface AddToLibraryProps {
   onStatusChange: (status: ReadingStatus) => void;
   currentStatus?: ReadingStatus;
+  bookId: string;
+  bookTitle: string;
+  bookAuthor: string | string[];
 }
 
-export function AddToLibrary({ onStatusChange, currentStatus }: AddToLibraryProps) {
+export function AddToLibrary({ 
+  onStatusChange, 
+  currentStatus, 
+  bookId, 
+  bookTitle, 
+  bookAuthor 
+}: AddToLibraryProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleStatusChange = async (status: ReadingStatus) => {
     setIsLoading(true);
     try {
-      onStatusChange(status);
-      toast({
-        description: "Livre ajouté à votre bibliothèque",
+      // Vérification si le livre existe déjà dans la bibliothèque
+      const existingBooks = await loadBooks();
+      
+      // Création d'une clé unique pour ce livre
+      const bookKey = `${bookTitle.toLowerCase()}_${Array.isArray(bookAuthor) ? bookAuthor[0].toLowerCase() : bookAuthor.toLowerCase()}`;
+      
+      // Vérification des doublons
+      const isDuplicate = existingBooks.some(book => {
+        const existingKey = `${book.title.toLowerCase()}_${Array.isArray(book.author) ? book.author[0].toLowerCase() : book.author.toLowerCase()}`;
+        return existingKey === bookKey && book.id !== bookId;
       });
+
+      if (isDuplicate) {
+        toast({
+          variant: "destructive",
+          description: "Ce livre est déjà dans votre bibliothèque.",
+        });
+      } else {
+        onStatusChange(status);
+        toast({
+          description: "Livre ajouté à votre bibliothèque",
+        });
+      }
     } catch (error) {
       toast({
         variant: "destructive",
         description: "Une erreur est survenue",
       });
+      console.error("Erreur lors de l'ajout du livre:", error);
     }
     setIsLoading(false);
   };

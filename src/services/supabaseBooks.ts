@@ -1,5 +1,7 @@
+
 import { createClient } from '@supabase/supabase-js';
 import { Book } from '@/types/book';
+import { isDuplicateBook } from '@/lib/utils';
 
 const supabaseUrl = 'https://ckeptymeczykfnbfcfuq.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrZXB0eW1lY3p5a2ZuYmZjZnVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE4MDM2MzEsImV4cCI6MjA1NzM3OTYzMX0.bwd0xD497DJmS5TN7UtNXVav-tB_5j0g6k2mgGENczo';
@@ -22,6 +24,12 @@ export async function saveBook(book: Book) {
     
     if (!user) {
       throw new Error('Vous devez être connecté pour effectuer cette action');
+    }
+
+    // Vérifier si le livre est un doublon avant de l'enregistrer
+    const existingBooks = await loadBooks();
+    if (isDuplicateBook(existingBooks, book)) {
+      throw new Error('Ce livre est déjà dans votre bibliothèque');
     }
 
     const { error } = await supabase
