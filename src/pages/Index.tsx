@@ -4,13 +4,14 @@ import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Search } from 'lucide-react';
+import { Search, RefreshCw } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
 import { useToast } from "@/components/ui/use-toast";
 import NavBar from '@/components/NavBar';
 import { searchBooks } from '@/services/bookSearch';
+import { invalidateCache } from '@/services/searchCache';
 
 const BOOKS_PER_PAGE = 12;
 
@@ -20,11 +21,12 @@ const Index = () => {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [displayedBooks, setDisplayedBooks] = useState(BOOKS_PER_PAGE);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [forceRefresh, setForceRefresh] = useState(false);
   const { toast } = useToast();
 
-  const { data: books = [], isLoading } = useQuery({
-    queryKey: ['books', debouncedQuery],
-    queryFn: () => searchBooks(debouncedQuery),
+  const { data: books = [], isLoading, refetch } = useQuery({
+    queryKey: ['books', debouncedQuery, refreshKey, forceRefresh],
+    queryFn: () => searchBooks(debouncedQuery, { forceRefresh }),
     enabled: debouncedQuery.length > 0
   });
 
@@ -32,12 +34,24 @@ const Index = () => {
     const value = e.target.value;
     setSearchQuery(value);
     setDisplayedBooks(BOOKS_PER_PAGE);
+    setForceRefresh(false); // Réinitialiser forceRefresh quand une nouvelle recherche est lancée
     
     const timeoutId = setTimeout(() => {
       setDebouncedQuery(value);
     }, 500);
 
     return () => clearTimeout(timeoutId);
+  };
+
+  const handleRefresh = async () => {
+    if (!debouncedQuery) return;
+    
+    toast({
+      description: "Recherche forcée en cours...",
+    });
+    
+    setForceRefresh(true);
+    await refetch();
   };
 
   const handleBookClick = async (book: Book) => {
@@ -93,11 +107,23 @@ const Index = () => {
                 value={searchQuery}
                 onChange={handleSearch}
               />
+              {debouncedQuery && (
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="absolute right-2 top-1/2 -translate-y-1/2"
+                  onClick={handleRefresh}
+                  disabled={isLoading}
+                  title="Forcer une nouvelle recherche (ignorer le cache)"
+                >
+                  <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                </Button>
+              )}
             </div>
 
             {isLoading && (
               <div className="text-center text-gray-600">
-                Recherche dans Gallica...
+                Recherche dans les bases de données...
               </div>
             )}
 
