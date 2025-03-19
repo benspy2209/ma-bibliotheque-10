@@ -11,10 +11,12 @@ import NavBar from '@/components/NavBar';
 import { loadBooks } from '@/services/supabaseBooks';
 import { useQuery } from '@tanstack/react-query';
 import { BookSections } from '@/components/library/BookSections';
+import { AuthorFilter } from '@/components/library/AuthorFilter';
 
 export default function Library() {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>('recent');
+  const [selectedAuthor, setSelectedAuthor] = useState<string | null>(null);
   const { toast } = useToast();
   const { sortBooks } = useBookSort();
   const { viewMode, toggleView } = useViewPreference();
@@ -33,7 +35,17 @@ export default function Library() {
     }
   });
 
-  const sortedBooks = sortBooks(books, sortBy);
+  // Filter books by author if an author is selected
+  const filteredBooks = selectedAuthor
+    ? books.filter(book => {
+        if (Array.isArray(book.author)) {
+          return book.author.includes(selectedAuthor);
+        }
+        return book.author === selectedAuthor;
+      })
+    : books;
+
+  const sortedBooks = sortBooks(filteredBooks, sortBy);
 
   const handleBookUpdate = () => {
     refetch();
@@ -52,9 +64,19 @@ export default function Library() {
             </div>
           </div>
 
+          <div className="mb-6">
+            <AuthorFilter 
+              books={books}
+              selectedAuthor={selectedAuthor}
+              onAuthorSelect={setSelectedAuthor}
+            />
+          </div>
+
           {sortedBooks.length === 0 ? (
-            <p className="text-center text-gray-600">
-              Votre bibliothèque est vide. Ajoutez des livres depuis la recherche !
+            <p className="text-center text-gray-600 mt-8">
+              {selectedAuthor 
+                ? `Aucun livre de ${selectedAuthor} dans votre bibliothèque.`
+                : "Votre bibliothèque est vide. Ajoutez des livres depuis la recherche !"}
             </p>
           ) : (
             <BookSections 
