@@ -178,25 +178,28 @@ export default function Statistics() {
     const avgReadingTime = totalReadingDays / Math.max(1, completedBooks.length);
     
     const readingTimeDistribution = [
-      { name: '1-7 jours', value: 0 },
-      { name: '8-14 jours', value: 0 },
-      { name: '15-30 jours', value: 0 },
-      { name: '31+ jours', value: 0 }
+      { name: '1-7 jours', value: 0, color: '#8884d8' },
+      { name: '8-14 jours', value: 0, color: '#82ca9d' },
+      { name: '15-30 jours', value: 0, color: '#ffc658' },
+      { name: '31+ jours', value: 0, color: '#ff8042' }
     ];
     
     completedBooks.forEach(book => {
-      if (book.readingTimeDays) {
-        if (book.readingTimeDays <= 7) {
+      const days = book.readingTimeDays;
+      if (days !== undefined) {
+        if (days <= 7) {
           readingTimeDistribution[0].value++;
-        } else if (book.readingTimeDays <= 14) {
+        } else if (days <= 14) {
           readingTimeDistribution[1].value++;
-        } else if (book.readingTimeDays <= 30) {
+        } else if (days <= 30) {
           readingTimeDistribution[2].value++;
         } else {
           readingTimeDistribution[3].value++;
         }
       }
     });
+
+    const filteredReadingTimeDistribution = readingTimeDistribution.filter(item => item.value > 0);
 
     return {
       totalBooks,
@@ -217,18 +220,30 @@ export default function Statistics() {
       toReadBooks: toReadBooks.length,
       totalReadingDays,
       avgReadingTime: avgReadingTime.toFixed(1),
-      readingTimeDistribution
+      readingTimeDistribution,
+      hasReadingTimeData: filteredReadingTimeDistribution.length > 0
     };
   }, [completedBooks, readingBooks, toReadBooks]);
 
-  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }: any) => {
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name, value }: any) => {
+    if (value === 0) return null;
+    
+    const RADIAN = Math.PI / 180;
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-    const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
-    const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
   
     return percent > 0.05 ? (
-      <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central">
-        {name}
+      <text 
+        x={x} 
+        y={y} 
+        fill="white" 
+        textAnchor="middle" 
+        dominantBaseline="central"
+        fontSize={12}
+        fontWeight="bold"
+      >
+        {name} ({value})
       </text>
     ) : null;
   };
@@ -584,26 +599,40 @@ export default function Statistics() {
                       <CardDescription>Nombre de livres par durée de lecture</CardDescription>
                     </CardHeader>
                     <CardContent className="h-[300px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={stats.readingTimeDistribution}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            label={renderCustomizedLabel}
-                            outerRadius={80}
-                            fill="#8884d8"
-                            dataKey="value"
-                          >
-                            {stats.readingTimeDistribution.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Legend />
-                          <Tooltip formatter={(value, name) => [`${value} livre(s)`, name]} />
-                        </PieChart>
-                      </ResponsiveContainer>
+                      {stats.hasReadingTimeData ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={stats.readingTimeDistribution}
+                              cx="50%"
+                              cy="50%"
+                              labelLine={false}
+                              label={renderCustomizedLabel}
+                              outerRadius={120}
+                              fill="#8884d8"
+                              dataKey="value"
+                              nameKey="name"
+                            >
+                              {stats.readingTimeDistribution.map((entry, index) => (
+                                <Cell 
+                                  key={`cell-${index}`} 
+                                  fill={entry.color || COLORS[index % COLORS.length]} 
+                                />
+                              ))}
+                            </Pie>
+                            <Legend layout="horizontal" verticalAlign="bottom" align="center" />
+                            <Tooltip formatter={(value, name) => [`${value} livre(s)`, name]} />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <div className="flex items-center justify-center h-full">
+                          <p className="text-center text-muted-foreground">
+                            Aucune donnée de temps de lecture disponible.
+                            <br />
+                            Ajoutez le temps de lecture à vos livres pour voir les statistiques.
+                          </p>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
 
