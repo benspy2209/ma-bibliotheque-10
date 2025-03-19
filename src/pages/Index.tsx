@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -44,8 +43,15 @@ const Index = () => {
   const allBooks = [
     ...(results[0].data || []), 
     ...(results[1].data || [])
-  ].filter(book => book && book.title); // S'assurer que tous les livres ont un titre
+  ].filter(book => 
+    book && 
+    book.title && 
+    book.language && 
+    (book.language.includes('fr') || book.language.includes('fre') || book.language.includes('fra'))
+  );
   const books = removeDuplicateBooks(allBooks);
+  
+  console.log(`Total des résultats combinés en français: ${books.length} livres`);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -96,7 +102,6 @@ const Index = () => {
   const visibleBooks = books.slice(0, displayedBooks);
   const hasMoreBooks = displayedBooks < books.length;
 
-  // Reste du code inchangé
   return (
     <>
       <div className="min-h-screen">

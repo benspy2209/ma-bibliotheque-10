@@ -61,9 +61,10 @@ export async function searchBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
+    // Ajout du filtre de langue 'language:fre' pour récupérer seulement des livres en français
     const encodedQuery = encodeURIComponent(query.replace(/['"]/g, ''));
     const openLibraryResponse = await fetch(
-      `${OPEN_LIBRARY_API}/search.json?q=${encodedQuery}&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key&limit=40`
+      `${OPEN_LIBRARY_API}/search.json?q=${encodedQuery}+language:fre&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key&limit=40`
     );
 
     if (!openLibraryResponse.ok) {
@@ -80,10 +81,14 @@ export async function searchBooks(query: string): Promise<Book[]> {
     const results = await Promise.all(
       openLibraryData.docs
         .filter((doc: any) => {
-          // Filtrer les résultats sans titre ou auteur
+          // Filtrer les résultats sans titre ou auteur, et vérifier que la langue est le français
           const hasTitle = doc.title && typeof doc.title === 'string';
           const hasAuthor = doc.author_name && doc.author_name.length > 0;
-          return hasTitle && hasAuthor;
+          const isFrench = doc.language && 
+                          (doc.language.includes('fre') || 
+                           doc.language.includes('fra') || 
+                           doc.language.includes('fr'));
+          return hasTitle && hasAuthor && isFrench;
         })
         .map(async (doc: any) => {
           const bookDetails = await fetchBookDetails(doc.key);
@@ -112,7 +117,7 @@ export async function searchBooks(query: string): Promise<Book[]> {
             title: doc.title,
             author: doc.author_name || ['Auteur inconnu'],
             cover: cover,
-            language: doc.language || [],
+            language: ['fr'], // Forcer la langue à français
             publishDate: doc.first_publish_date,
             description,
             numberOfPages: editionDetails?.number_of_pages || bookDetails?.number_of_pages,
@@ -122,7 +127,9 @@ export async function searchBooks(query: string): Promise<Book[]> {
         })
     );
 
-    return results.filter(Boolean);
+    const frenchResults = results.filter(Boolean);
+    console.log(`OpenLibrary: Trouvé ${frenchResults.length} livres en français pour "${query}"`);
+    return frenchResults;
   } catch (error) {
     console.error('Erreur lors de la recherche OpenLibrary:', error);
     return [];
