@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -19,7 +18,7 @@ const bookSchema = z.object({
   author: z.string().min(1, "L'auteur est requis"),
   language: z.string().default("fr"),
   description: z.string().optional(),
-  numberOfPages: z.string().optional().transform(val => val ? parseInt(val) : undefined),
+  numberOfPages: z.string().optional().transform(val => val ? Number(val) : undefined),
   publishDate: z.string().optional(),
   isbn: z.string().optional(),
 });
