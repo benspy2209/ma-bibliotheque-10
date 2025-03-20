@@ -12,11 +12,14 @@ import { loadBooks } from '@/services/supabaseBooks';
 import { useQuery } from '@tanstack/react-query';
 import { BookSections } from '@/components/library/BookSections';
 import { AuthorFilter } from '@/components/library/AuthorFilter';
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 export default function Library() {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>('recent');
   const [selectedAuthor, setSelectedAuthor] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const { toast } = useToast();
   const { sortBooks } = useBookSort();
   const { viewMode, toggleView } = useViewPreference();
@@ -35,15 +38,41 @@ export default function Library() {
     }
   });
 
-  // Filter books by author if an author is selected
-  const filteredBooks = selectedAuthor
-    ? books.filter(book => {
+  // Filter books by search query
+  const searchFilter = (book: Book) => {
+    if (!searchQuery) return true;
+    
+    const query = searchQuery.toLowerCase();
+    
+    // Search by title
+    const titleMatch = book.title.toLowerCase().includes(query);
+    
+    // Search by author
+    let authorMatch = false;
+    if (Array.isArray(book.author)) {
+      authorMatch = book.author.some(author => 
+        author && author.toLowerCase().includes(query)
+      );
+    } else if (book.author) {
+      authorMatch = book.author.toLowerCase().includes(query);
+    }
+    
+    return titleMatch || authorMatch;
+  };
+
+  // Apply both filters: author filter and search query filter
+  const filteredBooks = books
+    .filter(book => {
+      // First apply the author filter
+      if (selectedAuthor) {
         if (Array.isArray(book.author)) {
           return book.author.includes(selectedAuthor);
         }
         return book.author === selectedAuthor;
-      })
-    : books;
+      }
+      return true;
+    })
+    .filter(searchFilter); // Then apply the search query filter
 
   const sortedBooks = sortBooks(filteredBooks, sortBy);
 
@@ -64,19 +93,33 @@ export default function Library() {
             </div>
           </div>
 
-          <div className="mb-6">
-            <AuthorFilter 
-              books={books}
-              selectedAuthor={selectedAuthor}
-              onAuthorSelect={setSelectedAuthor}
-            />
+          <div className="mb-6 flex flex-col md:flex-row items-start gap-4">
+            <div className="w-full md:w-64">
+              <AuthorFilter 
+                books={books}
+                selectedAuthor={selectedAuthor}
+                onAuthorSelect={setSelectedAuthor}
+              />
+            </div>
+            <div className="w-full md:w-96 relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Input
+                type="search"
+                placeholder="Rechercher par titre ou auteur..."
+                className="pl-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
           </div>
 
           {sortedBooks.length === 0 ? (
             <p className="text-center text-gray-600 mt-8">
               {selectedAuthor 
                 ? `Aucun livre de ${selectedAuthor} dans votre bibliothèque.`
-                : "Votre bibliothèque est vide. Ajoutez des livres depuis la recherche !"}
+                : searchQuery 
+                  ? `Aucun livre ne correspond à votre recherche "${searchQuery}".`
+                  : "Votre bibliothèque est vide. Ajoutez des livres depuis la recherche !"}
             </p>
           ) : (
             <BookSections 
