@@ -77,12 +77,30 @@ export function isAuthorMatch(book: Book, searchQuery: string): boolean {
 export function isDuplicateBook(existingBooks: Book[], newBook: Book): boolean {
   if (!newBook || !newBook.title || !newBook.author) return false;
   
-  const newBookKey = `${newBook.title.toLowerCase()}_${Array.isArray(newBook.author) ? newBook.author[0].toLowerCase() : newBook.author.toLowerCase()}`;
+  // Création d'une clé unique pour le nouveau livre basée sur le titre et l'auteur (méthode normalisée)
+  const newBookTitle = newBook.title.toLowerCase().trim();
+  const newBookAuthor = Array.isArray(newBook.author) 
+    ? newBook.author[0]?.toLowerCase().trim() 
+    : newBook.author.toLowerCase().trim();
   
+  if (!newBookAuthor) return false;
+  
+  // Vérifier parmi les livres existants
   return existingBooks.some(book => {
+    // Ignorer la comparaison avec le même livre (même ID)
+    if (book.id === newBook.id) return false;
+    
     if (!book || !book.title || !book.author) return false;
     
-    const existingBookKey = `${book.title.toLowerCase()}_${Array.isArray(book.author) ? book.author[0].toLowerCase() : book.author.toLowerCase()}`;
-    return existingBookKey === newBookKey && book.id !== newBook.id;
+    // Normaliser les données du livre existant
+    const existingBookTitle = book.title.toLowerCase().trim();
+    const existingBookAuthor = Array.isArray(book.author) 
+      ? book.author[0]?.toLowerCase().trim() 
+      : book.author.toLowerCase().trim();
+    
+    if (!existingBookAuthor) return false;
+    
+    // Comparer titre et auteur
+    return existingBookTitle === newBookTitle && existingBookAuthor === newBookAuthor;
   });
 }
