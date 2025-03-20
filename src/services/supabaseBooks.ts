@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import { Book } from '@/types/book';
 import { isDuplicateBook } from '@/lib/utils';
@@ -26,17 +25,22 @@ export async function saveBook(book: Book) {
       throw new Error('Vous devez être connecté pour effectuer cette action');
     }
 
-    // Vérifier si le livre est un doublon uniquement pour les nouveaux livres
-    // Si nous sommes en train d'éditer un livre existant, on ne fait pas la vérification
-    const existingBooks = await loadBooks();
-    
-    // MODIFICATION: On filtre les livres pour exclure le livre actuel de la vérification des doublons
-    // Un livre ne peut pas être son propre doublon lors d'une édition
-    const otherBooks = existingBooks.filter(b => b.id !== book.id);
-    
-    // On ne vérifie les doublons que si la liste filtrée contient des livres
-    if (otherBooks.length > 0) {
-      const existingBook = otherBooks.find(b => isDuplicateBook([b], book));
+    // Avant de faire une mise à jour, vérifier si ce livre existe déjà dans la base de données
+    // avec le même ID - si c'est le cas, c'est une édition, pas une création
+    const { data: existingBookData } = await supabase
+      .from('books')
+      .select('id')
+      .eq('id', book.id)
+      .maybeSingle();
+
+    // Si le livre existe déjà dans la base avec cet ID, c'est une édition - pas besoin de vérifier les doublons
+    const isEditing = !!existingBookData;
+
+    // La vérification des doublons ne s'applique qu'aux nouveaux livres
+    if (!isEditing) {
+      const existingBooks = await loadBooks();
+      
+      const existingBook = existingBooks.find(b => isDuplicateBook([b], book));
       
       if (existingBook) {
         return {
