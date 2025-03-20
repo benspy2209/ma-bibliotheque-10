@@ -60,11 +60,27 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
 
   const saveToLibrary = async (bookToSave: Book) => {
     try {
-      await saveBook(bookToSave);
-      onUpdate();
-      toast({
-        description: "Les modifications ont été enregistrées",
-      });
+      const result = await saveBook(bookToSave);
+      
+      if (result.success) {
+        onUpdate();
+        toast({
+          description: "Les modifications ont été enregistrées",
+        });
+      } else {
+        // Gestion des différents types d'erreurs
+        if (result.error === 'duplicate') {
+          toast({
+            variant: "destructive",
+            description: "Ce livre est déjà dans votre bibliothèque",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            description: result.message || "Une erreur est survenue lors de la sauvegarde",
+          });
+        }
+      }
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
       toast({

@@ -10,8 +10,7 @@ import {
 import { BookPlus } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { loadBooks } from "@/services/supabaseBooks";
-import { removeDuplicateBooks } from "@/lib/utils";
+import { loadBooks, saveBook } from "@/services/supabaseBooks";
 
 interface AddToLibraryProps {
   onStatusChange: (status: ReadingStatus) => void;
@@ -34,37 +33,24 @@ export function AddToLibrary({
   const handleStatusChange = async (status: ReadingStatus) => {
     setIsLoading(true);
     try {
-      // Vérification si le livre existe déjà dans la bibliothèque
-      const existingBooks = await loadBooks();
+      // La vérification des doublons est maintenant gérée directement dans saveBook
+      // Pas besoin de l'implémenter ici
+      const result = await onStatusChange(status);
       
-      // Création d'une clé unique pour ce livre
-      const bookKey = `${bookTitle.toLowerCase()}_${Array.isArray(bookAuthor) ? bookAuthor[0].toLowerCase() : bookAuthor.toLowerCase()}`;
+      // Le composant parent (qui appelle la méthode saveBook) gère maintenant
+      // l'affichage du toast de succès
       
-      // Vérification des doublons
-      const isDuplicate = existingBooks.some(book => {
-        const existingKey = `${book.title.toLowerCase()}_${Array.isArray(book.author) ? book.author[0].toLowerCase() : book.author.toLowerCase()}`;
-        return existingKey === bookKey && book.id !== bookId;
-      });
-
-      if (isDuplicate) {
-        toast({
-          variant: "destructive",
-          description: "Ce livre est déjà dans votre bibliothèque.",
-        });
-      } else {
-        onStatusChange(status);
-        toast({
-          description: "Livre ajouté à votre bibliothèque",
-        });
-      }
     } catch (error) {
       toast({
         variant: "destructive",
-        description: "Une erreur est survenue",
+        description: error instanceof Error 
+          ? error.message 
+          : "Une erreur est survenue lors de l'ajout du livre",
       });
       console.error("Erreur lors de l'ajout du livre:", error);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const statusLabels: Record<ReadingStatus, string> = {

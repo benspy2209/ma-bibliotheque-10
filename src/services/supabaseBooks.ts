@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import { Book } from '@/types/book';
 import { isDuplicateBook } from '@/lib/utils';
@@ -28,8 +27,19 @@ export async function saveBook(book: Book) {
 
     // Vérifier si le livre est un doublon avant de l'enregistrer
     const existingBooks = await loadBooks();
-    if (isDuplicateBook(existingBooks, book)) {
-      throw new Error('Ce livre est déjà dans votre bibliothèque');
+    
+    // Vérification améliorée: on extrait d'abord le livre existant s'il y en a un
+    const existingBook = existingBooks.find(b => isDuplicateBook([b], book));
+    
+    if (existingBook) {
+      // On renvoie le livre existant au lieu de lancer une erreur
+      // pour permettre une meilleure gestion par l'interface
+      return {
+        success: false,
+        error: 'duplicate',
+        existingBook,
+        message: 'Ce livre est déjà dans votre bibliothèque'
+      };
     }
 
     const { error } = await supabase
@@ -44,11 +54,21 @@ export async function saveBook(book: Book) {
 
     if (error) {
       console.error('Erreur Supabase lors de la sauvegarde:', error);
-      throw new Error(`Erreur lors de la sauvegarde : ${error.message}`);
+      return {
+        success: false,
+        error: 'database',
+        message: `Erreur lors de la sauvegarde : ${error.message}`
+      };
     }
+    
+    return { success: true };
   } catch (error) {
     console.error('Erreur lors de la sauvegarde:', error);
-    throw error;
+    return {
+      success: false,
+      error: 'unknown',
+      message: error instanceof Error ? error.message : 'Erreur inconnue'
+    };
   }
 }
 
