@@ -1,9 +1,10 @@
+
 import { useState } from 'react';
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Search } from 'lucide-react';
+import { Search, ShoppingCart } from 'lucide-react';
 import { useQueries } from '@tanstack/react-query';
 import { searchBooks } from '@/services/openLibrary';
 import { searchGoogleBooks } from '@/services/googleBooks';
@@ -11,8 +12,9 @@ import { getBookDetails } from '@/services/bookDetails';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
 import { removeDuplicateBooks } from '@/lib/utils';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import NavBar from '@/components/NavBar';
+import { AddManualBook } from '@/components/AddManualBook';
 
 const BOOKS_PER_PAGE = 12;
 
@@ -85,6 +87,15 @@ const Index = () => {
     }
   };
 
+  const getAmazonSearchUrl = (book: Book) => {
+    const searchQuery = encodeURIComponent(`${book.title} ${Array.isArray(book.author) ? book.author[0] : book.author}`);
+    return `https://www.amazon.fr/s?k=${searchQuery}&i=stripbooks`;
+  };
+
+  const handleAmazonClick = (e: React.MouseEvent<HTMLAnchorElement>, book: Book) => {
+    e.stopPropagation(); // Éviter de déclencher handleBookClick
+  };
+
   const handleLoadMore = () => {
     if (displayedBooks >= books.length) {
       toast({
@@ -146,7 +157,7 @@ const Index = () => {
               {(!debouncedQuery ? [] : visibleBooks).map((book) => (
                 <Card 
                   key={book.id} 
-                  className="book-card group cursor-pointer"
+                  className="book-card group cursor-pointer relative"
                   onClick={() => handleBookClick(book)}
                 >
                   <img
@@ -159,14 +170,27 @@ const Index = () => {
                     <p className="text-sm text-gray-600 dark:text-gray-800">
                       {Array.isArray(book.author) ? book.author[0] : book.author}
                     </p>
+                    <a 
+                      href={getAmazonSearchUrl(book)}
+                      onClick={(e) => handleAmazonClick(e, book)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute bottom-2 right-2 bg-amber-500 hover:bg-amber-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Acheter sur Amazon"
+                    >
+                      <ShoppingCart className="h-4 w-4" />
+                    </a>
                   </div>
                 </Card>
               ))}
             </div>
 
             {debouncedQuery && visibleBooks.length === 0 && !isLoading && (
-              <div className="text-center text-gray-600">
-                Aucun livre trouvé
+              <div className="flex flex-col items-center space-y-4 mt-8">
+                <div className="text-center text-gray-600 mb-4">
+                  Aucun livre trouvé pour "{debouncedQuery}"
+                </div>
+                <AddManualBook onBookAdded={handleBookUpdate} />
               </div>
             )}
 
