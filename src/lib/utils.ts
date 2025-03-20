@@ -2,8 +2,16 @@ import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { Book } from '@/types/book'
 
+// Ajout de l'ID d'affilié Amazon France
+export const AMAZON_AFFILIATE_ID = 'votreid-21'; // Remplacez par votre identifiant d'affilié Amazon
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
+}
+
+export function getAmazonAffiliateUrl(book: Book) {
+  const searchQuery = encodeURIComponent(`${book.title} ${Array.isArray(book.author) ? book.author[0] : book.author}`);
+  return `https://www.amazon.fr/s?k=${searchQuery}&i=stripbooks&tag=${AMAZON_AFFILIATE_ID}`;
 }
 
 export function removeDuplicateBooks(books: Book[]): Book[] {

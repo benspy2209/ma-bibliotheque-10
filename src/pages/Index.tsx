@@ -10,7 +10,7 @@ import { searchGoogleBooks } from '@/services/googleBooks';
 import { getBookDetails } from '@/services/bookDetails';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
-import { removeDuplicateBooks } from '@/lib/utils';
+import { removeDuplicateBooks, getAmazonAffiliateUrl } from '@/lib/utils';
 import { useToast } from "@/hooks/use-toast";
 import NavBar from '@/components/NavBar';
 import { AddManualBook } from '@/components/AddManualBook';
@@ -87,8 +87,7 @@ const Index = () => {
   };
 
   const getAmazonSearchUrl = (book: Book) => {
-    const searchQuery = encodeURIComponent(`${book.title} ${Array.isArray(book.author) ? book.author[0] : book.author}`);
-    return `https://www.amazon.fr/s?k=${searchQuery}&i=stripbooks`;
+    return getAmazonAffiliateUrl(book);
   };
 
   const handleAmazonClick = (e: React.MouseEvent<HTMLAnchorElement>, book: Book) => {
