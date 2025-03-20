@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 import { Book } from '@/types/book';
 import { isDuplicateBook } from '@/lib/utils';
@@ -87,9 +88,15 @@ export async function loadBooks() {
   
   console.log("Utilisateur actuel:", user);
   
+  if (!user) {
+    console.log("Aucun utilisateur connecté, retour d'une liste vide");
+    return [];
+  }
+  
   const { data, error } = await supabase
     .from('books')
     .select('*')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
   console.log("Données reçues:", data);
