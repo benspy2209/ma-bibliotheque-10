@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -18,7 +19,7 @@ const bookSchema = z.object({
   author: z.string().min(1, "L'auteur est requis"),
   language: z.string().default("fr"),
   description: z.string().optional(),
-  numberOfPages: z.string().optional().transform(val => val ? Number(val) : undefined),
+  numberOfPages: z.coerce.number().optional(),
   publishDate: z.string().optional(),
   isbn: z.string().optional(),
 });
@@ -42,7 +43,7 @@ export function AddManualBook({ onBookAdded }: AddManualBookProps) {
       author: "",
       language: "fr",
       description: "",
-      numberOfPages: "",
+      numberOfPages: undefined,
       publishDate: "",
       isbn: "",
     },
