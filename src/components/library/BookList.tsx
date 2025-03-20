@@ -6,10 +6,10 @@ import { StarRating } from '../StarRating';
 import { ShoppingCart } from 'lucide-react';
 import { getAmazonAffiliateUrl } from '@/lib/utils';
 import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface BookListProps {
   books: Book[];
@@ -39,7 +39,7 @@ export const BookList = ({ books, onBookClick }: BookListProps) => {
       {books.map((book) => (
         <Card 
           key={book.id}
-          className="flex hover:shadow-lg transition-shadow cursor-pointer animate-fade-in"
+          className="flex hover:shadow-lg transition-shadow cursor-pointer animate-fade-in group relative"
           onClick={() => onBookClick(book)}
         >
           <div className="relative w-[100px] h-[150px] shrink-0">
@@ -52,6 +52,22 @@ export const BookList = ({ books, onBookClick }: BookListProps) => {
                 target.src = '/placeholder.svg';
               }}
             />
+            
+            {/* Amazon Shopping Cart Overlay on Image Hover */}
+            {(!book.purchased && (!book.status || book.status === 'to-read')) && (
+              <a 
+                href={getAmazonAffiliateUrl(book)}
+                onClick={handleAmazonClick}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300"
+                title="Acheter sur Amazon"
+              >
+                <div className="bg-amber-500 hover:bg-amber-600 text-white p-1.5 rounded-full transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                  <ShoppingCart className="h-4 w-4" />
+                </div>
+              </a>
+            )}
           </div>
           <div className="flex flex-col flex-grow p-4 gap-2">
             <div>
@@ -70,17 +86,17 @@ export const BookList = ({ books, onBookClick }: BookListProps) => {
                 {statusLabels[book.status || 'to-read']}
               </Badge>
               {(!book.purchased && (!book.status || book.status === 'to-read')) && (
-                <HoverCard>
-                  <HoverCardTrigger asChild>
+                <Popover>
+                  <PopoverTrigger asChild>
                     <Badge 
                       variant="destructive" 
-                      className="flex items-center gap-1 cursor-pointer"
+                      className="flex items-center gap-1 cursor-pointer hover:bg-red-600 transition-colors"
                     >
                       <ShoppingCart className="size-3" />
                       À acheter
                     </Badge>
-                  </HoverCardTrigger>
-                  <HoverCardContent className="w-auto p-2">
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-2">
                     <a 
                       href={getAmazonAffiliateUrl(book)}
                       onClick={handleAmazonClick}
@@ -91,8 +107,8 @@ export const BookList = ({ books, onBookClick }: BookListProps) => {
                       <ShoppingCart className="h-4 w-4" />
                       Acheter sur Amazon
                     </a>
-                  </HoverCardContent>
-                </HoverCard>
+                  </PopoverContent>
+                </Popover>
               )}
               {book.status === 'completed' && book.completionDate && (
                 <Badge variant="outline" className="bg-muted/50">

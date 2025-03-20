@@ -35,7 +35,7 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
           onClick={handleAmazonClick}
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute bottom-2 right-2 bg-amber-500 hover:bg-amber-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0"
+          className="absolute bottom-2 right-2 bg-amber-500 hover:bg-amber-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 shadow-lg hover:shadow-amber-500/50"
           title="Acheter sur Amazon"
         >
           <ShoppingCart className="h-4 w-4" />
