@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 import { Book } from '@/types/book';
 import { isDuplicateBook } from '@/lib/utils';
@@ -25,21 +26,26 @@ export async function saveBook(book: Book) {
       throw new Error('Vous devez être connecté pour effectuer cette action');
     }
 
-    // Vérifier si le livre est un doublon avant de l'enregistrer
+    // Vérifier si le livre est un doublon uniquement pour les nouveaux livres
+    // Si nous sommes en train d'éditer un livre existant, on ne fait pas la vérification
     const existingBooks = await loadBooks();
     
-    // Vérification améliorée: on extrait d'abord le livre existant s'il y en a un
-    const existingBook = existingBooks.find(b => isDuplicateBook([b], book));
+    // MODIFICATION: On filtre les livres pour exclure le livre actuel de la vérification des doublons
+    // Un livre ne peut pas être son propre doublon lors d'une édition
+    const otherBooks = existingBooks.filter(b => b.id !== book.id);
     
-    if (existingBook) {
-      // On renvoie le livre existant au lieu de lancer une erreur
-      // pour permettre une meilleure gestion par l'interface
-      return {
-        success: false,
-        error: 'duplicate',
-        existingBook,
-        message: 'Ce livre est déjà dans votre bibliothèque'
-      };
+    // On ne vérifie les doublons que si la liste filtrée contient des livres
+    if (otherBooks.length > 0) {
+      const existingBook = otherBooks.find(b => isDuplicateBook([b], book));
+      
+      if (existingBook) {
+        return {
+          success: false,
+          error: 'duplicate',
+          existingBook,
+          message: 'Ce livre est déjà dans votre bibliothèque'
+        };
+      }
     }
 
     const { error } = await supabase
