@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -128,12 +127,15 @@ const Index = () => {
                   Explorez, partagez et découvrez de nouveaux livres
                 </p>
               </div>
-              <Link 
-                to="/library" 
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-              >
-                Ma Bibliothèque
-              </Link>
+              <div className="flex gap-4 items-center w-full sm:w-auto">
+                <AddManualBook onBookAdded={handleBookUpdate} />
+                <Link 
+                  to="/library" 
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                >
+                  Ma Bibliothèque
+                </Link>
+              </div>
             </div>
 
             <div className="relative mb-8 sm:mb-12">
@@ -190,7 +192,6 @@ const Index = () => {
                 <div className="text-center text-gray-600 mb-4">
                   Aucun livre trouvé pour "{debouncedQuery}"
                 </div>
-                <AddManualBook onBookAdded={handleBookUpdate} />
               </div>
             )}
 
