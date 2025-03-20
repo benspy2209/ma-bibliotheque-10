@@ -17,7 +17,7 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
   return (
     <Card 
       key={book.id} 
-      className="book-card group cursor-pointer relative"
+      className="book-card group cursor-pointer relative overflow-hidden"
       onClick={() => onBookClick(book)}
     >
       <img
@@ -35,7 +35,7 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
           onClick={handleAmazonClick}
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute bottom-2 right-2 bg-amber-500 hover:bg-amber-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute bottom-2 right-2 bg-amber-500 hover:bg-amber-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0"
           title="Acheter sur Amazon"
         >
           <ShoppingCart className="h-4 w-4" />

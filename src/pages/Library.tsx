@@ -20,6 +20,7 @@ export default function Library() {
   const [sortBy, setSortBy] = useState<SortOption>('recent');
   const [selectedAuthor, setSelectedAuthor] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [toBuyFilter, setToBuyFilter] = useState<boolean | null>(null);
   const { toast } = useToast();
   const { sortBooks } = useBookSort();
   const { viewMode, toggleView } = useViewPreference();
@@ -60,7 +61,7 @@ export default function Library() {
     return titleMatch || authorMatch;
   };
 
-  // Apply both filters: author filter and search query filter
+  // Apply all filters: author filter, search query filter, and to-buy filter
   const filteredBooks = books
     .filter(book => {
       // First apply the author filter
@@ -72,12 +73,25 @@ export default function Library() {
       }
       return true;
     })
-    .filter(searchFilter); // Then apply the search query filter
+    .filter(searchFilter) // Then apply the search query filter
+    .filter(book => {
+      // Apply the "to buy" filter if active
+      if (toBuyFilter === true) {
+        return !book.purchased && (!book.status || book.status === 'to-read');
+      } else if (toBuyFilter === false) {
+        return book.purchased || !((!book.status || book.status === 'to-read'));
+      }
+      return true;
+    });
 
   const sortedBooks = sortBooks(filteredBooks, sortBy);
 
   const handleBookUpdate = () => {
     refetch();
+  };
+
+  const handleToBuyFilterChange = (value: boolean | null) => {
+    setToBuyFilter(value);
   };
 
   return (
@@ -119,13 +133,17 @@ export default function Library() {
                 ? `Aucun livre de ${selectedAuthor} dans votre bibliothèque.`
                 : searchQuery 
                   ? `Aucun livre ne correspond à votre recherche "${searchQuery}".`
-                  : "Votre bibliothèque est vide. Ajoutez des livres depuis la recherche !"}
+                  : toBuyFilter === true
+                    ? "Aucun livre à acheter dans votre bibliothèque."
+                    : "Votre bibliothèque est vide. Ajoutez des livres depuis la recherche !"}
             </p>
           ) : (
             <BookSections 
               books={sortedBooks}
               viewMode={viewMode}
               onBookClick={setSelectedBook}
+              toBuyFilter={toBuyFilter}
+              onToBuyFilterChange={handleToBuyFilterChange}
             />
           )}
 
