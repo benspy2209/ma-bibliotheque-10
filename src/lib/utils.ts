@@ -1,9 +1,10 @@
+
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { Book } from '@/types/book'
 
 // Ajout de l'ID d'affilié Amazon France
-export const AMAZON_AFFILIATE_ID = 'votreid-21'; // Remplacez par votre identifiant d'affilié Amazon
+export const AMAZON_AFFILIATE_ID = 'ben0113-21'; // ID d'affilié Amazon
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
