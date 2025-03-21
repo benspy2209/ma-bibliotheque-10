@@ -86,7 +86,7 @@ export const BookList = ({ books, onBookClick }: BookListProps) => {
                 {statusLabels[book.status || 'to-read']}
               </Badge>
               
-              {/* Badge "Acheté" pour les livres achetés - display for ALL purchased books */}
+              {/* Badge "Acheté" pour les livres achetés */}
               {book.purchased && (
                 <Badge 
                   variant="outline" 

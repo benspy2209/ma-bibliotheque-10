@@ -90,7 +90,7 @@ export const BookGrid = ({ books, onBookClick }: BookGridProps) => {
                 {statusLabels[book.status || 'to-read']}
               </Badge>
               
-              {/* Badge "Acheté" pour les livres achetés - display for ALL purchased books regardless of status */}
+              {/* Badge "Acheté" pour les livres achetés */}
               {book.purchased && (
                 <Badge 
                   variant="outline" 
