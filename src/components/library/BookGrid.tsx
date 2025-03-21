@@ -111,19 +111,17 @@ export const BookGrid = ({ books, onBookClick }: BookGridProps) => {
                 </Popover>
               )}
               
-              {/* Amazon direct badge */}
-              {(!book.purchased && (!book.status || book.status === 'to-read')) && (
-                <a 
-                  href={getAmazonAffiliateUrl(book)}
-                  onClick={handleAmazonClick}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="badge block w-fit flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white rounded-full"
-                >
-                  <ShoppingCart className="size-3" />
-                  Amazon
-                </a>
-              )}
+              {/* Amazon direct badge - maintenant pour TOUS les livres */}
+              <a 
+                href={getAmazonAffiliateUrl(book)}
+                onClick={handleAmazonClick}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="badge block w-fit flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white rounded-full"
+              >
+                <ShoppingCart className="size-3" />
+                Amazon
+              </a>
               
               {book.status === 'completed' && book.completionDate && (
                 <Badge 
