@@ -27,6 +27,7 @@ export const BookSections = ({
   const readingBooks = books.filter(book => book.status === 'reading');
   const toReadBooks = books.filter(book => !book.status || book.status === 'to-read');
   const toBuyBooks = books.filter(book => !book.purchased && (!book.status || book.status === 'to-read'));
+  const purchasedBooks = books.filter(book => book.purchased === true);
 
   const filteredToReadBooks = toReadBooks.filter(book => {
     if (purchaseFilter === 'purchased') return book.purchased;
@@ -64,6 +65,12 @@ export const BookSections = ({
           À lire ({toReadBooks.length})
         </TabsTrigger>
         <TabsTrigger 
+          value="purchased" 
+          onClick={() => onToBuyFilterChange(null)}
+        >
+          Achetés ({purchasedBooks.length})
+        </TabsTrigger>
+        <TabsTrigger 
           value="to-buy" 
           onClick={() => onToBuyFilterChange(true)}
           className="bg-destructive/10 hover:bg-destructive/20 data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground"
@@ -99,6 +106,16 @@ export const BookSections = ({
           </p>
         ) : (
           <BookComponent books={completedBooks} onBookClick={onBookClick} />
+        )}
+      </TabsContent>
+
+      <TabsContent value="purchased" className="space-y-8">
+        {purchasedBooks.length === 0 ? (
+          <p className="text-center text-gray-600 mt-8">
+            Aucun livre acheté dans votre bibliothèque.
+          </p>
+        ) : (
+          <BookComponent books={purchasedBooks} onBookClick={onBookClick} />
         )}
       </TabsContent>
 

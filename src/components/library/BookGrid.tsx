@@ -3,7 +3,7 @@ import { Book } from '@/types/book';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StarRating } from '../StarRating';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, CheckSquare } from 'lucide-react';
 import { getAmazonAffiliateUrl } from '@/lib/utils';
 import {
   HoverCard,
@@ -89,6 +89,18 @@ export const BookGrid = ({ books, onBookClick }: BookGridProps) => {
               >
                 {statusLabels[book.status || 'to-read']}
               </Badge>
+              
+              {/* Badge "Acheté" pour les livres achetés */}
+              {book.purchased && (
+                <Badge 
+                  variant="outline" 
+                  className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 flex items-center gap-1 w-fit"
+                >
+                  <CheckSquare className="size-3" />
+                  Acheté
+                </Badge>
+              )}
+              
               {(!book.purchased && (!book.status || book.status === 'to-read')) && (
                 <Popover>
                   <PopoverTrigger asChild>
