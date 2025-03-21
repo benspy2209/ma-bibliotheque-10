@@ -1,3 +1,4 @@
+
 import { Book } from '@/types/book';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -85,7 +86,7 @@ export const BookList = ({ books, onBookClick }: BookListProps) => {
                 {statusLabels[book.status || 'to-read']}
               </Badge>
               
-              {/* Badge "Acheté" pour les livres achetés */}
+              {/* Badge "Acheté" pour les livres achetés - display for ALL purchased books */}
               {book.purchased && (
                 <Badge 
                   variant="outline" 
