@@ -57,22 +57,6 @@ export const BookGrid = ({ books, onBookClick }: BookGridProps) => {
                 target.src = '/placeholder.svg';
               }}
             />
-            
-            {/* Amazon Shopping Cart Overlay on Image Hover */}
-            {(!book.purchased && (!book.status || book.status === 'to-read')) && (
-              <a 
-                href={getAmazonAffiliateUrl(book)}
-                onClick={handleAmazonClick}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300"
-                title="Acheter sur Amazon"
-              >
-                <div className="bg-amber-500 hover:bg-amber-600 text-white p-3 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
-                  <ShoppingCart className="h-6 w-6" />
-                </div>
-              </a>
-            )}
           </div>
           <div className="flex flex-col flex-grow p-3 space-y-2">
             <h3 className="font-semibold text-sm line-clamp-1">{book.title}</h3>
@@ -126,6 +110,21 @@ export const BookGrid = ({ books, onBookClick }: BookGridProps) => {
                   </PopoverContent>
                 </Popover>
               )}
+              
+              {/* Amazon direct badge */}
+              {(!book.purchased && (!book.status || book.status === 'to-read')) && (
+                <a 
+                  href={getAmazonAffiliateUrl(book)}
+                  onClick={handleAmazonClick}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="badge block w-fit flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white rounded-full"
+                >
+                  <ShoppingCart className="size-3" />
+                  Amazon
+                </a>
+              )}
+              
               {book.status === 'completed' && book.completionDate && (
                 <Badge 
                   variant="outline" 
