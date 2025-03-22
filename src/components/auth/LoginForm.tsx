@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Info } from "lucide-react";
 
 interface LoginFormProps {
   defaultTab?: 'login' | 'signup';
@@ -39,16 +39,21 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
           description: "Connexion réussie"
         });
       } else {
-        const { error } = await supabase.auth.signUp({
+        // Inscription
+        console.log("Tentative d'inscription avec:", email);
+        const { data, error } = await supabase.auth.signUp({
           email,
-          password
+          password,
+          options: {
+            emailRedirectTo: window.location.origin
+          }
         });
 
         if (error) {
-          // Si l'erreur contient "confirmation email", on traite spécialement
-          if (error.message.includes('confirmation email') || error.message.includes('sending')) {
+          // Si l'erreur contient des informations sur l'email, on traite spécialement
+          if (error.message.includes('confirmation email') || error.message.includes('sending') || error.message.includes('email')) {
             console.error("Erreur d'envoi d'email:", error.message);
-            setEmailSentMessage("L'inscription a réussi, mais l'envoi de l'email de confirmation a échoué. Cela peut être dû à un problème de configuration DNS.");
+            setEmailSentMessage(`L'inscription a été traitée, mais l'envoi de l'email de confirmation a rencontré un problème: ${error.message}. Veuillez vérifier votre domaine SMTP configuré dans Supabase.`);
             toast({
               description: "Compte créé, mais problème d'envoi d'email de confirmation",
               variant: "default"
@@ -58,12 +63,20 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
           throw error;
         }
 
-        setEmailSentMessage("Inscription réussie ! Si vous ne recevez pas d'email de confirmation, veuillez contacter l'administrateur.");
-        toast({
-          description: "Inscription réussie ! Vérifiez votre email pour confirmer votre compte."
-        });
+        console.log("Résultat de l'inscription:", data);
+        
+        // Vérifier si l'utilisateur est créé mais en attente de confirmation
+        if (data?.user?.identities?.length === 0) {
+          setEmailSentMessage("Un compte avec cette adresse email existe déjà. Veuillez vous connecter ou réinitialiser votre mot de passe.");
+        } else if (data?.user) {
+          setEmailSentMessage("Inscription réussie ! Veuillez vérifier votre email (bienvenue@bookpulse.be) pour confirmer votre compte. Si vous ne recevez pas d'email dans les prochaines minutes, contactez l'administrateur.");
+          toast({
+            description: "Inscription réussie ! Vérifiez votre email pour confirmer votre compte."
+          });
+        }
       }
     } catch (error: any) {
+      console.error("Erreur d'authentification:", error);
       toast({
         variant: "destructive",
         description: `Erreur : ${error.message}`
@@ -115,8 +128,8 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
       <TabsContent value="signup">
         <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-sm">
           {emailSentMessage && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="h-4 w-4" />
+            <Alert variant={emailSentMessage.includes("existe déjà") ? "destructive" : "default"} className="mb-4">
+              {emailSentMessage.includes("existe déjà") ? <AlertCircle className="h-4 w-4" /> : <Info className="h-4 w-4" />}
               <AlertDescription>
                 {emailSentMessage}
               </AlertDescription>
@@ -153,7 +166,7 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
           
           <Alert className="mt-4">
             <AlertDescription className="text-xs">
-              Note: Si vous ne recevez pas d'email de confirmation, veuillez vérifier votre dossier spam ou contacter l'administrateur.
+              Note: Les emails de confirmation sont envoyés depuis bienvenue@bookpulse.be. Vérifiez votre dossier spam si vous ne recevez pas l'email.
             </AlertDescription>
           </Alert>
         </form>
