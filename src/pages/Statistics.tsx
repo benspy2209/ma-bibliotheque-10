@@ -57,7 +57,7 @@ export default function Statistics() {
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     staleTime: 0,
-    cacheTime: 0, // Don't cache this data at all
+    gcTime: 0, // This replaces the old cacheTime property
   });
 
   const { data: readingGoals } = useReadingGoals();
