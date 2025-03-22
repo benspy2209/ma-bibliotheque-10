@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { BookPlus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -38,9 +38,14 @@ export function AddToLibrary({
       // Pas besoin de l'implémenter ici
       await onStatusChange(status);
       
-      // Invalider toutes les requêtes liées aux livres pour garantir la mise à jour des statistiques
-      // et de tous les autres composants qui utilisent les données de livres
-      queryClient.invalidateQueries({ queryKey: ['books'] });
+      // Force une invalidation IMMÉDIATE de toutes les requêtes liées aux livres
+      await queryClient.invalidateQueries({ 
+        queryKey: ['books'],
+        refetchType: 'all',
+        exact: false
+      });
+      
+      console.log(`Statut du livre ${bookId} changé à: ${status} - Cache invalidé`);
       
     } catch (error) {
       toast({
@@ -54,6 +59,13 @@ export function AddToLibrary({
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    // Force une actualisation lorsque le statut actuel change
+    if (currentStatus) {
+      queryClient.invalidateQueries({ queryKey: ['books'] });
+    }
+  }, [currentStatus, queryClient]);
 
   const statusLabels: Record<ReadingStatus, string> = {
     'to-read': 'À lire',
@@ -78,6 +90,7 @@ export function AddToLibrary({
           <DropdownMenuItem
             key={status}
             onClick={() => handleStatusChange(status as ReadingStatus)}
+            className={currentStatus === status ? "bg-muted" : ""}
           >
             {label}
           </DropdownMenuItem>

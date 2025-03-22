@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Book, ReadingStatus } from '@/types/book';
 import { useToast } from '@/hooks/use-toast';
 import { BookDetailsProps } from './book-details/types';
@@ -12,6 +12,11 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  useEffect(() => {
+    // Force une actualisation lorsque le composant est monté ou le livre change
+    queryClient.invalidateQueries({ queryKey: ['books'] });
+  }, [queryClient, isOpen]); // S'exécute uniquement lorsque le modal s'ouvre
+
   const handleStatusChange = async (status: ReadingStatus) => {
     const updatedBook = { ...currentBook, status };
     setCurrentBook(updatedBook);
@@ -20,18 +25,22 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
 
   const saveToLibrary = async (bookToSave: Book) => {
     try {
-      console.log('Starting save operation for book:', bookToSave.id);
+      console.log('Starting save operation for book:', bookToSave.id, 'with status:', bookToSave.status);
       const result = await saveBook(bookToSave);
       
       if (result.success) {
-        // Toujours invalider toutes les requêtes liées aux livres pour forcer une actualisation
-        queryClient.invalidateQueries({ queryKey: ['books'] });
+        // Force une invalidation IMMÉDIATE et COMPLÈTE du cache
+        await queryClient.invalidateQueries({ 
+          queryKey: ['books'],
+          refetchType: 'all',
+          exact: false
+        });
         
         onUpdate();
         toast({
           description: "Les modifications ont été enregistrées",
         });
-        console.log('Save operation completed successfully');
+        console.log('Save operation completed successfully, cache invalidated');
       } else {
         // Gestion des différents types d'erreurs
         if (result.error === 'duplicate') {
@@ -87,7 +96,11 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
     <BookDetailsDialog
       book={currentBook}
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={() => {
+        // Force une actualisation avant la fermeture
+        queryClient.invalidateQueries({ queryKey: ['books'] });
+        onClose();
+      }}
       onUpdate={onUpdate}
       onStatusChange={handleStatusChange}
       onSaveToLibrary={saveToLibrary}

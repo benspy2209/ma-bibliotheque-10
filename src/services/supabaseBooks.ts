@@ -45,6 +45,9 @@ export async function saveBook(book: Book) {
       bookToSave.sourceId = book.id;
     }
 
+    // Ajout d'un timestamp pour forcer la détection du changement
+    bookToSave.lastUpdated = new Date().toISOString();
+
     const { error } = await supabase
       .from('books')
       .upsert({
@@ -64,6 +67,7 @@ export async function saveBook(book: Book) {
       };
     }
     
+    console.log('Book saved successfully with ID:', bookToSave.id, 'and status:', bookToSave.status);
     return { success: true };
   } catch (error) {
     console.error('Erreur lors de la sauvegarde:', error);
