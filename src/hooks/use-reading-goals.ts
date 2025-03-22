@@ -22,7 +22,6 @@ export function useReadingGoals() {
         return DEFAULT_GOALS;
       }
 
-      // Utiliser une requête SQL brute pour éviter les erreurs de typage
       const { data, error } = await supabase.rpc('fetch_reading_goals', {
         p_user_id: user.user.id
       });
@@ -32,9 +31,11 @@ export function useReadingGoals() {
         return DEFAULT_GOALS;
       }
 
+      // Ensure we're properly parsing the JSON data returned from the function
+      // The data is already a parsed JSON object from the SQL function
       return {
-        yearly_goal: data.yearly_goal,
-        monthly_goal: data.monthly_goal
+        yearly_goal: typeof data.yearly_goal === 'number' ? data.yearly_goal : DEFAULT_GOALS.yearly_goal,
+        monthly_goal: typeof data.monthly_goal === 'number' ? data.monthly_goal : DEFAULT_GOALS.monthly_goal
       };
     } catch (error) {
       console.error("Error fetching reading goals:", error);
