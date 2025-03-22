@@ -15,10 +15,12 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [authMode, setAuthMode] = useState<'login' | 'signup'>(defaultTab);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
     try {
       if (authMode === 'login') {
@@ -49,6 +51,8 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
         variant: "destructive",
         description: `Erreur : ${error.message}`
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -70,6 +74,7 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="votre@email.com"
+              disabled={isLoading}
             />
           </div>
           <div className="space-y-2">
@@ -81,10 +86,11 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="••••••••"
+              disabled={isLoading}
             />
           </div>
-          <Button type="submit" className="w-full">
-            Se connecter
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Connexion...' : 'Se connecter'}
           </Button>
         </form>
       </TabsContent>
@@ -100,6 +106,7 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="votre@email.com"
+              disabled={isLoading}
             />
           </div>
           <div className="space-y-2">
@@ -111,10 +118,11 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="Minimum 6 caractères"
+              disabled={isLoading}
             />
           </div>
-          <Button type="submit" className="w-full">
-            Créer un compte
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Création...' : 'Créer un compte'}
           </Button>
         </form>
       </TabsContent>

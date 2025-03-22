@@ -12,6 +12,14 @@ interface HeaderSectionProps {
 export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
   const { user, signIn } = useSupabaseAuth();
 
+  const handleSignIn = () => {
+    signIn('login');
+  };
+
+  const handleSignUp = () => {
+    signIn('signup');
+  };
+
   return (
     <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mb-8 sm:mb-12">
       <div className="text-center sm:text-left flex-1">
@@ -35,22 +43,13 @@ export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
             </Link>
           </>
         ) : (
-          <>
-            <Button 
-              onClick={() => signIn('signup')}
-              className="w-full sm:w-auto flex items-center justify-center gap-2"
-              variant="outline"
-            >
-              <LogIn className="h-4 w-4" />
-              Créer un compte
-            </Button>
-            <Button
-              onClick={() => signIn('login')}
-              className="w-full sm:w-auto flex items-center justify-center gap-2"
-            >
-              Commencer
-            </Button>
-          </>
+          <Button
+            onClick={handleSignIn}
+            className="w-full sm:w-auto flex items-center justify-center gap-2"
+          >
+            <LogIn className="h-4 w-4" />
+            Se connecter / Créer un compte
+          </Button>
         )}
       </div>
     </div>
