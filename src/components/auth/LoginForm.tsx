@@ -50,7 +50,6 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
         });
 
         if (error) {
-          // Si l'erreur contient des informations sur l'email, on traite spécialement
           if (error.message.includes('confirmation email') || error.message.includes('sending') || error.message.includes('email')) {
             console.error("Erreur d'envoi d'email:", error.message);
             setEmailSentMessage(`L'inscription a été traitée, mais l'envoi de l'email de confirmation a rencontré un problème: ${error.message}. Veuillez vérifier votre domaine SMTP configuré dans Supabase.`);
@@ -69,7 +68,7 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
         if (data?.user?.identities?.length === 0) {
           setEmailSentMessage("Un compte avec cette adresse email existe déjà. Veuillez vous connecter ou réinitialiser votre mot de passe.");
         } else if (data?.user) {
-          setEmailSentMessage("Inscription réussie ! Veuillez vérifier votre email (bienvenue@bookpulse.be) pour confirmer votre compte. Si vous ne recevez pas d'email dans les prochaines minutes, contactez l'administrateur.");
+          setEmailSentMessage(`Inscription réussie ! Veuillez vérifier votre email (${email}) pour confirmer votre compte. Si vous ne recevez pas d'email dans les prochaines minutes, contactez l'administrateur.`);
           toast({
             description: "Inscription réussie ! Vérifiez votre email pour confirmer votre compte."
           });
