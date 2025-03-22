@@ -10,7 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 
 interface DeleteBookDialogProps {
@@ -18,25 +18,42 @@ interface DeleteBookDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirmDelete: () => Promise<void>;
+  isDeleting?: boolean; // État provenant du composant parent
 }
 
-export function DeleteBookDialog({ book, isOpen, onOpenChange, onConfirmDelete }: DeleteBookDialogProps) {
-  const [isDeleting, setIsDeleting] = useState(false);
+export function DeleteBookDialog({ 
+  book, 
+  isOpen, 
+  onOpenChange, 
+  onConfirmDelete,
+  isDeleting: externalIsDeleting 
+}: DeleteBookDialogProps) {
+  const [internalIsDeleting, setInternalIsDeleting] = useState(false);
+  
+  // Combiner l'état externe et interne pour assurer la synchronisation
+  const isDeleting = externalIsDeleting || internalIsDeleting;
+  
+  // Reset l'état interne quand le dialogue se ferme
+  useEffect(() => {
+    if (!isOpen) {
+      setInternalIsDeleting(false);
+    }
+  }, [isOpen]);
   
   const handleDelete = async () => {
     if (isDeleting) return; // Prevent multiple clicks
     
-    setIsDeleting(true);
+    setInternalIsDeleting(true);
     try {
       console.log('Starting delete operation for book:', book.id);
       await onConfirmDelete();
       console.log('Delete operation completed successfully');
+      
       // Fermer explicitement la boîte de dialogue après la suppression réussie
       onOpenChange(false);
     } catch (error) {
       console.error('Error in delete dialog during deletion:', error);
-    } finally {
-      setIsDeleting(false); // Always reset the deleting state
+      setInternalIsDeleting(false); // Reset only on error
     }
   };
   
@@ -49,7 +66,10 @@ export function DeleteBookDialog({ book, isOpen, onOpenChange, onConfirmDelete }
         onOpenChange(open);
       }}
     >
-      <AlertDialogContent aria-describedby="delete-dialog-description">
+      <AlertDialogContent 
+        aria-describedby="delete-dialog-description"
+        className="max-w-md"
+      >
         <AlertDialogHeader>
           <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
           <AlertDialogDescription id="delete-dialog-description">

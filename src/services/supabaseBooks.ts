@@ -137,6 +137,11 @@ export async function deleteBook(bookId: string) {
     throw new Error('ID du livre non fourni');
   }
 
+  // Ajouter un timeout pour éviter les blocages indéfinis
+  const timeout = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('Opération de suppression expirée')), 10000);
+  });
+
   try {
     console.log('Attempting to delete book with ID:', bookId);
     
@@ -179,12 +184,15 @@ export async function deleteBook(bookId: string) {
 
     console.log('Book found and belongs to user, proceeding with deletion');
 
-    // Finally delete the book
-    const { error } = await supabase
+    // Utiliser une course entre le timeout et l'opération de suppression
+    const deletePromise = supabase
       .from('books')
       .delete()
       .eq('id', bookId)
-      .eq('user_id', user.id); // Extra security check
+      .eq('user_id', user.id);
+      
+    // Attendre que la suppression soit terminée ou que le timeout soit atteint
+    const { error } = await Promise.race([deletePromise, timeout]) as any;
 
     if (error) {
       console.error('Supabase error during deletion:', error);
