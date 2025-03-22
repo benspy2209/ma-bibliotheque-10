@@ -50,12 +50,20 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
         });
 
         if (error) {
-          if (error.message.includes('confirmation email') || error.message.includes('sending') || error.message.includes('email')) {
+          if (error.message.includes('email rate limit exceeded')) {
+            console.error("Erreur d'envoi d'email:", error.message);
+            setEmailSentMessage(`L'inscription a été traitée, mais Supabase a limité l'envoi d'emails (rate limit). Veuillez attendre quelques minutes avant de réessayer ou contactez l'administrateur.`);
+            toast({
+              description: "Problème d'envoi d'email de confirmation",
+              variant: "destructive"
+            });
+            return;
+          } else if (error.message.includes('confirmation email') || error.message.includes('sending') || error.message.includes('email')) {
             console.error("Erreur d'envoi d'email:", error.message);
             setEmailSentMessage(`L'inscription a été traitée, mais l'envoi de l'email de confirmation a rencontré un problème: ${error.message}. Veuillez vérifier votre domaine SMTP configuré dans Supabase.`);
             toast({
-              description: "Compte créé, mais problème d'envoi d'email de confirmation",
-              variant: "default"
+              description: "Problème d'envoi d'email de confirmation",
+              variant: "destructive"
             });
             return;
           }
@@ -127,8 +135,8 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
       <TabsContent value="signup">
         <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-sm">
           {emailSentMessage && (
-            <Alert variant={emailSentMessage.includes("existe déjà") ? "destructive" : "default"} className="mb-4">
-              {emailSentMessage.includes("existe déjà") ? <AlertCircle className="h-4 w-4" /> : <Info className="h-4 w-4" />}
+            <Alert variant={emailSentMessage.includes("existe déjà") || emailSentMessage.includes("rate limit") ? "destructive" : "default"} className="mb-4">
+              {emailSentMessage.includes("existe déjà") || emailSentMessage.includes("rate limit") ? <AlertCircle className="h-4 w-4" /> : <Info className="h-4 w-4" />}
               <AlertDescription>
                 {emailSentMessage}
               </AlertDescription>
