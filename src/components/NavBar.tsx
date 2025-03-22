@@ -1,21 +1,14 @@
 
 import { NavLink } from "react-router-dom";
-import { Search, BookOpen, BarChart2, Sun, Moon, LogIn, LogOut } from "lucide-react";
+import { Search, BookOpen, BarChart2, Sun, Moon, LogIn } from "lucide-react";
 import { Button } from "./ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { LoginDialog } from "./auth/LoginDialog";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
 
 const NavBar = () => {
   const { theme, toggleTheme } = useTheme();
-  const { signIn, signOut, completeSignOut, user, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
+  const { signIn, signOut, user, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
 
   // Fonction wrapper pour gérer le clic du bouton de connexion
   const handleSignIn = () => {
@@ -50,28 +43,14 @@ const NavBar = () => {
         </div>
         <div className="flex items-center gap-4 order-1 sm:order-2 sm:ml-auto">
           {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="transition-colors duration-300"
-                >
-                  Options
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Compte</DropdownMenuLabel>
-                <DropdownMenuItem onClick={signOut}>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Se déconnecter
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={completeSignOut}>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Déconnexion complète
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={signOut}
+              className="transition-colors duration-300"
+            >
+              Se déconnecter
+            </Button>
           ) : (
             <Button 
               variant="outline" 
