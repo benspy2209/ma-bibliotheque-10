@@ -14,14 +14,29 @@ export function ResetPasswordForm() {
   const [emailSent, setEmailSent] = useState(false);
   const { toast } = useToast();
 
+  // Déterminer l'URL de production en fonction de l'environnement
+  const getRedirectUrl = () => {
+    // En production, utiliser bookpulse.com
+    if (window.location.hostname === 'bookpulse.com' || 
+        window.location.hostname === 'www.bookpulse.com') {
+      return `https://${window.location.hostname}/reset-password`;
+    }
+    // Sinon, utiliser l'URL actuelle
+    return `${window.location.origin}/reset-password`;
+  };
+
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
+      // Utiliser l'URL de redirection appropriée
+      const redirectUrl = getRedirectUrl();
+      console.log(`Redirection vers: ${redirectUrl}`);
+      
       // Envoi de l'email de réinitialisation
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: redirectUrl,
       });
 
       if (error) throw error;
