@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { useState } from 'react';
@@ -128,9 +129,12 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" aria-describedby="book-details-description">
           <DialogHeader className="pb-2">
-            <DialogTitle className="sr-only">Détails du livre</DialogTitle>
+            <DialogTitle className="text-xl">Détails du livre</DialogTitle>
+            <DialogDescription id="book-details-description" className="sr-only">
+              Informations détaillées sur le livre "{currentBook.title}"
+            </DialogDescription>
             <BookHeader
               book={currentBook}
               isEditing={isEditing}
