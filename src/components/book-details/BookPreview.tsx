@@ -44,6 +44,12 @@ export function BookPreview({
     fileInput?.click();
   };
 
+  // Gestion des erreurs d'image
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    // Remplacer par l'image de placeholder si l'image de couverture n'est pas valide
+    e.currentTarget.src = '/placeholder.svg';
+  };
+
   return (
     <div className="grid grid-cols-[150px,1fr] gap-4 py-2">
       <div className="relative group">
@@ -51,6 +57,7 @@ export function BookPreview({
           src={book.cover || '/placeholder.svg'}
           alt={book.title}
           className="w-full rounded-lg shadow-lg object-cover h-[200px]"
+          onError={handleImageError}
         />
         {isEditing && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">

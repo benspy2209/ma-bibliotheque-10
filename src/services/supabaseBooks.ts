@@ -1,8 +1,8 @@
-
 import { Book } from '@/types/book';
 import { isDuplicateBook } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { BookRow } from '@/types/supabase';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function saveBook(book: Book) {
   try {
@@ -12,8 +12,7 @@ export async function saveBook(book: Book) {
       throw new Error('Vous devez être connecté pour effectuer cette action');
     }
 
-    // Avant de faire une mise à jour, vérifier si ce livre existe déjà dans la base de données
-    // avec le même ID - si c'est le cas, c'est une édition, pas une création
+    // Vérifier si ce livre existe déjà dans la base de données
     const { data: existingBookData } = await supabase
       .from('books')
       .select('id')
@@ -39,11 +38,25 @@ export async function saveBook(book: Book) {
       }
     }
 
+    // Assurons-nous que l'ID est un UUID valide pour Supabase
+    // Si on édite un livre existant, on garde son ID, sinon on génère un nouveau UUID
+    const bookToSave = {
+      ...book,
+      // Si on n'est pas en édition, on vérifie si l'ID actuel est un UUID valide
+      // Si ce n'est pas le cas, on en génère un nouveau
+      id: isEditing ? book.id : isValidUUID(book.id) ? book.id : uuidv4()
+    };
+
+    // Si l'ID a été modifié, on le stocke dans une propriété sourceId
+    if (book.id !== bookToSave.id) {
+      bookToSave.sourceId = book.id;
+    }
+
     const { error } = await supabase
       .from('books')
       .upsert({
-        id: book.id,
-        book_data: book,
+        id: bookToSave.id,
+        book_data: bookToSave,
         status: book.status,
         completion_date: book.completionDate,
         user_id: user.id
@@ -67,6 +80,13 @@ export async function saveBook(book: Book) {
       message: error instanceof Error ? error.message : 'Erreur inconnue'
     };
   }
+}
+
+// Fonction qui vérifie si un string est un UUID valide
+function isValidUUID(id: string): boolean {
+  // Regex pour valider un UUID v4
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(id);
 }
 
 export async function loadBooks() {
