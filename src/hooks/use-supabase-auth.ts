@@ -55,5 +55,23 @@ export function useSupabaseAuth() {
     await supabase.auth.signOut();
   };
 
-  return { user, session, signIn, signOut, showLoginDialog, setShowLoginDialog, authMode };
+  // Fonction de déconnexion complète qui nettoie également le stockage local
+  const completeSignOut = async () => {
+    try {
+      // Déconnexion standard via Supabase
+      await supabase.auth.signOut();
+      
+      // Nettoyer le stockage local
+      localStorage.clear();
+      
+      // Redirection pour s'assurer que toute l'application est rechargée
+      window.location.href = '/';
+      
+      console.log('Déconnexion complète effectuée');
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion complète:', error);
+    }
+  };
+
+  return { user, session, signIn, signOut, completeSignOut, showLoginDialog, setShowLoginDialog, authMode };
 }
