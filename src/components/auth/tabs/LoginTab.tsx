@@ -45,6 +45,8 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
   };
 
   const handleForgotPassword = () => {
+    console.log("Redirection vers réinitialisation du mot de passe");
+    // Mettre à jour directement le mode d'authentification
     setAuthMode('reset');
   };
 
@@ -77,7 +79,7 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
           <Button 
             type="button" 
             variant="link" 
-            className="p-0 h-auto text-xs" 
+            className="p-0 h-auto text-xs cursor-pointer" 
             onClick={handleForgotPassword}
           >
             Mot de passe oublié ?

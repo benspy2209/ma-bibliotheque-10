@@ -19,6 +19,13 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
     defaultTab === 'reset' ? 'reset' : authMode === 'reset' ? 'reset' : defaultTab
   );
 
+  // Update activeTab whenever authMode changes
+  useState(() => {
+    if (authMode === 'reset') {
+      setActiveTab('reset');
+    }
+  }, [authMode]);
+
   const handleTabChange = (value: string) => {
     setActiveTab(value as 'login' | 'signup' | 'reset');
     setAuthMode(value as 'login' | 'signup' | 'reset');
