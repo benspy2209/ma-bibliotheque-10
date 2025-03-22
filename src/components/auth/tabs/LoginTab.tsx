@@ -44,7 +44,8 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
     }
   };
 
-  const handleForgotPassword = () => {
+  const handleForgotPassword = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent default button behavior
     console.log("Redirection vers réinitialisation du mot de passe");
     // Mettre à jour le mode d'authentification et forcer la mise à jour de l'interface
     setAuthMode('reset');

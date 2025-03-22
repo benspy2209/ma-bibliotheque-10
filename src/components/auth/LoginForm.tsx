@@ -39,10 +39,22 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
   return (
     <div className="w-full">
       <Tabs value={activeTab} className="w-full" onValueChange={handleTabChange}>
-        <TabsList className="grid w-full grid-cols-2 mb-2">
-          <TabsTrigger value="signup">Inscription</TabsTrigger>
-          <TabsTrigger value="login">Connexion</TabsTrigger>
-        </TabsList>
+        {activeTab !== 'reset' ? (
+          <TabsList className="grid w-full grid-cols-2 mb-2">
+            <TabsTrigger value="signup">Inscription</TabsTrigger>
+            <TabsTrigger value="login">Connexion</TabsTrigger>
+          </TabsList>
+        ) : (
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-medium">Réinitialisation de mot de passe</h3>
+            <button 
+              onClick={() => handleTabChange('login')} 
+              className="text-sm text-blue-600 hover:underline"
+            >
+              Retour à la connexion
+            </button>
+          </div>
+        )}
         
         {activeTab === 'login' && (
           <Alert className="mb-4 bg-blue-50 border-blue-200">
