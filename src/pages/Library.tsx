@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
@@ -13,7 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { BookSections } from '@/components/library/BookSections';
 import { AuthorFilter } from '@/components/library/AuthorFilter';
 import { Input } from "@/components/ui/input";
-import { Search, BookPlus } from "lucide-react";
+import { Search, BookPlus, LogIn } from "lucide-react";
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -27,7 +26,7 @@ export default function Library() {
   const { toast } = useToast();
   const { sortBooks } = useBookSort();
   const { viewMode, toggleView } = useViewPreference();
-  const { user } = useSupabaseAuth();
+  const { user, signIn } = useSupabaseAuth();
 
   const { data: books = [], refetch } = useQuery({
     queryKey: ['books'],
@@ -92,6 +91,11 @@ export default function Library() {
     setToBuyFilter(value);
   };
 
+  const handleLoginClick = () => {
+    console.log("Login button clicked");
+    signIn('login');
+  };
+
   return (
     <div className="min-h-screen fade-in">
       <NavBar />
@@ -104,6 +108,14 @@ export default function Library() {
                 Connectez-vous ou créez un compte pour commencer à organiser vos lectures, 
                 suivre votre progression et découvrir de nouveaux livres.
               </p>
+              <Button 
+                onClick={handleLoginClick} 
+                size="lg" 
+                className="flex items-center gap-2"
+              >
+                <LogIn className="h-5 w-5" />
+                Se connecter
+              </Button>
             </div>
           ) : (
             <>
