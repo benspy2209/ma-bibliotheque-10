@@ -24,7 +24,7 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
       const result = await saveBook(bookToSave);
       
       if (result.success) {
-        // Invalidate the books query to force a refetch
+        // Toujours invalider toutes les requêtes liées aux livres pour forcer une actualisation
         queryClient.invalidateQueries({ queryKey: ['books'] });
         
         onUpdate();

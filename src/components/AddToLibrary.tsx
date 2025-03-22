@@ -38,7 +38,8 @@ export function AddToLibrary({
       // Pas besoin de l'implémenter ici
       await onStatusChange(status);
       
-      // Invalider la requête pour forcer une mise à jour des statistiques
+      // Invalider toutes les requêtes liées aux livres pour garantir la mise à jour des statistiques
+      // et de tous les autres composants qui utilisent les données de livres
       queryClient.invalidateQueries({ queryKey: ['books'] });
       
     } catch (error) {
