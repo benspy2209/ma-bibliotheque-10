@@ -19,14 +19,12 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
   const [password, setPassword] = useState('');
   const [emailSentMessage, setEmailSentMessage] = useState('');
   const [skipEmailVerification, setSkipEmailVerification] = useState(false);
-  const [isRateLimited, setIsRateLimited] = useState(false);
   const { toast } = useToast();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setEmailSentMessage('');
-    setIsRateLimited(false);
     
     try {
       console.log("Tentative d'inscription avec:", email);
@@ -47,26 +45,11 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
       if (error) {
         if (error.message.includes('email rate limit exceeded')) {
           console.error("Erreur d'envoi d'email:", error.message);
-          setIsRateLimited(true);
-          setEmailSentMessage(`Le compte a été créé, mais Supabase limite l'envoi d'emails (rate limit).`);
+          setEmailSentMessage(`L'inscription a été traitée, mais Supabase a limité l'envoi d'emails (rate limit). Veuillez attendre quelques minutes avant de réessayer ou essayez de cocher l'option "Mode développement" ci-dessous.`);
           toast({
-            description: "Connexion possible sans confirmation d'email pour le moment",
-            variant: "default"
+            description: "Problème d'envoi d'email de confirmation",
+            variant: "destructive"
           });
-          
-          // Tentative de connexion directe puisque le compte est créé
-          const { error: loginError } = await supabase.auth.signInWithPassword({
-            email,
-            password
-          });
-          
-          if (loginError) {
-            console.error("Erreur lors de la connexion après création:", loginError);
-          } else {
-            toast({
-              description: "Connexion réussie! Vous pourrez confirmer votre email plus tard.",
-            });
-          }
           return;
         } else if (error.message.includes('confirmation email') || error.message.includes('sending') || error.message.includes('email')) {
           console.error("Erreur d'envoi d'email:", error.message);
@@ -113,15 +96,10 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
   return (
     <form onSubmit={handleSignup} className="space-y-4 w-full max-w-sm">
       {emailSentMessage && (
-        <Alert variant={emailSentMessage.includes("existe déjà") ? "destructive" : isRateLimited ? "default" : "default"} className="mb-4">
-          {emailSentMessage.includes("existe déjà") ? <AlertCircle className="h-4 w-4" /> : <Info className="h-4 w-4" />}
+        <Alert variant={emailSentMessage.includes("existe déjà") || emailSentMessage.includes("rate limit") ? "destructive" : "default"} className="mb-4">
+          {emailSentMessage.includes("existe déjà") || emailSentMessage.includes("rate limit") ? <AlertCircle className="h-4 w-4" /> : <Info className="h-4 w-4" />}
           <AlertDescription>
             {emailSentMessage}
-            {isRateLimited && (
-              <p className="mt-2 font-medium text-green-600">
-                Vous êtes maintenant connecté. Vous pourrez confirmer votre email ultérieurement.
-              </p>
-            )}
             {emailSentMessage.includes("Veuillez vérifier votre email") && (
               <strong className="block mt-2">N'oubliez pas de vérifier votre dossier SPAM.</strong>
             )}
