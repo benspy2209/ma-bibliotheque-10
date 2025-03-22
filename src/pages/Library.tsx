@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
@@ -13,7 +12,10 @@ import { useQuery } from '@tanstack/react-query';
 import { BookSections } from '@/components/library/BookSections';
 import { AuthorFilter } from '@/components/library/AuthorFilter';
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, BookPlus } from "lucide-react";
+import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 export default function Library() {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
@@ -24,6 +26,7 @@ export default function Library() {
   const { toast } = useToast();
   const { sortBooks } = useBookSort();
   const { viewMode, toggleView } = useViewPreference();
+  const { user, signIn } = useSupabaseAuth();
 
   const { data: books = [], refetch } = useQuery({
     queryKey: ['books'],
@@ -39,16 +42,13 @@ export default function Library() {
     }
   });
 
-  // Filter books by search query
   const searchFilter = (book: Book) => {
     if (!searchQuery) return true;
     
     const query = searchQuery.toLowerCase();
     
-    // Search by title
     const titleMatch = book.title.toLowerCase().includes(query);
     
-    // Search by author
     let authorMatch = false;
     if (Array.isArray(book.author)) {
       authorMatch = book.author.some(author => 
@@ -61,10 +61,8 @@ export default function Library() {
     return titleMatch || authorMatch;
   };
 
-  // Apply all filters: author filter, search query filter, and to-buy filter
   const filteredBooks = books
     .filter(book => {
-      // First apply the author filter
       if (selectedAuthor) {
         if (Array.isArray(book.author)) {
           return book.author.includes(selectedAuthor);
@@ -73,9 +71,8 @@ export default function Library() {
       }
       return true;
     })
-    .filter(searchFilter) // Then apply the search query filter
+    .filter(searchFilter)
     .filter(book => {
-      // Apply the "to buy" filter if active
       if (toBuyFilter === true) {
         return !book.purchased && (!book.status || book.status === 'to-read');
       } else if (toBuyFilter === false) {
@@ -99,61 +96,83 @@ export default function Library() {
       <NavBar />
       <div className="px-4 py-8 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold">Ma Bibliothèque</h1>
-            <div className="flex items-center gap-2">
-              <SortMenu sortBy={sortBy} onSortChange={setSortBy} />
-              <ViewToggle viewMode={viewMode} onToggle={toggleView} />
+          {!user ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <h1 className="text-3xl font-bold mb-4">Créez votre bibliothèque personnelle</h1>
+              <p className="text-muted-foreground mb-8 max-w-2xl">
+                Connectez-vous ou créez un compte pour commencer à organiser vos lectures, 
+                suivre votre progression et découvrir de nouveaux livres.
+              </p>
+              <Button onClick={signIn} size="lg">
+                Se connecter pour commencer
+              </Button>
             </div>
-          </div>
-
-          <div className="mb-6 flex flex-col md:flex-row items-start gap-4">
-            <div className="w-full md:w-64">
-              <AuthorFilter 
-                books={books}
-                selectedAuthor={selectedAuthor}
-                onAuthorSelect={setSelectedAuthor}
-              />
-            </div>
-            <div className="w-full md:w-96 relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <Input
-                type="search"
-                placeholder="Rechercher par titre ou auteur..."
-                className="pl-10"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {sortedBooks.length === 0 ? (
-            <p className="text-center text-gray-600 mt-8">
-              {selectedAuthor 
-                ? `Aucun livre de ${selectedAuthor} dans votre bibliothèque.`
-                : searchQuery 
-                  ? `Aucun livre ne correspond à votre recherche "${searchQuery}".`
-                  : toBuyFilter === true
-                    ? "Aucun livre à acheter dans votre bibliothèque."
-                    : "Votre bibliothèque est vide. Ajoutez des livres depuis la recherche !"}
-            </p>
           ) : (
-            <BookSections 
-              books={sortedBooks}
-              viewMode={viewMode}
-              onBookClick={setSelectedBook}
-              toBuyFilter={toBuyFilter}
-              onToBuyFilterChange={handleToBuyFilterChange}
-            />
-          )}
+            <>
+              <div className="flex justify-between items-center mb-8">
+                <h1 className="text-3xl font-bold">Ma Bibliothèque</h1>
+                <div className="flex items-center gap-2">
+                  <SortMenu sortBy={sortBy} onSortChange={setSortBy} />
+                  <ViewToggle viewMode={viewMode} onToggle={toggleView} />
+                </div>
+              </div>
 
-          {selectedBook && (
-            <BookDetails
-              book={selectedBook}
-              isOpen={!!selectedBook}
-              onClose={() => setSelectedBook(null)}
-              onUpdate={handleBookUpdate}
-            />
+              <div className="mb-6 flex flex-col md:flex-row items-start gap-4">
+                <div className="w-full md:w-64">
+                  <AuthorFilter 
+                    books={books}
+                    selectedAuthor={selectedAuthor}
+                    onAuthorSelect={setSelectedAuthor}
+                  />
+                </div>
+                <div className="w-full md:w-96 relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Input
+                    type="search"
+                    placeholder="Rechercher par titre ou auteur..."
+                    className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {books.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <h2 className="text-xl font-medium mb-4">Votre bibliothèque est vide</h2>
+                  <p className="text-muted-foreground mb-8 max-w-2xl">
+                    Commencez par rechercher des livres ou ajoutez-les manuellement pour créer votre bibliothèque personnelle.
+                  </p>
+                  <div className="flex gap-4">
+                    <Link to="/" className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors">
+                      <Search className="h-4 w-4" />
+                      Rechercher des livres
+                    </Link>
+                    <Link to="/" className="flex items-center gap-2 bg-secondary text-secondary-foreground px-4 py-2 rounded-md hover:bg-secondary/90 transition-colors">
+                      <BookPlus className="h-4 w-4" />
+                      Ajouter manuellement
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <BookSections 
+                  books={sortedBooks}
+                  viewMode={viewMode}
+                  onBookClick={setSelectedBook}
+                  toBuyFilter={toBuyFilter}
+                  onToBuyFilterChange={handleToBuyFilterChange}
+                />
+              )}
+
+              {selectedBook && (
+                <BookDetails
+                  book={selectedBook}
+                  isOpen={!!selectedBook}
+                  onClose={() => setSelectedBook(null)}
+                  onUpdate={handleBookUpdate}
+                />
+              )}
+            </>
           )}
         </div>
       </div>

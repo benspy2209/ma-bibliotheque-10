@@ -2,6 +2,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -15,9 +16,12 @@ interface LoginDialogProps {
 export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Connexion</DialogTitle>
+          <DialogTitle className="text-center">Bienvenue sur Biblioapp</DialogTitle>
+          <DialogDescription className="text-center">
+            Connectez-vous ou créez un compte pour gérer votre bibliothèque personnelle
+          </DialogDescription>
         </DialogHeader>
         <LoginForm />
       </DialogContent>
