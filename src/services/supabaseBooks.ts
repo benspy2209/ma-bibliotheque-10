@@ -2,6 +2,7 @@
 import { Book } from '@/types/book';
 import { isDuplicateBook } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { BookRow } from '@/types/supabase';
 
 export async function saveBook(book: Book) {
   try {
@@ -92,7 +93,8 @@ export async function loadBooks() {
     throw error;
   }
 
-  return data?.map(row => row.book_data || row) ?? [];
+  // Convertir les données en objets Book
+  return data?.map((row: BookRow) => row.book_data || row) ?? [];
 }
 
 export async function deleteBook(bookId: string) {

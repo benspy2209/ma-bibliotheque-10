@@ -9,8 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { BookPlus } from "lucide-react";
 import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
-import { loadBooks, saveBook } from "@/services/supabaseBooks";
+import { useToast } from "@/hooks/use-toast";
 
 interface AddToLibraryProps {
   onStatusChange: (status: ReadingStatus) => void;
