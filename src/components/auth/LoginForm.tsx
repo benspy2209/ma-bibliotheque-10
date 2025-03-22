@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Info } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface LoginFormProps {
   defaultTab?: 'login' | 'signup';
@@ -19,6 +20,7 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
   const [authMode, setAuthMode] = useState<'login' | 'signup'>(defaultTab);
   const [isLoading, setIsLoading] = useState(false);
   const [emailSentMessage, setEmailSentMessage] = useState('');
+  const [skipEmailVerification, setSkipEmailVerification] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,18 +43,24 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
       } else {
         // Inscription
         console.log("Tentative d'inscription avec:", email);
-        const { data, error } = await supabase.auth.signUp({
+        
+        // Utiliser l'option de désactivation de la vérification d'email si elle est cochée
+        const signUpOptions = {
           email,
           password,
           options: {
-            emailRedirectTo: window.location.origin
+            emailRedirectTo: window.location.origin,
+            // Si skipEmailVerification est activé, on essaie de désactiver la vérification
+            data: skipEmailVerification ? { skip_confirmation: true } : undefined
           }
-        });
+        };
+        
+        const { data, error } = await supabase.auth.signUp(signUpOptions);
 
         if (error) {
           if (error.message.includes('email rate limit exceeded')) {
             console.error("Erreur d'envoi d'email:", error.message);
-            setEmailSentMessage(`L'inscription a été traitée, mais Supabase a limité l'envoi d'emails (rate limit). Veuillez attendre quelques minutes avant de réessayer ou contactez l'administrateur.`);
+            setEmailSentMessage(`L'inscription a été traitée, mais Supabase a limité l'envoi d'emails (rate limit). Veuillez attendre quelques minutes avant de réessayer ou essayez de cocher l'option "Mode développement" ci-dessous.`);
             toast({
               description: "Problème d'envoi d'email de confirmation",
               variant: "destructive"
@@ -76,10 +84,18 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
         if (data?.user?.identities?.length === 0) {
           setEmailSentMessage("Un compte avec cette adresse email existe déjà. Veuillez vous connecter ou réinitialiser votre mot de passe.");
         } else if (data?.user) {
-          setEmailSentMessage(`Inscription réussie ! Veuillez vérifier votre email (${email}) pour confirmer votre compte. Si vous ne recevez pas d'email dans les prochaines minutes, contactez l'administrateur.`);
-          toast({
-            description: "Inscription réussie ! Vérifiez votre email pour confirmer votre compte."
-          });
+          if (skipEmailVerification && data.session) {
+            // L'utilisateur est déjà connecté (vérification d'email contournée)
+            toast({
+              description: "Inscription réussie ! Vous êtes maintenant connecté."
+            });
+          } else {
+            // Email de confirmation envoyé
+            setEmailSentMessage(`Inscription réussie ! Veuillez vérifier votre email (${email}) pour confirmer votre compte. Si vous ne recevez pas d'email dans les prochaines minutes, contactez l'administrateur.`);
+            toast({
+              description: "Inscription réussie ! Vérifiez votre email pour confirmer votre compte."
+            });
+          }
         }
       }
     } catch (error: any) {
@@ -167,6 +183,18 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
               disabled={isLoading}
             />
           </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="skip-verification" 
+              checked={skipEmailVerification} 
+              onCheckedChange={(checked) => setSkipEmailVerification(checked as boolean)}
+            />
+            <Label htmlFor="skip-verification" className="text-sm text-gray-500">
+              Mode développement (essayer de contourner la vérification d'email)
+            </Label>
+          </div>
+          
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? 'Création...' : 'Créer un compte'}
           </Button>
