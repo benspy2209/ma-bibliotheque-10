@@ -28,7 +28,7 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
           <TabsTrigger value="signup">Inscription</TabsTrigger>
         </TabsList>
         
-        {defaultTab === 'signup' && defaultTab === 'login' && (
+        {defaultTab === 'login' && (
           <Alert className="mb-4 bg-blue-50 border-blue-200">
             <Info className="h-4 w-4 text-blue-600" />
             <AlertDescription className="text-blue-800">
