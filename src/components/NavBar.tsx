@@ -1,19 +1,14 @@
+
 import { NavLink } from "react-router-dom";
-import { Search, BookOpen, BarChart2, Sun, Moon, LogIn, LogOut, ChevronDown, Github } from "lucide-react";
+import { Search, BookOpen, BarChart2, Sun, Moon, LogIn } from "lucide-react";
 import { Button } from "./ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { LoginDialog } from "./auth/LoginDialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 const NavBar = () => {
   const { theme, toggleTheme } = useTheme();
-  const { signIn, signOut, completeSignOut, emergencyGitHubDisconnect, user, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
+  const { signIn, signOut, user, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
 
   // Fonction wrapper pour gérer le clic du bouton de connexion
   const handleSignIn = () => {
@@ -48,23 +43,14 @@ const NavBar = () => {
         </div>
         <div className="flex items-center gap-4 order-1 sm:order-2 sm:ml-auto">
           {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="transition-colors duration-300">
-                  {user.email?.split('@')[0] || 'Utilisateur'} <ChevronDown className="h-4 w-4 ml-1" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={signOut}>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Se déconnecter
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={completeSignOut}>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Déconnexion complète
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={signOut}
+              className="transition-colors duration-300"
+            >
+              Se déconnecter
+            </Button>
           ) : (
             <Button 
               variant="outline" 
@@ -86,25 +72,6 @@ const NavBar = () => {
           </Button>
         </div>
       </div>
-      
-      {/* Bouton de déconnexion GitHub amélioré */}
-      <div className="fixed bottom-4 right-4 z-50">
-        <Button 
-          variant="destructive" 
-          size="sm"
-          onClick={() => {
-            if (window.confirm('Voulez-vous vraiment vous déconnecter complètement de GitHub? Cela effacera vos données de connexion.')) {
-              emergencyGitHubDisconnect();
-            }
-          }}
-          className="flex items-center gap-2 font-bold shadow-lg hover:shadow-xl transition-all animate-pulse"
-          title="Efface toutes les données de connexion GitHub"
-        >
-          <Github className="h-4 w-4" />
-          Réinitialiser GitHub
-        </Button>
-      </div>
-      
       <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
     </nav>
   );
