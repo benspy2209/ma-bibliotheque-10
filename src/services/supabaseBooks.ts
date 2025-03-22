@@ -54,6 +54,7 @@ export async function saveBook(book: Book) {
     // Log the save operation for debugging
     console.log('Saving book with status:', book.status, 'and ID:', bookToSave.id);
     console.log('Book data to save:', updatedBook);
+    console.log('User ID for book save:', user.id);
 
     const { error } = await supabase
       .from('books')
@@ -75,6 +76,8 @@ export async function saveBook(book: Book) {
     }
     
     console.log('Book saved successfully with ID:', bookToSave.id, 'and status:', book.status);
+    
+    // Invalidate books query after successful save
     return { success: true };
   } catch (error) {
     console.error('Erreur lors de la sauvegarde:', error);
@@ -95,7 +98,7 @@ export async function loadBooks() {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     
-    console.log("Utilisateur actuel:", user);
+    console.log("Utilisateur actuel:", user?.id);
     
     if (!user) {
       console.log("Aucun utilisateur connecté, retour d'une liste vide");
@@ -126,6 +129,7 @@ export async function loadBooks() {
     }, {} as Record<string, number>);
     
     console.log("Distribution des statuts:", booksByStatus);
+    console.log("Livres récupérés pour l'utilisateur:", user.id);
 
     return data?.map((row: BookRow) => {
       const bookData = row.book_data || row;
@@ -143,10 +147,17 @@ export async function loadBooks() {
 
 export async function getBookById(id: string) {
   try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      throw new Error('Vous devez être connecté pour effectuer cette action');
+    }
+    
     const { data, error } = await supabase
       .from('books')
       .select('book_data')
       .eq('id', id)
+      .eq('user_id', user.id) // Ensure we only get books belonging to the current user
       .maybeSingle();
 
     if (error) {
@@ -174,6 +185,7 @@ export async function deleteBook(bookId: string) {
     }
     
     console.log('Tentative de suppression du livre:', bookId);
+    console.log('Utilisateur:', user.id);
     
     const { error } = await supabase
       .from('books')
