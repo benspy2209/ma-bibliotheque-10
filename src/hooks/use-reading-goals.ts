@@ -26,13 +26,14 @@ export function useReadingGoals() {
         .from('reading_goals')
         .select('yearly_goal, monthly_goal')
         .eq('user_id', user.user.id)
-        .single();
+        .maybeSingle();
 
       if (error || !data) {
+        console.error("Erreur lors de la récupération des objectifs:", error);
         return DEFAULT_GOALS;
       }
 
-      return data;
+      return data as ReadingGoals;
     } catch (error) {
       console.error("Error fetching reading goals:", error);
       return DEFAULT_GOALS;

@@ -32,16 +32,19 @@ export function ReadingGoalsForm({ yearlyGoal, monthlyGoal }: ReadingGoalsFormPr
 
   const handleSaveGoals = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error("Vous devez être connecté pour effectuer cette action");
+      }
+      
       const { error } = await supabase
         .from('reading_goals')
-        .upsert(
-          { 
-            user_id: (await supabase.auth.getUser()).data.user?.id,
-            yearly_goal: newYearlyGoal,
-            monthly_goal: newMonthlyGoal
-          },
-          { onConflict: 'user_id' }
-        );
+        .upsert({ 
+          user_id: user.id,
+          yearly_goal: newYearlyGoal,
+          monthly_goal: newMonthlyGoal
+        }, { onConflict: 'user_id' });
 
       if (error) throw error;
 

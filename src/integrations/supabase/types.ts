@@ -36,6 +36,33 @@ export type Database = {
         }
         Relationships: []
       }
+      reading_goals: {
+        Row: {
+          created_at: string
+          id: string
+          monthly_goal: number
+          updated_at: string
+          user_id: string
+          yearly_goal: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          monthly_goal?: number
+          updated_at?: string
+          user_id: string
+          yearly_goal?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          monthly_goal?: number
+          updated_at?: string
+          user_id?: string
+          yearly_goal?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
