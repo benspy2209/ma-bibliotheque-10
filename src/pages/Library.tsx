@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
@@ -16,6 +17,7 @@ import { Search, BookPlus, LogIn } from "lucide-react";
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { LoginDialog } from '@/components/auth/LoginDialog';
 
 export default function Library() {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
@@ -26,7 +28,7 @@ export default function Library() {
   const { toast } = useToast();
   const { sortBooks } = useBookSort();
   const { viewMode, toggleView } = useViewPreference();
-  const { user, signIn } = useSupabaseAuth();
+  const { user, signIn, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
 
   const { data: books = [], refetch } = useQuery({
     queryKey: ['books'],
@@ -116,6 +118,7 @@ export default function Library() {
                 <LogIn className="h-5 w-5" />
                 Se connecter
               </Button>
+              <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
             </div>
           ) : (
             <>
