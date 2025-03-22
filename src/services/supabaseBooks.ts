@@ -7,16 +7,20 @@ import { v4 as uuidv4 } from 'uuid';
 
 export async function saveBook(book: Book) {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
     
-    if (!user) {
+    if (authError || !user) {
+      console.error('Authentication error:', authError);
       throw new Error('Vous devez être connecté pour effectuer cette action');
     }
+    
+    console.log('Saving book for user:', user.id);
 
     const { data: existingBookData } = await supabase
       .from('books')
       .select('id')
       .eq('id', book.id)
+      .eq('user_id', user.id)  // Ensure we're only looking at the user's own books
       .maybeSingle();
 
     const isEditing = !!existingBookData;
@@ -96,7 +100,12 @@ function isValidUUID(id: string): boolean {
 
 export async function loadBooks() {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError) {
+      console.error('Authentication error when loading books:', authError);
+      return [];
+    }
     
     console.log("Utilisateur actuel:", user?.id);
     
@@ -105,7 +114,7 @@ export async function loadBooks() {
       return [];
     }
     
-    // Add a timestamp parameter to force a fresh fetch every time
+    // Add a timestamp parameter to force a fresh fetch every time and never use cached results
     const timestamp = new Date().getTime();
     
     const { data, error } = await supabase
@@ -147,9 +156,10 @@ export async function loadBooks() {
 
 export async function getBookById(id: string) {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
     
-    if (!user) {
+    if (authError || !user) {
+      console.error('Authentication error when getting book by ID:', authError);
       throw new Error('Vous devez être connecté pour effectuer cette action');
     }
     
@@ -181,6 +191,7 @@ export async function deleteBook(bookId: string) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
     if (authError || !user) {
+      console.error('Authentication error when deleting book:', authError);
       throw new Error('Vous devez être connecté pour effectuer cette action');
     }
     
