@@ -1,4 +1,3 @@
-
 import { useMemo } from 'react';
 import { Book } from '@/types/book';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -42,6 +41,8 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
+import { ReadingGoalsForm } from "@/components/statistics/ReadingGoalsForm";
+import { useReadingGoals } from "@/hooks/use-reading-goals";
 
 const COLORS = [
   '#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE', '#00C49F',
@@ -49,15 +50,15 @@ const COLORS = [
 ];
 
 export default function Statistics() {
-  // Mettre à jour la configuration de useQuery pour s'assurer que les données sont rafraîchies
   const { data: books = [] } = useQuery({
     queryKey: ['books'],
     queryFn: loadBooks,
-    // Ajouter ces options pour s'assurer que les données sont toujours à jour
     refetchOnWindowFocus: true,
     refetchOnMount: true,
-    staleTime: 0 // Les données sont considérées comme obsolètes immédiatement
+    staleTime: 0
   });
+
+  const { data: readingGoals } = useReadingGoals();
 
   const completedBooks = books.filter((book): book is Book => 
     book !== null && book.status === 'completed' && book.completionDate != null
@@ -169,7 +170,7 @@ export default function Statistics() {
       book.completionDate && getYear(new Date(book.completionDate)) === currentYear
     ).length;
 
-    const yearlyGoal = 50;
+    const yearlyGoal = readingGoals.yearly_goal;
     const yearlyProgressPercentage = Math.min(100, (booksThisYear / yearlyGoal) * 100);
 
     const currentMonth = new Date();
@@ -178,7 +179,7 @@ export default function Statistics() {
       differenceInMonths(currentMonth, new Date(book.completionDate)) === 0
     ).length;
 
-    const monthlyGoal = 4;
+    const monthlyGoal = readingGoals.monthly_goal;
     const monthlyProgressPercentage = Math.min(100, (booksThisMonth / monthlyGoal) * 100);
 
     const avgReadingTime = totalReadingDays / Math.max(1, completedBooks.length);
@@ -229,7 +230,7 @@ export default function Statistics() {
       readingTimeDistribution,
       hasReadingTimeData: filteredReadingTimeDistribution.length > 0
     };
-  }, [completedBooks, readingBooks, toReadBooks]);
+  }, [completedBooks, readingBooks, toReadBooks, readingGoals]);
 
   const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name, value }: any) => {
     if (value === 0) return null;
