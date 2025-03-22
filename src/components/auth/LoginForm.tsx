@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Info } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ResetPasswordForm } from './ResetPasswordForm';
 
 interface LoginFormProps {
   defaultTab?: 'login' | 'signup';
@@ -17,7 +18,7 @@ interface LoginFormProps {
 export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>(defaultTab);
+  const [authMode, setAuthMode] = useState<'login' | 'signup' | 'reset'>(defaultTab);
   const [isLoading, setIsLoading] = useState(false);
   const [emailSentMessage, setEmailSentMessage] = useState('');
   const [skipEmailVerification, setSkipEmailVerification] = useState(false);
@@ -110,10 +111,11 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
   };
 
   return (
-    <Tabs defaultValue={defaultTab} className="w-full" onValueChange={(value) => setAuthMode(value as 'login' | 'signup')}>
-      <TabsList className="grid w-full grid-cols-2 mb-6">
+    <Tabs defaultValue={defaultTab} className="w-full" onValueChange={(value) => setAuthMode(value as 'login' | 'signup' | 'reset')}>
+      <TabsList className="grid w-full grid-cols-3 mb-6">
         <TabsTrigger value="login">Connexion</TabsTrigger>
         <TabsTrigger value="signup">Inscription</TabsTrigger>
+        <TabsTrigger value="reset">Mot de passe</TabsTrigger>
       </TabsList>
       
       <TabsContent value="login">
@@ -205,6 +207,10 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
             </AlertDescription>
           </Alert>
         </form>
+      </TabsContent>
+
+      <TabsContent value="reset">
+        <ResetPasswordForm />
       </TabsContent>
     </Tabs>
   );
