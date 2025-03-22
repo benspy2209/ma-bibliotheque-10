@@ -68,7 +68,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      fetch_reading_goals: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      upsert_reading_goals: {
+        Args: {
+          p_user_id: string
+          p_yearly_goal: number
+          p_monthly_goal: number
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
