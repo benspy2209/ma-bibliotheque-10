@@ -25,3 +25,22 @@ export interface BookDescriptionProps {
   isEditing: boolean;
   onDescriptionChange: (value: string) => void;
 }
+
+export interface BookActionsProps {
+  isEditing: boolean;
+  onSave: () => Promise<void>;
+}
+
+export interface BookStatusHandlerProps {
+  book: Book;
+  onStatusChange: (status: ReadingStatus) => Promise<void>;
+}
+
+export interface BookFormProps {
+  book: Book;
+  isEditing: boolean;
+  onInputChange: (field: keyof Book, value: string) => void;
+  onDateChange: (date: Date | undefined) => void;
+  onRatingChange: (rating: number) => void;
+  onReviewChange: (review: { content: string; date: string; } | undefined) => void;
+}

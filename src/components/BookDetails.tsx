@@ -1,63 +1,19 @@
 
-import { Book, ReadingStatus } from '@/types/book';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Book, ReadingStatus } from '@/types/book';
 import { useToast } from '@/hooks/use-toast';
 import { BookDetailsProps } from './book-details/types';
 import { saveBook, deleteBook } from '@/services/supabaseBooks';
-import { BookHeader } from './book-details/BookHeader';
-import { BookPreview } from './book-details/BookPreview';
-import { BookDescription } from './book-details/BookDescription';
-import { BookReview } from './book-details/BookReview';
-import { DeleteBookDialog } from './book-details/DeleteBookDialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BookDetailsDialog } from './book-details/BookDetailsDialog';
 import { useQueryClient } from '@tanstack/react-query';
 
 export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProps) {
   const [currentBook, setCurrentBook] = useState(book);
-  const [isEditing, setIsEditing] = useState(false);
-  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const handleStatusChange = async (status: ReadingStatus) => {
     const updatedBook = { ...currentBook, status };
-    setCurrentBook(updatedBook);
-    await saveToLibrary(updatedBook);
-  };
-
-  const handleInputChange = (field: keyof Book, value: string) => {
-    setCurrentBook(prev => ({
-      ...prev,
-      [field]: field === 'purchased' ? value === 'true' : 
-               (field === 'numberOfPages' || field === 'readingTimeDays') ? 
-               (value === '' ? undefined : Number(value)) : value
-    }));
-  };
-
-  const handleCompletionDateChange = (date: Date | undefined) => {
-    setCurrentBook(prev => ({
-      ...prev,
-      completionDate: date ? date.toISOString().split('T')[0] : undefined
-    }));
-  };
-
-  const handleRatingChange = async (newRating: number) => {
-    const updatedBook = { ...currentBook, rating: newRating };
-    setCurrentBook(updatedBook);
-    await saveToLibrary(updatedBook);
-  };
-
-  const handleReviewChange = async (review: { content: string; date: string; } | undefined) => {
-    const updatedBook = { ...currentBook, review };
     setCurrentBook(updatedBook);
     await saveToLibrary(updatedBook);
   };
@@ -97,20 +53,12 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
     }
   };
 
-  const handleSave = async () => {
-    await saveToLibrary(currentBook);
-    setIsEditing(false);
-  };
-
   const handleDelete = async () => {
     try {
       await deleteBook(currentBook.id);
       
       // Invalider la requête pour forcer une mise à jour des statistiques
       queryClient.invalidateQueries({ queryKey: ['books'] });
-      
-      // Fermer l'alerte de suppression
-      setShowDeleteAlert(false);
       
       toast({
         description: "Le livre a été supprimé de votre bibliothèque",
@@ -125,82 +73,50 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
         variant: "destructive",
         description: error instanceof Error ? error.message : "Une erreur est survenue lors de la suppression",
       });
-      
-      // S'assurer que la boîte de dialogue de suppression est fermée en cas d'erreur
-      setShowDeleteAlert(false);
     }
   };
 
+  const handleInputChange = (field: keyof Book, value: string) => {
+    setCurrentBook(prev => ({
+      ...prev,
+      [field]: field === 'purchased' ? value === 'true' : 
+               (field === 'numberOfPages' || field === 'readingTimeDays') ? 
+               (value === '' ? undefined : Number(value)) : value
+    }));
+  };
+
+  const handleCompletionDateChange = (date: Date | undefined) => {
+    setCurrentBook(prev => ({
+      ...prev,
+      completionDate: date ? date.toISOString().split('T')[0] : undefined
+    }));
+  };
+
+  const handleRatingChange = async (newRating: number) => {
+    const updatedBook = { ...currentBook, rating: newRating };
+    setCurrentBook(updatedBook);
+    await saveToLibrary(updatedBook);
+  };
+
+  const handleReviewChange = async (review: { content: string; date: string; } | undefined) => {
+    const updatedBook = { ...currentBook, review };
+    setCurrentBook(updatedBook);
+    await saveToLibrary(updatedBook);
+  };
+
+  const handleSave = async () => {
+    await saveToLibrary(currentBook);
+  };
+
   return (
-    <>
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent 
-          className="max-w-2xl max-h-[80vh] overflow-y-auto" 
-          aria-describedby="book-details-description"
-        >
-          <DialogHeader className="pb-2">
-            <DialogTitle className="text-xl">Détails du livre</DialogTitle>
-            <DialogDescription id="book-details-description" className="sr-only">
-              Informations détaillées sur le livre "{currentBook.title}"
-            </DialogDescription>
-            <BookHeader
-              book={currentBook}
-              isEditing={isEditing}
-              onEditToggle={() => setIsEditing(!isEditing)}
-              onDeleteClick={() => setShowDeleteAlert(true)}
-              onStatusChange={handleStatusChange}
-            />
-          </DialogHeader>
-          
-          <BookPreview
-            book={currentBook}
-            isEditing={isEditing}
-            onRatingChange={handleRatingChange}
-            onInputChange={handleInputChange}
-            onDateChange={handleCompletionDateChange}
-          />
-
-          <Separator className="my-4" />
-
-          <Tabs defaultValue="description" className="w-full">
-            <TabsList>
-              <TabsTrigger value="description">Description</TabsTrigger>
-              <TabsTrigger value="review">Critique</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="description">
-              <BookDescription
-                description={currentBook.description}
-                isEditing={isEditing}
-                onDescriptionChange={(value) => handleInputChange('description', value)}
-              />
-            </TabsContent>
-
-            <TabsContent value="review">
-              <BookReview
-                book={currentBook}
-                isEditing={isEditing}
-                onReviewChange={handleReviewChange}
-              />
-            </TabsContent>
-          </Tabs>
-
-          {isEditing && (
-            <div className="flex justify-end mt-4">
-              <Button onClick={handleSave}>
-                Enregistrer les modifications
-              </Button>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <DeleteBookDialog
-        book={currentBook}
-        isOpen={showDeleteAlert}
-        onOpenChange={setShowDeleteAlert}
-        onConfirmDelete={handleDelete}
-      />
-    </>
+    <BookDetailsDialog
+      book={currentBook}
+      isOpen={isOpen}
+      onClose={onClose}
+      onUpdate={() => {
+        onUpdate();
+        setCurrentBook(book);
+      }}
+    />
   );
 }
