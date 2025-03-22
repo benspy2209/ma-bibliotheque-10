@@ -91,31 +91,36 @@ function isValidUUID(id: string): boolean {
 }
 
 export async function loadBooks() {
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  console.log("Utilisateur actuel:", user);
-  
-  if (!user) {
-    console.log("Aucun utilisateur connecté, retour d'une liste vide");
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    console.log("Utilisateur actuel:", user);
+    
+    if (!user) {
+      console.log("Aucun utilisateur connecté, retour d'une liste vide");
+      return [];
+    }
+    
+    const { data, error } = await supabase
+      .from('books')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    console.log("Données reçues:", data);
+    console.log("Erreur éventuelle:", error);
+
+    if (error) {
+      console.error('Erreur lors du chargement des livres:', error);
+      throw error;
+    }
+
+    // Convertir les données en objets Book
+    return data?.map((row: BookRow) => row.book_data || row) ?? [];
+  } catch (error) {
+    console.error('Erreur lors du chargement des livres:', error);
     return [];
   }
-  
-  const { data, error } = await supabase
-    .from('books')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
-
-  console.log("Données reçues:", data);
-  console.log("Erreur éventuelle:", error);
-
-  if (error) {
-    console.error('Erreur lors du chargement des livres:', error);
-    throw error;
-  }
-
-  // Convertir les données en objets Book
-  return data?.map((row: BookRow) => row.book_data || row) ?? [];
 }
 
 export async function deleteBook(bookId: string) {
@@ -124,15 +129,42 @@ export async function deleteBook(bookId: string) {
   }
 
   try {
+    // Vérifier si l'utilisateur est connecté
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      throw new Error('Vous devez être connecté pour effectuer cette action');
+    }
+    
+    // Vérifier que le livre existe et appartient à cet utilisateur
+    const { data: bookData, error: checkError } = await supabase
+      .from('books')
+      .select('id')
+      .eq('id', bookId)
+      .eq('user_id', user.id)
+      .maybeSingle();
+      
+    if (checkError) {
+      console.error('Erreur lors de la vérification du livre:', checkError);
+      throw new Error(`Erreur lors de la vérification : ${checkError.message}`);
+    }
+    
+    if (!bookData) {
+      throw new Error('Ce livre n\'existe pas ou ne vous appartient pas');
+    }
+
+    // Procéder à la suppression
     const { error } = await supabase
       .from('books')
       .delete()
       .match({ id: bookId });
 
     if (error) {
-      console.error('Erreur Supabase:', error);
+      console.error('Erreur Supabase lors de la suppression:', error);
       throw new Error(`Erreur lors de la suppression : ${error.message}`);
     }
+    
+    return { success: true };
   } catch (error) {
     console.error('Erreur lors de la suppression du livre:', error);
     throw error; // Propager l'erreur pour la traiter dans le composant
@@ -140,16 +172,21 @@ export async function deleteBook(bookId: string) {
 }
 
 export async function getBookById(id: string) {
-  const { data, error } = await supabase
-    .from('books')
-    .select('book_data')
-    .eq('id', id)
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from('books')
+      .select('book_data')
+      .eq('id', id)
+      .maybeSingle();
 
-  if (error) {
-    console.error('Erreur lors du chargement du livre:', error);
-    throw error;
+    if (error) {
+      console.error('Erreur lors du chargement du livre:', error);
+      throw error;
+    }
+
+    return data?.book_data as Book || null;
+  } catch (error) {
+    console.error('Erreur lors du chargement du livre par ID:', error);
+    return null;
   }
-
-  return data?.book_data as Book || null;
 }

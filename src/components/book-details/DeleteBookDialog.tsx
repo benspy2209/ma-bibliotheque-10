@@ -10,7 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 
 interface DeleteBookDialogProps {
@@ -23,22 +23,34 @@ interface DeleteBookDialogProps {
 export function DeleteBookDialog({ book, isOpen, onOpenChange, onConfirmDelete }: DeleteBookDialogProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   
+  // Réinitialiser l'état de suppression quand le dialogue s'ouvre/se ferme
+  useEffect(() => {
+    if (!isOpen) {
+      setIsDeleting(false);
+    }
+  }, [isOpen]);
+  
   const handleDelete = async () => {
+    if (isDeleting) return; // Éviter les clics multiples
+    
     setIsDeleting(true);
     try {
       await onConfirmDelete();
-      // Fermer manuellement le dialogue après une suppression réussie
-      onOpenChange(false);
+      // La fermeture du dialogue est maintenant gérée par le composant parent
     } catch (error) {
       console.error('Erreur lors de la suppression :', error);
-      // Même en cas d'erreur, réinitialiser l'état de suppression
     } finally {
-      setIsDeleting(false);
+      // Ne pas réinitialiser isDeleting ici pour éviter de pouvoir cliquer à nouveau
+      // pendant que le composant parent traite la fermeture
     }
   };
   
   return (
-    <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
+    <AlertDialog open={isOpen} onOpenChange={(open) => {
+      // Empêcher la fermeture pendant la suppression
+      if (isDeleting && !open) return;
+      onOpenChange(open);
+    }}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>

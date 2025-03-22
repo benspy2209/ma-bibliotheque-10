@@ -8,7 +8,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { BookDetailsProps } from './book-details/types';
@@ -25,42 +25,44 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
   const [currentBook, setCurrentBook] = useState(book);
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const [isDeletingBook, setIsDeletingBook] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const handleStatusChange = async (status: ReadingStatus) => {
+  // Utilisation de useCallback pour stabiliser les fonctions
+  const handleStatusChange = useCallback(async (status: ReadingStatus) => {
     const updatedBook = { ...currentBook, status };
     setCurrentBook(updatedBook);
     await saveToLibrary(updatedBook);
-  };
+  }, [currentBook]);
 
-  const handleInputChange = (field: keyof Book, value: string) => {
+  const handleInputChange = useCallback((field: keyof Book, value: string) => {
     setCurrentBook(prev => ({
       ...prev,
       [field]: field === 'purchased' ? value === 'true' : 
                (field === 'numberOfPages' || field === 'readingTimeDays') ? 
                (value === '' ? undefined : Number(value)) : value
     }));
-  };
+  }, []);
 
-  const handleCompletionDateChange = (date: Date | undefined) => {
+  const handleCompletionDateChange = useCallback((date: Date | undefined) => {
     setCurrentBook(prev => ({
       ...prev,
       completionDate: date ? date.toISOString().split('T')[0] : undefined
     }));
-  };
+  }, []);
 
-  const handleRatingChange = async (newRating: number) => {
+  const handleRatingChange = useCallback(async (newRating: number) => {
     const updatedBook = { ...currentBook, rating: newRating };
     setCurrentBook(updatedBook);
     await saveToLibrary(updatedBook);
-  };
+  }, [currentBook]);
 
-  const handleReviewChange = async (review: { content: string; date: string; } | undefined) => {
+  const handleReviewChange = useCallback(async (review: { content: string; date: string; } | undefined) => {
     const updatedBook = { ...currentBook, review };
     setCurrentBook(updatedBook);
     await saveToLibrary(updatedBook);
-  };
+  }, [currentBook]);
 
   const saveToLibrary = async (bookToSave: Book) => {
     try {
@@ -103,32 +105,49 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
   };
 
   const handleDelete = async () => {
+    if (isDeletingBook) return; // Éviter les actions multiples
+    
     try {
-      setShowDeleteAlert(false);
-      onClose();
-
+      setIsDeletingBook(true);
+      
       await deleteBook(currentBook.id);
       
       // Invalider la requête pour forcer une mise à jour des statistiques
       queryClient.invalidateQueries({ queryKey: ['books'] });
       
+      // IMPORTANT: fermer d'abord la boîte de dialogue de suppression, 
+      // puis la modal de détails pour éviter les problèmes d'état
+      setShowDeleteAlert(false);
+      
       toast({
         description: "Le livre a été supprimé de votre bibliothèque",
       });
 
-      onUpdate();
+      // Ensuite, fermer le dialogue principal après un court délai
+      // pour s'assurer que l'alerte est fermée
+      setTimeout(() => {
+        onClose();
+        onUpdate();
+      }, 100);
+
     } catch (error) {
       console.error('Erreur lors de la suppression:', error);
       toast({
         variant: "destructive",
         description: error instanceof Error ? error.message : "Une erreur est survenue lors de la suppression",
       });
+    } finally {
+      setIsDeletingBook(false);
     }
   };
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={onClose}>
+      <Dialog open={isOpen} onOpenChange={(open) => {
+        // Ne pas permettre la fermeture pendant une suppression
+        if (isDeletingBook && !open) return;
+        onClose();
+      }}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" aria-describedby="book-details-description">
           <DialogHeader className="pb-2">
             <DialogTitle className="text-xl">Détails du livre</DialogTitle>
