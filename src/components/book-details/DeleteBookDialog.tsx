@@ -10,7 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
 interface DeleteBookDialogProps {
@@ -23,38 +23,37 @@ interface DeleteBookDialogProps {
 export function DeleteBookDialog({ book, isOpen, onOpenChange, onConfirmDelete }: DeleteBookDialogProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   
-  // Réinitialiser l'état de suppression quand le dialogue s'ouvre/se ferme
-  useEffect(() => {
-    if (!isOpen) {
-      setIsDeleting(false);
-    }
-  }, [isOpen]);
-  
   const handleDelete = async () => {
-    if (isDeleting) return; // Éviter les clics multiples
-    
     setIsDeleting(true);
     try {
       await onConfirmDelete();
-      // La fermeture du dialogue est maintenant gérée par le composant parent
+      // La fermeture sera gérée par le composant parent
     } catch (error) {
       console.error('Erreur lors de la suppression :', error);
-    } finally {
-      // Ne pas réinitialiser isDeleting ici pour éviter de pouvoir cliquer à nouveau
-      // pendant que le composant parent traite la fermeture
+      setIsDeleting(false); // Réinitialiser uniquement en cas d'erreur
     }
   };
   
   return (
-    <AlertDialog open={isOpen} onOpenChange={(open) => {
-      // Empêcher la fermeture pendant la suppression
-      if (isDeleting && !open) return;
-      onOpenChange(open);
-    }}>
-      <AlertDialogContent>
+    <AlertDialog 
+      open={isOpen} 
+      onOpenChange={(open) => {
+        // Ne pas permettre la fermeture pendant la suppression
+        if (isDeleting && !open) return;
+        
+        // Si on ferme le dialogue et qu'on n'est pas en train de supprimer, 
+        // réinitialiser l'état
+        if (!open && !isDeleting) {
+          setIsDeleting(false);
+        }
+        
+        onOpenChange(open);
+      }}
+    >
+      <AlertDialogContent aria-describedby="delete-dialog-description">
         <AlertDialogHeader>
           <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
-          <AlertDialogDescription>
+          <AlertDialogDescription id="delete-dialog-description">
             Cette action supprimera définitivement le livre "{book.title}" de votre bibliothèque.
           </AlertDialogDescription>
         </AlertDialogHeader>

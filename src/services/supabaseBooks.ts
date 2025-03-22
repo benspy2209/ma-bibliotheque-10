@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 import { isDuplicateBook } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -157,7 +156,7 @@ export async function deleteBook(bookId: string) {
     const { error } = await supabase
       .from('books')
       .delete()
-      .match({ id: bookId });
+      .eq('id', bookId);
 
     if (error) {
       console.error('Erreur Supabase lors de la suppression:', error);
