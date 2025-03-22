@@ -49,9 +49,14 @@ const COLORS = [
 ];
 
 export default function Statistics() {
+  // Mettre à jour la configuration de useQuery pour s'assurer que les données sont rafraîchies
   const { data: books = [] } = useQuery({
     queryKey: ['books'],
-    queryFn: loadBooks
+    queryFn: loadBooks,
+    // Ajouter ces options pour s'assurer que les données sont toujours à jour
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    staleTime: 0 // Les données sont considérées comme obsolètes immédiatement
   });
 
   const completedBooks = books.filter((book): book is Book => 
