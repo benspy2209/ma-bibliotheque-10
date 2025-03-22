@@ -31,7 +31,8 @@ export function DeleteBookDialog({ book, isOpen, onOpenChange, onConfirmDelete }
       console.log('Starting delete operation for book:', book.id);
       await onConfirmDelete();
       console.log('Delete operation completed successfully');
-      // Dialog will be closed by the parent component
+      // Fermer explicitement la boîte de dialogue après la suppression réussie
+      onOpenChange(false);
     } catch (error) {
       console.error('Error in delete dialog during deletion:', error);
     } finally {
