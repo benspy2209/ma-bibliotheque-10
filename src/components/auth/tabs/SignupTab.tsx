@@ -100,6 +100,9 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
           {emailSentMessage.includes("existe déjà") || emailSentMessage.includes("rate limit") ? <AlertCircle className="h-4 w-4" /> : <Info className="h-4 w-4" />}
           <AlertDescription>
             {emailSentMessage}
+            {emailSentMessage.includes("Veuillez vérifier votre email") && (
+              <strong className="block mt-2">N'oubliez pas de vérifier votre dossier SPAM.</strong>
+            )}
           </AlertDescription>
         </Alert>
       )}
@@ -146,7 +149,8 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
       
       <Alert className="mt-4">
         <AlertDescription className="text-xs">
-          Note: Les emails de confirmation sont envoyés depuis bienvenue@bibliopulse.be. Vérifiez votre dossier spam si vous ne recevez pas l'email.
+          Note: Les emails de confirmation sont envoyés depuis bienvenue@bibliopulse.be. 
+          <span className="block mt-1 font-medium">Vérifiez votre dossier SPAM si vous ne recevez pas l'email.</span>
         </AlertDescription>
       </Alert>
     </form>

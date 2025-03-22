@@ -62,7 +62,9 @@ export function ResetPasswordForm() {
         <Alert className="mb-4">
           <Info className="h-4 w-4" />
           <AlertDescription>
-            Un email de réinitialisation a été envoyé à {email}. Veuillez vérifier votre boîte de réception et suivre les instructions pour réinitialiser votre mot de passe.
+            Un email de réinitialisation a été envoyé à {email}. 
+            <strong className="block mt-2">Veuillez vérifier votre boîte de réception ainsi que votre dossier SPAM</strong>, 
+            puis suivre les instructions pour réinitialiser votre mot de passe.
           </AlertDescription>
         </Alert>
       ) : (
@@ -87,6 +89,7 @@ export function ResetPasswordForm() {
           <Alert>
             <AlertDescription className="text-xs">
               Un email sera envoyé avec les instructions pour réinitialiser votre mot de passe.
+              <span className="block mt-1 font-medium">N'oubliez pas de vérifier votre dossier SPAM si vous ne trouvez pas l'email.</span>
             </AlertDescription>
           </Alert>
         </form>
