@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Book, ReadingStatus } from '@/types/book';
 import { useToast } from '@/hooks/use-toast';
 import { BookDetailsProps } from './book-details/types';
@@ -113,10 +113,14 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
       book={currentBook}
       isOpen={isOpen}
       onClose={onClose}
-      onUpdate={() => {
-        onUpdate();
-        setCurrentBook(book);
-      }}
+      onUpdate={onUpdate}
+      onStatusChange={handleStatusChange}
+      onSaveToLibrary={saveToLibrary}
+      onInputChange={handleInputChange}
+      onCompletionDateChange={handleCompletionDateChange}
+      onRatingChange={handleRatingChange}
+      onReviewChange={handleReviewChange}
+      onDelete={handleDelete}
     />
   );
 }

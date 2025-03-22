@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Book, ReadingStatus } from '@/types/book';
 import {
@@ -8,15 +9,18 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { useToast } from '@/hooks/use-toast';
-import { BookDetailsProps } from './types';
 import { BookHeader } from './BookHeader';
 import { BookForm } from './BookForm';
 import { BookActions } from './BookActions';
 import { DeleteBookDialog } from './DeleteBookDialog';
 
-interface BookDetailsDialogProps extends BookDetailsProps {
+interface BookDetailsDialogProps {
+  book: Book;
+  isOpen: boolean;
+  onClose: () => void;
+  onUpdate: () => void;
   onStatusChange: (status: ReadingStatus) => Promise<void>;
-  onSaveToLibrary: (bookToSave: Book) => Promise<Book>;
+  onSaveToLibrary: (bookToSave: Book) => Promise<void>;
   onInputChange: (field: keyof Book, value: string) => void;
   onCompletionDateChange: (date: Date | undefined) => void;
   onRatingChange: (newRating: number) => Promise<void>;
@@ -37,49 +41,12 @@ export function BookDetailsDialog({
   onReviewChange,
   onDelete
 }: BookDetailsDialogProps) {
-  const [currentBook, setCurrentBook] = useState(book);
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const { toast } = useToast();
 
-  const handleInputChangeInner = (field: keyof Book, value: string) => {
-    onInputChange(field, value);
-    setCurrentBook(prev => ({
-      ...prev,
-      [field]: field === 'purchased' ? value === 'true' : 
-               (field === 'numberOfPages' || field === 'readingTimeDays') ? 
-               (value === '' ? undefined : Number(value)) : value
-    }));
-  };
-
-  const handleCompletionDateChangeInner = (date: Date | undefined) => {
-    onCompletionDateChange(date);
-    setCurrentBook(prev => ({
-      ...prev,
-      completionDate: date ? date.toISOString().split('T')[0] : undefined
-    }));
-  };
-
-  const handleRatingChangeInner = async (newRating: number) => {
-    await onRatingChange(newRating);
-    const updatedBook = { ...currentBook, rating: newRating };
-    setCurrentBook(updatedBook);
-  };
-
-  const handleReviewChangeInner = async (review: { content: string; date: string; } | undefined) => {
-    await onReviewChange(review);
-    const updatedBook = { ...currentBook, review };
-    setCurrentBook(updatedBook);
-  };
-
-  const handleStatusChangeInner = async (status: ReadingStatus) => {
-    await onStatusChange(status);
-    const updatedBook = { ...currentBook, status };
-    setCurrentBook(updatedBook);
-  };
-
   const handleSave = async () => {
-    await onSaveToLibrary(currentBook);
+    await onSaveToLibrary(book);
     setIsEditing(false);
   };
 
@@ -87,8 +54,6 @@ export function BookDetailsDialog({
     try {
       await onDelete();
       setShowDeleteAlert(false);
-      onClose();
-      onUpdate();
     } catch (error) {
       console.error('Erreur lors de la suppression:', error);
       toast({
@@ -109,24 +74,24 @@ export function BookDetailsDialog({
           <DialogHeader className="pb-2">
             <DialogTitle className="text-xl">Détails du livre</DialogTitle>
             <DialogDescription id="book-details-description" className="sr-only">
-              Informations détaillées sur le livre "{currentBook.title}"
+              Informations détaillées sur le livre "{book.title}"
             </DialogDescription>
             <BookHeader
-              book={currentBook}
+              book={book}
               isEditing={isEditing}
               onEditToggle={() => setIsEditing(!isEditing)}
               onDeleteClick={() => setShowDeleteAlert(true)}
-              onStatusChange={handleStatusChangeInner}
+              onStatusChange={onStatusChange}
             />
           </DialogHeader>
           
           <BookForm
-            book={currentBook}
+            book={book}
             isEditing={isEditing}
-            onInputChange={handleInputChangeInner}
-            onDateChange={handleCompletionDateChangeInner}
-            onRatingChange={handleRatingChangeInner}
-            onReviewChange={handleReviewChangeInner}
+            onInputChange={onInputChange}
+            onDateChange={onCompletionDateChange}
+            onRatingChange={onRatingChange}
+            onReviewChange={onReviewChange}
           />
 
           <BookActions isEditing={isEditing} onSave={handleSave} />
@@ -134,7 +99,7 @@ export function BookDetailsDialog({
       </Dialog>
 
       <DeleteBookDialog
-        book={currentBook}
+        book={book}
         isOpen={showDeleteAlert}
         onOpenChange={setShowDeleteAlert}
         onConfirmDelete={handleDelete}
