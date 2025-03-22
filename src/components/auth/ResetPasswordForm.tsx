@@ -16,9 +16,9 @@ export function ResetPasswordForm() {
 
   // Déterminer l'URL de production en fonction de l'environnement
   const getRedirectUrl = () => {
-    // En production, utiliser bookpulse.com
-    if (window.location.hostname === 'bookpulse.com' || 
-        window.location.hostname === 'www.bookpulse.com') {
+    // En production, utiliser bibliopulse.com
+    if (window.location.hostname === 'bibliopulse.com' || 
+        window.location.hostname === 'www.bibliopulse.com') {
       return `https://${window.location.hostname}/reset-password`;
     }
     // Sinon, utiliser l'URL actuelle

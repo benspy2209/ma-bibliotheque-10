@@ -203,7 +203,7 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
           
           <Alert className="mt-4">
             <AlertDescription className="text-xs">
-              Note: Les emails de confirmation sont envoyés depuis bienvenue@bookpulse.be. Vérifiez votre dossier spam si vous ne recevez pas l'email.
+              Note: Les emails de confirmation sont envoyés depuis bienvenue@bibliopulse.be. Vérifiez votre dossier spam si vous ne recevez pas l'email.
             </AlertDescription>
           </Alert>
         </form>
