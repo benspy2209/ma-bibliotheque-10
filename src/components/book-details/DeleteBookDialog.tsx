@@ -31,11 +31,11 @@ export function DeleteBookDialog({ book, isOpen, onOpenChange, onConfirmDelete }
       console.log('Starting delete operation for book:', book.id);
       await onConfirmDelete();
       console.log('Delete operation completed successfully');
-      // onOpenChange(false) will be called by the parent component after successful deletion
+      // Dialog will be closed by the parent component
     } catch (error) {
       console.error('Error in delete dialog during deletion:', error);
-      setIsDeleting(false); // Reset state only on error
-      // The dialog will remain open so the user can try again
+    } finally {
+      setIsDeleting(false); // Always reset the deleting state
     }
   };
   
@@ -45,13 +45,6 @@ export function DeleteBookDialog({ book, isOpen, onOpenChange, onConfirmDelete }
       onOpenChange={(open) => {
         // Don't allow closing the dialog during deletion
         if (isDeleting && !open) return;
-        
-        // If we're closing the dialog and not in the process of deleting,
-        // reset the state
-        if (!open && !isDeleting) {
-          setIsDeleting(false);
-        }
-        
         onOpenChange(open);
       }}
     >

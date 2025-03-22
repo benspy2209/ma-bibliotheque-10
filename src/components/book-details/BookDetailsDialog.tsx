@@ -26,6 +26,7 @@ interface BookDetailsDialogProps {
   onRatingChange: (newRating: number) => Promise<void>;
   onReviewChange: (review: { content: string; date: string; } | undefined) => Promise<void>;
   onDelete: () => Promise<void>;
+  isDeleting?: boolean;
 }
 
 export function BookDetailsDialog({ 
@@ -39,7 +40,8 @@ export function BookDetailsDialog({
   onCompletionDateChange,
   onRatingChange,
   onReviewChange,
-  onDelete
+  onDelete,
+  isDeleting = false
 }: BookDetailsDialogProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
@@ -64,9 +66,15 @@ export function BookDetailsDialog({
     }
   };
 
+  // Don't allow closing the dialog during deletion
+  const handleDialogChange = (open: boolean) => {
+    if (isDeleting && !open) return;
+    onClose();
+  };
+
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={onClose}>
+      <Dialog open={isOpen} onOpenChange={handleDialogChange}>
         <DialogContent 
           className="max-w-2xl max-h-[80vh] overflow-y-auto" 
           aria-describedby="book-details-description"

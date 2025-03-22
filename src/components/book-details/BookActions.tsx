@@ -15,6 +15,8 @@ export function BookActions({ isEditing, onSave }: BookActionsProps) {
       console.log('Starting save operation');
       await onSave();
       console.log('Save operation completed');
+    } catch (error) {
+      console.error('Error during save operation:', error);
     } finally {
       setIsSaving(false);
     }

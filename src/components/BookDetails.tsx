@@ -9,6 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProps) {
   const [currentBook, setCurrentBook] = useState(book);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -56,6 +57,9 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
   };
 
   const handleDelete = async () => {
+    if (isDeleting) return; // Prevent multiple attempts
+
+    setIsDeleting(true);
     try {
       console.log('Initiating delete in BookDetails component for book:', currentBook.id);
       await deleteBook(currentBook.id);
@@ -77,6 +81,8 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
         variant: "destructive",
         description: error instanceof Error ? error.message : "Une erreur est survenue lors de la suppression",
       });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -121,6 +127,7 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
       onRatingChange={handleRatingChange}
       onReviewChange={handleReviewChange}
       onDelete={handleDelete}
+      isDeleting={isDeleting}
     />
   );
 }

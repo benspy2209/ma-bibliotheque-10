@@ -1,3 +1,4 @@
+
 import { Book } from '@/types/book';
 import { isDuplicateBook } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -139,7 +140,13 @@ export async function deleteBook(bookId: string) {
   try {
     console.log('Attempting to delete book with ID:', bookId);
     
-    const { data: { user } } = await supabase.auth.getUser();
+    // Verify user is authenticated
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError) {
+      console.error('Error getting current user:', authError);
+      throw new Error(`Erreur d'authentification: ${authError.message}`);
+    }
     
     if (!user) {
       console.error('No user found when attempting to delete book');
@@ -148,11 +155,11 @@ export async function deleteBook(bookId: string) {
     
     console.log('User authenticated, proceeding with book deletion');
     
+    // First verify the book exists and belongs to this user
     const { data: bookData, error: checkError } = await supabase
       .from('books')
-      .select('id')
+      .select('id, user_id')
       .eq('id', bookId)
-      .eq('user_id', user.id)
       .maybeSingle();
       
     if (checkError) {
@@ -164,13 +171,20 @@ export async function deleteBook(bookId: string) {
       console.error('Book not found or does not belong to user');
       throw new Error('Ce livre n\'existe pas ou ne vous appartient pas');
     }
+    
+    if (bookData.user_id !== user.id) {
+      console.error('Book does not belong to current user');
+      throw new Error('Ce livre ne vous appartient pas');
+    }
 
-    console.log('Book found, proceeding with deletion');
+    console.log('Book found and belongs to user, proceeding with deletion');
 
+    // Finally delete the book
     const { error } = await supabase
       .from('books')
       .delete()
-      .eq('id', bookId);
+      .eq('id', bookId)
+      .eq('user_id', user.id); // Extra security check
 
     if (error) {
       console.error('Supabase error during deletion:', error);
