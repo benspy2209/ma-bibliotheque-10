@@ -21,6 +21,7 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
 
   // Update activeTab whenever authMode changes
   useEffect(() => {
+    console.log("LoginForm: authMode changed to", authMode);
     if (authMode === 'reset') {
       setActiveTab('reset');
       console.log("LoginForm: activeTab set to 'reset'");
@@ -28,6 +29,7 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
   }, [authMode]);
 
   const handleTabChange = (value: string) => {
+    console.log("Tab change requested to:", value);
     setActiveTab(value as 'login' | 'signup' | 'reset');
     setAuthMode(value as 'login' | 'signup' | 'reset');
   };
@@ -36,25 +38,31 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
   console.log("Current activeTab:", activeTab);
   console.log("Current authMode:", authMode);
 
+  // If activeTab is 'reset', render the reset password form directly
+  if (activeTab === 'reset') {
+    return (
+      <div className="w-full">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-medium">Réinitialisation de mot de passe</h3>
+          <button 
+            onClick={() => handleTabChange('login')} 
+            className="text-sm text-blue-600 hover:underline"
+          >
+            Retour à la connexion
+          </button>
+        </div>
+        <ResetPasswordForm />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full">
       <Tabs value={activeTab} className="w-full" onValueChange={handleTabChange}>
-        {activeTab !== 'reset' ? (
-          <TabsList className="grid w-full grid-cols-2 mb-2">
-            <TabsTrigger value="signup">Inscription</TabsTrigger>
-            <TabsTrigger value="login">Connexion</TabsTrigger>
-          </TabsList>
-        ) : (
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-medium">Réinitialisation de mot de passe</h3>
-            <button 
-              onClick={() => handleTabChange('login')} 
-              className="text-sm text-blue-600 hover:underline"
-            >
-              Retour à la connexion
-            </button>
-          </div>
-        )}
+        <TabsList className="grid w-full grid-cols-2 mb-2">
+          <TabsTrigger value="signup">Inscription</TabsTrigger>
+          <TabsTrigger value="login">Connexion</TabsTrigger>
+        </TabsList>
         
         {activeTab === 'login' && (
           <Alert className="mb-4 bg-blue-50 border-blue-200">
@@ -77,10 +85,6 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
             isLoading={isLoading} 
             setIsLoading={setIsLoading} 
           />
-        </TabsContent>
-
-        <TabsContent value="reset">
-          <ResetPasswordForm />
         </TabsContent>
       </Tabs>
     </div>
