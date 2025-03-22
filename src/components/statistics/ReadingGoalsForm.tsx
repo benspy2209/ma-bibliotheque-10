@@ -38,7 +38,7 @@ export function ReadingGoalsForm({ yearlyGoal, monthlyGoal }: ReadingGoalsFormPr
         throw new Error("Vous devez être connecté pour effectuer cette action");
       }
       
-      // Use a raw query to upsert into reading_goals table
+      // Utilisez la fonction RPC pour la mise à jour
       const { error } = await supabase.rpc('upsert_reading_goals', {
         p_user_id: user.id,
         p_yearly_goal: newYearlyGoal,

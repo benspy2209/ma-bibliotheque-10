@@ -364,9 +364,15 @@ export default function Statistics() {
                   </Card>
                   
                   <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Objectifs de lecture</CardTitle>
-                      <CardDescription>Progression vers vos objectifs</CardDescription>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                      <div>
+                        <CardTitle className="text-lg">Objectifs de lecture</CardTitle>
+                        <CardDescription>Progression vers vos objectifs</CardDescription>
+                      </div>
+                      <ReadingGoalsForm 
+                        yearlyGoal={readingGoals.yearly_goal}
+                        monthlyGoal={readingGoals.monthly_goal}
+                      />
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="space-y-2">

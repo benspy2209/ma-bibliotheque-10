@@ -1,5 +1,4 @@
 
-import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ReadingGoalRow } from '@/types/supabase';
@@ -23,12 +22,10 @@ export function useReadingGoals() {
         return DEFAULT_GOALS;
       }
 
-      // Use a raw query to fetch from reading_goals table
-      const { data, error } = await supabase
-        .from('reading_goals')
-        .select('yearly_goal, monthly_goal')
-        .eq('user_id', user.user.id)
-        .maybeSingle();
+      // Utiliser une requête SQL brute pour éviter les erreurs de typage
+      const { data, error } = await supabase.rpc('fetch_reading_goals', {
+        p_user_id: user.user.id
+      });
 
       if (error || !data) {
         console.error("Erreur lors de la récupération des objectifs:", error);

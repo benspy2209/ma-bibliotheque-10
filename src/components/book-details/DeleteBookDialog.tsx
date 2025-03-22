@@ -10,6 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useState } from 'react';
 
 interface DeleteBookDialogProps {
   book: Book;
@@ -19,6 +20,17 @@ interface DeleteBookDialogProps {
 }
 
 export function DeleteBookDialog({ book, isOpen, onOpenChange, onConfirmDelete }: DeleteBookDialogProps) {
+  const [isDeleting, setIsDeleting] = useState(false);
+  
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await onConfirmDelete();
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+  
   return (
     <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -29,12 +41,13 @@ export function DeleteBookDialog({ book, isOpen, onOpenChange, onConfirmDelete }
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Annuler</AlertDialogCancel>
+          <AlertDialogCancel disabled={isDeleting}>Annuler</AlertDialogCancel>
           <AlertDialogAction 
-            onClick={onConfirmDelete}
+            onClick={handleDelete}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            disabled={isDeleting}
           >
-            Supprimer
+            {isDeleting ? 'Suppression...' : 'Supprimer'}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
