@@ -73,5 +73,37 @@ export function useSupabaseAuth() {
     }
   };
 
-  return { user, session, signIn, signOut, completeSignOut, showLoginDialog, setShowLoginDialog, authMode };
+  // Fonction d'urgence pour déconnecter GitHub sans connexion
+  const emergencyGitHubDisconnect = () => {
+    try {
+      // Nettoyer le stockage local
+      localStorage.clear();
+      
+      // Nettoyer les cookies de session
+      document.cookie.split(";").forEach((c) => {
+        document.cookie = c
+          .replace(/^ +/, "")
+          .replace(/=.*/, `=;expires=${new Date().toUTCString()};path=/`);
+      });
+      
+      // Recharger la page
+      window.location.href = '/';
+      
+      console.log('Déconnexion d\'urgence GitHub effectuée');
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion d\'urgence GitHub:', error);
+    }
+  };
+
+  return { 
+    user, 
+    session, 
+    signIn, 
+    signOut, 
+    completeSignOut,
+    emergencyGitHubDisconnect,
+    showLoginDialog, 
+    setShowLoginDialog, 
+    authMode 
+  };
 }

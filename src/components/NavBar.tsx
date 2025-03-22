@@ -1,6 +1,6 @@
 
 import { NavLink } from "react-router-dom";
-import { Search, BookOpen, BarChart2, Sun, Moon, LogIn, LogOut, ChevronDown } from "lucide-react";
+import { Search, BookOpen, BarChart2, Sun, Moon, LogIn, LogOut, ChevronDown, Github } from "lucide-react";
 import { Button } from "./ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
@@ -14,7 +14,7 @@ import {
 
 const NavBar = () => {
   const { theme, toggleTheme } = useTheme();
-  const { signIn, signOut, completeSignOut, user, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
+  const { signIn, signOut, completeSignOut, emergencyGitHubDisconnect, user, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
 
   // Fonction wrapper pour gérer le clic du bouton de connexion
   const handleSignIn = () => {
@@ -87,6 +87,20 @@ const NavBar = () => {
           </Button>
         </div>
       </div>
+      
+      {/* Bouton d'urgence pour déconnecter GitHub */}
+      <div className="fixed bottom-4 right-4 z-50">
+        <Button 
+          variant="destructive" 
+          size="sm"
+          onClick={emergencyGitHubDisconnect}
+          className="flex items-center gap-2"
+        >
+          <Github className="h-4 w-4" />
+          Déconnecter GitHub
+        </Button>
+      </div>
+      
       <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
     </nav>
   );
