@@ -27,7 +27,7 @@ export default function Library() {
   const { toast } = useToast();
   const { sortBooks } = useBookSort();
   const { viewMode, toggleView } = useViewPreference();
-  const { user, signIn } = useSupabaseAuth();
+  const { user } = useSupabaseAuth();
 
   const { data: books = [], refetch } = useQuery({
     queryKey: ['books'],
@@ -92,12 +92,6 @@ export default function Library() {
     setToBuyFilter(value);
   };
 
-  // Définir la fonction handleLoginClick explicitement
-  const handleLoginClick = () => {
-    console.log("Bouton de connexion cliqué");
-    signIn('login');
-  };
-
   return (
     <div className="min-h-screen fade-in">
       <NavBar />
@@ -110,9 +104,6 @@ export default function Library() {
                 Connectez-vous ou créez un compte pour commencer à organiser vos lectures, 
                 suivre votre progression et découvrir de nouveaux livres.
               </p>
-              <Button onClick={handleLoginClick} size="lg">
-                Se connecter pour commencer
-              </Button>
             </div>
           ) : (
             <>
