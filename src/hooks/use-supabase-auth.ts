@@ -11,17 +11,14 @@ export function useSupabaseAuth() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
       const newUser = newSession?.user ?? null;
       setSession(newSession);
       setUser(newUser);
       
-      // Log the auth state change for debugging
       console.log(`Auth state changed: ${event}`, 
         newUser ? `User ID: ${newUser.id}` : 'No user');
       
-      // Invalidate and refetch all queries when auth state changes
       if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
         console.log(`Auth event triggered query invalidation: ${event}`);
         queryClient.invalidateQueries({ type: 'all' });
@@ -30,7 +27,6 @@ export function useSupabaseAuth() {
       }
     });
 
-    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
@@ -54,59 +50,60 @@ export function useSupabaseAuth() {
     await supabase.auth.signOut();
   };
 
-  // Fonction de déconnexion complète qui nettoie également le stockage local
   const completeSignOut = async () => {
     try {
-      // Déconnexion standard via Supabase
       await supabase.auth.signOut();
-      
-      // Nettoyer le stockage local
       localStorage.clear();
-      
-      // Redirection pour s'assurer que toute l'application est rechargée
       window.location.href = '/';
-      
       console.log('Déconnexion complète effectuée');
     } catch (error) {
       console.error('Erreur lors de la déconnexion complète:', error);
     }
   };
 
-  // Fonction améliorée pour déconnecter GitHub et permettre la reconnexion
   const emergencyGitHubDisconnect = () => {
     try {
-      // Rechercher et supprimer uniquement les cookies liés à GitHub
+      const cookiesToDelete = ['github', 'gh_', '_gh', 'supabase', 'sb-'];
       document.cookie.split(";").forEach((c) => {
         const cookieName = c.trim().split("=")[0];
-        if (cookieName.includes("github") || cookieName.includes("gh_") || cookieName.includes("_gh")) {
-          document.cookie = `${cookieName}=;expires=${new Date().toUTCString()};path=/`;
+        for (const prefix of cookiesToDelete) {
+          if (cookieName.toLowerCase().includes(prefix.toLowerCase())) {
+            document.cookie = `${cookieName}=;expires=${new Date().toUTCString()};path=/;domain=${window.location.hostname}`;
+            document.cookie = `${cookieName}=;expires=${new Date().toUTCString()};path=/`;
+          }
         }
       });
       
-      // Supprimer les données GitHub du stockage local
-      for (let i = 0; i < localStorage.length; i++) {
+      const keysToDelete = ['github', 'gh_', '_gh', 'supabase', 'sb-'];
+      for (const prefix of keysToDelete) {
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (key && key.toLowerCase().includes(prefix.toLowerCase())) {
+            localStorage.removeItem(key);
+          }
+        }
+      }
+      
+      localStorage.removeItem('supabase.auth.token');
+      
+      for (let i = localStorage.length - 1; i >= 0; i--) {
         const key = localStorage.key(i);
-        if (key && (key.includes("github") || key.includes("gh_") || key.includes("_gh"))) {
+        if (key && key.startsWith('sb-') && key.includes('-auth-token')) {
           localStorage.removeItem(key);
         }
       }
       
-      // Supprimer le token de Supabase pour forcer une nouvelle connexion
-      const supabaseKey = Object.keys(localStorage).find(key => 
-        key.startsWith('sb-') && key.includes('-auth-token')
-      );
+      setUser(null);
+      setSession(null);
       
-      if (supabaseKey) {
-        localStorage.removeItem(supabaseKey);
-      }
+      console.log('Déconnexion GitHub complète effectuée');
       
-      // Afficher un message de succès
-      console.log('Déconnexion GitHub réussie - vous pouvez maintenant vous reconnecter');
-      
-      // Rediriger vers la page d'accueil
-      window.location.href = '/';
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 500);
     } catch (error) {
       console.error('Erreur lors de la déconnexion GitHub:', error);
+      alert('Erreur lors de la déconnexion. Veuillez rafraîchir manuellement la page.');
     }
   };
 

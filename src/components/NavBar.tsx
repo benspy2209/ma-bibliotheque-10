@@ -1,4 +1,3 @@
-
 import { NavLink } from "react-router-dom";
 import { Search, BookOpen, BarChart2, Sun, Moon, LogIn, LogOut, ChevronDown, Github } from "lucide-react";
 import { Button } from "./ui/button";
@@ -88,17 +87,21 @@ const NavBar = () => {
         </div>
       </div>
       
-      {/* Bouton pour déconnecter GitHub avec style amélioré */}
+      {/* Bouton de déconnexion GitHub amélioré */}
       <div className="fixed bottom-4 right-4 z-50">
         <Button 
           variant="destructive" 
           size="sm"
-          onClick={emergencyGitHubDisconnect}
-          className="flex items-center gap-2 shadow-lg hover:shadow-xl transition-shadow"
-          title="Déconnectez GitHub et reconnectez-vous"
+          onClick={() => {
+            if (window.confirm('Voulez-vous vraiment vous déconnecter complètement de GitHub? Cela effacera vos données de connexion.')) {
+              emergencyGitHubDisconnect();
+            }
+          }}
+          className="flex items-center gap-2 font-bold shadow-lg hover:shadow-xl transition-all animate-pulse"
+          title="Efface toutes les données de connexion GitHub"
         >
           <Github className="h-4 w-4" />
-          Déconnecter GitHub
+          Réinitialiser GitHub
         </Button>
       </div>
       
