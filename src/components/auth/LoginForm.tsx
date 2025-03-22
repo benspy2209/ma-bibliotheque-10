@@ -7,10 +7,14 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export function LoginForm() {
+interface LoginFormProps {
+  defaultTab?: 'login' | 'signup';
+}
+
+export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>(defaultTab);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,7 +53,7 @@ export function LoginForm() {
   };
 
   return (
-    <Tabs defaultValue="login" className="w-full" onValueChange={(value) => setAuthMode(value as 'login' | 'signup')}>
+    <Tabs defaultValue={defaultTab} className="w-full" onValueChange={(value) => setAuthMode(value as 'login' | 'signup')}>
       <TabsList className="grid w-full grid-cols-2 mb-6">
         <TabsTrigger value="login">Connexion</TabsTrigger>
         <TabsTrigger value="signup">Inscription</TabsTrigger>

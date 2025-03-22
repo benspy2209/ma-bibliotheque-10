@@ -37,7 +37,7 @@ export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
         ) : (
           <>
             <Button 
-              onClick={signIn}
+              onClick={() => signIn('signup')}
               className="w-full sm:w-auto flex items-center justify-center gap-2"
               variant="outline"
             >
@@ -45,7 +45,7 @@ export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
               Créer un compte
             </Button>
             <Button
-              onClick={signIn}
+              onClick={() => signIn('login')}
               className="w-full sm:w-auto flex items-center justify-center gap-2"
             >
               Commencer

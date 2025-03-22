@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 export function useSupabaseAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
@@ -20,7 +21,8 @@ export function useSupabaseAuth() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = () => {
+  const signIn = (mode: 'login' | 'signup' = 'login') => {
+    setAuthMode(mode);
     setShowLoginDialog(true);
   };
 
@@ -28,5 +30,5 @@ export function useSupabaseAuth() {
     await supabase.auth.signOut();
   };
 
-  return { user, signIn, signOut, showLoginDialog, setShowLoginDialog };
+  return { user, signIn, signOut, showLoginDialog, setShowLoginDialog, authMode };
 }

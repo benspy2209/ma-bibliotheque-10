@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { LoginForm } from "./LoginForm";
+import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 
 interface LoginDialogProps {
   open: boolean;
@@ -14,6 +15,8 @@ interface LoginDialogProps {
 }
 
 export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
+  const { authMode } = useSupabaseAuth();
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -23,7 +26,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
             Connectez-vous ou créez un compte pour gérer votre bibliothèque personnelle
           </DialogDescription>
         </DialogHeader>
-        <LoginForm />
+        <LoginForm defaultTab={authMode} />
       </DialogContent>
     </Dialog>
   );
