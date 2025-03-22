@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoginTab } from './tabs/LoginTab';
 import { SignupTab } from './tabs/SignupTab';
@@ -20,7 +20,7 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
   );
 
   // Update activeTab whenever authMode changes
-  useState(() => {
+  useEffect(() => {
     if (authMode === 'reset') {
       setActiveTab('reset');
     }
