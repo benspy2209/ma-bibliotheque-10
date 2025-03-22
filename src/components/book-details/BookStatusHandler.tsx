@@ -10,16 +10,31 @@ export function BookStatusHandler({ book, onStatusChange }: BookStatusHandlerPro
   useEffect(() => {
     // Force une invalidation du cache chaque fois que le statut du livre change
     if (book.status) {
-      queryClient.invalidateQueries({ queryKey: ['books'] });
+      queryClient.invalidateQueries({ 
+        queryKey: ['books'],
+        refetchType: 'all',
+        exact: false
+      });
     }
   }, [book.status, queryClient]);
   
   const handleStatusChange = async (status: ReadingStatus) => {
     await onStatusChange(status);
-    // Force une invalidation immédiate après le changement
+    
+    // Force une invalidation immédiate et complète après le changement
     await queryClient.invalidateQueries({ 
       queryKey: ['books'],
-      refetchType: 'all'
+      refetchType: 'all',
+      exact: false
+    });
+    
+    console.log("Cache invalidé après changement de statut à:", status);
+    
+    // Force refetch de toutes les données liées aux livres
+    await queryClient.refetchQueries({ 
+      queryKey: ['books'],
+      exact: false,
+      type: 'all'
     });
   };
   

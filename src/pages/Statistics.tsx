@@ -1,3 +1,4 @@
+
 import { useMemo } from 'react';
 import { Book } from '@/types/book';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -50,20 +51,29 @@ const COLORS = [
 ];
 
 export default function Statistics() {
-  const { data: books = [] } = useQuery({
+  const { data: books = [], refetch: refetchBooks } = useQuery({
     queryKey: ['books'],
     queryFn: loadBooks,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
-    staleTime: 0
+    staleTime: 0,
+    cacheTime: 0, // Don't cache this data at all
   });
 
   const { data: readingGoals } = useReadingGoals();
 
-  const completedBooks = books.filter((book): book is Book => 
-    book !== null && book.status === 'completed' && book.completionDate != null
-  );
+  // Log books for debugging
+  console.log('All books loaded:', books.length, 'books');
+  console.log('Book statuses:', books.map(book => ({ id: book.id, title: book.title, status: book.status })));
 
+  // Use a more explicit and safer filter for completed books
+  const completedBooks = books.filter((book): book is Book => 
+    book !== null && book.status === 'completed'
+  );
+  
+  // Log completed books for debugging
+  console.log('Completed books:', completedBooks.length, 'books');
+  
   const readingBooks = books.filter((book): book is Book =>
     book !== null && book.status === 'reading'
   );

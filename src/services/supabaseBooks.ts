@@ -1,3 +1,4 @@
+
 import { Book } from '@/types/book';
 import { isDuplicateBook } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -50,6 +51,10 @@ export async function saveBook(book: Book) {
       _lastUpdated: new Date().toISOString()
     };
 
+    // Log the save operation for debugging
+    console.log('Saving book with status:', book.status, 'and ID:', bookToSave.id);
+    console.log('Book data to save:', updatedBook);
+
     const { error } = await supabase
       .from('books')
       .upsert({
@@ -69,7 +74,7 @@ export async function saveBook(book: Book) {
       };
     }
     
-    console.log('Book saved successfully with ID:', bookToSave.id, 'and status:', bookToSave.status);
+    console.log('Book saved successfully with ID:', bookToSave.id, 'and status:', book.status);
     return { success: true };
   } catch (error) {
     console.error('Erreur lors de la sauvegarde:', error);
@@ -97,21 +102,39 @@ export async function loadBooks() {
       return [];
     }
     
+    // Add a timestamp parameter to force a fresh fetch every time
+    const timestamp = new Date().getTime();
+    
     const { data, error } = await supabase
       .from('books')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
-    console.log("Données reçues:", data);
-    console.log("Erreur éventuelle:", error);
-
+    console.log("Données reçues:", data?.length, "livres");
+    
     if (error) {
       console.error('Erreur lors du chargement des livres:', error);
       throw error;
     }
 
-    return data?.map((row: BookRow) => row.book_data || row) ?? [];
+    // Log status distribution for debugging
+    const booksByStatus = data?.reduce((acc, row: BookRow) => {
+      const status = row.status || 'undefined';
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    console.log("Distribution des statuts:", booksByStatus);
+
+    return data?.map((row: BookRow) => {
+      const bookData = row.book_data || row;
+      // Ensure the status from the database row is used
+      return {
+        ...bookData,
+        status: row.status || bookData.status
+      };
+    }) ?? [];
   } catch (error) {
     console.error('Erreur lors du chargement des livres:', error);
     return [];
