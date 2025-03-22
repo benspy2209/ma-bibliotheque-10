@@ -22,8 +22,8 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center">
-            {authMode === 'login' && "Connexion à Biblioapp"}
-            {authMode === 'signup' && "Créer un compte Biblioapp"}
+            {authMode === 'login' && "Connexion à Bibliopulse"}
+            {authMode === 'signup' && "Créer un compte Bibliopulse"}
             {authMode === 'reset' && "Réinitialiser votre mot de passe"}
           </DialogTitle>
           <DialogDescription className="text-center">

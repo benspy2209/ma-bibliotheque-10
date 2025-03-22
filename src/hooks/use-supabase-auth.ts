@@ -9,7 +9,7 @@ export function useSupabaseAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [authMode, setAuthMode] = useState<'login' | 'signup' | 'reset'>('login');
   const [isLoading, setIsLoading] = useState(true);
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -70,7 +70,7 @@ export function useSupabaseAuth() {
     return () => subscription.unsubscribe();
   }, [queryClient, toast]);
 
-  const signIn = (mode: 'login' | 'signup' = 'login') => {
+  const signIn = (mode: 'login' | 'signup' | 'reset' = 'login') => {
     setAuthMode(mode);
     setShowLoginDialog(true);
   };
@@ -94,6 +94,7 @@ export function useSupabaseAuth() {
     showLoginDialog, 
     setShowLoginDialog, 
     authMode, 
+    setAuthMode,
     isLoading 
   };
 }

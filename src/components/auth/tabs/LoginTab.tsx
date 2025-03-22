@@ -16,7 +16,7 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { toast } = useToast();
-  const { signIn } = useSupabaseAuth();
+  const { setAuthMode } = useSupabaseAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +45,7 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
   };
 
   const handleForgotPassword = () => {
-    signIn('reset');
+    setAuthMode('reset');
   };
 
   return (
