@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 import { isDuplicateBook } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -137,72 +136,30 @@ export async function deleteBook(bookId: string) {
     throw new Error('ID du livre non fourni');
   }
 
-  // Ajouter un timeout pour éviter les blocages indéfinis
-  const timeout = new Promise((_, reject) => {
-    setTimeout(() => reject(new Error('Opération de suppression expirée')), 10000);
-  });
-
   try {
-    console.log('Attempting to delete book with ID:', bookId);
-    
-    // Verify user is authenticated
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
-    if (authError) {
-      console.error('Error getting current user:', authError);
-      throw new Error(`Erreur d'authentification: ${authError.message}`);
-    }
-    
-    if (!user) {
-      console.error('No user found when attempting to delete book');
+    if (authError || !user) {
       throw new Error('Vous devez être connecté pour effectuer cette action');
     }
     
-    console.log('User authenticated, proceeding with book deletion');
+    console.log('Tentative de suppression du livre:', bookId);
     
-    // First verify the book exists and belongs to this user
-    const { data: bookData, error: checkError } = await supabase
-      .from('books')
-      .select('id, user_id')
-      .eq('id', bookId)
-      .maybeSingle();
-      
-    if (checkError) {
-      console.error('Error checking book existence:', checkError);
-      throw new Error(`Erreur lors de la vérification : ${checkError.message}`);
-    }
-    
-    if (!bookData) {
-      console.error('Book not found or does not belong to user');
-      throw new Error('Ce livre n\'existe pas ou ne vous appartient pas');
-    }
-    
-    if (bookData.user_id !== user.id) {
-      console.error('Book does not belong to current user');
-      throw new Error('Ce livre ne vous appartient pas');
-    }
-
-    console.log('Book found and belongs to user, proceeding with deletion');
-
-    // Utiliser une course entre le timeout et l'opération de suppression
-    const deletePromise = supabase
+    const { error } = await supabase
       .from('books')
       .delete()
       .eq('id', bookId)
       .eq('user_id', user.id);
-      
-    // Attendre que la suppression soit terminée ou que le timeout soit atteint
-    const { error } = await Promise.race([deletePromise, timeout]) as any;
 
     if (error) {
-      console.error('Supabase error during deletion:', error);
-      throw new Error(`Erreur lors de la suppression : ${error.message}`);
+      console.error('Erreur lors de la suppression:', error);
+      throw new Error(`Erreur lors de la suppression: ${error.message}`);
     }
     
-    console.log('Book successfully deleted');
+    console.log('Livre supprimé avec succès');
     return { success: true };
   } catch (error) {
-    console.error('Error during book deletion:', error);
-    throw error; // Propager l'erreur pour la traiter dans le composant
+    console.error('Erreur pendant la suppression:', error);
+    throw error;
   }
 }

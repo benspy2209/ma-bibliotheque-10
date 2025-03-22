@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { BookHeader } from './BookHeader';
 import { BookForm } from './BookForm';
 import { BookActions } from './BookActions';
+import { DeleteButton } from './DeleteButton';
 
 interface BookDetailsDialogProps {
   book: Book;
@@ -74,7 +75,19 @@ export function BookDetailsDialog({
           onReviewChange={onReviewChange}
         />
 
-        <BookActions isEditing={isEditing} onSave={handleSave} />
+        <div className="flex justify-between mt-4">
+          {isEditing ? (
+            <BookActions isEditing={isEditing} onSave={handleSave} />
+          ) : (
+            <div></div>
+          )}
+          
+          <DeleteButton 
+            book={book} 
+            onDeleteSuccess={onUpdate} 
+            onClose={onClose} 
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );
