@@ -11,12 +11,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 interface DeleteBookDialogProps {
   book: Book;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirmDelete: () => void;
+  onConfirmDelete: () => Promise<void>;
 }
 
 export function DeleteBookDialog({ book, isOpen, onOpenChange, onConfirmDelete }: DeleteBookDialogProps) {
@@ -26,6 +27,11 @@ export function DeleteBookDialog({ book, isOpen, onOpenChange, onConfirmDelete }
     setIsDeleting(true);
     try {
       await onConfirmDelete();
+      // Fermer manuellement le dialogue après une suppression réussie
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Erreur lors de la suppression :', error);
+      // Même en cas d'erreur, réinitialiser l'état de suppression
     } finally {
       setIsDeleting(false);
     }
@@ -47,7 +53,12 @@ export function DeleteBookDialog({ book, isOpen, onOpenChange, onConfirmDelete }
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             disabled={isDeleting}
           >
-            {isDeleting ? 'Suppression...' : 'Supprimer'}
+            {isDeleting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Suppression...
+              </>
+            ) : 'Supprimer'}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -1,3 +1,4 @@
+
 import { Book } from '@/types/book';
 import { isDuplicateBook } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -122,14 +123,19 @@ export async function deleteBook(bookId: string) {
     throw new Error('ID du livre non fourni');
   }
 
-  const { error } = await supabase
-    .from('books')
-    .delete()
-    .match({ id: bookId });
+  try {
+    const { error } = await supabase
+      .from('books')
+      .delete()
+      .match({ id: bookId });
 
-  if (error) {
-    console.error('Erreur Supabase:', error);
-    throw new Error(`Erreur lors de la suppression : ${error.message}`);
+    if (error) {
+      console.error('Erreur Supabase:', error);
+      throw new Error(`Erreur lors de la suppression : ${error.message}`);
+    }
+  } catch (error) {
+    console.error('Erreur lors de la suppression du livre:', error);
+    throw error; // Propager l'erreur pour la traiter dans le composant
   }
 }
 
