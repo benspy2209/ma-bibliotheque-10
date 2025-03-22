@@ -12,3 +12,12 @@ export type BookRow = {
   status: string | null;
   completion_date: string | null;
 }
+
+export type ReadingGoalRow = {
+  id: string;
+  user_id: string;
+  yearly_goal: number;
+  monthly_goal: number;
+  created_at: string;
+  updated_at: string;
+}

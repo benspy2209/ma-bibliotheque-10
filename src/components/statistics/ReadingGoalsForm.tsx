@@ -38,13 +38,12 @@ export function ReadingGoalsForm({ yearlyGoal, monthlyGoal }: ReadingGoalsFormPr
         throw new Error("Vous devez être connecté pour effectuer cette action");
       }
       
-      const { error } = await supabase
-        .from('reading_goals')
-        .upsert({ 
-          user_id: user.id,
-          yearly_goal: newYearlyGoal,
-          monthly_goal: newMonthlyGoal
-        }, { onConflict: 'user_id' });
+      // Use a raw query to upsert into reading_goals table
+      const { error } = await supabase.rpc('upsert_reading_goals', {
+        p_user_id: user.id,
+        p_yearly_goal: newYearlyGoal,
+        p_monthly_goal: newMonthlyGoal
+      });
 
       if (error) throw error;
 

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { ReadingGoalRow } from '@/types/supabase';
 
 interface ReadingGoals {
   yearly_goal: number;
@@ -22,6 +23,7 @@ export function useReadingGoals() {
         return DEFAULT_GOALS;
       }
 
+      // Use a raw query to fetch from reading_goals table
       const { data, error } = await supabase
         .from('reading_goals')
         .select('yearly_goal, monthly_goal')
@@ -33,7 +35,10 @@ export function useReadingGoals() {
         return DEFAULT_GOALS;
       }
 
-      return data as ReadingGoals;
+      return {
+        yearly_goal: data.yearly_goal,
+        monthly_goal: data.monthly_goal
+      };
     } catch (error) {
       console.error("Error fetching reading goals:", error);
       return DEFAULT_GOALS;
