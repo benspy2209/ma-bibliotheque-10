@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
@@ -13,7 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { BookSections } from '@/components/library/BookSections';
 import { AuthorFilter } from '@/components/library/AuthorFilter';
 import { Input } from "@/components/ui/input";
-import { Search, BookPlus, LogIn } from "lucide-react";
+import { Search, BookPlus, BookOpen } from "lucide-react";
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -115,7 +114,7 @@ export default function Library() {
                 size="lg" 
                 className="flex items-center gap-2"
               >
-                <LogIn className="h-5 w-5" />
+                <BookOpen className="h-5 w-5" />
                 Rejoindre l'aventure
               </Button>
               <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
