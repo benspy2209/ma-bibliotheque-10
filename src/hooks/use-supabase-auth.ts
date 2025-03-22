@@ -55,5 +55,37 @@ export function useSupabaseAuth() {
     await supabase.auth.signOut();
   };
 
-  return { user, session, signIn, signOut, showLoginDialog, setShowLoginDialog, authMode };
+  // Fonction complète de déconnexion qui nettoie également localStorage
+  const completeSignOut = async () => {
+    try {
+      // Déconnexion de Supabase
+      await supabase.auth.signOut({ scope: 'global' });
+      
+      // Nettoyage de localStorage pour les données liées à l'authentification
+      localStorage.removeItem('supabase.auth.token');
+      
+      // Si d'autres clés de stockage local sont spécifiques à l'utilisateur, vous pouvez les supprimer ici
+      
+      // Réinitialiser les requêtes et l'état du client
+      queryClient.clear();
+      
+      // Forcer une actualisation de la page pour s'assurer que tout est propre
+      window.location.href = '/';
+      
+      console.log('Déconnexion complète effectuée');
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    }
+  };
+
+  return { 
+    user, 
+    session, 
+    signIn, 
+    signOut, 
+    completeSignOut, // Nouvelle fonction exportée
+    showLoginDialog, 
+    setShowLoginDialog, 
+    authMode 
+  };
 }
