@@ -73,7 +73,7 @@ export function DeleteBookDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
           <AlertDialogDescription id="delete-dialog-description">
-            Cette action supprimera définitivement le livre "{book.title}" de votre bibliothèque.
+            Cette action supprimera définitivement le livre "{book.title}" de votre bibliothèque, quel que soit son statut (à lire, en cours, lu, acheté ou à acheter).
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
