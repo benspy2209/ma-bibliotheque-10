@@ -3,13 +3,12 @@ import { useState, useCallback } from 'react';
 import { Book, ReadingStatus } from '@/types/book';
 import { useToast } from '@/hooks/use-toast';
 import { BookDetailsProps } from './book-details/types';
-import { saveBook, deleteBook } from '@/services/supabaseBooks';
+import { saveBook } from '@/services/supabaseBooks';
 import { BookDetailsDialog } from './book-details/BookDetailsDialog';
 import { useQueryClient } from '@tanstack/react-query';
 
 export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProps) {
   const [currentBook, setCurrentBook] = useState(book);
-  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -56,36 +55,6 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
     }
   };
 
-  const handleDelete = async () => {
-    if (isDeleting) return; // Prevent multiple attempts
-
-    setIsDeleting(true);
-    try {
-      console.log('Initiating delete in BookDetails component for book:', currentBook.id);
-      await deleteBook(currentBook.id);
-      
-      // Invalider la requête pour forcer une mise à jour des statistiques
-      queryClient.invalidateQueries({ queryKey: ['books'] });
-      
-      toast({
-        description: "Le livre a été supprimé de votre bibliothèque",
-      });
-
-      console.log('Delete completed, closing dialog');
-      // Fermer le dialogue principal
-      onClose();
-      onUpdate();
-    } catch (error) {
-      console.error('Error in BookDetails during deletion:', error);
-      toast({
-        variant: "destructive",
-        description: error instanceof Error ? error.message : "Une erreur est survenue lors de la suppression",
-      });
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
   const handleInputChange = (field: keyof Book, value: string) => {
     setCurrentBook(prev => ({
       ...prev,
@@ -126,8 +95,6 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
       onCompletionDateChange={handleCompletionDateChange}
       onRatingChange={handleRatingChange}
       onReviewChange={handleReviewChange}
-      onDelete={handleDelete}
-      isDeleting={isDeleting}
     />
   );
 }

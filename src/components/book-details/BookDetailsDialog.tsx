@@ -12,7 +12,6 @@ import { useToast } from '@/hooks/use-toast';
 import { BookHeader } from './BookHeader';
 import { BookForm } from './BookForm';
 import { BookActions } from './BookActions';
-import { DeleteBookDialog } from './DeleteBookDialog';
 
 interface BookDetailsDialogProps {
   book: Book;
@@ -25,8 +24,6 @@ interface BookDetailsDialogProps {
   onCompletionDateChange: (date: Date | undefined) => void;
   onRatingChange: (newRating: number) => Promise<void>;
   onReviewChange: (review: { content: string; date: string; } | undefined) => Promise<void>;
-  onDelete: () => Promise<void>;
-  isDeleting?: boolean;
 }
 
 export function BookDetailsDialog({ 
@@ -39,12 +36,9 @@ export function BookDetailsDialog({
   onInputChange,
   onCompletionDateChange,
   onRatingChange,
-  onReviewChange,
-  onDelete,
-  isDeleting = false
+  onReviewChange
 }: BookDetailsDialogProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const { toast } = useToast();
 
   const handleSave = async () => {
@@ -52,66 +46,36 @@ export function BookDetailsDialog({
     setIsEditing(false);
   };
 
-  const handleDelete = async () => {
-    try {
-      await onDelete();
-      setShowDeleteAlert(false);
-    } catch (error) {
-      console.error('Erreur lors de la suppression:', error);
-      toast({
-        variant: "destructive",
-        description: error instanceof Error ? error.message : "Une erreur est survenue lors de la suppression",
-      });
-      setShowDeleteAlert(false);
-    }
-  };
-
-  // Don't allow closing the dialog during deletion
-  const handleDialogChange = (open: boolean) => {
-    if (isDeleting && !open) return;
-    onClose();
-  };
-
   return (
-    <>
-      <Dialog open={isOpen} onOpenChange={handleDialogChange}>
-        <DialogContent 
-          className="max-w-2xl max-h-[80vh] overflow-y-auto" 
-          aria-describedby="book-details-description"
-        >
-          <DialogHeader className="pb-2">
-            <DialogTitle className="text-xl">Détails du livre</DialogTitle>
-            <DialogDescription id="book-details-description" className="sr-only">
-              Informations détaillées sur le livre "{book.title}"
-            </DialogDescription>
-            <BookHeader
-              book={book}
-              isEditing={isEditing}
-              onEditToggle={() => setIsEditing(!isEditing)}
-              onDeleteClick={() => setShowDeleteAlert(true)}
-              onStatusChange={onStatusChange}
-            />
-          </DialogHeader>
-          
-          <BookForm
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent 
+        className="max-w-2xl max-h-[80vh] overflow-y-auto" 
+        aria-describedby="book-details-description"
+      >
+        <DialogHeader className="pb-2">
+          <DialogTitle className="text-xl">Détails du livre</DialogTitle>
+          <DialogDescription id="book-details-description" className="sr-only">
+            Informations détaillées sur le livre "{book.title}"
+          </DialogDescription>
+          <BookHeader
             book={book}
             isEditing={isEditing}
-            onInputChange={onInputChange}
-            onDateChange={onCompletionDateChange}
-            onRatingChange={onRatingChange}
-            onReviewChange={onReviewChange}
+            onEditToggle={() => setIsEditing(!isEditing)}
+            onStatusChange={onStatusChange}
           />
+        </DialogHeader>
+        
+        <BookForm
+          book={book}
+          isEditing={isEditing}
+          onInputChange={onInputChange}
+          onDateChange={onCompletionDateChange}
+          onRatingChange={onRatingChange}
+          onReviewChange={onReviewChange}
+        />
 
-          <BookActions isEditing={isEditing} onSave={handleSave} />
-        </DialogContent>
-      </Dialog>
-
-      <DeleteBookDialog
-        book={book}
-        isOpen={showDeleteAlert}
-        onOpenChange={setShowDeleteAlert}
-        onConfirmDelete={handleDelete}
-      />
-    </>
+        <BookActions isEditing={isEditing} onSave={handleSave} />
+      </DialogContent>
+    </Dialog>
   );
 }

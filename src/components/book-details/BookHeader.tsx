@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Book, ReadingStatus } from '@/types/book';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AddToLibrary } from '@/components/AddToLibrary';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +10,6 @@ interface BookHeaderProps {
   book: Book;
   isEditing: boolean;
   onEditToggle: () => void;
-  onDeleteClick: () => void;
   onStatusChange: (status: ReadingStatus) => void;
 }
 
@@ -18,7 +17,6 @@ export function BookHeader({
   book, 
   isEditing, 
   onEditToggle, 
-  onDeleteClick, 
   onStatusChange 
 }: BookHeaderProps) {
   const [titleInput, setTitleInput] = useState(book.title);
@@ -74,16 +72,6 @@ export function BookHeader({
             title={isEditing ? "Terminer l'édition" : "Modifier"}
           >
             <Edit className="h-4 w-4" />
-          </Button>
-          
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onDeleteClick}
-            className="text-destructive"
-            title="Supprimer"
-          >
-            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       </div>
