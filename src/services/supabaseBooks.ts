@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 import { isDuplicateBook } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -46,13 +45,16 @@ export async function saveBook(book: Book) {
     }
 
     // Ajout d'un timestamp pour forcer la détection du changement
-    bookToSave.lastUpdated = new Date().toISOString();
+    const updatedBook = {
+      ...bookToSave,
+      _lastUpdated: new Date().toISOString()
+    };
 
     const { error } = await supabase
       .from('books')
       .upsert({
         id: bookToSave.id,
-        book_data: bookToSave,
+        book_data: updatedBook,
         status: book.status,
         completion_date: book.completionDate,
         user_id: user.id
