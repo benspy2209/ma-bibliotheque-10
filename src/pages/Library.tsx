@@ -91,6 +91,10 @@ export default function Library() {
     setToBuyFilter(value);
   };
 
+  const handleSignIn = () => {
+    signIn('login');
+  };
+
   return (
     <div className="min-h-screen fade-in">
       <NavBar />
@@ -103,7 +107,7 @@ export default function Library() {
                 Connectez-vous ou créez un compte pour commencer à organiser vos lectures, 
                 suivre votre progression et découvrir de nouveaux livres.
               </p>
-              <Button onClick={signIn} size="lg">
+              <Button onClick={handleSignIn} size="lg">
                 Se connecter pour commencer
               </Button>
             </div>

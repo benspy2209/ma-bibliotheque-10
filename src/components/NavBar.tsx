@@ -1,3 +1,4 @@
+
 import { NavLink } from "react-router-dom";
 import { Search, BookOpen, BarChart2, Sun, Moon, LogIn } from "lucide-react";
 import { Button } from "./ui/button";
@@ -8,6 +9,11 @@ import { LoginDialog } from "./auth/LoginDialog";
 const NavBar = () => {
   const { theme, toggleTheme } = useTheme();
   const { signIn, signOut, user, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
+
+  // Fonction wrapper pour gérer le clic du bouton de connexion
+  const handleSignIn = () => {
+    signIn('login');
+  };
 
   return (
     <nav className="w-full bg-background border-b py-4 px-6 transition-colors duration-300">
@@ -49,7 +55,7 @@ const NavBar = () => {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={signIn}
+              onClick={handleSignIn}
               className="transition-colors duration-300"
             >
               <LogIn className="h-4 w-4 mr-2" />
