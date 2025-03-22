@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
@@ -91,6 +92,12 @@ export default function Library() {
     setToBuyFilter(value);
   };
 
+  // Définir la fonction handleLoginClick explicitement
+  const handleLoginClick = () => {
+    console.log("Bouton de connexion cliqué");
+    signIn('login');
+  };
+
   return (
     <div className="min-h-screen fade-in">
       <NavBar />
@@ -103,7 +110,7 @@ export default function Library() {
                 Connectez-vous ou créez un compte pour commencer à organiser vos lectures, 
                 suivre votre progression et découvrir de nouveaux livres.
               </p>
-              <Button onClick={() => signIn('login')} size="lg">
+              <Button onClick={handleLoginClick} size="lg">
                 Se connecter pour commencer
               </Button>
             </div>
