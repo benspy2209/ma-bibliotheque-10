@@ -88,13 +88,14 @@ const NavBar = () => {
         </div>
       </div>
       
-      {/* Bouton d'urgence pour déconnecter GitHub */}
+      {/* Bouton pour déconnecter GitHub avec style amélioré */}
       <div className="fixed bottom-4 right-4 z-50">
         <Button 
           variant="destructive" 
           size="sm"
           onClick={emergencyGitHubDisconnect}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 shadow-lg hover:shadow-xl transition-shadow"
+          title="Déconnectez GitHub et reconnectez-vous"
         >
           <Github className="h-4 w-4" />
           Déconnecter GitHub

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -73,25 +72,41 @@ export function useSupabaseAuth() {
     }
   };
 
-  // Fonction d'urgence pour déconnecter GitHub sans connexion
+  // Fonction améliorée pour déconnecter GitHub et permettre la reconnexion
   const emergencyGitHubDisconnect = () => {
     try {
-      // Nettoyer le stockage local
-      localStorage.clear();
-      
-      // Nettoyer les cookies de session
+      // Rechercher et supprimer uniquement les cookies liés à GitHub
       document.cookie.split(";").forEach((c) => {
-        document.cookie = c
-          .replace(/^ +/, "")
-          .replace(/=.*/, `=;expires=${new Date().toUTCString()};path=/`);
+        const cookieName = c.trim().split("=")[0];
+        if (cookieName.includes("github") || cookieName.includes("gh_") || cookieName.includes("_gh")) {
+          document.cookie = `${cookieName}=;expires=${new Date().toUTCString()};path=/`;
+        }
       });
       
-      // Recharger la page
-      window.location.href = '/';
+      // Supprimer les données GitHub du stockage local
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.includes("github") || key.includes("gh_") || key.includes("_gh"))) {
+          localStorage.removeItem(key);
+        }
+      }
       
-      console.log('Déconnexion d\'urgence GitHub effectuée');
+      // Supprimer le token de Supabase pour forcer une nouvelle connexion
+      const supabaseKey = Object.keys(localStorage).find(key => 
+        key.startsWith('sb-') && key.includes('-auth-token')
+      );
+      
+      if (supabaseKey) {
+        localStorage.removeItem(supabaseKey);
+      }
+      
+      // Afficher un message de succès
+      console.log('Déconnexion GitHub réussie - vous pouvez maintenant vous reconnecter');
+      
+      // Rediriger vers la page d'accueil
+      window.location.href = '/';
     } catch (error) {
-      console.error('Erreur lors de la déconnexion d\'urgence GitHub:', error);
+      console.error('Erreur lors de la déconnexion GitHub:', error);
     }
   };
 
