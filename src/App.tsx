@@ -10,6 +10,7 @@ import Library from "./pages/Library";
 import Statistics from "./pages/Statistics";
 import BookPage from "./pages/BookPage";
 import NotFound from "./pages/NotFound";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/library" element={<Library />} />
             <Route path="/statistics" element={<Statistics />} />
             <Route path="/book/:id" element={<BookPage />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
