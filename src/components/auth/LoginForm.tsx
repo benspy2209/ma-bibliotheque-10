@@ -14,21 +14,25 @@ interface LoginFormProps {
 
 export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const { setAuthMode } = useSupabaseAuth();
+  const { authMode, setAuthMode } = useSupabaseAuth();
+  const [activeTab, setActiveTab] = useState<'login' | 'signup' | 'reset'>(
+    defaultTab === 'reset' ? 'reset' : authMode === 'reset' ? 'reset' : defaultTab
+  );
 
   const handleTabChange = (value: string) => {
+    setActiveTab(value as 'login' | 'signup' | 'reset');
     setAuthMode(value as 'login' | 'signup' | 'reset');
   };
 
   return (
     <div className="w-full">
-      <Tabs defaultValue={defaultTab} className="w-full" onValueChange={handleTabChange}>
+      <Tabs value={activeTab} className="w-full" onValueChange={handleTabChange}>
         <TabsList className="grid w-full grid-cols-2 mb-2">
           <TabsTrigger value="signup">Inscription</TabsTrigger>
           <TabsTrigger value="login">Connexion</TabsTrigger>
         </TabsList>
         
-        {defaultTab === 'login' && (
+        {activeTab === 'login' && (
           <Alert className="mb-4 bg-blue-50 border-blue-200">
             <Info className="h-4 w-4 text-blue-600" />
             <AlertDescription className="text-blue-800">
