@@ -21,9 +21,15 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-center">Bienvenue sur Biblioapp</DialogTitle>
+          <DialogTitle className="text-center">
+            {authMode === 'login' && "Connexion à Biblioapp"}
+            {authMode === 'signup' && "Créer un compte Biblioapp"}
+            {authMode === 'reset' && "Réinitialiser votre mot de passe"}
+          </DialogTitle>
           <DialogDescription className="text-center">
-            Connectez-vous ou créez un compte pour gérer votre bibliothèque personnelle
+            {authMode === 'login' && "Accédez à votre bibliothèque personnelle"}
+            {authMode === 'signup' && "Inscrivez-vous pour gérer votre bibliothèque personnelle"}
+            {authMode === 'reset' && "Nous vous enverrons un lien pour réinitialiser votre mot de passe"}
           </DialogDescription>
         </DialogHeader>
         <LoginForm defaultTab={authMode} />

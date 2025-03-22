@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
+import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 
 interface LoginTabProps {
   isLoading: boolean;
@@ -15,6 +16,7 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { toast } = useToast();
+  const { signIn } = useSupabaseAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +44,10 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
     }
   };
 
+  const handleForgotPassword = () => {
+    signIn('reset');
+  };
+
   return (
     <form onSubmit={handleLogin} className="space-y-4 w-full max-w-sm">
       <div className="space-y-2">
@@ -67,6 +73,16 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
           placeholder="••••••••"
           disabled={isLoading}
         />
+        <div className="text-right">
+          <Button 
+            type="button" 
+            variant="link" 
+            className="p-0 h-auto text-xs" 
+            onClick={handleForgotPassword}
+          >
+            Mot de passe oublié ?
+          </Button>
+        </div>
       </div>
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? 'Connexion...' : 'Se connecter'}
