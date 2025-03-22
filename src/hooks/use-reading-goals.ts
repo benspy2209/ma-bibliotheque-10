@@ -31,12 +31,17 @@ export function useReadingGoals() {
         return DEFAULT_GOALS;
       }
 
-      // Ensure we're properly parsing the JSON data returned from the function
-      // The data is already a parsed JSON object from the SQL function
-      return {
-        yearly_goal: typeof data.yearly_goal === 'number' ? data.yearly_goal : DEFAULT_GOALS.yearly_goal,
-        monthly_goal: typeof data.monthly_goal === 'number' ? data.monthly_goal : DEFAULT_GOALS.monthly_goal
-      };
+      // Ensure we're properly handling the data returned from the function
+      // Check if the returned data is an object with the expected properties
+      if (typeof data === 'object' && data !== null) {
+        const goalsData = data as Record<string, unknown>;
+        return {
+          yearly_goal: typeof goalsData.yearly_goal === 'number' ? goalsData.yearly_goal : DEFAULT_GOALS.yearly_goal,
+          monthly_goal: typeof goalsData.monthly_goal === 'number' ? goalsData.monthly_goal : DEFAULT_GOALS.monthly_goal
+        };
+      }
+      
+      return DEFAULT_GOALS;
     } catch (error) {
       console.error("Error fetching reading goals:", error);
       return DEFAULT_GOALS;
