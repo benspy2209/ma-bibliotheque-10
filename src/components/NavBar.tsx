@@ -23,15 +23,15 @@ const NavBar = () => {
             to="/" 
             className={({ isActive }) => `flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
           >
-            <Search className="h-4 w-4" />
-            Recherche
-          </NavLink>
-          <NavLink 
-            to="/library" 
-            className={({ isActive }) => `flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
-          >
             <BookOpen className="h-4 w-4" />
             Ma Bibliothèque
+          </NavLink>
+          <NavLink 
+            to="/search" 
+            className={({ isActive }) => `flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
+          >
+            <Search className="h-4 w-4" />
+            Recherche
           </NavLink>
           <NavLink 
             to="/statistics" 

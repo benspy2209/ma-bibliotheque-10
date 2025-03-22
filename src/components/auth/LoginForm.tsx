@@ -24,8 +24,8 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
     <div className="w-full">
       <Tabs defaultValue={defaultTab} className="w-full" onValueChange={handleTabChange}>
         <TabsList className="grid w-full grid-cols-2 mb-2">
-          <TabsTrigger value="login">Connexion</TabsTrigger>
           <TabsTrigger value="signup">Inscription</TabsTrigger>
+          <TabsTrigger value="login">Connexion</TabsTrigger>
         </TabsList>
         
         {defaultTab === 'login' && (

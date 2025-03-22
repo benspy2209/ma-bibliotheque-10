@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
@@ -148,11 +149,11 @@ export default function Library() {
                     Commencez par rechercher des livres ou ajoutez-les manuellement pour créer votre bibliothèque personnelle.
                   </p>
                   <div className="flex gap-4">
-                    <Link to="/" className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors">
+                    <Link to="/search" className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors">
                       <Search className="h-4 w-4" />
                       Rechercher des livres
                     </Link>
-                    <Link to="/" className="flex items-center gap-2 bg-secondary text-secondary-foreground px-4 py-2 rounded-md hover:bg-secondary/90 transition-colors">
+                    <Link to="/search" className="flex items-center gap-2 bg-secondary text-secondary-foreground px-4 py-2 rounded-md hover:bg-secondary/90 transition-colors">
                       <BookPlus className="h-4 w-4" />
                       Ajouter manuellement
                     </Link>
