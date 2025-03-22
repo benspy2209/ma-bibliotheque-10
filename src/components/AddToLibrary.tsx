@@ -10,6 +10,7 @@ import {
 import { BookPlus } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface AddToLibraryProps {
   onStatusChange: (status: ReadingStatus) => void;
@@ -28,16 +29,17 @@ export function AddToLibrary({
 }: AddToLibraryProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   const handleStatusChange = async (status: ReadingStatus) => {
     setIsLoading(true);
     try {
       // La vérification des doublons est maintenant gérée directement dans saveBook
       // Pas besoin de l'implémenter ici
-      const result = await onStatusChange(status);
+      await onStatusChange(status);
       
-      // Le composant parent (qui appelle la méthode saveBook) gère maintenant
-      // l'affichage du toast de succès
+      // Invalider la requête pour forcer une mise à jour des statistiques
+      queryClient.invalidateQueries({ queryKey: ['books'] });
       
     } catch (error) {
       toast({

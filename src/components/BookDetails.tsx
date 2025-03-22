@@ -4,6 +4,7 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { useState } from 'react';
@@ -17,12 +18,14 @@ import { BookDescription } from './book-details/BookDescription';
 import { BookReview } from './book-details/BookReview';
 import { DeleteBookDialog } from './book-details/DeleteBookDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQueryClient } from '@tanstack/react-query';
 
 export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProps) {
   const [currentBook, setCurrentBook] = useState(book);
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const handleStatusChange = async (status: ReadingStatus) => {
     const updatedBook = { ...currentBook, status };
@@ -63,6 +66,9 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
       const result = await saveBook(bookToSave);
       
       if (result.success) {
+        // Invalidate the books query to force a refetch
+        queryClient.invalidateQueries({ queryKey: ['books'] });
+        
         onUpdate();
         toast({
           description: "Les modifications ont été enregistrées",
@@ -102,6 +108,9 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
 
       await deleteBook(currentBook.id);
       
+      // Invalider la requête pour forcer une mise à jour des statistiques
+      queryClient.invalidateQueries({ queryKey: ['books'] });
+      
       toast({
         description: "Le livre a été supprimé de votre bibliothèque",
       });
@@ -121,6 +130,7 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader className="pb-2">
+            <DialogTitle className="sr-only">Détails du livre</DialogTitle>
             <BookHeader
               book={currentBook}
               isEditing={isEditing}
