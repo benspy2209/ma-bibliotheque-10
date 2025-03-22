@@ -71,6 +71,7 @@ export function useSupabaseAuth() {
   }, [queryClient, toast]);
 
   const signIn = (mode: 'login' | 'signup' | 'reset' = 'login') => {
+    console.log(`signIn called with mode: ${mode}`);
     setAuthMode(mode);
     setShowLoginDialog(true);
   };

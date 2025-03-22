@@ -46,8 +46,10 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
 
   const handleForgotPassword = () => {
     console.log("Redirection vers réinitialisation du mot de passe");
-    // Mettre à jour directement le mode d'authentification
+    // Mettre à jour le mode d'authentification et forcer la mise à jour de l'interface
     setAuthMode('reset');
+    // Ajout d'un log pour déboguer
+    console.log("Mode d'authentification changé à 'reset'");
   };
 
   return (

@@ -23,6 +23,7 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
   useEffect(() => {
     if (authMode === 'reset') {
       setActiveTab('reset');
+      console.log("LoginForm: activeTab set to 'reset'");
     }
   }, [authMode]);
 
@@ -30,6 +31,10 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
     setActiveTab(value as 'login' | 'signup' | 'reset');
     setAuthMode(value as 'login' | 'signup' | 'reset');
   };
+
+  // Debug log to see the actual active tab value
+  console.log("Current activeTab:", activeTab);
+  console.log("Current authMode:", authMode);
 
   return (
     <div className="w-full">
