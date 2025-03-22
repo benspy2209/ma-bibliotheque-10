@@ -116,7 +116,7 @@ export default function Library() {
                 className="flex items-center gap-2"
               >
                 <LogIn className="h-5 w-5" />
-                Se connecter
+                Rejoindre l'aventure
               </Button>
               <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
             </div>
