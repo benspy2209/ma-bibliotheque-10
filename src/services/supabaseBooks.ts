@@ -12,17 +12,14 @@ export async function saveBook(book: Book) {
       throw new Error('Vous devez être connecté pour effectuer cette action');
     }
 
-    // Vérifier si ce livre existe déjà dans la base de données
     const { data: existingBookData } = await supabase
       .from('books')
       .select('id')
       .eq('id', book.id)
       .maybeSingle();
 
-    // Si le livre existe déjà dans la base avec cet ID, c'est une édition - pas besoin de vérifier les doublons
     const isEditing = !!existingBookData;
 
-    // La vérification des doublons ne s'applique qu'aux nouveaux livres
     if (!isEditing) {
       const existingBooks = await loadBooks();
       
@@ -38,16 +35,11 @@ export async function saveBook(book: Book) {
       }
     }
 
-    // Assurons-nous que l'ID est un UUID valide pour Supabase
-    // Si on édite un livre existant, on garde son ID, sinon on génère un nouveau UUID
     const bookToSave = {
       ...book,
-      // Si on n'est pas en édition, on vérifie si l'ID actuel est un UUID valide
-      // Si ce n'est pas le cas, on en génère un nouveau
       id: isEditing ? book.id : isValidUUID(book.id) ? book.id : uuidv4()
     };
 
-    // Si l'ID a été modifié, on le stocke dans une propriété sourceId
     if (book.id !== bookToSave.id) {
       bookToSave.sourceId = book.id;
     }
@@ -82,9 +74,7 @@ export async function saveBook(book: Book) {
   }
 }
 
-// Fonction qui vérifie si un string est un UUID valide
 function isValidUUID(id: string): boolean {
-  // Regex pour valider un UUID v4
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   return uuidRegex.test(id);
 }
@@ -114,59 +104,10 @@ export async function loadBooks() {
       throw error;
     }
 
-    // Convertir les données en objets Book
     return data?.map((row: BookRow) => row.book_data || row) ?? [];
   } catch (error) {
     console.error('Erreur lors du chargement des livres:', error);
     return [];
-  }
-}
-
-export async function deleteBook(bookId: string) {
-  if (!bookId) {
-    throw new Error('ID du livre non fourni');
-  }
-
-  try {
-    // Vérifier si l'utilisateur est connecté
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      throw new Error('Vous devez être connecté pour effectuer cette action');
-    }
-    
-    // Vérifier que le livre existe et appartient à cet utilisateur
-    const { data: bookData, error: checkError } = await supabase
-      .from('books')
-      .select('id')
-      .eq('id', bookId)
-      .eq('user_id', user.id)
-      .maybeSingle();
-      
-    if (checkError) {
-      console.error('Erreur lors de la vérification du livre:', checkError);
-      throw new Error(`Erreur lors de la vérification : ${checkError.message}`);
-    }
-    
-    if (!bookData) {
-      throw new Error('Ce livre n\'existe pas ou ne vous appartient pas');
-    }
-
-    // Procéder à la suppression
-    const { error } = await supabase
-      .from('books')
-      .delete()
-      .eq('id', bookId);
-
-    if (error) {
-      console.error('Erreur Supabase lors de la suppression:', error);
-      throw new Error(`Erreur lors de la suppression : ${error.message}`);
-    }
-    
-    return { success: true };
-  } catch (error) {
-    console.error('Erreur lors de la suppression du livre:', error);
-    throw error; // Propager l'erreur pour la traiter dans le composant
   }
 }
 
@@ -187,5 +128,59 @@ export async function getBookById(id: string) {
   } catch (error) {
     console.error('Erreur lors du chargement du livre par ID:', error);
     return null;
+  }
+}
+
+export async function deleteBook(bookId: string) {
+  if (!bookId) {
+    throw new Error('ID du livre non fourni');
+  }
+
+  try {
+    console.log('Attempting to delete book with ID:', bookId);
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      console.error('No user found when attempting to delete book');
+      throw new Error('Vous devez être connecté pour effectuer cette action');
+    }
+    
+    console.log('User authenticated, proceeding with book deletion');
+    
+    const { data: bookData, error: checkError } = await supabase
+      .from('books')
+      .select('id')
+      .eq('id', bookId)
+      .eq('user_id', user.id)
+      .maybeSingle();
+      
+    if (checkError) {
+      console.error('Error checking book existence:', checkError);
+      throw new Error(`Erreur lors de la vérification : ${checkError.message}`);
+    }
+    
+    if (!bookData) {
+      console.error('Book not found or does not belong to user');
+      throw new Error('Ce livre n\'existe pas ou ne vous appartient pas');
+    }
+
+    console.log('Book found, proceeding with deletion');
+
+    const { error } = await supabase
+      .from('books')
+      .delete()
+      .eq('id', bookId);
+
+    if (error) {
+      console.error('Supabase error during deletion:', error);
+      throw new Error(`Erreur lors de la suppression : ${error.message}`);
+    }
+    
+    console.log('Book successfully deleted');
+    return { success: true };
+  } catch (error) {
+    console.error('Error during book deletion:', error);
+    throw error; // Propager l'erreur pour la traiter dans le composant
   }
 }

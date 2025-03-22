@@ -20,6 +20,7 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
 
   const saveToLibrary = async (bookToSave: Book) => {
     try {
+      console.log('Starting save operation for book:', bookToSave.id);
       const result = await saveBook(bookToSave);
       
       if (result.success) {
@@ -30,6 +31,7 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
         toast({
           description: "Les modifications ont été enregistrées",
         });
+        console.log('Save operation completed successfully');
       } else {
         // Gestion des différents types d'erreurs
         if (result.error === 'duplicate') {
@@ -45,7 +47,7 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
         }
       }
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
+      console.error('Error during book save:', error);
       toast({
         variant: "destructive",
         description: "Une erreur est survenue lors de la sauvegarde",
@@ -55,6 +57,7 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
 
   const handleDelete = async () => {
     try {
+      console.log('Initiating delete in BookDetails component for book:', currentBook.id);
       await deleteBook(currentBook.id);
       
       // Invalider la requête pour forcer une mise à jour des statistiques
@@ -64,11 +67,12 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
         description: "Le livre a été supprimé de votre bibliothèque",
       });
 
+      console.log('Delete completed, closing dialog');
       // Fermer le dialogue principal
       onClose();
       onUpdate();
     } catch (error) {
-      console.error('Erreur lors de la suppression:', error);
+      console.error('Error in BookDetails during deletion:', error);
       toast({
         variant: "destructive",
         description: error instanceof Error ? error.message : "Une erreur est survenue lors de la suppression",
@@ -102,10 +106,6 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
     const updatedBook = { ...currentBook, review };
     setCurrentBook(updatedBook);
     await saveToLibrary(updatedBook);
-  };
-
-  const handleSave = async () => {
-    await saveToLibrary(currentBook);
   };
 
   return (

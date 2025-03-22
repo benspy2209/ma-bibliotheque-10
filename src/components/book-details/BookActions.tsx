@@ -8,9 +8,13 @@ export function BookActions({ isEditing, onSave }: BookActionsProps) {
   const [isSaving, setIsSaving] = useState(false);
   
   const handleSave = async () => {
+    if (isSaving) return; // Prevent multiple clicks
+    
     setIsSaving(true);
     try {
+      console.log('Starting save operation');
       await onSave();
+      console.log('Save operation completed');
     } finally {
       setIsSaving(false);
     }

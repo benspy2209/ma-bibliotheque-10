@@ -24,13 +24,18 @@ export function DeleteBookDialog({ book, isOpen, onOpenChange, onConfirmDelete }
   const [isDeleting, setIsDeleting] = useState(false);
   
   const handleDelete = async () => {
+    if (isDeleting) return; // Prevent multiple clicks
+    
     setIsDeleting(true);
     try {
+      console.log('Starting delete operation for book:', book.id);
       await onConfirmDelete();
-      // La fermeture sera gérée par le composant parent
+      console.log('Delete operation completed successfully');
+      // onOpenChange(false) will be called by the parent component after successful deletion
     } catch (error) {
-      console.error('Erreur lors de la suppression :', error);
-      setIsDeleting(false); // Réinitialiser uniquement en cas d'erreur
+      console.error('Error in delete dialog during deletion:', error);
+      setIsDeleting(false); // Reset state only on error
+      // The dialog will remain open so the user can try again
     }
   };
   
@@ -38,11 +43,11 @@ export function DeleteBookDialog({ book, isOpen, onOpenChange, onConfirmDelete }
     <AlertDialog 
       open={isOpen} 
       onOpenChange={(open) => {
-        // Ne pas permettre la fermeture pendant la suppression
+        // Don't allow closing the dialog during deletion
         if (isDeleting && !open) return;
         
-        // Si on ferme le dialogue et qu'on n'est pas en train de supprimer, 
-        // réinitialiser l'état
+        // If we're closing the dialog and not in the process of deleting,
+        // reset the state
         if (!open && !isDeleting) {
           setIsDeleting(false);
         }
