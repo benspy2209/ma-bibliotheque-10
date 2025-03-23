@@ -47,7 +47,7 @@ export const AuthorFilter = ({ books, selectedAuthor, onAuthorSelect }: AuthorFi
         onValueChange={(value) => onAuthorSelect(value || null)}
       >
         <SelectTrigger 
-          className="w-full md:w-[250px]"
+          className="w-full"
         >
           <SelectValue placeholder="Filtrer par auteur" />
         </SelectTrigger>

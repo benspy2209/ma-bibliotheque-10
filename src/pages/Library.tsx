@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
@@ -121,23 +122,23 @@ export default function Library() {
             </div>
           ) : (
             <>
-              <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold">Ma Bibliothèque</h1>
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <h1 className="text-2xl md:text-3xl font-bold">Ma Bibliothèque</h1>
                 <div className="flex items-center gap-2">
                   <SortMenu sortBy={sortBy} onSortChange={setSortBy} />
                   <ViewToggle viewMode={viewMode} onToggle={toggleView} />
                 </div>
               </div>
 
-              <div className="mb-6 flex flex-col md:flex-row items-start gap-4">
-                <div className="w-full md:w-64">
+              <div className="mb-6 flex flex-col gap-4">
+                <div className="w-full">
                   <AuthorFilter 
                     books={books}
                     selectedAuthor={selectedAuthor}
                     onAuthorSelect={setSelectedAuthor}
                   />
                 </div>
-                <div className="w-full md:w-96 relative">
+                <div className="w-full relative">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                   <Input
                     type="search"
@@ -155,12 +156,12 @@ export default function Library() {
                   <p className="text-muted-foreground mb-8 max-w-2xl">
                     Commencez par rechercher des livres ou ajoutez-les manuellement pour créer votre bibliothèque personnelle.
                   </p>
-                  <div className="flex gap-4">
-                    <Link to="/search" className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Link to="/search" className="flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors">
                       <Search className="h-4 w-4" />
                       Rechercher des livres
                     </Link>
-                    <Link to="/search" className="flex items-center gap-2 bg-secondary text-secondary-foreground px-4 py-2 rounded-md hover:bg-secondary/90 transition-colors">
+                    <Link to="/search" className="flex items-center justify-center gap-2 bg-secondary text-secondary-foreground px-4 py-2 rounded-md hover:bg-secondary/90 transition-colors">
                       <BookPlus className="h-4 w-4" />
                       Ajouter manuellement
                     </Link>

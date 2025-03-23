@@ -1,18 +1,23 @@
 
-import { Book } from '@/types/book';
-import { BookGrid } from './BookGrid';
-import { BookList } from './BookList';
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from 'react';
-
-interface BookSectionsProps {
-  books: Book[];
-  viewMode: 'grid' | 'list';
-  onBookClick: (book: Book) => void;
-  toBuyFilter: boolean | null;
-  onToBuyFilterChange: (value: boolean | null) => void;
-}
+import { Book } from '@/types/book';
+import { BookDetails } from '@/components/BookDetails';
+import { useToast } from "@/hooks/use-toast";
+import { SortMenu, SortOption } from '@/components/library/SortMenu';
+import { ViewToggle } from '@/components/library/ViewToggle';
+import { useBookSort } from '@/hooks/use-book-sort';
+import { useViewPreference } from '@/hooks/use-view-preference';
+import NavBar from '@/components/NavBar';
+import { loadBooks } from '@/services/supabaseBooks';
+import { useQuery } from '@tanstack/react-query';
+import { BookSections } from '@/components/library/BookSections';
+import { AuthorFilter } from '@/components/library/AuthorFilter';
+import { Input } from "@/components/ui/input";
+import { Search, BookPlus, BookOpen } from "lucide-react";
+import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { LoginDialog } from '@/components/auth/LoginDialog';
 
 export const BookSections = ({ 
   books, 
@@ -39,41 +44,46 @@ export const BookSections = ({
 
   return (
     <Tabs defaultValue="all" className="w-full">
-      <TabsList className="mb-8">
+      <TabsList className="mb-8 flex-wrap h-auto justify-start overflow-x-auto">
         <TabsTrigger 
           value="all" 
           onClick={() => onToBuyFilterChange(null)}
+          className="text-xs sm:text-sm"
         >
-          Tous les livres ({books.length})
+          Tous ({books.length})
         </TabsTrigger>
         <TabsTrigger 
           value="reading" 
           onClick={() => onToBuyFilterChange(null)}
+          className="text-xs sm:text-sm"
         >
           En cours ({readingBooks.length})
         </TabsTrigger>
         <TabsTrigger 
           value="completed" 
           onClick={() => onToBuyFilterChange(null)}
+          className="text-xs sm:text-sm"
         >
           Lu ({completedBooks.length})
         </TabsTrigger>
         <TabsTrigger 
           value="to-read" 
           onClick={() => onToBuyFilterChange(null)}
+          className="text-xs sm:text-sm"
         >
           À lire ({toReadBooks.length})
         </TabsTrigger>
         <TabsTrigger 
           value="purchased" 
           onClick={() => onToBuyFilterChange(null)}
+          className="text-xs sm:text-sm"
         >
           Achetés ({purchasedBooks.length})
         </TabsTrigger>
         <TabsTrigger 
           value="to-buy" 
           onClick={() => onToBuyFilterChange(true)}
-          className="bg-destructive/10 hover:bg-destructive/20 data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground"
+          className="bg-destructive/10 hover:bg-destructive/20 data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground text-xs sm:text-sm"
         >
           À acheter ({toBuyBooks.length})
         </TabsTrigger>
