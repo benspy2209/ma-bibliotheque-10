@@ -1,23 +1,22 @@
 
 import { useState } from 'react';
 import { Book } from '@/types/book';
-import { BookDetails } from '@/components/BookDetails';
-import { useToast } from "@/hooks/use-toast";
-import { SortMenu, SortOption } from '@/components/library/SortMenu';
-import { ViewToggle } from '@/components/library/ViewToggle';
-import { useBookSort } from '@/hooks/use-book-sort';
-import { useViewPreference } from '@/hooks/use-view-preference';
-import NavBar from '@/components/NavBar';
-import { loadBooks } from '@/services/supabaseBooks';
-import { useQuery } from '@tanstack/react-query';
-import { BookSections } from '@/components/library/BookSections';
-import { AuthorFilter } from '@/components/library/AuthorFilter';
-import { Input } from "@/components/ui/input";
-import { Search, BookPlus, BookOpen } from "lucide-react";
-import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { LoginDialog } from '@/components/auth/LoginDialog';
+import { BookGrid } from '@/components/library/BookGrid';
+import { BookList } from '@/components/library/BookList';
+import { 
+  Tabs, 
+  TabsList, 
+  TabsContent, 
+  TabsTrigger
+} from "@/components/ui/tabs";
+
+interface BookSectionsProps {
+  books: Book[];
+  viewMode: 'grid' | 'list';
+  onBookClick: (book: Book) => void;
+  toBuyFilter: boolean | null;
+  onToBuyFilterChange: (value: boolean | null) => void;
+}
 
 export const BookSections = ({ 
   books, 
