@@ -65,6 +65,18 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
   };
 
   const handleInputChange = (field: keyof Book, value: string) => {
+    console.log(`Updating field ${field} with value:`, value);
+    
+    // Handle subjects conversion specially
+    if (field === 'subjects' && value.trim()) {
+      const subjectsArray = value.split(',').map(s => s.trim()).filter(Boolean);
+      setCurrentBook(prev => ({
+        ...prev,
+        subjects: subjectsArray
+      }));
+      return;
+    }
+    
     setCurrentBook(prev => ({
       ...prev,
       [field]: field === 'purchased' ? value === 'true' : 
@@ -74,6 +86,7 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
   };
 
   const handleCompletionDateChange = (date: Date | undefined) => {
+    console.log('Date changed to:', date);
     setCurrentBook(prev => ({
       ...prev,
       completionDate: date ? date.toISOString().split('T')[0] : undefined

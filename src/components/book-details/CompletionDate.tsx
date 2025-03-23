@@ -22,7 +22,7 @@ export function CompletionDate({ book, isEditing, onDateChange }: CompletionDate
             <Button
               variant="outline"
               className={cn(
-                "w-[240px] pl-3 text-left font-normal",
+                "w-[240px] pl-3 text-left font-normal pointer-events-auto",
                 !book.completionDate && "text-muted-foreground"
               )}
               disabled={book.status !== 'completed'}
@@ -35,7 +35,7 @@ export function CompletionDate({ book, isEditing, onDateChange }: CompletionDate
               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
+          <PopoverContent className="w-auto p-0 pointer-events-auto z-50" align="start">
             <Calendar
               mode="single"
               selected={book.completionDate ? new Date(book.completionDate) : undefined}
