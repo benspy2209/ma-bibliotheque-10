@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
-import { CheckCircle, AlertCircle } from "lucide-react";
+import { CheckCircle, AlertCircle, Info } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 
 export function UpdatePasswordForm() {
@@ -16,6 +16,7 @@ export function UpdatePasswordForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasRecoveryHash, setHasRecoveryHash] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -26,6 +27,7 @@ export function UpdatePasswordForm() {
     if (hash && hash.includes('type=recovery')) {
       // Si oui, nous avons un lien de réinitialisation valide
       console.log("Lien de réinitialisation détecté:", hash);
+      setHasRecoveryHash(true);
       
       // Récupérer l'email depuis l'URL (si présent)
       const urlParams = new URLSearchParams(hash.substring(1));
@@ -35,6 +37,7 @@ export function UpdatePasswordForm() {
       }
     } else {
       console.log("Aucun lien de réinitialisation détecté, utilisation du mode manuel");
+      setHasRecoveryHash(false);
     }
   }, []);
 
@@ -62,28 +65,57 @@ export function UpdatePasswordForm() {
     
     try {
       // Vérifier si nous avons un hash de récupération dans l'URL
-      const hash = window.location.hash;
       let resetResult;
       
-      if (hash && hash.includes('type=recovery')) {
-        // Si nous avons un hash, nous utilisons la méthode de mise à jour avec la session implicite
+      if (hasRecoveryHash) {
+        // Si nous sommes sur un lien de réinitialisation valide, nous pouvons directement 
+        // mettre à jour le mot de passe sans authentification préalable
+        console.log("Utilisation du flux de réinitialisation par lien");
         resetResult = await supabase.auth.updateUser({ password });
       } else {
-        // Sinon, nous utilisons la méthode de création d'un nouveau mot de passe directement
-        // Ceci est pour le développement uniquement, car normalement on passerait par un lien d'email
-        const { data } = await supabase.auth.signInWithPassword({
-          email,
-          password: 'ancien-mot-de-passe-temporaire',  // Ceci ne fonctionnera que si c'est le bon mot de passe
+        // Si nous n'avons pas de lien de réinitialisation, nous devons d'abord 
+        // déclencher l'envoi d'un email de réinitialisation
+        console.log("Déclenchement du flux de réinitialisation manuel");
+        
+        // Option 1: Tentative de réinitialisation de mot de passe par email
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
         });
         
-        if (data.session) {
-          // Si la connexion a réussi, mettre à jour le mot de passe
-          resetResult = await supabase.auth.updateUser({ password });
-          // Se déconnecter pour forcer une nouvelle connexion
-          await supabase.auth.signOut();
+        if (resetError) {
+          if (resetError.message.includes("session")) {
+            // Option 2 (fallback pour développement): Tentative directe sans email
+            // Cette option est uniquement pour le mode développement
+            console.log("Tentative directe de mise à jour de mot de passe (mode développement)");
+            
+            // Création d'un nouvel objet pour stocker les données de session
+            const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
+              email: email,
+              password: 'ancien-mot-de-passe', // Ceci est juste une tentative
+            });
+            
+            if (signInError) {
+              throw new Error(
+                "En production, un email serait envoyé avec un lien de réinitialisation. " +
+                "En développement, essayez de vous connecter d'abord avec votre compte, " +
+                "puis utilisez cette page pour changer votre mot de passe."
+              );
+            }
+            
+            resetResult = await supabase.auth.updateUser({ password });
+            // Se déconnecter après la mise à jour
+            await supabase.auth.signOut();
+          } else {
+            throw resetError;
+          }
         } else {
-          // Si la connexion a échoué, indiquer l'erreur
-          throw new Error("Impossible de se connecter avec cet email. Veuillez vérifier que vous utilisez bien l'email avec lequel vous vous êtes inscrit.");
+          // L'email de réinitialisation a été envoyé avec succès
+          setSuccess(true);
+          toast({
+            description: "Un email de réinitialisation a été envoyé. Veuillez vérifier votre boîte de réception."
+          });
+          setIsLoading(false);
+          return; // Arrêter l'exécution ici car nous n'avons pas vraiment réinitialisé le mot de passe
         }
       }
       
@@ -115,11 +147,22 @@ export function UpdatePasswordForm() {
     <div className="w-full max-w-md mx-auto py-8">
       <h2 className="text-2xl font-bold mb-6 text-center">Réinitialisation du mot de passe</h2>
       
+      {hasRecoveryHash && (
+        <Alert className="mb-4 bg-blue-50 border-blue-200">
+          <Info className="h-4 w-4 text-blue-600" />
+          <AlertDescription className="text-blue-800">
+            Vous pouvez maintenant définir votre nouveau mot de passe.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       {success ? (
         <Alert className="mb-4 bg-green-50 border-green-200">
           <CheckCircle className="h-4 w-4 text-green-600" />
           <AlertDescription>
-            Votre mot de passe a été mis à jour avec succès. Vous allez être redirigé vers la page d'accueil...
+            {hasRecoveryHash 
+              ? "Votre mot de passe a été mis à jour avec succès. Vous allez être redirigé vers la page d'accueil..."
+              : "Un email de réinitialisation a été envoyé à l'adresse indiquée. Veuillez vérifier votre boîte de réception et votre dossier spam."}
           </AlertDescription>
         </Alert>
       ) : (
@@ -140,7 +183,7 @@ export function UpdatePasswordForm() {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="votre@email.com"
-              disabled={isLoading}
+              disabled={isLoading || hasRecoveryHash}
             />
           </div>
           
@@ -171,14 +214,14 @@ export function UpdatePasswordForm() {
           </div>
           
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Mise à jour...' : 'Mettre à jour le mot de passe'}
+            {isLoading ? 'Mise à jour...' : hasRecoveryHash ? 'Mettre à jour le mot de passe' : 'Envoyer un lien de réinitialisation'}
           </Button>
 
           <Alert>
             <AlertDescription className="text-xs">
-              Cette page permet de réinitialiser votre mot de passe. Si vous avez reçu un lien par email, 
-              assurez-vous de bien cliquer sur ce lien. En mode développement, vous pouvez essayer de 
-              réinitialiser directement en utilisant votre email et en choisissant un nouveau mot de passe.
+              {hasRecoveryHash 
+                ? "Vous êtes sur le point de définir un nouveau mot de passe à l'aide du lien de réinitialisation que vous avez reçu par email."
+                : "Un email de réinitialisation sera envoyé à l'adresse indiquée. En mode développement uniquement, si vous connaissez votre ancien mot de passe, le système peut aussi tenter une mise à jour directe."}
             </AlertDescription>
           </Alert>
         </form>
