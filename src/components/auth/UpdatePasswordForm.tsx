@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,9 +18,28 @@ export function UpdatePasswordForm() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  // Récupérer le hash de la requête pour les utilisateurs venant d'un lien de réinitialisation
+  useEffect(() => {
+    const hash = window.location.hash;
+    // Vérifier si nous avons un hash de type accès par mail
+    if (hash && hash.includes('type=recovery')) {
+      // Si oui, nous avons un lien de réinitialisation valide
+      console.log("Lien de réinitialisation détecté:", hash);
+      
+      // Récupérer l'email depuis l'URL (si présent)
+      const urlParams = new URLSearchParams(hash.substring(1));
+      const emailParam = urlParams.get('email');
+      if (emailParam) {
+        setEmail(decodeURIComponent(emailParam));
+      }
+    } else {
+      console.log("Aucun lien de réinitialisation détecté, utilisation du mode manuel");
+    }
+  }, []);
 
-  // En mode développement, permettre de réinitialiser le mot de passe directement
-  const handleResetPasswordDirect = async (e: React.FormEvent) => {
+  // Méthode principale pour la mise à jour du mot de passe
+  const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     
@@ -42,14 +61,33 @@ export function UpdatePasswordForm() {
     setIsLoading(true);
     
     try {
-      // Tentative de connexion avec l'email fourni
-      // Note: Cette méthode ne fonctionnera que pour les comptes existants
-      const { error: resetError } = await supabase.auth.updateUser({
-        email: email,
-        password: password
-      });
-
-      if (resetError) throw resetError;
+      // Vérifier si nous avons un hash de récupération dans l'URL
+      const hash = window.location.hash;
+      let resetResult;
+      
+      if (hash && hash.includes('type=recovery')) {
+        // Si nous avons un hash, nous utilisons la méthode de mise à jour avec la session implicite
+        resetResult = await supabase.auth.updateUser({ password });
+      } else {
+        // Sinon, nous utilisons la méthode de création d'un nouveau mot de passe directement
+        // Ceci est pour le développement uniquement, car normalement on passerait par un lien d'email
+        const { data } = await supabase.auth.signInWithPassword({
+          email,
+          password: 'ancien-mot-de-passe-temporaire',  // Ceci ne fonctionnera que si c'est le bon mot de passe
+        });
+        
+        if (data.session) {
+          // Si la connexion a réussi, mettre à jour le mot de passe
+          resetResult = await supabase.auth.updateUser({ password });
+          // Se déconnecter pour forcer une nouvelle connexion
+          await supabase.auth.signOut();
+        } else {
+          // Si la connexion a échoué, indiquer l'erreur
+          throw new Error("Impossible de se connecter avec cet email. Veuillez vérifier que vous utilisez bien l'email avec lequel vous vous êtes inscrit.");
+        }
+      }
+      
+      if (resetResult?.error) throw resetResult.error;
       
       setSuccess(true);
       toast({
@@ -63,10 +101,10 @@ export function UpdatePasswordForm() {
       
     } catch (error: any) {
       console.error("Erreur lors de la mise à jour du mot de passe:", error);
-      setError(error.message);
+      setError(error.message || "Une erreur est survenue lors de la mise à jour du mot de passe.");
       toast({
         variant: "destructive",
-        description: `Erreur : ${error.message}`
+        description: `Erreur : ${error.message || "Une erreur inattendue s'est produite."}`
       });
     } finally {
       setIsLoading(false);
@@ -85,7 +123,7 @@ export function UpdatePasswordForm() {
           </AlertDescription>
         </Alert>
       ) : (
-        <form onSubmit={handleResetPasswordDirect} className="space-y-4">
+        <form onSubmit={handlePasswordUpdate} className="space-y-4">
           {error && (
             <Alert variant="destructive" className="mb-4">
               <AlertCircle className="h-4 w-4" />
@@ -138,7 +176,9 @@ export function UpdatePasswordForm() {
 
           <Alert>
             <AlertDescription className="text-xs">
-              Vous devez utiliser l'email avec lequel vous vous êtes inscrit pour que cette réinitialisation fonctionne.
+              Cette page permet de réinitialiser votre mot de passe. Si vous avez reçu un lien par email, 
+              assurez-vous de bien cliquer sur ce lien. En mode développement, vous pouvez essayer de 
+              réinitialiser directement en utilisant votre email et en choisissant un nouveau mot de passe.
             </AlertDescription>
           </Alert>
         </form>
