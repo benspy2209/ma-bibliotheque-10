@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import { searchBooks } from '@/services/openLibrary';
@@ -11,6 +12,9 @@ import NavBar from '@/components/NavBar';
 import { SearchBar } from '@/components/search/SearchBar';
 import { BookGrid } from '@/components/search/BookGrid';
 import { HeaderSection } from '@/components/search/HeaderSection';
+import { BookFinder } from '@/components/BookFinder';
+import { Button } from '@/components/ui/button';
+import { Search } from 'lucide-react';
 
 const BOOKS_PER_PAGE = 12;
 
@@ -19,6 +23,7 @@ const Index = () => {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [displayedBooks, setDisplayedBooks] = useState(BOOKS_PER_PAGE);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [showBookFinder, setShowBookFinder] = useState(false);
   const { toast } = useToast();
 
   const results = useQueries({
@@ -93,6 +98,24 @@ const Index = () => {
         <div className="container px-4 py-6 sm:py-8 sm:px-6 lg:px-8 mx-auto">
           <div className="max-w-4xl mx-auto">
             <HeaderSection onBookAdded={handleBookUpdate} />
+
+            <div className="flex justify-between items-center mb-4">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowBookFinder(!showBookFinder)}
+                className="mb-4"
+              >
+                <Search className="mr-2 h-4 w-4" />
+                {showBookFinder ? "Masquer la recherche par UUID" : "Rechercher un livre par titre (UUID)"}
+              </Button>
+            </div>
+            
+            {showBookFinder && (
+              <div className="mb-8 p-4 border rounded-lg bg-card">
+                <BookFinder />
+              </div>
+            )}
 
             <div className="mb-8 sm:mb-12">
               <SearchBar 

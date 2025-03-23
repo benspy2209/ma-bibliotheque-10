@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 import { isDuplicateBook } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -214,5 +213,49 @@ export async function deleteBook(bookId: string) {
   } catch (error) {
     console.error('Erreur pendant la suppression:', error);
     throw error;
+  }
+}
+
+/**
+ * Searches for books by title in the current user's library
+ * @param title The title to search for (case insensitive, partial match)
+ * @returns Array of books matching the search criteria
+ */
+export async function searchBooksByTitle(title: string): Promise<Book[]> {
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user) {
+      console.error('Authentication error when searching books:', authError);
+      return [];
+    }
+    
+    console.log(`Searching for books with title containing: "${title}"`);
+    
+    // Use Postgres ILIKE for case-insensitive search
+    // We need to search inside the jsonb book_data -> title field
+    const { data, error } = await supabase
+      .from('books')
+      .select('*')
+      .eq('user_id', user.id)
+      .filter('book_data->title', 'ilike', `%${title}%`);
+    
+    if (error) {
+      console.error('Error searching books by title:', error);
+      return [];
+    }
+    
+    console.log(`Found ${data?.length} books matching the search`);
+    
+    return data?.map((row: BookRow) => {
+      const bookData = row.book_data || row;
+      return {
+        ...bookData,
+        status: row.status || bookData.status
+      };
+    }) ?? [];
+  } catch (error) {
+    console.error('Error during book search:', error);
+    return [];
   }
 }
