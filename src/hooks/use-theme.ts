@@ -12,8 +12,13 @@ export const useTheme = () => {
   });
 
   useEffect(() => {
+    // Sauvegarder le thème dans le localStorage
     localStorage.setItem('theme', theme);
-    document.documentElement.classList.toggle('dark', theme === 'dark');
+    
+    // Appliquer la classe appropriée au document
+    // Retirer les deux classes et ajouter seulement celle qui correspond au thème actuel
+    document.documentElement.classList.remove('dark', 'light');
+    document.documentElement.classList.add(theme);
   }, [theme]);
 
   const toggleTheme = () => {
