@@ -11,7 +11,6 @@ export function ImportExport() {
   const [isImporting, setIsImporting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const fileInputRef = useState<HTMLInputElement | null>(null);
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -80,7 +79,20 @@ export function ImportExport() {
       reader.onload = async (e) => {
         try {
           const content = e.target?.result as string;
-          const data = JSON.parse(content);
+          let data: any;
+          
+          try {
+            data = JSON.parse(content);
+            console.log('Données importées:', data);
+          } catch (parseError) {
+            console.error('Erreur de parsing JSON:', parseError);
+            toast({
+              variant: "destructive",
+              description: "Le fichier n'est pas un JSON valide",
+            });
+            setIsImporting(false);
+            return;
+          }
           
           // Import des données
           const result = await importLibrary(data);
