@@ -74,25 +74,64 @@ export async function importLibrary(
       };
     }
     
-    console.log('Structure des données importées:', JSON.stringify(importData, null, 2));
+    console.log('Structure des données importées:', JSON.stringify(importData, null, 2).substring(0, 500) + '...');
     
     // Détection du format des données
     let booksToImport: any[] = [];
     
     // Format 1: { books: [...] }
     if (importData.books && Array.isArray(importData.books)) {
+      console.log('Format détecté: { books: [...] }');
       booksToImport = importData.books;
     } 
     // Format 2: [...] (tableau direct de livres)
     else if (Array.isArray(importData)) {
+      console.log('Format détecté: tableau direct');
       booksToImport = importData;
     }
-    // Format 3: Tenter de trouver des données imbriquées
+    // Format 3: Recherche récursive pour trouver un tableau de livres
     else {
-      for (const key in importData) {
-        if (importData[key] && Array.isArray(importData[key])) {
-          booksToImport = importData[key];
-          break;
+      console.log('Recherche récursive de données...');
+      const findBooksArray = (obj: any): any[] | null => {
+        if (!obj || typeof obj !== 'object') return null;
+        
+        // Si c'est un tableau avec des objets qui ont des propriétés comme title, author
+        if (Array.isArray(obj) && obj.length > 0 && 
+            obj[0] && typeof obj[0] === 'object' && 
+            (obj[0].title || (obj[0].book_data && obj[0].book_data.title))) {
+          return obj;
+        }
+        
+        // Recherche dans toutes les propriétés
+        for (const key in obj) {
+          if (key === 'books' && Array.isArray(obj[key])) {
+            return obj[key];
+          }
+          
+          const result = findBooksArray(obj[key]);
+          if (result) return result;
+        }
+        
+        return null;
+      };
+      
+      const foundBooks = findBooksArray(importData);
+      if (foundBooks) {
+        console.log(`Format détecté: structure imbriquée, ${foundBooks.length} livres trouvés`);
+        booksToImport = foundBooks;
+      } else {
+        // Tentative de dernière chance - rechercher des propriétés ressemblant à des livres
+        for (const key in importData) {
+          if (importData[key] && Array.isArray(importData[key])) {
+            console.log(`Essai avec la propriété: ${key} (${importData[key].length} éléments)`);
+            booksToImport = importData[key];
+            if (booksToImport.length > 0 && 
+                (booksToImport[0].title || 
+                 (booksToImport[0].book_data && booksToImport[0].book_data.title))) {
+              console.log(`Format détecté: propriété ${key}`);
+              break;
+            }
+          }
         }
       }
     }
@@ -113,92 +152,75 @@ export async function importLibrary(
     // Statistiques d'importation
     let imported = 0;
     let errors = 0;
+    let duplicates = 0;
     
     // Pour chaque livre dans le fichier d'import
-    for (const bookItem of booksToImport) {
+    for (let i = 0; i < booksToImport.length; i++) {
       try {
+        const bookItem = booksToImport[i];
+        console.log(`Traitement du livre ${i+1}/${booksToImport.length}: ${JSON.stringify(bookItem).substring(0, 100)}...`);
+        
         // Trouver les données du livre selon différents formats possibles
         let bookData = bookItem;
+        let bookStatus = 'to-read';
+        let completionDate = undefined;
         
         // Format où les données du livre sont dans book_data
         if (bookItem.book_data) {
           bookData = bookItem.book_data;
+          bookStatus = bookItem.status || bookData.status || 'to-read';
+          completionDate = bookItem.completion_date || bookData.completionDate;
+        } else {
+          // Si le statut est une propriété directe
+          bookStatus = bookItem.status || 'to-read';
+          completionDate = bookItem.completionDate || bookItem.completion_date;
         }
         
-        // Format de la base de données Supabase directe
-        if (bookItem.id && typeof bookItem.id === 'string' && bookItem.user_id) {
-          // Construction du livre avec un nouvel ID
-          const book: Book = {
-            id: uuidv4(), // Nouvel ID pour éviter les conflits
-            title: bookData.title || 'Titre inconnu',
-            author: bookData.author || 'Auteur inconnu',
-            language: Array.isArray(bookData.language) ? bookData.language : ['unknown'],
-            status: bookItem.status || bookData.status || 'to-read',
-            completionDate: bookItem.completion_date || bookData.completionDate
-          };
-          
-          // Copie des propriétés optionnelles si elles existent
-          if (bookData.sourceId) book.sourceId = bookData.sourceId;
-          if (bookData.cover) book.cover = bookData.cover;
-          if (bookData.rating) book.rating = bookData.rating;
-          if (bookData.purchased !== undefined) book.purchased = bookData.purchased;
-          if (bookData.numberOfPages) book.numberOfPages = bookData.numberOfPages;
-          if (bookData.publishDate) book.publishDate = bookData.publishDate;
-          if (bookData.series) book.series = bookData.series;
-          if (bookData.description) book.description = bookData.description;
-          if (bookData.publishers) book.publishers = bookData.publishers;
-          if (bookData.subjects) book.subjects = bookData.subjects;
-          if (bookData.isbn) book.isbn = bookData.isbn;
-          if (bookData.readingTimeDays) book.readingTimeDays = bookData.readingTimeDays;
-          if (bookData.review) book.review = bookData.review;
-          
-          // Sauvegarde du livre dans la base de données
-          const result = await saveBook(book);
-          
-          if (result.success) {
-            imported++;
-          } else {
-            if (result.error !== 'duplicate') {
-              errors++;
-              console.error('Erreur lors de l\'importation du livre:', result.message);
-            }
-          }
+        // Vérification de base pour s'assurer que c'est un livre valide
+        if (!bookData.title && !bookData.author) {
+          console.warn(`Livre #${i+1} ignoré: données de base manquantes`, bookData);
+          errors++;
+          continue;
+        }
+        
+        // Construction du livre avec un nouvel ID
+        const book: Book = {
+          id: uuidv4(), // Nouvel ID pour éviter les conflits
+          title: bookData.title || 'Titre inconnu',
+          author: bookData.author || 'Auteur inconnu',
+          language: Array.isArray(bookData.language) ? bookData.language : ['unknown'],
+          status: bookStatus,
+          completionDate: completionDate
+        };
+        
+        // Copie des propriétés optionnelles si elles existent
+        if (bookData.sourceId) book.sourceId = bookData.sourceId;
+        if (bookData.cover) book.cover = bookData.cover;
+        if (bookData.rating) book.rating = bookData.rating;
+        if (bookData.purchased !== undefined) book.purchased = bookData.purchased;
+        if (bookData.numberOfPages) book.numberOfPages = bookData.numberOfPages;
+        if (bookData.publishDate) book.publishDate = bookData.publishDate;
+        if (bookData.series) book.series = bookData.series;
+        if (bookData.description) book.description = bookData.description;
+        if (bookData.publishers) book.publishers = bookData.publishers;
+        if (bookData.subjects) book.subjects = bookData.subjects;
+        if (bookData.isbn) book.isbn = bookData.isbn;
+        if (bookData.readingTimeDays) book.readingTimeDays = bookData.readingTimeDays;
+        if (bookData.review) book.review = bookData.review;
+        
+        // Sauvegarde du livre dans la base de données
+        const result = await saveBook(book);
+        
+        if (result.success) {
+          imported++;
+          console.log(`Livre importé avec succès: "${book.title}"`);
         } else {
-          // Format de livre simple (potentiellement sans ID)
-          const book: Book = {
-            id: uuidv4(),
-            title: bookData.title || 'Titre inconnu',
-            author: bookData.author || 'Auteur inconnu',
-            language: Array.isArray(bookData.language) ? bookData.language : ['unknown'],
-            status: bookItem.status || bookData.status || 'to-read',
-            completionDate: bookItem.completion_date || bookData.completionDate
-          };
-          
-          // Copie des propriétés optionnelles si elles existent
-          if (bookData.sourceId) book.sourceId = bookData.sourceId;
-          if (bookData.cover) book.cover = bookData.cover;
-          if (bookData.rating) book.rating = bookData.rating;
-          if (bookData.purchased !== undefined) book.purchased = bookData.purchased;
-          if (bookData.numberOfPages) book.numberOfPages = bookData.numberOfPages;
-          if (bookData.publishDate) book.publishDate = bookData.publishDate;
-          if (bookData.series) book.series = bookData.series;
-          if (bookData.description) book.description = bookData.description;
-          if (bookData.publishers) book.publishers = bookData.publishers;
-          if (bookData.subjects) book.subjects = bookData.subjects;
-          if (bookData.isbn) book.isbn = bookData.isbn;
-          if (bookData.readingTimeDays) book.readingTimeDays = bookData.readingTimeDays;
-          if (bookData.review) book.review = bookData.review;
-          
-          // Sauvegarde du livre dans la base de données
-          const result = await saveBook(book);
-          
-          if (result.success) {
-            imported++;
+          if (result.error === 'duplicate') {
+            duplicates++;
+            console.log(`Livre dupliqué ignoré: "${book.title}"`);
           } else {
-            if (result.error !== 'duplicate') {
-              errors++;
-              console.error('Erreur lors de l\'importation du livre:', result.message);
-            }
+            errors++;
+            console.error(`Erreur lors de l'importation du livre "${book.title}":`, result.message);
           }
         }
       } catch (error) {
@@ -211,7 +233,7 @@ export async function importLibrary(
       success: true,
       imported,
       errors,
-      message: `Importation terminée: ${imported} livres importés, ${errors} erreurs`
+      message: `Importation terminée: ${imported} livres importés, ${errors} erreurs, ${duplicates} doublons ignorés`
     };
   } catch (error) {
     console.error('Erreur lors de l\'importation:', error);

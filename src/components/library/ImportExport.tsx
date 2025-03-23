@@ -71,6 +71,9 @@ export function ImportExport() {
     if (!file) return;
     
     setIsImporting(true);
+    toast({
+      description: "Analyse du fichier en cours...",
+    });
     
     try {
       // Lecture du fichier
@@ -83,7 +86,7 @@ export function ImportExport() {
           
           try {
             data = JSON.parse(content);
-            console.log('Données importées:', data);
+            console.log('Fichier JSON valide, analyse en cours...');
           } catch (parseError) {
             console.error('Erreur de parsing JSON:', parseError);
             toast({
@@ -94,7 +97,15 @@ export function ImportExport() {
             return;
           }
           
+          // Vérification basique de la structure
+          const fileSize = Math.round(content.length / 1024);
+          console.log(`Taille du fichier: ${fileSize}KB`);
+          
           // Import des données
+          toast({
+            description: "Importation en cours, veuillez patienter...",
+          });
+          
           const result = await importLibrary(data);
           
           if (result.success) {
@@ -114,7 +125,7 @@ export function ImportExport() {
           console.error('Erreur lors du traitement du fichier:', error);
           toast({
             variant: "destructive",
-            description: "Format de fichier invalide",
+            description: "Erreur lors du traitement du fichier",
           });
         } finally {
           setIsImporting(false);
