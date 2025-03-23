@@ -10,6 +10,7 @@ import { CheckCircle, AlertCircle } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 
 export function UpdatePasswordForm() {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -18,10 +19,16 @@ export function UpdatePasswordForm() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleUpdatePassword = async (e: React.FormEvent) => {
+  // En mode développement, permettre de réinitialiser le mot de passe directement
+  const handleResetPasswordDirect = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     
+    if (!email) {
+      setError("Veuillez saisir votre adresse email.");
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError("Les mots de passe ne correspondent pas.");
       return;
@@ -35,11 +42,14 @@ export function UpdatePasswordForm() {
     setIsLoading(true);
     
     try {
-      const { error } = await supabase.auth.updateUser({ 
-        password
+      // Tentative de connexion avec l'email fourni
+      // Note: Cette méthode ne fonctionnera que pour les comptes existants
+      const { error: resetError } = await supabase.auth.updateUser({
+        email: email,
+        password: password
       });
 
-      if (error) throw error;
+      if (resetError) throw resetError;
       
       setSuccess(true);
       toast({
@@ -75,13 +85,26 @@ export function UpdatePasswordForm() {
           </AlertDescription>
         </Alert>
       ) : (
-        <form onSubmit={handleUpdatePassword} className="space-y-4">
+        <form onSubmit={handleResetPasswordDirect} className="space-y-4">
           {error && (
             <Alert variant="destructive" className="mb-4">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
+          
+          <div className="space-y-2">
+            <Label htmlFor="email">Votre email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="votre@email.com"
+              disabled={isLoading}
+            />
+          </div>
           
           <div className="space-y-2">
             <Label htmlFor="new-password">Nouveau mot de passe</Label>
@@ -112,6 +135,12 @@ export function UpdatePasswordForm() {
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? 'Mise à jour...' : 'Mettre à jour le mot de passe'}
           </Button>
+
+          <Alert>
+            <AlertDescription className="text-xs">
+              Vous devez utiliser l'email avec lequel vous vous êtes inscrit pour que cette réinitialisation fonctionne.
+            </AlertDescription>
+          </Alert>
         </form>
       )}
     </div>
