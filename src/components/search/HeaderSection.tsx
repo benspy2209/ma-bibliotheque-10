@@ -4,6 +4,7 @@ import { AddManualBook } from '@/components/AddManualBook';
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { Button } from "@/components/ui/button";
 import { LogIn, BookOpen } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface HeaderSectionProps {
   onBookAdded: () => void;
@@ -11,13 +12,10 @@ interface HeaderSectionProps {
 
 export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
   const { user, signIn } = useSupabaseAuth();
+  const isMobile = useIsMobile();
 
   const handleSignIn = () => {
     signIn('login');
-  };
-
-  const handleSignUp = () => {
-    signIn('signup');
   };
 
   return (
@@ -39,7 +37,7 @@ export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
               className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
             >
               <BookOpen className="h-4 w-4" />
-              Ma Bibliothèque
+              {!isMobile && "Ma Bibliothèque"}
             </Link>
           </>
         ) : (
@@ -48,7 +46,7 @@ export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
             className="w-full sm:w-auto flex items-center justify-center gap-2"
           >
             <LogIn className="h-4 w-4" />
-            Se connecter / Créer un compte
+            {isMobile ? "Se connecter" : "Se connecter / Créer un compte"}
           </Button>
         )}
       </div>
