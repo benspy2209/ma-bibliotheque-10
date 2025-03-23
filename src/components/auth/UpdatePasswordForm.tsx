@@ -20,28 +20,59 @@ export function UpdatePasswordForm() {
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  // Récupérer le hash de la requête pour les utilisateurs venant d'un lien de réinitialisation
+  // Parse hash parameters from URL for recovery links
+  const parseHashParameters = (hash: string) => {
+    if (!hash || hash === '') return {};
+    
+    const hashParams: Record<string, string> = {};
+    const hashParts = hash.substring(1).split('&');
+    
+    hashParts.forEach(part => {
+      const [key, value] = part.split('=');
+      if (key && value) {
+        hashParams[key] = decodeURIComponent(value);
+      }
+    });
+    
+    return hashParams;
+  };
+  
+  // Check for recovery token in the URL hash
   useEffect(() => {
     const hash = window.location.hash;
-    // Vérifier si nous avons un hash de type accès par mail
-    if (hash && hash.includes('type=recovery')) {
-      // Si oui, nous avons un lien de réinitialisation valide
-      console.log("Lien de réinitialisation détecté:", hash);
+    console.log("URL hash:", hash);
+    
+    // Check if we have a recovery type or token in the URL
+    const hashParams = parseHashParameters(hash);
+    const isRecovery = 
+      hash.includes('type=recovery') || 
+      hashParams.type === 'recovery' ||
+      hashParams.access_token;
+    
+    if (isRecovery) {
+      console.log("Recovery link detected:", hashParams);
       setHasRecoveryHash(true);
       
-      // Récupérer l'email depuis l'URL (si présent)
-      const urlParams = new URLSearchParams(hash.substring(1));
-      const emailParam = urlParams.get('email');
-      if (emailParam) {
-        setEmail(decodeURIComponent(emailParam));
+      // Try to extract email from token or URL parameters
+      if (hashParams.email) {
+        setEmail(hashParams.email);
+      }
+      
+      // Handle direct access tokens for Supabase password recovery
+      if (hashParams.access_token) {
+        // When we have an access_token in the URL, Supabase has already authenticated the user
+        // with a temporary session. We just need to notify users they can reset their password.
+        toast({
+          description: "Vous pouvez maintenant réinitialiser votre mot de passe"
+        });
       }
     } else {
-      console.log("Aucun lien de réinitialisation détecté, utilisation du mode manuel");
+      console.log("No recovery link detected, using manual mode");
       setHasRecoveryHash(false);
     }
-  }, []);
+  }, [toast]);
 
-  // Méthode principale pour la mise à jour du mot de passe
+  // Main method for password update
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -64,73 +95,57 @@ export function UpdatePasswordForm() {
     setIsLoading(true);
     
     try {
-      // Vérifier si nous avons un hash de récupération dans l'URL
+      // Check if we have a recovery hash in the URL
       let resetResult;
       
       if (hasRecoveryHash) {
-        // Si nous sommes sur un lien de réinitialisation valide, nous pouvons directement 
-        // mettre à jour le mot de passe sans authentification préalable
-        console.log("Utilisation du flux de réinitialisation par lien");
+        // If we're on a valid reset link, we can directly 
+        // update the password without prior authentication
+        console.log("Using password reset link flow");
         resetResult = await supabase.auth.updateUser({ password });
-      } else {
-        // Si nous n'avons pas de lien de réinitialisation, nous devons d'abord 
-        // déclencher l'envoi d'un email de réinitialisation
-        console.log("Déclenchement du flux de réinitialisation manuel");
         
-        // Option 1: Tentative de réinitialisation de mot de passe par email
+        // Check if the update was successful
+        if (resetResult.error) {
+          throw resetResult.error;
+        }
+        
+        console.log("Password updated successfully");
+        setSuccess(true);
+        toast({
+          description: "Votre mot de passe a été mis à jour avec succès."
+        });
+        
+        // Redirect to home page after 3 seconds
+        setTimeout(() => {
+          navigate('/');
+        }, 3000);
+      } else {
+        // If we don't have a reset link, we need to 
+        // trigger a password reset email
+        console.log("Triggering manual reset flow");
+        
+        // Send password reset email
         const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/reset-password`,
         });
         
         if (resetError) {
-          if (resetError.message.includes("session")) {
-            // Option 2 (fallback pour développement): Tentative directe sans email
-            // Cette option est uniquement pour le mode développement
-            console.log("Tentative directe de mise à jour de mot de passe (mode développement)");
-            
-            // Création d'un nouvel objet pour stocker les données de session
-            const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
-              email: email,
-              password: 'ancien-mot-de-passe', // Ceci est juste une tentative
-            });
-            
-            if (signInError) {
-              throw new Error(
-                "En production, un email serait envoyé avec un lien de réinitialisation. " +
-                "En développement, essayez de vous connecter d'abord avec votre compte, " +
-                "puis utilisez cette page pour changer votre mot de passe."
-              );
-            }
-            
-            resetResult = await supabase.auth.updateUser({ password });
-            // Se déconnecter après la mise à jour
-            await supabase.auth.signOut();
+          // Check for specific error messages to provide better guidance
+          if (resetError.message.includes("Invalid email")) {
+            throw new Error("L'adresse email n'existe pas dans notre base de données.");
+          } else if (resetError.message.includes("For security purposes")) {
+            throw new Error("Pour des raisons de sécurité, veuillez attendre quelques secondes avant de réessayer.");
           } else {
             throw resetError;
           }
-        } else {
-          // L'email de réinitialisation a été envoyé avec succès
-          setSuccess(true);
-          toast({
-            description: "Un email de réinitialisation a été envoyé. Veuillez vérifier votre boîte de réception."
-          });
-          setIsLoading(false);
-          return; // Arrêter l'exécution ici car nous n'avons pas vraiment réinitialisé le mot de passe
         }
+        
+        // Reset email sent successfully
+        setSuccess(true);
+        toast({
+          description: "Un email de réinitialisation a été envoyé. Veuillez vérifier votre boîte de réception et votre dossier SPAM."
+        });
       }
-      
-      if (resetResult?.error) throw resetResult.error;
-      
-      setSuccess(true);
-      toast({
-        description: "Votre mot de passe a été mis à jour avec succès."
-      });
-      
-      // Rediriger vers la page d'accueil après 3 secondes
-      setTimeout(() => {
-        navigate('/');
-      }, 3000);
-      
     } catch (error: any) {
       console.error("Erreur lors de la mise à jour du mot de passe:", error);
       setError(error.message || "Une erreur est survenue lors de la mise à jour du mot de passe.");
@@ -221,7 +236,7 @@ export function UpdatePasswordForm() {
             <AlertDescription className="text-xs">
               {hasRecoveryHash 
                 ? "Vous êtes sur le point de définir un nouveau mot de passe à l'aide du lien de réinitialisation que vous avez reçu par email."
-                : "Un email de réinitialisation sera envoyé à l'adresse indiquée. En mode développement uniquement, si vous connaissez votre ancien mot de passe, le système peut aussi tenter une mise à jour directe."}
+                : "Un email de réinitialisation sera envoyé à l'adresse indiquée. Vérifiez bien votre dossier SPAM si vous ne trouvez pas l'email."}
             </AlertDescription>
           </Alert>
         </form>
