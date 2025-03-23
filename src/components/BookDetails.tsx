@@ -68,7 +68,7 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
     console.log(`Updating field ${field} with value:`, value);
     
     // Handle subjects conversion specially
-    if (field === 'subjects' && value.trim()) {
+    if (field === 'subjects' && value !== undefined) {
       const subjectsArray = value.split(',').map(s => s.trim()).filter(Boolean);
       setCurrentBook(prev => ({
         ...prev,

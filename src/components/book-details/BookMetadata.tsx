@@ -108,6 +108,7 @@ export function BookMetadata({ book, isEditing, onInputChange }: BookMetadataPro
               value={book.subjects && Array.isArray(book.subjects) ? book.subjects.join(', ') : ''}
               onChange={(e) => onInputChange('subjects', e.target.value)}
               placeholder="Catégories (séparées par des virgules)"
+              aria-label="Catégories"
             />
           ) : (
             <div className="flex flex-wrap gap-2">
