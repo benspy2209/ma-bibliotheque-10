@@ -1,5 +1,5 @@
 
-import { Book } from '@/types/book';
+import { Book, ReadingStatus } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { saveBook } from './supabaseBooks';
 import { v4 as uuidv4 } from 'uuid';
@@ -162,17 +162,20 @@ export async function importLibrary(
         
         // Trouver les données du livre selon différents formats possibles
         let bookData = bookItem;
-        let bookStatus = 'to-read';
+        let bookStatus: ReadingStatus = 'to-read';
         let completionDate = undefined;
         
         // Format où les données du livre sont dans book_data
         if (bookItem.book_data) {
           bookData = bookItem.book_data;
-          bookStatus = bookItem.status || bookData.status || 'to-read';
+          // FIX: Vérifier que le statut est valide avant de l'assigner
+          const status = bookItem.status || bookData.status || 'to-read';
+          bookStatus = validateReadingStatus(status);
           completionDate = bookItem.completion_date || bookData.completionDate;
         } else {
           // Si le statut est une propriété directe
-          bookStatus = bookItem.status || 'to-read';
+          const status = bookItem.status || 'to-read';
+          bookStatus = validateReadingStatus(status);
           completionDate = bookItem.completionDate || bookItem.completion_date;
         }
         
@@ -244,4 +247,34 @@ export async function importLibrary(
       message: error instanceof Error ? error.message : 'Erreur inconnue lors de l\'importation'
     };
   }
+}
+
+/**
+ * Valide et normalise un statut de lecture
+ * Si le statut n'est pas valide, retourne 'to-read' par défaut
+ */
+function validateReadingStatus(status: string): ReadingStatus {
+  const validStatuses: ReadingStatus[] = ['to-read', 'reading', 'completed'];
+  
+  // Vérification directe
+  if (validStatuses.includes(status as ReadingStatus)) {
+    return status as ReadingStatus;
+  }
+  
+  // Tentative de normalisation pour différentes variations possibles
+  const normalizedStatus = status.toLowerCase().trim();
+  
+  if (normalizedStatus === 'to-read' || normalizedStatus === 'to read' || normalizedStatus === 'à lire' || normalizedStatus === 'a lire') {
+    return 'to-read';
+  }
+  if (normalizedStatus === 'reading' || normalizedStatus === 'en cours' || normalizedStatus === 'en lecture' || normalizedStatus === 'lu partiellement') {
+    return 'reading';
+  }
+  if (normalizedStatus === 'completed' || normalizedStatus === 'read' || normalizedStatus === 'lu' || normalizedStatus === 'terminé' || normalizedStatus === 'termine') {
+    return 'completed';
+  }
+  
+  // Statut par défaut si aucune correspondance
+  console.log(`Statut non reconnu "${status}", utilisation de la valeur par défaut "to-read"`);
+  return 'to-read';
 }
