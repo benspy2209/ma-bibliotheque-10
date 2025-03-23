@@ -109,7 +109,7 @@ export function BookMetadata({ book, isEditing, onInputChange }: BookMetadataPro
           </h3>
           {isEditing ? (
             <Input
-              value={book.subjects && Array.isArray(book.subjects) ? book.subjects.join(', ') : ''}
+              value={ensureArray(book.subjects).join(', ')}
               onChange={(e) => onInputChange('subjects', e.target.value)}
               placeholder="Catégories (séparées par des virgules)"
             />
