@@ -67,9 +67,13 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
   const handleInputChange = (field: keyof Book, value: string) => {
     console.log(`Updating field ${field} with value:`, value);
     
-    // Handle subjects conversion specially
-    if (field === 'subjects' && value !== undefined) {
-      const subjectsArray = value.split(',').map(s => s.trim()).filter(Boolean);
+    // Traitement spécial pour les catégories
+    if (field === 'subjects') {
+      console.log("Processing subjects field with value:", value);
+      // Divise la chaîne en tableau, conserve les espaces dans les catégories
+      const subjectsArray = value ? value.split(',').map(s => s.trim()).filter(Boolean) : [];
+      console.log("Converted to array:", subjectsArray);
+      
       setCurrentBook(prev => ({
         ...prev,
         subjects: subjectsArray

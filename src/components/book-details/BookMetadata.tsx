@@ -109,6 +109,8 @@ export function BookMetadata({ book, isEditing, onInputChange }: BookMetadataPro
               onChange={(e) => onInputChange('subjects', e.target.value)}
               placeholder="Catégories (séparées par des virgules)"
               aria-label="Catégories"
+              autoComplete="off"
+              spellCheck="false"
             />
           ) : (
             <div className="flex flex-wrap gap-2">
