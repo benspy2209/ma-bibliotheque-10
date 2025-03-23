@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Book, ReadingStatus } from '@/types/book';
 import { useToast } from '@/hooks/use-toast';
 import { BookDetailsProps } from './book-details/types';

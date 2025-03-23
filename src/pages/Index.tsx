@@ -12,7 +12,6 @@ import NavBar from '@/components/NavBar';
 import { SearchBar } from '@/components/search/SearchBar';
 import { BookGrid } from '@/components/search/BookGrid';
 import { HeaderSection } from '@/components/search/HeaderSection';
-import { Button } from '@/components/ui/button';
 
 const BOOKS_PER_PAGE = 12;
 
@@ -26,12 +25,12 @@ const Index = () => {
   const results = useQueries({
     queries: [
       {
-        queryKey: ['openLibrary', debouncedQuery],
+        queryKey: ['openLibrary', debouncedQuery, refreshKey],
         queryFn: () => searchBooks(debouncedQuery),
         enabled: debouncedQuery.length > 0
       },
       {
-        queryKey: ['googleBooks', debouncedQuery],
+        queryKey: ['googleBooks', debouncedQuery, refreshKey],
         queryFn: () => searchGoogleBooks(debouncedQuery),
         enabled: debouncedQuery.length > 0
       }
@@ -84,6 +83,8 @@ const Index = () => {
 
   const handleBookUpdate = () => {
     setRefreshKey(prev => prev + 1);
+    // Forcer l'actualisation des données
+    results.forEach(result => result.refetch());
   };
 
   const visibleBooks = books.slice(0, displayedBooks);

@@ -47,6 +47,14 @@ export function AddToLibrary({
       
       console.log(`Statut du livre ${bookId} changé à: ${status} - Cache invalidé`);
       
+      toast({
+        description: status === 'to-read' 
+          ? "Livre ajouté à votre liste de lecture" 
+          : status === 'reading' 
+          ? "Livre ajouté à vos lectures en cours" 
+          : "Livre marqué comme lu",
+      });
+      
     } catch (error) {
       toast({
         variant: "destructive",
