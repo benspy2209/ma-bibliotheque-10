@@ -17,7 +17,6 @@ import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LoginDialog } from '@/components/auth/LoginDialog';
-import { ImportExport } from '@/components/library/ImportExport';
 
 export default function Library() {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
@@ -147,9 +146,6 @@ export default function Library() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
-                </div>
-                <div className="w-full md:w-auto ml-auto">
-                  <ImportExport />
                 </div>
               </div>
 
