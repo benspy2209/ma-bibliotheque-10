@@ -13,6 +13,9 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentPropsWithoutRef<
           className
         )}
         ref={ref}
+        autoComplete="off"
+        spellCheck="false"
+        style={{ caretColor: 'auto' }}
         {...props}
       />
     )

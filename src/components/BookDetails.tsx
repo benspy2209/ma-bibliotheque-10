@@ -71,18 +71,16 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
     if (field === 'subjects') {
       console.log("Processing subjects field with value:", value);
       
-      // Permettre les espaces ET les virgules correctement
-      const subjectsArray = value
-        ? value.split(',')
-            .map(s => s.trim())
-            .filter(Boolean)
-        : [];
+      // Logique simplifiée : chaque virgule est un séparateur, on préserve tout le reste
+      const subjects = value.split(',')
+        .map(subject => subject.trim())
+        .filter(subject => subject.length > 0);
       
-      console.log("Converted to array:", subjectsArray);
+      console.log("Converted to array:", subjects);
       
       setCurrentBook(prev => ({
         ...prev,
-        subjects: subjectsArray
+        subjects
       }));
       return;
     }
