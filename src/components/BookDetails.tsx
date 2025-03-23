@@ -70,13 +70,29 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
     // Traitement spécial pour les catégories
     if (field === 'subjects') {
       console.log("Processing subjects field with value:", value);
-      // Divise la chaîne en tableau, conserve les espaces dans les catégories
-      const subjectsArray = value ? value.split(',').map(s => s.trim()).filter(Boolean) : [];
+      
+      // Permettre les espaces ET les virgules correctement
+      const subjectsArray = value
+        ? value.split(',')
+            .map(s => s.trim())
+            .filter(Boolean)
+        : [];
+      
       console.log("Converted to array:", subjectsArray);
       
       setCurrentBook(prev => ({
         ...prev,
         subjects: subjectsArray
+      }));
+      return;
+    }
+    
+    // Traitement spécial pour l'auteur
+    if (field === 'author' && value.includes(',')) {
+      const authorArray = value.split(',').map(a => a.trim()).filter(Boolean);
+      setCurrentBook(prev => ({
+        ...prev,
+        author: authorArray
       }));
       return;
     }

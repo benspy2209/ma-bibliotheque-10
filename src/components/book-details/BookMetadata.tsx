@@ -103,8 +103,8 @@ export function BookMetadata({ book, isEditing, onInputChange }: BookMetadataPro
             Catégories
           </h3>
           {isEditing ? (
-            <Input
-              className="h-8 text-sm pointer-events-auto z-50 relative"
+            <input
+              className="flex h-8 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pointer-events-auto"
               value={book.subjects && Array.isArray(book.subjects) ? book.subjects.join(', ') : ''}
               onChange={(e) => onInputChange('subjects', e.target.value)}
               placeholder="Catégories (séparées par des virgules)"
