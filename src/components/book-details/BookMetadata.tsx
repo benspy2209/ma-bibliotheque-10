@@ -111,6 +111,8 @@ export function BookMetadata({ book, isEditing, onInputChange }: BookMetadataPro
               aria-label="Catégories"
               autoComplete="off"
               spellCheck="false"
+              type="text"
+              style={{ caretColor: 'auto' }}
             />
           ) : (
             <div className="flex flex-wrap gap-2">
