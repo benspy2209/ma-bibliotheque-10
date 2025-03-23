@@ -10,6 +10,16 @@ import { CompletionDateProps } from './types';
 export function CompletionDate({ book, isEditing, onDateChange }: CompletionDateProps) {
   if (!isEditing && !book.status) return null;
 
+  const handleTriggerClick = (e: React.MouseEvent) => {
+    // Assurez-vous que l'événement de clic se propage correctement
+    e.stopPropagation();
+  };
+
+  const handleDateSelect = (date: Date | undefined) => {
+    console.log('Date sélectionnée dans CompletionDate:', date);
+    onDateChange(date);
+  };
+
   return (
     <div>
       <h3 className="font-semibold flex items-center gap-2">
@@ -18,7 +28,7 @@ export function CompletionDate({ book, isEditing, onDateChange }: CompletionDate
       </h3>
       {isEditing ? (
         <Popover>
-          <PopoverTrigger asChild>
+          <PopoverTrigger asChild onClick={handleTriggerClick}>
             <Button
               variant="outline"
               className={cn(
@@ -35,13 +45,14 @@ export function CompletionDate({ book, isEditing, onDateChange }: CompletionDate
               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 z-[100]" align="start">
+          <PopoverContent className="w-auto p-0 z-[9999]" align="start">
             <Calendar
               mode="single"
               selected={book.completionDate ? new Date(book.completionDate) : undefined}
-              onSelect={onDateChange}
+              onSelect={handleDateSelect}
               disabled={(date) => date > new Date()}
               initialFocus
+              className="pointer-events-auto"
             />
           </PopoverContent>
         </Popover>
