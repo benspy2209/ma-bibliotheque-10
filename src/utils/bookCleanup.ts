@@ -1,4 +1,3 @@
-
 import { searchBooksByTitle, deleteBook, loadBooks } from '@/services/supabaseBooks';
 
 /**

@@ -13,8 +13,6 @@ import { SearchBar } from '@/components/search/SearchBar';
 import { BookGrid } from '@/components/search/BookGrid';
 import { HeaderSection } from '@/components/search/HeaderSection';
 import { Button } from '@/components/ui/button';
-import { removeSpecificBook } from '@/utils/bookCleanup';
-import { Loader2 } from 'lucide-react';
 
 const BOOKS_PER_PAGE = 12;
 
@@ -23,7 +21,6 @@ const Index = () => {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [displayedBooks, setDisplayedBooks] = useState(BOOKS_PER_PAGE);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [isRemoving, setIsRemoving] = useState(false);
   const { toast } = useToast();
 
   const results = useQueries({
@@ -89,29 +86,6 @@ const Index = () => {
     setRefreshKey(prev => prev + 1);
   };
 
-  const handleRemoveSpecificBook = async () => {
-    setIsRemoving(true);
-    try {
-      const result = await removeSpecificBook("Purgatoire des innocents", "Karine Giebel");
-      toast({
-        description: result.message,
-        variant: result.success ? "default" : "destructive"
-      });
-      
-      if (result.success) {
-        // Si le livre a été supprimé avec succès, rafraîchir la bibliothèque
-        handleBookUpdate();
-      }
-    } catch (error) {
-      toast({
-        description: "Une erreur est survenue lors de la suppression du livre.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsRemoving(false);
-    }
-  };
-
   const visibleBooks = books.slice(0, displayedBooks);
 
   return (
@@ -121,24 +95,6 @@ const Index = () => {
         <div className="container px-4 py-6 sm:py-8 sm:px-6 lg:px-8 mx-auto">
           <div className="max-w-4xl mx-auto">
             <HeaderSection onBookAdded={handleBookUpdate} />
-            
-            <div className="mb-4 text-right">
-              <Button 
-                variant="destructive" 
-                size="sm" 
-                onClick={handleRemoveSpecificBook}
-                disabled={isRemoving}
-              >
-                {isRemoving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Suppression en cours...
-                  </>
-                ) : (
-                  "Supprimer 'Purgatoire des innocents'"
-                )}
-              </Button>
-            </div>
 
             <div className="mb-8 sm:mb-12">
               <SearchBar 
