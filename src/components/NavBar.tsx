@@ -50,7 +50,7 @@ const NavBar = () => {
   );
 
   return (
-    <nav className="w-full bg-background border-b py-4 px-6">
+    <nav className="w-full bg-background border-b py-4 px-6 transition-colors duration-300">
       <div className="max-w-7xl mx-auto flex flex-row items-center justify-between gap-4">
         {isMobile ? (
           <div className="flex items-center">
@@ -61,7 +61,7 @@ const NavBar = () => {
                   <span className="sr-only">Menu</span>
                 </Button>
               </DrawerTrigger>
-              <DrawerContent className="px-4 py-6 bg-background">
+              <DrawerContent className="px-4 py-6">
                 <div className="flex flex-col gap-6">
                   <div className="flex flex-col gap-4">
                     <NavLinks />
@@ -85,6 +85,7 @@ const NavBar = () => {
               variant="outline" 
               size="sm"
               onClick={signOut}
+              className="transition-colors duration-300"
             >
               Se déconnecter
             </Button>
@@ -93,6 +94,7 @@ const NavBar = () => {
               variant="outline" 
               size="sm"
               onClick={handleSignIn}
+              className="transition-colors duration-300"
             >
               <LogIn className="h-4 w-4 mr-2" />
               Se connecter
@@ -102,6 +104,7 @@ const NavBar = () => {
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
+            className="transition-colors duration-300"
           >
             {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
           </Button>

@@ -5,7 +5,7 @@
  
 @layer base {
   /* Thème clair (light) */
-  :root {
+  .light {
     --background: 40 33% 98%;
     --foreground: 20 14.3% 4.1%;
     --card: 0 0% 100%;
@@ -56,7 +56,7 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-300;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
@@ -81,7 +81,7 @@
 }
 
 .book-info {
-  @apply absolute bottom-0 left-0 right-0 bg-white/90 dark:bg-black/90 p-4 backdrop-blur-sm transition-all duration-300;
+  @apply absolute bottom-0 left-0 right-0 bg-white/90 p-4 backdrop-blur-sm transition-all duration-300;
 }
 
 /* Animations */
@@ -138,3 +138,4 @@
 .tabs-list-scroll::-webkit-scrollbar {
   display: none;
 }
+

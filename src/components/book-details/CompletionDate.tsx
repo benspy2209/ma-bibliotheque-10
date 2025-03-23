@@ -6,23 +6,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { CompletionDateProps } from './types';
-import { useState } from 'react';
 
 export function CompletionDate({ book, isEditing, onDateChange }: CompletionDateProps) {
   if (!isEditing && !book.status) return null;
-  const [open, setOpen] = useState(false);
-
-  const handleTriggerClick = (e: React.MouseEvent) => {
-    console.log("Date trigger clicked");
-    e.stopPropagation();
-    // No need to do anything else as the Popover will handle open/close state
-  };
-
-  const handleDateSelect = (date: Date | undefined) => {
-    console.log('Date sélectionnée dans CompletionDate:', date);
-    onDateChange(date);
-    setOpen(false); // Close popover after selection
-  };
 
   return (
     <div>
@@ -31,8 +17,8 @@ export function CompletionDate({ book, isEditing, onDateChange }: CompletionDate
         Date de lecture
       </h3>
       {isEditing ? (
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild onClick={handleTriggerClick}>
+        <Popover>
+          <PopoverTrigger asChild>
             <Button
               variant="outline"
               className={cn(
@@ -40,7 +26,6 @@ export function CompletionDate({ book, isEditing, onDateChange }: CompletionDate
                 !book.completionDate && "text-muted-foreground"
               )}
               disabled={book.status !== 'completed'}
-              type="button"
             >
               {book.completionDate ? (
                 format(new Date(book.completionDate), "dd/MM/yyyy")
@@ -54,9 +39,10 @@ export function CompletionDate({ book, isEditing, onDateChange }: CompletionDate
             <Calendar
               mode="single"
               selected={book.completionDate ? new Date(book.completionDate) : undefined}
-              onSelect={handleDateSelect}
+              onSelect={onDateChange}
               disabled={(date) => date > new Date()}
               initialFocus
+              className="p-3 pointer-events-auto"
             />
           </PopoverContent>
         </Popover>

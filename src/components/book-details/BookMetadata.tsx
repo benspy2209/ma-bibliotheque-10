@@ -12,11 +12,6 @@ interface BookMetadataProps {
 }
 
 export function BookMetadata({ book, isEditing, onInputChange }: BookMetadataProps) {
-  // Fonction utilitaire pour s'assurer que les sujets sont un tableau
-  const ensureArray = (value: any) => {
-    return Array.isArray(value) ? value : (value ? [value] : []);
-  };
-
   return (
     <div className="grid gap-4">
       <div>
@@ -109,13 +104,13 @@ export function BookMetadata({ book, isEditing, onInputChange }: BookMetadataPro
           </h3>
           {isEditing ? (
             <Input
-              value={ensureArray(book.subjects).join(', ')}
+              value={book.subjects?.join(', ') || ''}
               onChange={(e) => onInputChange('subjects', e.target.value)}
               placeholder="Catégories (séparées par des virgules)"
             />
           ) : (
             <div className="flex flex-wrap gap-2">
-              {ensureArray(book.subjects).slice(0, 5).map((subject, index) => (
+              {book.subjects?.slice(0, 5).map((subject, index) => (
                 <span
                   key={index}
                   className="bg-secondary text-secondary-foreground px-2 py-1 rounded-full text-sm"

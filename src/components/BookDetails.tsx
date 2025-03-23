@@ -74,17 +74,10 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
   };
 
   const handleCompletionDateChange = (date: Date | undefined) => {
-    console.log('Date selected in BookDetails:', date);
-    if (date) {
-      console.log('Formatting date to ISO:', date.toISOString());
-    }
-    
     setCurrentBook(prev => ({
       ...prev,
       completionDate: date ? date.toISOString().split('T')[0] : undefined
     }));
-    
-    console.log('Current book updated with new completion date');
   };
 
   const handleRatingChange = async (newRating: number) => {
