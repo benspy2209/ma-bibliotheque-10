@@ -74,6 +74,7 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
   };
 
   const handleCompletionDateChange = (date: Date | undefined) => {
+    console.log('Date selected:', date);
     setCurrentBook(prev => ({
       ...prev,
       completionDate: date ? date.toISOString().split('T')[0] : undefined

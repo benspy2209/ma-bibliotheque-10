@@ -35,14 +35,13 @@ export function CompletionDate({ book, isEditing, onDateChange }: CompletionDate
               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 z-50" align="start">
+          <PopoverContent className="w-auto p-0 z-[100]" align="start">
             <Calendar
               mode="single"
               selected={book.completionDate ? new Date(book.completionDate) : undefined}
               onSelect={onDateChange}
               disabled={(date) => date > new Date()}
               initialFocus
-              className="p-3 pointer-events-auto"
             />
           </PopoverContent>
         </Popover>
