@@ -25,6 +25,9 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
     if (authMode === 'reset') {
       setActiveTab('reset');
       console.log("LoginForm: activeTab set to 'reset'");
+    } else if (authMode === 'signup' || authMode === 'login') {
+      setActiveTab(authMode);
+      console.log(`LoginForm: activeTab set to '${authMode}'`);
     }
   }, [authMode]);
 
