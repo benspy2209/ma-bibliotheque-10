@@ -31,13 +31,22 @@ export function AddToLibrary({
 }: AddToLibraryProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState<ReadingStatus | undefined>(currentStatus);
   const queryClient = useQueryClient();
   const { theme } = useTheme();
 
-  const handleStatusChange = async (status: ReadingStatus) => {
+  // Mise à jour du statut local lorsque currentStatus change
+  useEffect(() => {
+    setStatus(currentStatus);
+  }, [currentStatus]);
+
+  const handleStatusChange = async (newStatus: ReadingStatus) => {
     setIsLoading(true);
     try {
-      await onStatusChange(status);
+      await onStatusChange(newStatus);
+      
+      // Mettre à jour le statut local immédiatement pour l'interface utilisateur
+      setStatus(newStatus);
       
       // Force une invalidation IMMÉDIATE de toutes les requêtes liées aux livres
       await queryClient.invalidateQueries({ 
@@ -46,12 +55,12 @@ export function AddToLibrary({
         exact: false
       });
       
-      console.log(`Statut du livre ${bookId} changé à: ${status} - Cache invalidé`);
+      console.log(`Statut du livre ${bookId} changé à: ${newStatus} - Cache invalidé`);
       
       toast({
-        description: status === 'to-read' 
+        description: newStatus === 'to-read' 
           ? "Livre ajouté à votre liste de lecture" 
-          : status === 'reading' 
+          : newStatus === 'reading' 
           ? "Livre ajouté à vos lectures en cours" 
           : "Livre marqué comme lu",
       });
@@ -71,10 +80,10 @@ export function AddToLibrary({
 
   useEffect(() => {
     // Force une actualisation lorsque le statut actuel change
-    if (currentStatus) {
+    if (status) {
       queryClient.invalidateQueries({ queryKey: ['books'] });
     }
-  }, [currentStatus, queryClient]);
+  }, [status, queryClient]);
 
   // Icônes et labels pour chaque statut
   const statusConfig: Record<ReadingStatus, { icon: React.ReactNode, label: string }> = {
@@ -94,27 +103,27 @@ export function AddToLibrary({
         <div 
           className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold cursor-pointer ${badgeClass} backdrop-blur-sm shadow-sm ${isLoading ? 'opacity-50' : ''}`}
         >
-          {currentStatus 
-            ? statusConfig[currentStatus].icon 
+          {status 
+            ? statusConfig[status].icon 
             : <BookmarkPlus className="h-4 w-4" />}
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent className={theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-white text-gray-800'}>
-        {Object.entries(statusConfig).map(([status, { icon, label }]) => (
+        {Object.entries(statusConfig).map(([statusKey, { icon, label }]) => (
           <DropdownMenuItem
-            key={status}
+            key={statusKey}
             onClick={(e) => {
               e.stopPropagation();
-              handleStatusChange(status as ReadingStatus);
+              handleStatusChange(statusKey as ReadingStatus);
             }}
-            className={`flex items-center gap-2 ${currentStatus === status ? (theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100') : ''} ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
+            className={`flex items-center gap-2 ${status === statusKey ? (theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100') : ''} ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
           >
             {icon}
             {label}
           </DropdownMenuItem>
         ))}
         
-        {currentStatus && (
+        {status && (
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();

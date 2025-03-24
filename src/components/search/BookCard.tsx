@@ -18,9 +18,15 @@ interface BookCardProps {
 
 export const BookCard = ({ book, onBookClick }: BookCardProps) => {
   const [isHovering, setIsHovering] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState<ReadingStatus | undefined>(book.status);
   const { user, signIn } = useSupabaseAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Mettre à jour currentStatus lorsque book.status change
+  useEffect(() => {
+    setCurrentStatus(book.status);
+  }, [book.status]);
 
   const handleAmazonClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.stopPropagation(); // Éviter de déclencher handleBookClick
@@ -35,6 +41,9 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
     try {
       const updatedBook = { ...book, status };
       const result = await saveBook(updatedBook);
+      
+      // Mettre à jour l'état local pour refléter immédiatement le changement
+      setCurrentStatus(status);
       
       if (!result.success && result.error === 'duplicate') {
         toast({
@@ -70,7 +79,7 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
       <div className="absolute top-2 right-2 z-10">
         <AddToLibrary
           onStatusChange={handleAddToLibrary}
-          currentStatus={book.status}
+          currentStatus={currentStatus}
           bookId={book.id}
           bookTitle={book.title}
           bookAuthor={book.author}
