@@ -61,9 +61,7 @@ const LegalNotice = () => {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">5. ABONNEMENT PREMIUM</h2>
             <h3 className="text-xl font-medium mt-4 mb-2">5.1 Services payants</h3>
-            <p>
-              BiblioPluse propose un service premium au prix de 39 euros par an. L'abonnement premium offre des fonctionnalités supplémentaires comme la possibilité d'ajouter un nombre illimité de livres à votre bibliothèque.
-            </p>
+            <p>BiblioPulse propose un service premium au prix de 39 euros par an. L'abonnement premium offre des fonctionnalités supplémentaires comme la possibilité d'ajouter un nombre illimité de livres à votre bibliothèque.</p>
             <h3 className="text-xl font-medium mt-4 mb-2">5.2 Facturation et annulation</h3>
             <p>
               Le paiement est effectué annuellement. Vous pouvez annuler votre abonnement à tout moment, l'accès aux fonctionnalités premium se terminera à la fin de la période de facturation en cours.
