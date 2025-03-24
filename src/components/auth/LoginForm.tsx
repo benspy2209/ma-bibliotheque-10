@@ -16,7 +16,7 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { authMode, setAuthMode } = useSupabaseAuth();
   const [activeTab, setActiveTab] = useState<'login' | 'signup' | 'reset'>(
-    defaultTab === 'reset' ? 'reset' : authMode === 'reset' ? 'reset' : defaultTab
+    defaultTab === 'reset' ? 'reset' : authMode
   );
 
   // Update activeTab whenever authMode changes

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,24 +8,21 @@ export function useSupabaseAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
-  const [authMode, setAuthMode] = useState<'login' | 'signup' | 'reset'>('login');
+  const [authMode, setAuthMode] = useState<'login' | 'signup' | 'reset'>('signup');
   const [isLoading, setIsLoading] = useState(true);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
       const newUser = newSession?.user ?? null;
       setSession(newSession);
       setUser(newUser);
       setIsLoading(false);
       
-      // Log the auth state change for debugging
       console.log(`Auth state changed: ${event}`, 
         newUser ? `User ID: ${newUser.id}` : 'No user');
       
-      // Afficher un toast pour les événements d'authentification significatifs
       if (event === 'SIGNED_IN') {
         toast({
           description: "Connexion réussie"
@@ -45,7 +41,6 @@ export function useSupabaseAuth() {
         });
       }
       
-      // Invalidate and refetch all queries when auth state changes
       if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
         console.log(`Auth event triggered query invalidation: ${event}`);
         queryClient.invalidateQueries({ type: 'all' });
@@ -54,7 +49,6 @@ export function useSupabaseAuth() {
       }
     });
 
-    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
@@ -70,7 +64,7 @@ export function useSupabaseAuth() {
     return () => subscription.unsubscribe();
   }, [queryClient, toast]);
 
-  const signIn = (mode: 'login' | 'signup' | 'reset' = 'login') => {
+  const signIn = (mode: 'login' | 'signup' | 'reset' = 'signup') => {
     console.log(`signIn called with mode: ${mode}`);
     setAuthMode(mode);
     setShowLoginDialog(true);
