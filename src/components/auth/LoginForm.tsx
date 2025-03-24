@@ -7,6 +7,7 @@ import { ResetPasswordForm } from './ResetPasswordForm';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
+import { cn } from "@/lib/utils";
 
 interface LoginFormProps {
   defaultTab?: 'login' | 'signup' | 'reset';
@@ -63,7 +64,22 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
     <div className="w-full">
       <Tabs value={activeTab} className="w-full" onValueChange={handleTabChange}>
         <TabsList className="grid w-full grid-cols-2 mb-2">
-          <TabsTrigger value="signup">Inscription</TabsTrigger>
+          <TabsTrigger 
+            value="signup"
+            className={cn(
+              "relative overflow-hidden",
+              activeTab === "signup" 
+                ? "bg-green-600 text-white hover:bg-green-700" 
+                : "hover:bg-green-100 hover:text-green-700"
+            )}
+          >
+            {activeTab !== "signup" && 
+              <div className="absolute -right-1 -top-1 transform rotate-45 bg-green-500 text-xs px-5 py-0.5 text-white font-bold">
+                Nouveau
+              </div>
+            }
+            Inscription
+          </TabsTrigger>
           <TabsTrigger value="login">Connexion</TabsTrigger>
         </TabsList>
         

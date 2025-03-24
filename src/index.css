@@ -95,12 +95,24 @@
   to { transform: translateX(0); opacity: 1; }
 }
 
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+}
+
 .fade-in {
   animation: fadeIn 0.5s ease-out forwards;
 }
 
 .slide-in {
   animation: slideIn 0.3s ease-out forwards;
+}
+
+/* Signup button animation */
+[data-state="inactive"][value="signup"] {
+  animation: pulse 2s infinite;
+  transition: all 0.3s ease;
 }
 
 /* Page Transitions */
