@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -39,4 +40,34 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Styles pour les menus déroulants en mode sombre */
+[data-theme="dark"] [data-radix-popper-content-wrapper] [role="menu"] {
+  background-color: #333;
+  color: white;
+  border-color: #444;
+}
+
+[data-theme="dark"] [data-radix-popper-content-wrapper] [role="menuitem"]:hover {
+  background-color: #444;
+}
+
+[data-theme="dark"] [data-radix-popper-content-wrapper] [role="menuitem"][data-highlighted] {
+  background-color: #444;
+}
+
+/* Styles pour les menus déroulants en mode clair */
+[data-radix-popper-content-wrapper] [role="menu"] {
+  background-color: white;
+  color: #333;
+  border-color: #eee;
+}
+
+[data-radix-popper-content-wrapper] [role="menuitem"]:hover {
+  background-color: #f5f5f5;
+}
+
+[data-radix-popper-content-wrapper] [role="menuitem"][data-highlighted] {
+  background-color: #f5f5f5;
 }

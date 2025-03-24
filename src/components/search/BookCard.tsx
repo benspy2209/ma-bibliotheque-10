@@ -1,8 +1,15 @@
 
-import { Book } from '@/types/book';
+import { Book, ReadingStatus } from '@/types/book';
 import { Card } from "@/components/ui/card";
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, BookmarkPlus, BookOpen, CheckCircle, X } from 'lucide-react';
 import { getAmazonAffiliateUrl } from '@/lib/utils';
+import { Badge } from "@/components/ui/badge";
+import { useState, useEffect } from 'react';
+import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
+import { saveBook } from '@/services/supabaseBooks';
+import { useToast } from "@/hooks/use-toast";
+import { AddToLibrary } from '@/components/AddToLibrary';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface BookCardProps {
   book: Book;
@@ -10,8 +17,45 @@ interface BookCardProps {
 }
 
 export const BookCard = ({ book, onBookClick }: BookCardProps) => {
+  const [isHovering, setIsHovering] = useState(false);
+  const { user, signIn } = useSupabaseAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   const handleAmazonClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.stopPropagation(); // Éviter de déclencher handleBookClick
+  };
+
+  const handleAddToLibrary = async (status: ReadingStatus) => {
+    if (!user) {
+      signIn('login');
+      return;
+    }
+
+    try {
+      const updatedBook = { ...book, status };
+      const result = await saveBook(updatedBook);
+      
+      if (!result.success && result.error === 'duplicate') {
+        toast({
+          description: "Ce livre est déjà dans votre bibliothèque."
+        });
+      }
+      
+      // Force une invalidation du cache pour actualiser les données
+      await queryClient.invalidateQueries({ 
+        queryKey: ['books'],
+        refetchType: 'all',
+        exact: false
+      });
+      
+    } catch (error) {
+      console.error("Erreur lors de l'ajout du livre:", error);
+      toast({
+        variant: "destructive",
+        description: "Erreur lors de l'ajout du livre à votre bibliothèque."
+      });
+    }
   };
 
   return (
@@ -19,7 +63,20 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
       key={book.id} 
       className="book-card group cursor-pointer relative overflow-hidden"
       onClick={() => onBookClick(book)}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
     >
+      {/* Badge d'ajout à la bibliothèque */}
+      <div className="absolute top-2 right-2 z-10">
+        <AddToLibrary
+          onStatusChange={handleAddToLibrary}
+          currentStatus={book.status}
+          bookId={book.id}
+          bookTitle={book.title}
+          bookAuthor={book.author}
+        />
+      </div>
+
       <img
         src={book.cover}
         alt={book.title}

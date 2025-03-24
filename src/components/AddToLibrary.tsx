@@ -7,10 +7,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { BookPlus } from "lucide-react";
+import { BookmarkPlus, BookOpen, CheckCircle, X } from 'lucide-react';
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTheme } from "@/hooks/use-theme";
+import { Badge } from "@/components/ui/badge";
 
 interface AddToLibraryProps {
   onStatusChange: (status: ReadingStatus) => void;
@@ -30,12 +32,11 @@ export function AddToLibrary({
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const queryClient = useQueryClient();
+  const { theme } = useTheme();
 
   const handleStatusChange = async (status: ReadingStatus) => {
     setIsLoading(true);
     try {
-      // La vérification des doublons est maintenant gérée directement dans saveBook
-      // Pas besoin de l'implémenter ici
       await onStatusChange(status);
       
       // Force une invalidation IMMÉDIATE de toutes les requêtes liées aux livres
@@ -75,34 +76,60 @@ export function AddToLibrary({
     }
   }, [currentStatus, queryClient]);
 
-  const statusLabels: Record<ReadingStatus, string> = {
-    'to-read': 'À lire',
-    'reading': 'En cours',
-    'completed': 'Lu'
+  // Icônes et labels pour chaque statut
+  const statusConfig: Record<ReadingStatus, { icon: React.ReactNode, label: string }> = {
+    'to-read': { icon: <BookmarkPlus className="h-4 w-4" />, label: 'À lire' },
+    'reading': { icon: <BookOpen className="h-4 w-4" />, label: 'En cours' },
+    'completed': { icon: <CheckCircle className="h-4 w-4" />, label: 'Lu' }
   };
+
+  // Style du badge selon le thème
+  const badgeClass = theme === 'dark' 
+    ? "bg-gray-800/80 hover:bg-gray-700/90 text-white"
+    : "bg-white/80 hover:bg-gray-100/90 text-gray-800 border border-gray-200";
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="outline" 
-          size="sm"
+        <Badge 
+          className={`cursor-pointer ${badgeClass} backdrop-blur-sm shadow-sm`}
           disabled={isLoading}
         >
-          <BookPlus className="mr-2 h-4 w-4" />
-          {currentStatus ? statusLabels[currentStatus] : "Ajouter à ma bibliothèque"}
-        </Button>
+          {currentStatus 
+            ? statusConfig[currentStatus].icon 
+            : <BookmarkPlus className="h-4 w-4" />}
+        </Badge>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        {Object.entries(statusLabels).map(([status, label]) => (
+      <DropdownMenuContent className={theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-white text-gray-800'}>
+        {Object.entries(statusConfig).map(([status, { icon, label }]) => (
           <DropdownMenuItem
             key={status}
-            onClick={() => handleStatusChange(status as ReadingStatus)}
-            className={currentStatus === status ? "bg-muted" : ""}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleStatusChange(status as ReadingStatus);
+            }}
+            className={`flex items-center gap-2 ${currentStatus === status ? (theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100') : ''} ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
           >
+            {icon}
             {label}
           </DropdownMenuItem>
         ))}
+        
+        {currentStatus && (
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              // Ici, on pourrait ajouter une fonction pour retirer le livre de la bibliothèque
+              toast({
+                description: "La suppression depuis ce menu n'est pas encore implémentée"
+              });
+            }}
+            className={`flex items-center gap-2 text-red-500 ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
+          >
+            <X className="h-4 w-4" />
+            Retirer
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
