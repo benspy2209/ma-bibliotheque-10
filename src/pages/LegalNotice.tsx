@@ -1,10 +1,12 @@
+
 import { Helmet } from "react-helmet-async";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
+
 const LegalNotice = () => {
   return <div className="min-h-screen flex flex-col">
       <Helmet>
-        <title>Mentions légales | BiblioPluse</title>
+        <title>Mentions légales | BiblioPulse</title>
       </Helmet>
       <NavBar />
       <main className="flex-grow container mx-auto px-4 py-8 sm:px-6 lg:px-8 max-w-4xl">
@@ -72,7 +74,7 @@ const LegalNotice = () => {
             <h2 className="text-2xl font-semibold mb-4">6. PROPRIÉTÉ INTELLECTUELLE</h2>
             <h3 className="text-xl font-medium mt-4 mb-2">6.1 Contenu du site</h3>
             <p>
-              Tous les contenus présents sur BiblioPluse, y compris les textes, graphiques, logos, icônes, images, sont la propriété de HAKUNA MATATA SRL ou de ses fournisseurs de contenu et sont protégés par les lois belges et internationales sur la propriété intellectuelle.
+              Tous les contenus présents sur BiblioPulse, y compris les textes, graphiques, logos, icônes, images, sont la propriété de HAKUNA MATATA SRL ou de ses fournisseurs de contenu et sont protégés par les lois belges et internationales sur la propriété intellectuelle.
             </p>
             <h3 className="text-xl font-medium mt-4 mb-2">6.2 Liens vers Amazon</h3>
             <p>
