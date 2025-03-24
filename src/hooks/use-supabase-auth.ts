@@ -71,6 +71,47 @@ export function useSupabaseAuth() {
     setShowLoginDialog(true);
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      // Determine if we're on production domain
+      const hostname = window.location.hostname;
+      const isProduction = hostname === 'bibliopulse.com' || hostname === 'www.bibliopulse.com';
+      
+      // Use appropriate redirect URL based on environment
+      const redirectUrl = isProduction 
+        ? 'https://bibliopulse.com' 
+        : window.location.origin;
+      
+      console.log("Tentative de connexion avec Google. URL de redirection:", redirectUrl);
+      
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectUrl,
+          queryParams: {
+            // Ensure we're not passing redirect_to as a separate param
+            // This was causing issues in the auth flow
+            prompt: 'select_account'
+          }
+        }
+      });
+
+      if (error) {
+        console.error("Erreur lors de la connexion avec Google:", error);
+        toast({
+          variant: "destructive",
+          description: `Erreur lors de la connexion avec Google: ${error.message}`
+        });
+      }
+    } catch (error: any) {
+      console.error("Exception lors de la connexion avec Google:", error);
+      toast({
+        variant: "destructive",
+        description: `Erreur lors de la connexion avec Google: ${error.message}`
+      });
+    }
+  };
+
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
@@ -86,6 +127,7 @@ export function useSupabaseAuth() {
     user, 
     session, 
     signIn,
+    signInWithGoogle, 
     signOut, 
     showLoginDialog, 
     setShowLoginDialog, 
