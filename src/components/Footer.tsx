@@ -8,7 +8,7 @@ const Footer = () => {
     <footer className="w-full border-t py-4 px-6 mt-auto">
       <div className="container mx-auto max-w-7xl flex flex-col sm:flex-row justify-between items-center text-sm text-muted-foreground">
         <div>
-          © {currentYear} Ma Bibliothèque
+          © {currentYear} BiblioPluse
         </div>
         <div className="flex gap-4 mt-2 sm:mt-0">
           <Link 
