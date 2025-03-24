@@ -51,9 +51,7 @@ const LegalNotice = () => {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">4. COMPTE UTILISATEUR</h2>
             <h3 className="text-xl font-medium mt-4 mb-2">4.1 Création de compte</h3>
-            <p>
-              Pour utiliser certaines fonctionnalités de BiblioPluse, vous devrez créer un compte. Vous êtes responsable de maintenir la confidentialité de vos informations de compte et de toutes les activités qui se produisent sous votre compte.
-            </p>
+            <p>Pour utiliser certaines fonctionnalités de BiblioPulse, vous devrez créer un compte. Vous êtes responsable de maintenir la confidentialité de vos informations de compte et de toutes les activités qui se produisent sous votre compte.</p>
             <h3 className="text-xl font-medium mt-4 mb-2">4.2 Contenu utilisateur</h3>
             <p>
               En ajoutant des livres à votre bibliothèque, vous acceptez que ces informations soient traitées conformément à notre politique de confidentialité.
