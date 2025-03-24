@@ -20,7 +20,7 @@ const NavBar = () => {
 
   // Fonction wrapper pour gérer le clic du bouton de connexion
   const handleSignIn = () => {
-    signIn('login');
+    signIn('signup'); // Changed from 'login' to 'signup'
   };
 
   const NavLinks = () => (
@@ -113,6 +113,6 @@ const NavBar = () => {
       <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
     </nav>
   );
-};
+}
 
 export default NavBar;

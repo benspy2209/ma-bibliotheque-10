@@ -15,7 +15,7 @@ export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
   const isMobile = useIsMobile();
 
   const handleSignIn = () => {
-    signIn('login');
+    signIn('signup'); // Changed from 'login' to 'signup'
   };
 
   return (
