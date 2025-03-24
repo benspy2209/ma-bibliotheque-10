@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { AddManualBook } from '@/components/AddManualBook';
-import { InfoCircled } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface HeaderSectionProps {
@@ -21,7 +21,7 @@ export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
-              <InfoCircled className="h-4 w-4 text-muted-foreground" />
+              <Info className="h-4 w-4 text-muted-foreground" />
             </TooltipTrigger>
             <TooltipContent className="max-w-xs text-left">
               <p className="font-semibold mb-1">Conseils de recherche:</p>
@@ -44,7 +44,7 @@ export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
       </button>
       
       <AddManualBook 
-        isOpen={isAddModalOpen} 
+        open={isAddModalOpen} 
         onClose={() => setIsAddModalOpen(false)}
         onBookAdded={onBookAdded}
       />

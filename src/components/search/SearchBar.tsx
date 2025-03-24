@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Input } from "@/components/ui/input";
-import { Search, BarcodeScan } from 'lucide-react';
+import { Search, Barcode } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { isValidISBN } from '@/lib/utils';
 
@@ -31,7 +31,7 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
   return (
     <div className="relative w-full">
       {isValidIsbnInput ? (
-        <BarcodeScan className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-primary" />
+        <Barcode className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-primary" />
       ) : (
         <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
       )}
