@@ -1,7 +1,6 @@
 
 import { Book } from '@/types/book';
 import { translateToFrench } from '@/utils/translation';
-import { looksLikeISBN } from '@/lib/utils';
 
 export const GOOGLE_BOOKS_API_KEY = 'AIzaSyDUQ2dB8e_EnUp14DY9GnYAv2CmGiqBapY';
 
@@ -37,23 +36,12 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
-    // Déterminer si la requête est un ISBN
-    const isISBNQuery = looksLikeISBN(query);
-    
-    // Construire la requête en fonction du type de recherche
-    let searchQuery;
-    if (isISBNQuery) {
-      // Recherche directe par ISBN
-      const cleanISBN = query.replace(/[-\s]/g, '');
-      searchQuery = `isbn:${cleanISBN}`;
-    } else {
-      // Recherche par auteur
-      searchQuery = `inauthor:"${query}"`;
-    }
+    // Construire la requête avec "inauthor:" pour cibler les auteurs
+    const authorQuery = `inauthor:"${query}"`;
     
     // Ajout du filtre de langue 'fr' pour récupérer seulement des livres en français
     const response = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(searchQuery)}&langRestrict=fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(authorQuery)}&langRestrict=fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
     );
 
     if (!response.ok) {
@@ -63,7 +51,7 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
     const data = await response.json();
     
     if (!data.items) {
-      console.log(`Aucun résultat Google Books pour: ${query}`);
+      console.log('Aucun résultat Google Books pour:', query);
       return [];
     }
     
@@ -77,7 +65,6 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
       .map(async (item: any) => {
         const volumeInfo = item.volumeInfo;
         
-        // Amélioration de la gestion des couvertures
         let cover = '/placeholder.svg';
         if (volumeInfo.imageLinks) {
           cover = volumeInfo.imageLinks.extraLarge || 
@@ -91,66 +78,31 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
 
         // Ensure description is translated
         let description = volumeInfo.description || '';
-        if (description && description.length > 0) {
-          description = await translateToFrench(description);
-        }
+        description = await translateToFrench(description);
 
-        // Récupérer l'ISBN si disponible
-        const isbn13 = volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_13')?.identifier;
-        const isbn10 = volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_10')?.identifier;
-        const isbn = isbn13 || isbn10 || query;
-
-        // Pour les recherches par ISBN, faire une recherche plus approfondie pour obtenir une couverture
-        if (isISBNQuery && !volumeInfo.imageLinks) {
-          try {
-            // Utiliser l'API Open Library pour tenter de récupérer une couverture
-            const cleanISBN = query.replace(/[-\s]/g, '');
-            const olResponse = await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${cleanISBN}&jscmd=data&format=json`);
-            if (olResponse.ok) {
-              const olData = await olResponse.json();
-              const olBook = olData[`ISBN:${cleanISBN}`];
-              if (olBook && olBook.cover) {
-                cover = olBook.cover.medium || olBook.cover.large || olBook.cover.small;
-              }
-            }
-          } catch (error) {
-            console.error('Erreur lors de la récupération de la couverture OpenLibrary:', error);
-          }
-        }
-
-        // Créer l'objet livre avec données complètes
-        const book: Book = {
+        // Créer l'objet livre
+        const book = {
           id: item.id,
-          title: volumeInfo.title || 'Titre inconnu',
+          title: volumeInfo.title,
           author: volumeInfo.authors || ['Auteur inconnu'],
           cover: cover,
-          description: description || '',
-          numberOfPages: volumeInfo.pageCount || 0,
-          publishDate: volumeInfo.publishedDate || '',
-          publishers: volumeInfo.publisher ? [volumeInfo.publisher] : [],
+          description,
+          numberOfPages: volumeInfo.pageCount,
+          publishDate: volumeInfo.publishedDate,
+          publishers: [volumeInfo.publisher].filter(Boolean),
           subjects: volumeInfo.categories || [],
           language: ['fr'], // Forcer la langue à français
-          isbn: isbn
+          isbn: volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_13')?.identifier
         };
 
-        // If it's an ISBN search, don't apply additional filters
-        if (isISBNQuery) {
-          console.log('Google Books ISBN result:', book);
-          return book;
-        }
-        
-        // For author searches, apply additional filters
-        // Check if it's a technical book
+        // Vérifier si c'est un livre technique
         if (isTechnicalBook(book.title, book.description, book.subjects)) {
-          return null; // Exclude technical books
+          return null; // Exclure les livres techniques
         }
         
-        // Make sure author names are always an array before passing to isAuthorMatch
-        const authorArray = Array.isArray(book.author) ? book.author : [book.author];
-        
-        // Check if the author matches the search query
-        if (!isAuthorMatch(authorArray, query)) {
-          return null; // Exclude books by other authors
+        // Vérifier si l'auteur correspond à la recherche
+        if (!isAuthorMatch(book.author, query)) {
+          return null; // Exclure les livres d'autres auteurs
         }
         
         return book;
@@ -158,13 +110,7 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
 
     // Filtrer les nulls (livres techniques exclus et auteurs ne correspondant pas)
     const filteredBooks = books.filter(Boolean);
-    
-    if (isISBNQuery) {
-      console.log(`Google Books: Trouvé ${filteredBooks.length} livre(s) avec l'ISBN "${query}"`);
-    } else {
-      console.log(`Google Books: Trouvé ${filteredBooks.length} livres en français de l'auteur "${query}"`);
-    }
-    
+    console.log(`Google Books: Trouvé ${filteredBooks.length} livres en français de l'auteur "${query}"`);
     return filteredBooks;
   } catch (error) {
     console.error('Erreur lors de la recherche Google Books:', error);

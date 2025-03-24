@@ -1,138 +1,95 @@
 
 import { Book } from '@/types/book';
-import { supabase } from '@/integrations/supabase/client';
-import { translateToFrench } from '@/utils/translation';
+import { GOOGLE_BOOKS_API_KEY } from './googleBooks';
 
-const GOOGLE_BOOKS_API_KEY = 'AIzaSyDUQ2dB8e_EnUp14DY9GnYAv2CmGiqBapY';
+function cleanDescription(description: string): string {
+  if (!description) return '';
+  
+  // Remplacer les balises <br> et <p> par des sauts de ligne
+  let cleaned = description.replace(/<br\s*\/?>/gi, '\n');
+  cleaned = cleaned.replace(/<p>/gi, '\n');
+  cleaned = cleaned.replace(/<\/p>/gi, '\n');
+  
+  // Supprimer toutes les autres balises HTML
+  cleaned = cleaned.replace(/<[^>]*>/g, '');
+  
+  // Supprimer les caractères spéciaux et entités HTML
+  cleaned = cleaned.replace(/&quot;/g, '"');
+  cleaned = cleaned.replace(/&apos;/g, "'");
+  cleaned = cleaned.replace(/&amp;/g, '&');
+  cleaned = cleaned.replace(/&lt;/g, '<');
+  cleaned = cleaned.replace(/&gt;/g, '>');
+  
+  // Supprimer les sauts de ligne multiples
+  cleaned = cleaned.replace(/\n\s*\n/g, '\n\n');
+  
+  // Supprimer les espaces en début et fin
+  cleaned = cleaned.trim();
+
+  return cleaned;
+}
 
 export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
+  if (bookId.startsWith('/works/')) {
+    return getOpenLibraryDetails(bookId);
+  } else {
+    return getGoogleBooksDetails(bookId);
+  }
+}
+
+async function getOpenLibraryDetails(bookId: string): Promise<Partial<Book>> {
   try {
-    // Si l'ID commence par "ol-isbn-", alors c'est un livre OpenLibrary par ISBN
-    if (bookId.startsWith('ol-isbn-')) {
-      const isbn = bookId.replace('ol-isbn-', '');
-      console.log(`Recherche de détails supplémentaires pour ISBN ${isbn} via Google Books`);
-      
-      // Essayer de récupérer plus de détails via l'API Google Books pour enrichir
-      try {
-        const response = await fetch(
-          `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
-        );
-        
-        if (response.ok) {
-          const data = await response.json();
-          if (data.items && data.items.length > 0) {
-            const volumeInfo = data.items[0].volumeInfo;
-            let description = volumeInfo?.description || '';
-            
-            if (description) {
-              description = await translateToFrench(description);
-            }
-            
-            console.log(`Détails enrichis trouvés pour ISBN ${isbn} via Google Books`);
-            return {
-              description,
-              subjects: volumeInfo?.categories || [],
-              numberOfPages: volumeInfo?.pageCount,
-              publishDate: volumeInfo?.publishedDate,
-              publishers: volumeInfo?.publisher ? [volumeInfo.publisher] : []
-            };
-          }
-        }
-      } catch (error) {
-        console.error('Erreur lors de la récupération des détails Google Books pour ISBN:', error);
-      }
+    const cleanId = bookId.replace('/works/', '');
+    const [workResponse, editionsResponse] = await Promise.all([
+      fetch(`https://openlibrary.org/works/${cleanId}.json`),
+      fetch(`https://openlibrary.org/works/${cleanId}/editions.json?limit=1`)
+    ]);
+
+    if (!workResponse.ok) {
+      throw new Error('Erreur lors de la récupération des détails OpenLibrary');
     }
+
+    const workData = await workResponse.json();
+    const editionsData = editionsResponse.ok ? await editionsResponse.json() : null;
+    const firstEdition = editionsData?.entries?.[0];
     
-    // Si l'ID commence par un autre préfixe OpenLibrary
-    if (bookId.startsWith('/works/')) {
-      // Récupérer les détails OpenLibrary
-      const response = await fetch(`https://openlibrary.org${bookId}.json`);
-      if (!response.ok) {
-        throw new Error(`Erreur lors de la récupération des détails OpenLibrary: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      // Récupérer la description
-      let description = data.description?.value || data.description || '';
-      
-      // Traduire la description si nécessaire
-      if (description && typeof description === 'string') {
-        description = await translateToFrench(description);
-      }
-      
-      // Récupérer la couverture si disponible
-      let cover = '/placeholder.svg';
-      if (data.covers && data.covers.length > 0) {
-        cover = `https://covers.openlibrary.org/b/id/${data.covers[0]}-L.jpg`;
-      }
-      
-      return {
-        description,
-        subjects: data.subjects || [],
-        cover
-      };
-    } else {
-      // Sinon, c'est un livre Google Books
-      const response = await fetch(
-        `https://www.googleapis.com/books/v1/volumes/${bookId}?fields=volumeInfo&key=${GOOGLE_BOOKS_API_KEY}`
-      );
-      
-      if (!response.ok) {
-        throw new Error(`Erreur lors de la récupération des détails Google Books: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      const volumeInfo = data.volumeInfo;
-      
-      // Vérifier si le livre est déjà dans la bibliothèque de l'utilisateur
-      let status = undefined;
-      try {
-        const { data: bookData } = await supabase
-          .from('books')
-          .select('status')
-          .eq('book_data->>id', bookId)
-          .maybeSingle();
-          
-        if (bookData) {
-          status = bookData.status;
-        }
-      } catch (error) {
-        console.error("Erreur lors de la vérification du statut du livre:", error);
-      }
-      
-      // Traduire la description si nécessaire
-      let description = volumeInfo?.description || '';
-      if (description) {
-        description = await translateToFrench(description);
-      }
-      
-      // Gestion améliorée des couvertures
-      let cover = '/placeholder.svg';
-      if (volumeInfo.imageLinks) {
-        cover = volumeInfo.imageLinks.extraLarge || 
-                volumeInfo.imageLinks.large || 
-                volumeInfo.imageLinks.medium || 
-                volumeInfo.imageLinks.thumbnail || 
-                volumeInfo.imageLinks.smallThumbnail;
-        
-        cover = cover.replace('http:', 'https:');
-      }
-      
-      return {
-        description,
-        subjects: volumeInfo?.categories || [],
-        numberOfPages: volumeInfo?.pageCount,
-        publishDate: volumeInfo?.publishedDate,
-        publishers: volumeInfo?.publisher ? [volumeInfo.publisher] : [],
-        status,
-        cover
-      };
-    }
-    
-    return {};
+    return {
+      description: cleanDescription(workData.description?.value || workData.description || ''),
+      subjects: workData.subjects || [],
+      series: workData?.series?.[0]?.title || '',
+      numberOfPages: firstEdition?.number_of_pages || workData.number_of_pages,
+      publishDate: workData.first_publish_date || firstEdition?.publish_date,
+      publishers: firstEdition?.publishers || [],
+    };
   } catch (error) {
-    console.error("Erreur lors de la récupération des détails du livre:", error);
+    console.error('Erreur OpenLibrary:', error);
+    return {};
+  }
+}
+
+async function getGoogleBooksDetails(bookId: string): Promise<Partial<Book>> {
+  try {
+    const response = await fetch(
+      `https://www.googleapis.com/books/v1/volumes/${bookId}?fields=volumeInfo&key=${GOOGLE_BOOKS_API_KEY}`
+    );
+
+    if (!response.ok) {
+      throw new Error('Erreur lors de la récupération des détails Google Books');
+    }
+
+    const data = await response.json();
+    const volumeInfo = data.volumeInfo;
+    
+    return {
+      description: cleanDescription(volumeInfo.description || ''),
+      subjects: volumeInfo.categories || [],
+      numberOfPages: volumeInfo.pageCount,
+      publishDate: volumeInfo.publishedDate,
+      publishers: [volumeInfo.publisher].filter(Boolean),
+      isbn: volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_13')?.identifier
+    };
+  } catch (error) {
+    console.error('Erreur Google Books:', error);
     return {};
   }
 }

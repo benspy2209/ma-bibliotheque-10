@@ -1,46 +1,61 @@
 
-import { useState } from 'react';
-import { AddManualBook } from '@/components/add-book/AddManualBook';
-import { Info } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Link } from "react-router-dom";
+import { AddManualBook } from '@/components/AddManualBook';
+import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
+import { Button } from "@/components/ui/button";
+import { BookOpen } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { LoginDialog } from "@/components/auth/LoginDialog";
 
 interface HeaderSectionProps {
   onBookAdded: () => void;
 }
 
 export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const { user, signIn, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
+  const isMobile = useIsMobile();
+
+  const handleSignIn = () => {
+    console.log("Join adventure button clicked");
+    signIn('signup');
+  };
 
   return (
-    <div className="mb-8 text-center flex flex-col items-center">
-      <h1 className="text-3xl font-bold mb-2">Recherche de Livres</h1>
-      <div className="flex items-center gap-2">
-        <p className="text-muted-foreground mb-4">
-          Trouvez des livres en français à ajouter à votre bibliothèque
+    <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mb-8 sm:mb-12">
+      <div className="text-center sm:text-left flex-1">
+        <h1 className="mb-3 text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900 dark:text-white">
+          Découvrez votre prochaine lecture
+        </h1>
+        <p className="text-base sm:text-lg text-gray-600 dark:text-gray-200">
+          Explorez, partagez et découvrez de nouveaux livres
         </p>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              <Info className="h-4 w-4 text-muted-foreground" />
-            </TooltipTrigger>
-            <TooltipContent className="max-w-xs text-left">
-              <p className="font-semibold mb-1">Conseils de recherche:</p>
-              <ul className="list-disc pl-4 text-sm space-y-1">
-                <li>Recherchez par titre de livre</li>
-                <li>Recherchez par nom d'auteur</li>
-                <li>Recherchez par ISBN (10 ou 13 chiffres)</li>
-                <li>Les résultats sont limités aux livres en français</li>
-              </ul>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
       </div>
-      
-      <AddManualBook 
-        isOpen={isAddModalOpen}
-        setIsOpen={setIsAddModalOpen}
-        onBookAdded={onBookAdded}
-      />
+      <div className="flex gap-4 items-center w-full sm:w-auto">
+        {user ? (
+          <>
+            <AddManualBook onBookAdded={onBookAdded} />
+            <Link 
+              to="/library" 
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+            >
+              <BookOpen className="h-4 w-4" />
+              {!isMobile && "Ma Bibliothèque"}
+            </Link>
+          </>
+        ) : (
+          <>
+            <Button 
+              onClick={handleSignIn} 
+              size="lg" 
+              className="flex items-center gap-2"
+            >
+              <BookOpen className="h-5 w-5" />
+              Rejoindre l'aventure
+            </Button>
+            <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
+          </>
+        )}
+      </div>
     </div>
   );
 };
