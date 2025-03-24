@@ -25,7 +25,10 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
 
   // Mettre à jour currentStatus lorsque book.status change
   useEffect(() => {
-    setCurrentStatus(book.status);
+    if (book.status !== currentStatus) {
+      console.log(`Mise à jour du statut: ${book.status} (était ${currentStatus})`);
+      setCurrentStatus(book.status);
+    }
   }, [book.status]);
 
   const handleAmazonClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -39,11 +42,11 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
     }
 
     try {
+      // Mettre à jour l'état local immédiatement pour refléter le changement
+      setCurrentStatus(status);
+      
       const updatedBook = { ...book, status };
       const result = await saveBook(updatedBook);
-      
-      // Mettre à jour l'état local pour refléter immédiatement le changement
-      setCurrentStatus(status);
       
       if (!result.success && result.error === 'duplicate') {
         toast({
@@ -58,7 +61,13 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
         exact: false
       });
       
+      // Log pour déboguer
+      console.log(`Statut mis à jour avec succès pour le livre ${book.id}: ${status}`);
+      
     } catch (error) {
+      // En cas d'erreur, rétablir le statut précédent
+      setCurrentStatus(book.status);
+      
       console.error("Erreur lors de l'ajout du livre:", error);
       toast({
         variant: "destructive",

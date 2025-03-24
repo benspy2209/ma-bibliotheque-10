@@ -43,10 +43,11 @@ export function AddToLibrary({
   const handleStatusChange = async (newStatus: ReadingStatus) => {
     setIsLoading(true);
     try {
-      await onStatusChange(newStatus);
-      
       // Mettre à jour le statut local immédiatement pour l'interface utilisateur
       setStatus(newStatus);
+      
+      // Appeler la fonction de changement de statut
+      await onStatusChange(newStatus);
       
       // Force une invalidation IMMÉDIATE de toutes les requêtes liées aux livres
       await queryClient.invalidateQueries({ 
@@ -66,6 +67,9 @@ export function AddToLibrary({
       });
       
     } catch (error) {
+      // En cas d'erreur, rétablir le statut précédent
+      setStatus(currentStatus);
+      
       toast({
         variant: "destructive",
         description: error instanceof Error 
@@ -77,13 +81,6 @@ export function AddToLibrary({
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    // Force une actualisation lorsque le statut actuel change
-    if (status) {
-      queryClient.invalidateQueries({ queryKey: ['books'] });
-    }
-  }, [status, queryClient]);
 
   // Icônes et labels pour chaque statut
   const statusConfig: Record<ReadingStatus, { icon: React.ReactNode, label: string }> = {
