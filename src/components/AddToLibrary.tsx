@@ -95,7 +95,7 @@ export function AddToLibrary({
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="bg-popover dark:bg-gray-800 text-popover-foreground dark:text-gray-200 shadow-lg border-gray-200 dark:border-gray-700 z-50"
+        className="bg-popover dark:bg-gray-800 text-popover-foreground dark:text-gray-200 shadow-lg border border-gray-200 dark:border-gray-700 z-50"
         sideOffset={5}
       >
         {Object.entries(statusLabels).map(([status, label]) => (

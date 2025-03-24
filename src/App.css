@@ -124,3 +124,16 @@
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   z-index: 50;
 }
+
+/* Corrections spécifiques pour le mode sombre */
+.dark [data-radix-popper-content-wrapper] > div {
+  background-color: hsl(var(--popover)) !important;
+  color: hsl(var(--popover-foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.dark .dropdown-menu-content {
+  background-color: hsl(var(--popover)) !important;
+  border-color: hsl(var(--border));
+  color: hsl(var(--popover-foreground));
+}
