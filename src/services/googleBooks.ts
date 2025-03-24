@@ -1,6 +1,7 @@
 
 import { Book } from '@/types/book';
 import { translateToFrench } from '@/utils/translation';
+import { looksLikeISBN } from '@/lib/utils';
 
 export const GOOGLE_BOOKS_API_KEY = 'AIzaSyDUQ2dB8e_EnUp14DY9GnYAv2CmGiqBapY';
 
@@ -36,12 +37,23 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
-    // Construire la requête avec "inauthor:" pour cibler les auteurs
-    const authorQuery = `inauthor:"${query}"`;
+    // Déterminer si la requête est un ISBN
+    const isISBNQuery = looksLikeISBN(query);
+    
+    // Construire la requête en fonction du type de recherche
+    let searchQuery;
+    if (isISBNQuery) {
+      // Recherche directe par ISBN
+      const cleanISBN = query.replace(/[-\s]/g, '');
+      searchQuery = `isbn:${cleanISBN}`;
+    } else {
+      // Recherche par auteur
+      searchQuery = `inauthor:"${query}"`;
+    }
     
     // Ajout du filtre de langue 'fr' pour récupérer seulement des livres en français
     const response = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(authorQuery)}&langRestrict=fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(searchQuery)}&langRestrict=fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
     );
 
     if (!response.ok) {
@@ -51,7 +63,7 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
     const data = await response.json();
     
     if (!data.items) {
-      console.log('Aucun résultat Google Books pour:', query);
+      console.log(`Aucun résultat Google Books pour: ${query}`);
       return [];
     }
     
@@ -92,9 +104,16 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
           publishers: [volumeInfo.publisher].filter(Boolean),
           subjects: volumeInfo.categories || [],
           language: ['fr'], // Forcer la langue à français
-          isbn: volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_13')?.identifier
+          isbn: volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_13')?.identifier || 
+                volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_10')?.identifier
         };
 
+        // Si c'est une recherche par ISBN, ne pas appliquer les filtres additionnels
+        if (isISBNQuery) {
+          return book;
+        }
+        
+        // Pour les recherches par auteur, appliquer les filtres additionnels
         // Vérifier si c'est un livre technique
         if (isTechnicalBook(book.title, book.description, book.subjects)) {
           return null; // Exclure les livres techniques
@@ -110,7 +129,13 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
 
     // Filtrer les nulls (livres techniques exclus et auteurs ne correspondant pas)
     const filteredBooks = books.filter(Boolean);
-    console.log(`Google Books: Trouvé ${filteredBooks.length} livres en français de l'auteur "${query}"`);
+    
+    if (isISBNQuery) {
+      console.log(`Google Books: Trouvé ${filteredBooks.length} livre(s) avec l'ISBN "${query}"`);
+    } else {
+      console.log(`Google Books: Trouvé ${filteredBooks.length} livres en français de l'auteur "${query}"`);
+    }
+    
     return filteredBooks;
   } catch (error) {
     console.error('Erreur lors de la recherche Google Books:', error);

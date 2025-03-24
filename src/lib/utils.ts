@@ -1,3 +1,4 @@
+
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { Book } from '@/types/book'
@@ -18,6 +19,70 @@ export function getAmazonAffiliateUrl(book: Book) {
     const searchQuery = encodeURIComponent(`${book.title} ${Array.isArray(book.author) ? book.author[0] : book.author}`);
     return `https://www.amazon.fr/s?k=${searchQuery}&i=stripbooks&tag=${AMAZON_AFFILIATE_ID}`;
   }
+}
+
+// Fonction pour valider un ISBN (ISBN-10 ou ISBN-13)
+export function isValidISBN(isbn: string): boolean {
+  // Nettoyer l'entrée (supprimer les tirets et espaces)
+  const cleanISBN = isbn.replace(/[-\s]/g, '');
+  
+  // Vérifier si c'est un ISBN-10 (10 chiffres)
+  if (cleanISBN.length === 10) {
+    // Vérification du checksum ISBN-10
+    const sum = cleanISBN
+      .split('')
+      .slice(0, 9)
+      .reduce((acc, digit, index) => {
+        return acc + (Number(digit) * (10 - index));
+      }, 0);
+    
+    // Le dernier chiffre peut être 'X' (représentant 10)
+    const lastChar = cleanISBN.charAt(9);
+    const lastDigit = lastChar === 'X' || lastChar === 'x' ? 10 : Number(lastChar);
+    return (sum + lastDigit) % 11 === 0;
+  }
+  
+  // Vérifier si c'est un ISBN-13 (13 chiffres)
+  else if (cleanISBN.length === 13) {
+    // Vérification du checksum ISBN-13
+    const sum = cleanISBN
+      .split('')
+      .slice(0, 12)
+      .reduce((acc, digit, index) => {
+        // Dans ISBN-13, on alterne les poids 1 et 3
+        const weight = index % 2 === 0 ? 1 : 3;
+        return acc + (Number(digit) * weight);
+      }, 0);
+    
+    const checkDigit = (10 - (sum % 10)) % 10;
+    return Number(cleanISBN.charAt(12)) === checkDigit;
+  }
+  
+  // Si ce n'est ni un ISBN-10 ni un ISBN-13
+  return false;
+}
+
+// Fonction pour déterminer si une chaîne ressemble à un ISBN
+export function looksLikeISBN(input: string): boolean {
+  // Nettoyer l'entrée (supprimer les tirets et espaces)
+  const cleanInput = input.replace(/[-\s]/g, '');
+  
+  // Vérifier si la longueur correspond à un ISBN (10 ou 13 chiffres)
+  if (cleanInput.length !== 10 && cleanInput.length !== 13) {
+    return false;
+  }
+  
+  // Pour ISBN-10, vérifier si tous les caractères sont des chiffres (sauf éventuellement le dernier qui peut être 'X')
+  if (cleanInput.length === 10) {
+    return /^[0-9]{9}[0-9X]$/i.test(cleanInput);
+  }
+  
+  // Pour ISBN-13, vérifier si tous les caractères sont des chiffres
+  if (cleanInput.length === 13) {
+    return /^[0-9]{13}$/.test(cleanInput);
+  }
+  
+  return false;
 }
 
 export function removeDuplicateBooks(books: Book[]): Book[] {

@@ -1,180 +1,81 @@
 import { Book } from '@/types/book';
-import { GOOGLE_BOOKS_API_KEY } from './googleBooks'; 
-import { translateToFrench } from '@/utils/translation';
-
-const OPEN_LIBRARY_API = 'https://openlibrary.org';
-
-// Liste de mots-clés techniques à exclure
-const TECHNICAL_KEYWORDS = [
-  'manuel', 'guide', 'prospection', 'minier', 'minière', 'géologie', 'scientifique',
-  'technique', 'rapport', 'étude', 'ingénierie', 'document', 'actes', 'conférence',
-  'colloque', 'symposium', 'proceedings', 'thèse', 'mémoire', 'doctorat'
-];
-
-function isTechnicalBook(title: string, description: string = '', subjects: string[] = []): boolean {
-  const allText = `${title} ${description} ${subjects.join(' ')}`.toLowerCase();
-  
-  // Vérifier si le titre ou la description contient des mots-clés techniques
-  return TECHNICAL_KEYWORDS.some(keyword => allText.includes(keyword.toLowerCase()));
-}
-
-function isAuthorMatch(authorNames: string[], searchQuery: string): boolean {
-  if (!authorNames || authorNames.length === 0) return false;
-  
-  const searchTerms = searchQuery.toLowerCase().split(' ');
-  
-  return authorNames.some(author => {
-    if (!author) return false;
-    const authorLower = author.toLowerCase();
-    
-    // Si le nom de l'auteur contient tous les termes de recherche
-    return searchTerms.every(term => authorLower.includes(term));
-  });
-}
-
-async function fetchBookDetails(key: string): Promise<any> {
-  try {
-    const response = await fetch(`${OPEN_LIBRARY_API}${key}.json`);
-    if (!response.ok) {
-      console.error(`Erreur OpenLibrary (${key}):`, response.status);
-      return null;
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Erreur lors de la récupération des détails:', error);
-    return null;
-  }
-}
-
-async function fetchEditionDetails(editionKey: string): Promise<any> {
-  try {
-    const response = await fetch(`${OPEN_LIBRARY_API}/books/${editionKey}.json`);
-    if (!response.ok) {
-      console.error(`Erreur édition OpenLibrary (${editionKey}):`, response.status);
-      return null;
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Erreur lors de la récupération des éditions:', error);
-    return null;
-  }
-}
-
-async function searchGoogleBooksCover(title: string, author: string): Promise<string | null> {
-  try {
-    const query = `${title} ${author}`;
-    const response = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&fields=items(volumeInfo(imageLinks))&key=${GOOGLE_BOOKS_API_KEY}`
-    );
-
-    if (!response.ok) return null;
-    
-    const data = await response.json();
-    const imageLinks = data.items?.[0]?.volumeInfo?.imageLinks;
-    
-    if (imageLinks) {
-      return imageLinks.thumbnail?.replace('http:', 'https:') ||
-             imageLinks.smallThumbnail?.replace('http:', 'https:');
-    }
-    
-    return null;
-  } catch (error) {
-    console.error('Erreur lors de la recherche Google Books:', error);
-    return null;
-  }
-}
+import { looksLikeISBN } from '@/lib/utils';
 
 export async function searchBooks(query: string): Promise<Book[]> {
-  if (!query.trim()) return [];
+  if (!query) return [];
 
   try {
-    // Rechercher par auteur avec 'author:'
-    const encodedQuery = encodeURIComponent(`author:${query.replace(/['"]/g, '')}`);
-    const openLibraryResponse = await fetch(
-      `${OPEN_LIBRARY_API}/search.json?q=${encodedQuery}+language:fre&fields=key,title,author_name,cover_i,language,first_publish_date,edition_key,subject&limit=40`
-    );
-
-    if (!openLibraryResponse.ok) {
-      throw new Error(`Erreur OpenLibrary: ${openLibraryResponse.status}`);
+    // Déterminer si la requête est un ISBN
+    const isISBNQuery = looksLikeISBN(query);
+    
+    // Construire l'URL de recherche en fonction du type de requête
+    let searchUrl;
+    if (isISBNQuery) {
+      const cleanISBN = query.replace(/[-\s]/g, '');
+      searchUrl = `https://openlibrary.org/api/books?bibkeys=ISBN:${cleanISBN}&jscmd=data&format=json`;
+    } else {
+      searchUrl = `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=40`;
     }
 
-    const openLibraryData = await openLibraryResponse.json();
-
-    if (!openLibraryData.docs || openLibraryData.docs.length === 0) {
-      console.log('Aucun résultat OpenLibrary pour:', query);
-      return [];
+    const response = await fetch(searchUrl);
+    
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status}`);
     }
-
-    const results = await Promise.all(
-      openLibraryData.docs
-        .filter((doc: any) => {
-          // Filtrer les résultats sans titre ou auteur, et vérifier que la langue est le français
-          const hasTitle = doc.title && typeof doc.title === 'string';
-          const hasAuthor = doc.author_name && doc.author_name.length > 0;
-          const isFrench = doc.language && 
-                          (doc.language.includes('fre') || 
-                           doc.language.includes('fra') || 
-                           doc.language.includes('fr'));
-                           
-          // Vérifier si le titre contient des mots-clés techniques
-          if (hasTitle && isTechnicalBook(doc.title, '', doc.subject || [])) {
-            return false; // Exclure les documents techniques
-          }
-          
-          // Vérifier si l'auteur correspond à la recherche
-          if (hasAuthor && !isAuthorMatch(doc.author_name, query)) {
-            return false; // Exclure les livres d'autres auteurs
-          }
-          
-          return hasTitle && hasAuthor && isFrench;
-        })
-        .map(async (doc: any) => {
-          const bookDetails = await fetchBookDetails(doc.key);
-          let editionDetails = null;
-          
-          if (doc.edition_key?.[0]) {
-            editionDetails = await fetchEditionDetails(doc.edition_key[0]);
-          }
-
-          let cover = '/placeholder.svg';
-          if (doc.cover_i) {
-            cover = `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`;
-          } else {
-            const googleCover = await searchGoogleBooksCover(doc.title, doc.author_name?.[0] || '');
-            if (googleCover) cover = googleCover;
-          }
-
-          const description = await translateToFrench(
-            bookDetails?.description?.value || 
-            bookDetails?.description || 
-            ''
-          );
-
-          const book = {
-            id: doc.key,
-            title: doc.title,
-            author: doc.author_name || ['Auteur inconnu'],
-            cover: cover,
-            language: ['fr'], // Forcer la langue à français
-            publishDate: doc.first_publish_date,
-            description,
-            numberOfPages: editionDetails?.number_of_pages || bookDetails?.number_of_pages,
-            subjects: bookDetails?.subjects || [],
-            publishers: editionDetails?.publishers || []
-          };
-
-          // Vérifier à nouveau avec la description complète
-          if (isTechnicalBook(book.title, book.description, book.subjects)) {
-            return null; // Exclure les livres techniques
-          }
-          
-          return book;
-        })
-    );
-
-    const frenchResults = results.filter(Boolean);
-    console.log(`OpenLibrary: Trouvé ${frenchResults.length} livres en français de l'auteur "${query}"`);
-    return frenchResults;
+    
+    const data = await response.json();
+    
+    // Traitement différent selon le type de recherche
+    if (isISBNQuery) {
+      // Format de réponse pour la recherche par ISBN
+      const isbnKey = `ISBN:${query.replace(/[-\s]/g, '')}`;
+      const book = data[isbnKey];
+      
+      if (!book) {
+        console.log('Aucun livre trouvé par ISBN sur OpenLibrary');
+        return [];
+      }
+      
+      // Conversion au format de livre de l'application
+      return [{
+        id: `ol-isbn-${query}`,
+        title: book.title,
+        author: book.authors?.map((author: any) => author.name) || ['Auteur inconnu'],
+        cover: book.cover?.medium || book.cover?.large || '/placeholder.svg',
+        description: book.excerpts?.[0]?.text || book.description?.value || '',
+        numberOfPages: book.number_of_pages,
+        publishDate: book.publish_date,
+        publishers: book.publishers?.map((pub: any) => pub.name) || [],
+        subjects: book.subjects?.map((s: any) => s.name || s) || [],
+        language: book.languages?.map((lang: any) => lang.key.replace('/languages/', '')) || ['fr'],
+        isbn: query.replace(/[-\s]/g, '')
+      }];
+    } else {
+      // Format de réponse pour la recherche par titre/auteur
+      if (!data.docs) {
+        console.log('Aucun livre trouvé sur OpenLibrary');
+        return [];
+      }
+      
+      const books = data.docs.map((doc: any) => {
+        let cover = '/placeholder.svg';
+        if (doc.cover_i) {
+          cover = `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`;
+        }
+        
+        return {
+          id: doc.key,
+          title: doc.title,
+          author: doc.author_name || ['Auteur inconnu'],
+          cover: cover,
+          language: doc.language || ['fr'],
+          isbn: doc.isbn?.[0]
+        };
+      });
+      
+      console.log(`OpenLibrary: Trouvé ${books.length} livres pour la requête "${query}"`);
+      return books;
+    }
   } catch (error) {
     console.error('Erreur lors de la recherche OpenLibrary:', error);
     return [];
