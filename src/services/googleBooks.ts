@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 import { translateToFrench } from '@/utils/translation';
 import { looksLikeISBN } from '@/lib/utils';
@@ -133,21 +132,24 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
           isbn: isbn
         };
 
-        // Si c'est une recherche par ISBN, ne pas appliquer les filtres additionnels
+        // If it's an ISBN search, don't apply additional filters
         if (isISBNQuery) {
           console.log('Google Books ISBN result:', book);
           return book;
         }
         
-        // Pour les recherches par auteur, appliquer les filtres additionnels
-        // Vérifier si c'est un livre technique
+        // For author searches, apply additional filters
+        // Check if it's a technical book
         if (isTechnicalBook(book.title, book.description, book.subjects)) {
-          return null; // Exclure les livres techniques
+          return null; // Exclude technical books
         }
         
-        // Vérifier si l'auteur correspond à la recherche
-        if (!isAuthorMatch(book.author, query)) {
-          return null; // Exclure les livres d'autres auteurs
+        // Make sure author names are always an array before passing to isAuthorMatch
+        const authorArray = Array.isArray(book.author) ? book.author : [book.author];
+        
+        // Check if the author matches the search query
+        if (!isAuthorMatch(authorArray, query)) {
+          return null; // Exclude books by other authors
         }
         
         return book;
