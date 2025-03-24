@@ -6,6 +6,9 @@ import { BookDetails } from '@/components/BookDetails';
 import { getBookById } from '@/services/supabaseBooks';
 import { useToast } from '@/hooks/use-toast';
 import { Helmet } from 'react-helmet-async';
+import { Button } from '@/components/ui/button';
+import { ShoppingCart } from 'lucide-react';
+import { getAmazonAffiliateUrl } from '@/lib/utils';
 
 const BookPage = () => {
   const { id } = useParams();
@@ -71,6 +74,20 @@ const BookPage = () => {
         <meta property="og:url" content={`https://meslectures.lalibreplume.be/book/${book.id}`} />
       </Helmet>
       <div className="container mx-auto py-8">
+        {/* Bouton Acheter sur Amazon ajouté au-dessus des détails */}
+        <div className="mb-6 flex justify-end">
+          <a 
+            href={getAmazonAffiliateUrl(book)}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button className="bg-amber-500 hover:bg-amber-600 text-white">
+              <ShoppingCart className="mr-2 h-4 w-4" />
+              Acheter sur Amazon
+            </Button>
+          </a>
+        </div>
+        
         <BookDetails
           book={book}
           isOpen={true}
