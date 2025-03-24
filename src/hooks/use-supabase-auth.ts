@@ -73,20 +73,28 @@ export function useSupabaseAuth() {
 
   const signInWithGoogle = async () => {
     try {
+      // Déterminer l'URL de redirection en fonction de l'environnement
+      const origin = window.location.origin;
+      const redirectUrl = `${origin}`;
+      
+      console.log("Tentative de connexion avec Google. URL de redirection:", redirectUrl);
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin
+          redirectTo: redirectUrl
         }
       });
 
       if (error) {
+        console.error("Erreur lors de la connexion avec Google:", error);
         toast({
           variant: "destructive",
           description: `Erreur lors de la connexion avec Google: ${error.message}`
         });
       }
     } catch (error: any) {
+      console.error("Exception lors de la connexion avec Google:", error);
       toast({
         variant: "destructive",
         description: `Erreur lors de la connexion avec Google: ${error.message}`

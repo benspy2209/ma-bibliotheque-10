@@ -24,7 +24,7 @@ const NavBar = () => {
   };
 
   const handleGoogleSignIn = () => {
-    console.log("Google sign in button clicked");
+    console.log("Google sign in button clicked from NavBar");
     signInWithGoogle();
   };
 
