@@ -137,9 +137,9 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
         </div>
       )}
       
-      <div className="book-info">
-        <h3 className="text-lg font-semibold dark:text-black">{book.title}</h3>
-        <p className="text-sm text-gray-600 dark:text-gray-800">
+      <div className="book-info dark:bg-gray-800/90 dark:text-white">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{book.title}</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-300">
           {Array.isArray(book.author) ? book.author[0] : book.author}
         </p>
         <a 
