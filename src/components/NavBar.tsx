@@ -1,4 +1,3 @@
-
 import { NavLink } from "react-router-dom";
 import { Search, BookOpen, BarChart2, Sun, Moon, LogIn, Menu } from "lucide-react";
 import { Button } from "./ui/button";
@@ -20,7 +19,7 @@ const NavBar = () => {
 
   // Fonction wrapper pour gérer le clic du bouton de connexion
   const handleSignIn = () => {
-    signIn('signup'); // Changed from 'login' to 'signup'
+    signIn('signup');
   };
 
   const NavLinks = () => (
