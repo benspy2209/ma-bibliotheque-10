@@ -95,7 +95,7 @@ export default function Library() {
 
   const handleLoginClick = () => {
     console.log("Join adventure button clicked");
-    signIn('signup'); // Changed from 'login' to 'signup'
+    signIn('signup');
   };
 
   return (
