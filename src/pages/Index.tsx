@@ -12,6 +12,7 @@ import NavBar from '@/components/NavBar';
 import { SearchBar } from '@/components/search/SearchBar';
 import { BookGrid } from '@/components/search/BookGrid';
 import { HeaderSection } from '@/components/search/HeaderSection';
+import Footer from '@/components/Footer';
 
 const BOOKS_PER_PAGE = 12;
 
@@ -90,42 +91,41 @@ const Index = () => {
   const visibleBooks = books.slice(0, displayedBooks);
 
   return (
-    <>
-      <div className="min-h-screen">
-        <NavBar />
-        <div className="container px-4 py-6 sm:py-8 sm:px-6 lg:px-8 mx-auto">
-          <div className="max-w-4xl mx-auto">
-            <HeaderSection onBookAdded={handleBookUpdate} />
+    <div className="min-h-screen flex flex-col">
+      <NavBar />
+      <div className="container px-4 py-6 sm:py-8 sm:px-6 lg:px-8 mx-auto flex-grow">
+        <div className="max-w-4xl mx-auto">
+          <HeaderSection onBookAdded={handleBookUpdate} />
 
-            <div className="mb-8 sm:mb-12">
-              <SearchBar 
-                onSearch={setDebouncedQuery}
-                placeholder="Rechercher un livre, un auteur..."
-              />
-            </div>
-
-            <BookGrid 
-              books={!debouncedQuery ? [] : visibleBooks}
-              onBookClick={handleBookClick}
-              displayedBooks={displayedBooks}
-              totalBooks={books.length}
-              onLoadMore={handleLoadMore}
-              isLoading={isLoading}
-              searchQuery={debouncedQuery}
+          <div className="mb-8 sm:mb-12">
+            <SearchBar 
+              onSearch={setDebouncedQuery}
+              placeholder="Rechercher un livre, un auteur..."
             />
-
-            {selectedBook && (
-              <BookDetails
-                book={selectedBook}
-                isOpen={!!selectedBook}
-                onClose={() => setSelectedBook(null)}
-                onUpdate={handleBookUpdate}
-              />
-            )}
           </div>
+
+          <BookGrid 
+            books={!debouncedQuery ? [] : visibleBooks}
+            onBookClick={handleBookClick}
+            displayedBooks={displayedBooks}
+            totalBooks={books.length}
+            onLoadMore={handleLoadMore}
+            isLoading={isLoading}
+            searchQuery={debouncedQuery}
+          />
+
+          {selectedBook && (
+            <BookDetails
+              book={selectedBook}
+              isOpen={!!selectedBook}
+              onClose={() => setSelectedBook(null)}
+              onUpdate={handleBookUpdate}
+            />
+          )}
         </div>
       </div>
-    </>
+      <Footer />
+    </div>
   );
 };
 

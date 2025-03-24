@@ -18,6 +18,7 @@ import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LoginDialog } from '@/components/auth/LoginDialog';
+import Footer from '@/components/Footer';
 
 export default function Library() {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
@@ -99,9 +100,9 @@ export default function Library() {
   };
 
   return (
-    <div className="min-h-screen fade-in">
+    <div className="min-h-screen flex flex-col">
       <NavBar />
-      <div className="px-4 py-8 sm:px-6 lg:px-8">
+      <div className="px-4 py-8 sm:px-6 lg:px-8 flex-grow">
         <div className="mx-auto max-w-7xl">
           {!user ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -189,6 +190,7 @@ export default function Library() {
           )}
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
