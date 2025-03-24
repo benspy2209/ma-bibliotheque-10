@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -27,11 +26,12 @@ const bookSchema = z.object({
 type BookFormValues = z.infer<typeof bookSchema>;
 
 interface AddManualBookProps {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
   onBookAdded: () => void;
 }
 
-export function AddManualBook({ onBookAdded }: AddManualBookProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function AddManualBook({ isOpen, setIsOpen, onBookAdded }: AddManualBookProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const [coverImage, setCoverImage] = useState<string | null>(null);
@@ -228,3 +228,4 @@ export function AddManualBook({ onBookAdded }: AddManualBookProps) {
     </Dialog>
   );
 }
+

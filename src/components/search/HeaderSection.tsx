@@ -36,15 +36,9 @@ export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
         </TooltipProvider>
       </div>
       
-      <button 
-        onClick={() => setIsAddModalOpen(true)}
-        className="text-primary hover:underline text-sm"
-      >
-        Ou ajoutez un livre manuellement
-      </button>
-      
       <AddManualBook 
-        onClose={() => setIsAddModalOpen(false)}
+        isOpen={isAddModalOpen}
+        setIsOpen={setIsAddModalOpen}
         onBookAdded={onBookAdded}
       />
     </div>
