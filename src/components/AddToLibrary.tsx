@@ -92,8 +92,7 @@ export function AddToLibrary({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Badge 
-          className={`cursor-pointer ${badgeClass} backdrop-blur-sm shadow-sm`}
-          disabled={isLoading}
+          className={`cursor-pointer ${badgeClass} backdrop-blur-sm shadow-sm ${isLoading ? 'opacity-50' : ''}`}
         >
           {currentStatus 
             ? statusConfig[currentStatus].icon 
