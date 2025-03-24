@@ -93,12 +93,16 @@ export function AddToLibrary({
           Ajouter
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-white">
+      <DropdownMenuContent 
+        align="end" 
+        className="bg-white shadow-lg border-gray-200 z-50"
+        sideOffset={5}
+      >
         {Object.entries(statusLabels).map(([status, label]) => (
           <DropdownMenuItem
             key={status}
             onClick={() => handleStatusChange(status as ReadingStatus)}
-            className={currentStatus === status ? "bg-muted" : ""}
+            className={`${currentStatus === status ? "bg-muted" : ""} hover:bg-gray-100 cursor-pointer`}
           >
             {label}
           </DropdownMenuItem>
