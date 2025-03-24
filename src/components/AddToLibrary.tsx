@@ -35,6 +35,7 @@ export function AddToLibrary({
     setIsLoading(true);
     try {
       // La vérification des doublons est maintenant gérée directement dans saveBook
+      // Pas besoin de l'implémenter ici
       await onStatusChange(status);
       
       // Force une invalidation IMMÉDIATE de toutes les requêtes liées aux livres
@@ -87,22 +88,17 @@ export function AddToLibrary({
           variant="outline" 
           size="sm"
           disabled={isLoading}
-          className="bg-primary text-white hover:bg-primary/90 flex items-center gap-1"
         >
-          <BookPlus className="h-3 w-3" />
-          Ajouter
+          <BookPlus className="mr-2 h-4 w-4" />
+          {currentStatus ? statusLabels[currentStatus] : "Ajouter à ma bibliothèque"}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        align="end" 
-        className="dropdown-menu-content bg-white dark:bg-gray-800 text-foreground dark:text-white shadow-lg border border-gray-200 dark:border-gray-700 z-50"
-        sideOffset={5}
-      >
+      <DropdownMenuContent>
         {Object.entries(statusLabels).map(([status, label]) => (
           <DropdownMenuItem
             key={status}
             onClick={() => handleStatusChange(status as ReadingStatus)}
-            className={`${currentStatus === status ? "bg-muted dark:bg-gray-700" : ""} hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-foreground dark:text-white`}
+            className={currentStatus === status ? "bg-muted" : ""}
           >
             {label}
           </DropdownMenuItem>
