@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -70,6 +71,29 @@ export function useSupabaseAuth() {
     setShowLoginDialog(true);
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin
+        }
+      });
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          description: `Erreur lors de la connexion avec Google: ${error.message}`
+        });
+      }
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        description: `Erreur lors de la connexion avec Google: ${error.message}`
+      });
+    }
+  };
+
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
@@ -84,7 +108,8 @@ export function useSupabaseAuth() {
   return { 
     user, 
     session, 
-    signIn, 
+    signIn,
+    signInWithGoogle, 
     signOut, 
     showLoginDialog, 
     setShowLoginDialog, 

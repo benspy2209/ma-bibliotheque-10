@@ -6,6 +6,9 @@ import { SignupTab } from './tabs/SignupTab';
 import { ResetPasswordForm } from './ResetPasswordForm';
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Google } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 interface LoginFormProps {
   defaultTab?: 'login' | 'signup' | 'reset';
@@ -13,7 +16,7 @@ interface LoginFormProps {
 
 export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const { authMode, setAuthMode } = useSupabaseAuth();
+  const { authMode, setAuthMode, signInWithGoogle } = useSupabaseAuth();
   const [activeTab, setActiveTab] = useState<'login' | 'signup' | 'reset'>(
     defaultTab === 'reset' ? 'reset' : authMode
   );
@@ -34,6 +37,11 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
     console.log("Tab change requested to:", value);
     setActiveTab(value as 'login' | 'signup' | 'reset');
     setAuthMode(value as 'login' | 'signup' | 'reset');
+  };
+
+  const handleGoogleSignIn = () => {
+    console.log("Connexion avec Google initiée");
+    signInWithGoogle();
   };
 
   // Debug log to see the actual active tab value
@@ -60,6 +68,24 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
 
   return (
     <div className="w-full">
+      <div className="mb-6">
+        <Button 
+          variant="outline" 
+          className="w-full flex items-center gap-2 h-11"
+          onClick={handleGoogleSignIn}
+        >
+          <Google className="h-5 w-5" />
+          <span>Continuer avec Google</span>
+        </Button>
+
+        <div className="relative my-6">
+          <Separator className="my-4" />
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-xs text-muted-foreground">
+            ou continuer avec email
+          </div>
+        </div>
+      </div>
+
       <Tabs value={activeTab} className="w-full" onValueChange={handleTabChange}>
         <TabsList className="grid w-full grid-cols-2 mb-4">
           <TabsTrigger 

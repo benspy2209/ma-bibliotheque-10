@@ -1,6 +1,6 @@
 
 import { NavLink } from "react-router-dom";
-import { Search, BookOpen, BarChart2, Sun, Moon, LogIn, Menu } from "lucide-react";
+import { Search, BookOpen, BarChart2, Sun, Moon, LogIn, Menu, Google } from "lucide-react";
 import { Button } from "./ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
@@ -15,12 +15,17 @@ import {
 
 const NavBar = () => {
   const { theme, toggleTheme } = useTheme();
-  const { signIn, signOut, user, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
+  const { signIn, signOut, signInWithGoogle, user, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
   const isMobile = useIsMobile();
 
   // Fonction wrapper pour gérer le clic du bouton de connexion
   const handleSignIn = () => {
     signIn('signup'); // Changed from 'login' to 'signup'
+  };
+
+  const handleGoogleSignIn = () => {
+    console.log("Google sign in button clicked");
+    signInWithGoogle();
   };
 
   const NavLinks = () => (
@@ -90,15 +95,26 @@ const NavBar = () => {
               Se déconnecter
             </Button>
           ) : (
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleSignIn}
-              className="transition-colors duration-300"
-            >
-              <LogIn className="h-4 w-4 mr-2" />
-              Se connecter
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleSignIn}
+                className="transition-colors duration-300"
+              >
+                <LogIn className="h-4 w-4 mr-2" />
+                Se connecter
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleGoogleSignIn}
+                className="transition-colors duration-300"
+              >
+                <Google className="h-4 w-4 mr-2" />
+                Google
+              </Button>
+            </div>
           )}
           <Button
             variant="ghost"

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
@@ -13,7 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { BookSections } from '@/components/library/BookSections';
 import { AuthorFilter } from '@/components/library/AuthorFilter';
 import { Input } from "@/components/ui/input";
-import { Search, BookPlus, BookOpen } from "lucide-react";
+import { Search, BookPlus, BookOpen, Google } from "lucide-react";
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -29,7 +28,7 @@ export default function Library() {
   const { toast } = useToast();
   const { sortBooks } = useBookSort();
   const { viewMode, toggleView } = useViewPreference();
-  const { user, signIn, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
+  const { user, signIn, signInWithGoogle, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
 
   const { data: books = [], refetch } = useQuery({
     queryKey: ['books'],
@@ -99,6 +98,11 @@ export default function Library() {
     signIn('signup');
   };
 
+  const handleGoogleSignIn = () => {
+    console.log("Google sign in button clicked");
+    signInWithGoogle();
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
@@ -111,14 +115,25 @@ export default function Library() {
                 Connectez-vous ou créez un compte pour commencer à organiser vos lectures, 
                 suivre votre progression et découvrir de nouveaux livres.
               </p>
-              <Button 
-                onClick={handleLoginClick} 
-                size="lg" 
-                className="flex items-center gap-2"
-              >
-                <BookOpen className="h-5 w-5" />
-                Rejoindre l'aventure
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button 
+                  onClick={handleLoginClick} 
+                  size="lg" 
+                  className="flex items-center gap-2"
+                >
+                  <BookOpen className="h-5 w-5" />
+                  Rejoindre l'aventure
+                </Button>
+                <Button 
+                  onClick={handleGoogleSignIn} 
+                  variant="outline" 
+                  size="lg" 
+                  className="flex items-center gap-2"
+                >
+                  <Google className="h-5 w-5" />
+                  Continuer avec Google
+                </Button>
+              </div>
               <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
             </div>
           ) : (

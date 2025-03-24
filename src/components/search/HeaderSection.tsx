@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { AddManualBook } from '@/components/AddManualBook';
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { Button } from "@/components/ui/button";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Google } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { LoginDialog } from "@/components/auth/LoginDialog";
 
@@ -12,12 +12,17 @@ interface HeaderSectionProps {
 }
 
 export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
-  const { user, signIn, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
+  const { user, signIn, signInWithGoogle, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
   const isMobile = useIsMobile();
 
   const handleSignIn = () => {
     console.log("Join adventure button clicked");
     signIn('signup');
+  };
+
+  const handleGoogleSignIn = () => {
+    console.log("Google sign in button clicked");
+    signInWithGoogle();
   };
 
   return (
@@ -51,6 +56,15 @@ export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
             >
               <BookOpen className="h-5 w-5" />
               Rejoindre l'aventure
+            </Button>
+            <Button 
+              onClick={handleGoogleSignIn} 
+              variant="outline" 
+              size="lg" 
+              className="flex items-center gap-2"
+            >
+              <Google className="h-5 w-5" />
+              {!isMobile && "Google"}
             </Button>
             <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
           </>
