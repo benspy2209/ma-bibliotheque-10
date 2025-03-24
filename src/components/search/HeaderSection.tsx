@@ -44,7 +44,6 @@ export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
       </button>
       
       <AddManualBook 
-        open={isAddModalOpen} 
         onClose={() => setIsAddModalOpen(false)}
         onBookAdded={onBookAdded}
       />
