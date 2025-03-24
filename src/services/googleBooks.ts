@@ -1,3 +1,4 @@
+
 import { Book } from '@/types/book';
 import { translateToFrench } from '@/utils/translation';
 import { looksLikeISBN } from '@/lib/utils';
