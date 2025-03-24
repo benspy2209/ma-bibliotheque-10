@@ -15,6 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useTheme } from '@/hooks/use-theme';
 
 interface BookGridProps {
   books: Book[];
@@ -22,6 +23,23 @@ interface BookGridProps {
 }
 
 export const BookGrid = ({ books, onBookClick }: BookGridProps) => {
+  const { theme } = useTheme();
+  
+  const statusColors: Record<string, { bg: string, text: string }> = {
+    'to-read': {
+      bg: theme === 'dark' ? 'bg-blue-500' : 'bg-blue-100',
+      text: theme === 'dark' ? 'text-white' : 'text-blue-800'
+    },
+    'reading': {
+      bg: theme === 'dark' ? 'bg-amber-500' : 'bg-amber-100',
+      text: theme === 'dark' ? 'text-white' : 'text-amber-800'
+    },
+    'completed': {
+      bg: theme === 'dark' ? 'bg-green-500' : 'bg-green-100',
+      text: theme === 'dark' ? 'text-white' : 'text-green-800'
+    }
+  };
+  
   const statusLabels: Record<string, string> = {
     'to-read': 'À lire',
     'reading': 'En cours',
@@ -67,18 +85,18 @@ export const BookGrid = ({ books, onBookClick }: BookGridProps) => {
               <StarRating rating={book.rating} readonly />
             )}
             <div className="mt-auto space-y-1.5">
-              <Badge 
-                variant={book.status === 'completed' ? "default" : "secondary"}
-                className="block w-fit"
-              >
-                {statusLabels[book.status || 'to-read']}
-              </Badge>
+              {book.status && (
+                <Badge 
+                  className={`block w-fit ${statusColors[book.status].bg} ${statusColors[book.status].text} border-0`}
+                >
+                  {statusLabels[book.status]}
+                </Badge>
+              )}
               
               {/* Badge "Acheté" pour les livres achetés */}
               {book.purchased && (
                 <Badge 
-                  variant="outline" 
-                  className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 flex items-center gap-1 w-fit"
+                  className="bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100 flex items-center gap-1 w-fit border-0"
                 >
                   <CheckSquare className="size-3" />
                   Acheté
@@ -90,7 +108,7 @@ export const BookGrid = ({ books, onBookClick }: BookGridProps) => {
                   <PopoverTrigger asChild>
                     <Badge 
                       variant="destructive" 
-                      className="flex items-center gap-1 w-fit cursor-pointer hover:bg-red-600 transition-colors"
+                      className="flex items-center gap-1 w-fit cursor-pointer hover:bg-red-600 transition-colors border-0"
                     >
                       <ShoppingCart className="size-3" />
                       À acheter

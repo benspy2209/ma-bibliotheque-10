@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { BookmarkPlus, BookOpen, CheckCircle, X } from 'lucide-react';
+import { BookmarkPlus, BookOpen, CheckCircle, X, ShoppingBag } from 'lucide-react';
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -83,22 +83,43 @@ export function AddToLibrary({
   };
 
   // Icônes et labels pour chaque statut
-  const statusConfig: Record<ReadingStatus, { icon: React.ReactNode, label: string }> = {
-    'to-read': { icon: <BookmarkPlus className="h-4 w-4" />, label: 'À lire' },
-    'reading': { icon: <BookOpen className="h-4 w-4" />, label: 'En cours' },
-    'completed': { icon: <CheckCircle className="h-4 w-4" />, label: 'Lu' }
+  const statusConfig: Record<ReadingStatus, { icon: React.ReactNode, label: string, bgColor: string, textColor: string }> = {
+    'to-read': { 
+      icon: <BookmarkPlus className="h-4 w-4" />, 
+      label: 'À lire',
+      bgColor: theme === 'dark' ? 'bg-blue-500' : 'bg-blue-100', 
+      textColor: theme === 'dark' ? 'text-white' : 'text-blue-800' 
+    },
+    'reading': { 
+      icon: <BookOpen className="h-4 w-4" />, 
+      label: 'En cours',
+      bgColor: theme === 'dark' ? 'bg-amber-500' : 'bg-amber-100', 
+      textColor: theme === 'dark' ? 'text-white' : 'text-amber-800'
+    },
+    'completed': { 
+      icon: <CheckCircle className="h-4 w-4" />, 
+      label: 'Lu',
+      bgColor: theme === 'dark' ? 'bg-green-500' : 'bg-green-100', 
+      textColor: theme === 'dark' ? 'text-white' : 'text-green-800'
+    }
   };
 
-  // Style du badge selon le thème
-  const badgeClass = theme === 'dark' 
-    ? "bg-gray-800/80 hover:bg-gray-700/90 text-white"
-    : "bg-white/80 hover:bg-gray-100/90 text-gray-800 border border-gray-200";
+  // Style du badge selon le thème et le statut
+  const getBadgeClass = () => {
+    if (!status) {
+      return theme === 'dark' 
+        ? 'bg-gray-800/80 hover:bg-gray-700/90 text-white'
+        : 'bg-white/80 hover:bg-gray-100/90 text-gray-800 border border-gray-200';
+    }
+    
+    return `${statusConfig[status].bgColor} ${statusConfig[status].textColor}`;
+  };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
         <div 
-          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold cursor-pointer ${badgeClass} backdrop-blur-sm shadow-sm ${isLoading ? 'opacity-50' : ''}`}
+          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold cursor-pointer backdrop-blur-sm shadow-sm ${getBadgeClass()} ${isLoading ? 'opacity-50' : ''}`}
         >
           {status 
             ? statusConfig[status].icon 
