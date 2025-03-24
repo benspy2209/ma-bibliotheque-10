@@ -73,9 +73,16 @@ export function useSupabaseAuth() {
 
   const signInWithGoogle = async () => {
     try {
-      // Déterminer l'URL de redirection en fonction de l'environnement
+      // Utiliser l'URL de production en priorité si nous sommes sur le domaine de production
+      let redirectUrl;
       const origin = window.location.origin;
-      const redirectUrl = `${origin}`;
+      const hostname = window.location.hostname;
+      
+      if (hostname === 'bibliopulse.com' || hostname === 'www.bibliopulse.com') {
+        redirectUrl = 'https://bibliopulse.com';
+      } else {
+        redirectUrl = origin;
+      }
       
       console.log("Tentative de connexion avec Google. URL de redirection:", redirectUrl);
       
