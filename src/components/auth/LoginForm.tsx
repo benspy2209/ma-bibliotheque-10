@@ -4,8 +4,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoginTab } from './tabs/LoginTab';
 import { SignupTab } from './tabs/SignupTab';
 import { ResetPasswordForm } from './ResetPasswordForm';
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from "lucide-react";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { cn } from "@/lib/utils";
 
@@ -92,15 +90,6 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
             Connexion
           </TabsTrigger>
         </TabsList>
-        
-        {activeTab === 'login' && (
-          <Alert className="mb-4 bg-blue-50 border-blue-200">
-            <Info className="h-4 w-4 text-blue-600" />
-            <AlertDescription className="text-blue-800">
-              Nouveau sur Bibliopulse ? Cliquez sur "Inscription" pour créer un compte.
-            </AlertDescription>
-          </Alert>
-        )}
         
         <TabsContent value="login">
           <LoginTab 
