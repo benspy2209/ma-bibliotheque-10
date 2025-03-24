@@ -37,17 +37,32 @@ export async function searchBooks(query: string): Promise<Book[]> {
         return [];
       }
       
+      // Récupérer des données supplémentaires si disponible via l'API Works
+      let worksData = null;
+      if (book.works && book.works.length > 0) {
+        try {
+          const worksUrl = `${book.works[0].key}.json`;
+          const worksResponse = await fetch(`https://openlibrary.org${worksUrl}`);
+          if (worksResponse.ok) {
+            worksData = await worksResponse.json();
+          }
+        } catch (error) {
+          console.error('Erreur lors de la récupération des données Works:', error);
+        }
+      }
+      
       // Conversion au format de livre de l'application avec données complètes
       return [{
         id: `ol-isbn-${query}`,
         title: book.title || 'Titre inconnu',
         author: book.authors?.map((author: any) => author.name) || ['Auteur inconnu'],
-        cover: book.cover?.medium || book.cover?.large || book.cover?.small || '/placeholder.svg',
-        description: book.excerpts?.[0]?.text || book.description?.value || '',
+        cover: book.cover?.medium || book.cover?.large || book.cover?.small || 
+               (book.covers && book.covers.length > 0 ? `https://covers.openlibrary.org/b/id/${book.covers[0]}-L.jpg` : '/placeholder.svg'),
+        description: worksData?.description?.value || worksData?.description || book.excerpts?.[0]?.text || book.description?.value || '',
         numberOfPages: book.number_of_pages,
         publishDate: book.publish_date,
         publishers: book.publishers?.map((pub: any) => pub.name) || [],
-        subjects: book.subjects?.map((s: any) => s.name || s) || [],
+        subjects: worksData?.subjects || book.subjects?.map((s: any) => s.name || s) || [],
         language: book.languages?.map((lang: any) => lang.key.replace('/languages/', '')) || ['fr'],
         isbn: query.replace(/[-\s]/g, '')
       }];

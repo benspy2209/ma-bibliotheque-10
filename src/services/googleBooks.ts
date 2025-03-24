@@ -94,6 +94,29 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
           description = await translateToFrench(description);
         }
 
+        // Récupérer l'ISBN si disponible
+        const isbn13 = volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_13')?.identifier;
+        const isbn10 = volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_10')?.identifier;
+        const isbn = isbn13 || isbn10;
+
+        // Pour les recherches par ISBN, faire une recherche plus approfondie pour obtenir une couverture
+        if (isISBNQuery && !volumeInfo.imageLinks) {
+          try {
+            // Utiliser l'API Open Library pour tenter de récupérer une couverture
+            const cleanISBN = query.replace(/[-\s]/g, '');
+            const olResponse = await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${cleanISBN}&jscmd=data&format=json`);
+            if (olResponse.ok) {
+              const olData = await olResponse.json();
+              const olBook = olData[`ISBN:${cleanISBN}`];
+              if (olBook && olBook.cover) {
+                cover = olBook.cover.medium || olBook.cover.large || olBook.cover.small;
+              }
+            }
+          } catch (error) {
+            console.error('Erreur lors de la récupération de la couverture OpenLibrary:', error);
+          }
+        }
+
         // Créer l'objet livre avec données complètes
         const book = {
           id: item.id,
@@ -103,11 +126,10 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
           description,
           numberOfPages: volumeInfo.pageCount,
           publishDate: volumeInfo.publishedDate,
-          publishers: [volumeInfo.publisher].filter(Boolean),
+          publishers: volumeInfo.publisher ? [volumeInfo.publisher] : [],
           subjects: volumeInfo.categories || [],
           language: ['fr'], // Forcer la langue à français
-          isbn: volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_13')?.identifier || 
-                volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_10')?.identifier
+          isbn: isbn
         };
 
         // Si c'est une recherche par ISBN, ne pas appliquer les filtres additionnels

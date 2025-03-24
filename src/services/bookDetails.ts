@@ -33,9 +33,16 @@ export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
         description = await translateToFrench(description);
       }
       
+      // Récupérer la couverture si disponible
+      let cover = '/placeholder.svg';
+      if (data.covers && data.covers.length > 0) {
+        cover = `https://covers.openlibrary.org/b/id/${data.covers[0]}-L.jpg`;
+      }
+      
       return {
         description,
-        subjects: data.subjects || []
+        subjects: data.subjects || [],
+        cover
       };
     } else {
       // Sinon, c'est un livre Google Books
@@ -72,17 +79,30 @@ export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
         description = await translateToFrench(description);
       }
       
+      // Gestion améliorée des couvertures
+      let cover = '/placeholder.svg';
+      if (volumeInfo.imageLinks) {
+        cover = volumeInfo.imageLinks.extraLarge || 
+                volumeInfo.imageLinks.large || 
+                volumeInfo.imageLinks.medium || 
+                volumeInfo.imageLinks.thumbnail || 
+                volumeInfo.imageLinks.smallThumbnail;
+        
+        cover = cover.replace('http:', 'https:');
+      }
+      
       return {
         description,
         subjects: volumeInfo?.categories || [],
         numberOfPages: volumeInfo?.pageCount,
         publishDate: volumeInfo?.publishedDate,
         publishers: volumeInfo?.publisher ? [volumeInfo.publisher] : [],
-        status
+        status,
+        cover
       };
     }
   } catch (error) {
-    console.error("Erreur Google Books:", error);
+    console.error("Erreur lors de la récupération des détails du livre:", error);
     return {};
   }
 }
