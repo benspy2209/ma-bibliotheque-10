@@ -1,11 +1,8 @@
-
 import { Helmet } from "react-helmet-async";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
-
 const LegalNotice = () => {
-  return (
-    <div className="min-h-screen flex flex-col">
+  return <div className="min-h-screen flex flex-col">
       <Helmet>
         <title>Mentions légales | BiblioPluse</title>
       </Helmet>
@@ -20,9 +17,7 @@ const LegalNotice = () => {
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">1. INFORMATIONS LÉGALES</h2>
-            <p>
-              BiblioPluse est un service fourni par :
-            </p>
+            <p>BiblioPulse est un service fourni par :</p>
             <ul className="list-disc pl-6 my-4">
               <li>Société : HAKUNA MATATA SRL</li>
               <li>Numéro d'entreprise : 0877.585.922</li>
@@ -134,8 +129,6 @@ const LegalNotice = () => {
         </div>
       </main>
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default LegalNotice;
