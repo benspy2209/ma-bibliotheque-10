@@ -12,6 +12,7 @@ import BookPage from "./pages/BookPage";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import LegalNotice from "./pages/LegalNotice";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/book/:id" element={<BookPage />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/legal-notice" element={<LegalNotice />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

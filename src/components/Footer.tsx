@@ -10,12 +10,18 @@ const Footer = () => {
         <div>
           © {currentYear} BiblioPluse
         </div>
-        <div className="flex gap-4 mt-2 sm:mt-0">
+        <div className="flex flex-col sm:flex-row gap-4 mt-2 sm:mt-0 items-center">
           <Link 
             to="/privacy-policy" 
             className="hover:text-primary transition-colors"
           >
             Politique de confidentialité
+          </Link>
+          <Link 
+            to="/legal-notice" 
+            className="hover:text-primary transition-colors"
+          >
+            Mentions légales
           </Link>
         </div>
       </div>
