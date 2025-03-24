@@ -90,14 +90,14 @@ export function AddToLibrary({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Badge 
-          className={`cursor-pointer ${badgeClass} backdrop-blur-sm shadow-sm ${isLoading ? 'opacity-50' : ''}`}
+      <DropdownMenuTrigger>
+        <div 
+          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold cursor-pointer ${badgeClass} backdrop-blur-sm shadow-sm ${isLoading ? 'opacity-50' : ''}`}
         >
           {currentStatus 
             ? statusConfig[currentStatus].icon 
             : <BookmarkPlus className="h-4 w-4" />}
-        </Badge>
+        </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent className={theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-white text-gray-800'}>
         {Object.entries(statusConfig).map(([status, { icon, label }]) => (

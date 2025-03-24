@@ -47,6 +47,7 @@
   background-color: #333;
   color: white;
   border-color: #444;
+  z-index: 50;
 }
 
 [data-theme="dark"] [data-radix-popper-content-wrapper] [role="menuitem"]:hover {
@@ -62,6 +63,7 @@
   background-color: white;
   color: #333;
   border-color: #eee;
+  z-index: 50;
 }
 
 [data-radix-popper-content-wrapper] [role="menuitem"]:hover {
@@ -70,4 +72,9 @@
 
 [data-radix-popper-content-wrapper] [role="menuitem"][data-highlighted] {
   background-color: #f5f5f5;
+}
+
+/* Correction des z-index pour les menus */
+[data-radix-popper-content-wrapper] {
+  z-index: 50 !important;
 }
