@@ -88,9 +88,10 @@ export function AddToLibrary({
           variant="outline" 
           size="sm"
           disabled={isLoading}
+          className="bg-primary text-white hover:bg-primary/90 flex items-center gap-1"
         >
-          <BookPlus className="mr-2 h-4 w-4" />
-          {currentStatus ? statusLabels[currentStatus] : "Ajouter à ma bibliothèque"}
+          <BookPlus className="h-3 w-3" />
+          Ajouter
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
