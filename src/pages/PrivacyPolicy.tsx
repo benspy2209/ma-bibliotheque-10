@@ -1,11 +1,8 @@
-
 import { Helmet } from "react-helmet-async";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
-
 const PrivacyPolicy = () => {
-  return (
-    <div className="min-h-screen flex flex-col">
+  return <div className="min-h-screen flex flex-col">
       <Helmet>
         <title>Politique de confidentialité | BiblioPluse</title>
       </Helmet>
@@ -20,11 +17,7 @@ const PrivacyPolicy = () => {
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">1. INTRODUCTION</h2>
-            <p>
-              BiblioPluse respecte votre vie privée et s'engage à protéger les données à caractère personnel que vous partagez avec nous. 
-              Cette politique de confidentialité explique comment nous collectons, utilisons et protégeons vos informations lorsque vous 
-              utilisez notre application et notre site web (https://bibliopulse.com).
-            </p>
+            <p className="text-base">BiblioPulse respecte votre vie privée et s'engage à protéger les données à caractère personnel que vous partagez avec nous. Cette politique de confidentialité explique comment nous collectons, utilisons et protégeons vos informations lorsque vous utilisez notre application et notre site web (https://bibliopulse.com).</p>
           </section>
 
           <section className="mb-8">
@@ -141,8 +134,6 @@ const PrivacyPolicy = () => {
         </div>
       </main>
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default PrivacyPolicy;
