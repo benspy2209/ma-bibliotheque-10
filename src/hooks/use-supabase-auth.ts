@@ -73,23 +73,26 @@ export function useSupabaseAuth() {
 
   const signInWithGoogle = async () => {
     try {
-      // Utiliser l'URL de production en priorité si nous sommes sur le domaine de production
-      let redirectUrl;
-      const origin = window.location.origin;
+      // Determine if we're on production domain
       const hostname = window.location.hostname;
+      const isProduction = hostname === 'bibliopulse.com' || hostname === 'www.bibliopulse.com';
       
-      if (hostname === 'bibliopulse.com' || hostname === 'www.bibliopulse.com') {
-        redirectUrl = 'https://bibliopulse.com';
-      } else {
-        redirectUrl = origin;
-      }
+      // Use appropriate redirect URL based on environment
+      const redirectUrl = isProduction 
+        ? 'https://bibliopulse.com' 
+        : window.location.origin;
       
       console.log("Tentative de connexion avec Google. URL de redirection:", redirectUrl);
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: redirectUrl
+          redirectTo: redirectUrl,
+          queryParams: {
+            // Ensure we're not passing redirect_to as a separate param
+            // This was causing issues in the auth flow
+            prompt: 'select_account'
+          }
         }
       });
 
