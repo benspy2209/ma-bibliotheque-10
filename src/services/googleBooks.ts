@@ -77,6 +77,7 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
       .map(async (item: any) => {
         const volumeInfo = item.volumeInfo;
         
+        // Amélioration de la gestion des couvertures
         let cover = '/placeholder.svg';
         if (volumeInfo.imageLinks) {
           cover = volumeInfo.imageLinks.extraLarge || 
@@ -97,7 +98,7 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
         // Récupérer l'ISBN si disponible
         const isbn13 = volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_13')?.identifier;
         const isbn10 = volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_10')?.identifier;
-        const isbn = isbn13 || isbn10;
+        const isbn = isbn13 || isbn10 || query;
 
         // Pour les recherches par ISBN, faire une recherche plus approfondie pour obtenir une couverture
         if (isISBNQuery && !volumeInfo.imageLinks) {
@@ -118,14 +119,14 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
         }
 
         // Créer l'objet livre avec données complètes
-        const book = {
+        const book: Book = {
           id: item.id,
           title: volumeInfo.title || 'Titre inconnu',
           author: volumeInfo.authors || ['Auteur inconnu'],
           cover: cover,
-          description,
-          numberOfPages: volumeInfo.pageCount,
-          publishDate: volumeInfo.publishedDate,
+          description: description || '',
+          numberOfPages: volumeInfo.pageCount || 0,
+          publishDate: volumeInfo.publishedDate || '',
           publishers: volumeInfo.publisher ? [volumeInfo.publisher] : [],
           subjects: volumeInfo.categories || [],
           language: ['fr'], // Forcer la langue à français
@@ -134,6 +135,7 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
 
         // Si c'est une recherche par ISBN, ne pas appliquer les filtres additionnels
         if (isISBNQuery) {
+          console.log('Google Books ISBN result:', book);
           return book;
         }
         

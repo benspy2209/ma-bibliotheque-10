@@ -10,9 +10,37 @@ export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
     // Si l'ID commence par "ol-isbn-", alors c'est un livre OpenLibrary par ISBN
     if (bookId.startsWith('ol-isbn-')) {
       const isbn = bookId.replace('ol-isbn-', '');
-      // Dans ce cas, nous avons déjà les détails complets dans le résultat initial
-      console.log(`Détails déjà complets pour ISBN ${isbn}`);
-      return {};
+      console.log(`Recherche de détails supplémentaires pour ISBN ${isbn} via Google Books`);
+      
+      // Essayer de récupérer plus de détails via l'API Google Books pour enrichir
+      try {
+        const response = await fetch(
+          `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.items && data.items.length > 0) {
+            const volumeInfo = data.items[0].volumeInfo;
+            let description = volumeInfo?.description || '';
+            
+            if (description) {
+              description = await translateToFrench(description);
+            }
+            
+            console.log(`Détails enrichis trouvés pour ISBN ${isbn} via Google Books`);
+            return {
+              description,
+              subjects: volumeInfo?.categories || [],
+              numberOfPages: volumeInfo?.pageCount,
+              publishDate: volumeInfo?.publishedDate,
+              publishers: volumeInfo?.publisher ? [volumeInfo.publisher] : []
+            };
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des détails Google Books pour ISBN:', error);
+      }
     }
     
     // Si l'ID commence par un autre préfixe OpenLibrary
@@ -101,6 +129,8 @@ export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
         cover
       };
     }
+    
+    return {};
   } catch (error) {
     console.error("Erreur lors de la récupération des détails du livre:", error);
     return {};
