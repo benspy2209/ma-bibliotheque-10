@@ -5,16 +5,18 @@ import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { LoginDialog } from "@/components/auth/LoginDialog";
 
 interface HeaderSectionProps {
   onBookAdded: () => void;
 }
 
 export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
-  const { user, signIn } = useSupabaseAuth();
+  const { user, signIn, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
   const isMobile = useIsMobile();
 
   const handleSignIn = () => {
+    console.log("Join adventure button clicked");
     signIn('signup');
   };
 
@@ -41,14 +43,17 @@ export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
             </Link>
           </>
         ) : (
-          <Button 
-            onClick={handleSignIn} 
-            size="lg" 
-            className="flex items-center gap-2"
-          >
-            <BookOpen className="h-5 w-5" />
-            Rejoindre l'aventure
-          </Button>
+          <>
+            <Button 
+              onClick={handleSignIn} 
+              size="lg" 
+              className="flex items-center gap-2"
+            >
+              <BookOpen className="h-5 w-5" />
+              Rejoindre l'aventure
+            </Button>
+            <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
+          </>
         )}
       </div>
     </div>
