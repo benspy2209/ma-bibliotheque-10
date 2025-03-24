@@ -67,10 +67,10 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
           <TabsTrigger 
             value="signup"
             className={cn(
-              "relative overflow-hidden",
+              "relative overflow-hidden font-semibold",
               activeTab === "signup" 
-                ? "bg-green-600 text-white hover:bg-green-700" 
-                : "hover:bg-green-100 hover:text-green-700"
+                ? "bg-green-600 text-white hover:bg-green-700 shadow-lg" 
+                : "bg-green-100 text-green-800 hover:bg-green-200 hover:text-green-900 border-2 border-green-300"
             )}
           >
             {activeTab !== "signup" && 
@@ -80,7 +80,12 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
             }
             Inscription
           </TabsTrigger>
-          <TabsTrigger value="login">Connexion</TabsTrigger>
+          <TabsTrigger 
+            value="login"
+            className={activeTab === "login" ? "font-medium" : ""}
+          >
+            Connexion
+          </TabsTrigger>
         </TabsList>
         
         {activeTab === 'login' && (
