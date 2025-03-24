@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
 import { AlertCircle, Info } from "lucide-react";
@@ -18,7 +17,6 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailSentMessage, setEmailSentMessage] = useState('');
-  const [skipEmailVerification, setSkipEmailVerification] = useState(false);
   const [isRateLimited, setIsRateLimited] = useState(false);
   const { toast } = useToast();
 
@@ -31,14 +29,11 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
     try {
       console.log("Tentative d'inscription avec:", email);
       
-      // Utiliser l'option de désactivation de la vérification d'email si elle est cochée
       const signUpOptions = {
         email,
         password,
         options: {
-          emailRedirectTo: window.location.origin,
-          // Si skipEmailVerification est activé, on essaie de désactiver la vérification
-          data: skipEmailVerification ? { skip_confirmation: true } : undefined
+          emailRedirectTo: window.location.origin
         }
       };
       
@@ -83,8 +78,8 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
       if (data?.user?.identities?.length === 0) {
         setEmailSentMessage("Un compte avec cette adresse email existe déjà. Veuillez vous connecter ou réinitialiser votre mot de passe.");
       } else if (data?.user) {
-        if (skipEmailVerification && data.session) {
-          // L'utilisateur est déjà connecté (vérification d'email contournée)
+        if (data.session) {
+          // L'utilisateur est déjà connecté
           toast({
             description: "Inscription réussie ! Vous êtes maintenant connecté."
           });
@@ -144,17 +139,6 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
           placeholder="Minimum 6 caractères"
           disabled={isLoading}
         />
-      </div>
-      
-      <div className="flex items-center space-x-2">
-        <Checkbox 
-          id="skip-verification" 
-          checked={skipEmailVerification} 
-          onCheckedChange={(checked) => setSkipEmailVerification(checked as boolean)}
-        />
-        <Label htmlFor="skip-verification" className="text-sm text-gray-500">
-          Mode développement (essayer de contourner la vérification d'email)
-        </Label>
       </div>
       
       <Button type="submit" className="w-full" disabled={isLoading}>
