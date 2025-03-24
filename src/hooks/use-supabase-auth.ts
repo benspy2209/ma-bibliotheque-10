@@ -82,11 +82,31 @@ export function useSupabaseAuth() {
     }
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}`
+        }
+      });
+      
+      if (error) throw error;
+    } catch (error: any) {
+      console.error("Erreur lors de la connexion avec Google:", error);
+      toast({
+        variant: "destructive",
+        description: `Erreur: ${error.message}`
+      });
+    }
+  };
+
   return { 
     user, 
     session, 
     signIn,
     signOut, 
+    signInWithGoogle, 
     showLoginDialog, 
     setShowLoginDialog, 
     authMode, 
