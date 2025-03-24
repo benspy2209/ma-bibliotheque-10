@@ -21,7 +21,11 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent 
+        className="sm:max-w-md" 
+        onPointerDownOutside={(e) => e.preventDefault()} // Prevent closing when clicking outside
+        onInteractOutside={(e) => e.preventDefault()} // Prevent all outside interactions
+      >
         <DialogHeader>
           <DialogTitle className="text-center">
             {authMode === 'login' && "Connexion à Bibliopulse"}
