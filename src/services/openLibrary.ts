@@ -1,3 +1,4 @@
+
 import { Book } from '@/types/book';
 import { looksLikeISBN } from '@/lib/utils';
 
@@ -36,12 +37,12 @@ export async function searchBooks(query: string): Promise<Book[]> {
         return [];
       }
       
-      // Conversion au format de livre de l'application
+      // Conversion au format de livre de l'application avec données complètes
       return [{
         id: `ol-isbn-${query}`,
-        title: book.title,
+        title: book.title || 'Titre inconnu',
         author: book.authors?.map((author: any) => author.name) || ['Auteur inconnu'],
-        cover: book.cover?.medium || book.cover?.large || '/placeholder.svg',
+        cover: book.cover?.medium || book.cover?.large || book.cover?.small || '/placeholder.svg',
         description: book.excerpts?.[0]?.text || book.description?.value || '',
         numberOfPages: book.number_of_pages,
         publishDate: book.publish_date,

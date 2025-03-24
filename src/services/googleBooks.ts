@@ -90,12 +90,14 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
 
         // Ensure description is translated
         let description = volumeInfo.description || '';
-        description = await translateToFrench(description);
+        if (description && description.length > 0) {
+          description = await translateToFrench(description);
+        }
 
-        // Créer l'objet livre
+        // Créer l'objet livre avec données complètes
         const book = {
           id: item.id,
-          title: volumeInfo.title,
+          title: volumeInfo.title || 'Titre inconnu',
           author: volumeInfo.authors || ['Auteur inconnu'],
           cover: cover,
           description,
