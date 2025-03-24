@@ -35,7 +35,6 @@ export function AddToLibrary({
     setIsLoading(true);
     try {
       // La vérification des doublons est maintenant gérée directement dans saveBook
-      // Pas besoin de l'implémenter ici
       await onStatusChange(status);
       
       // Force une invalidation IMMÉDIATE de toutes les requêtes liées aux livres
@@ -94,7 +93,7 @@ export function AddToLibrary({
           Ajouter
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent align="end" className="bg-white">
         {Object.entries(statusLabels).map(([status, label]) => (
           <DropdownMenuItem
             key={status}
