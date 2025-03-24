@@ -63,26 +63,31 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
   return (
     <div className="w-full">
       <Tabs value={activeTab} className="w-full" onValueChange={handleTabChange}>
-        <TabsList className="grid w-full grid-cols-2 mb-2">
+        <TabsList className="grid w-full grid-cols-2 mb-4">
           <TabsTrigger 
             value="signup"
             className={cn(
-              "relative overflow-hidden font-semibold",
+              "relative overflow-hidden text-base font-bold py-3 -mr-1 z-10 transform scale-110 shadow-xl rounded-l-lg rounded-r-none border-r-0",
               activeTab === "signup" 
-                ? "bg-green-600 text-white hover:bg-green-700 shadow-lg" 
-                : "bg-green-100 text-green-800 hover:bg-green-200 hover:text-green-900 border-2 border-green-300"
+                ? "bg-green-600 text-white hover:bg-green-700 glow-effect" 
+                : "bg-green-100 text-green-800 hover:bg-green-200 hover:text-green-900 border-2 border-green-400 pulse-effect"
             )}
           >
             {activeTab !== "signup" && 
-              <div className="absolute -right-1 -top-1 transform rotate-45 bg-green-500 text-xs px-5 py-0.5 text-white font-bold">
+              <div className="absolute -right-6 -top-1 transform rotate-45 bg-green-500 text-xs px-8 py-1 text-white font-bold shadow-md">
                 Nouveau
               </div>
             }
-            Inscription
+            INSCRIPTION
           </TabsTrigger>
           <TabsTrigger 
             value="login"
-            className={activeTab === "login" ? "font-medium" : ""}
+            className={cn(
+              "z-0 rounded-l-none rounded-r-lg",
+              activeTab === "login" 
+                ? "font-medium bg-gray-200" 
+                : "text-gray-600"
+            )}
           >
             Connexion
           </TabsTrigger>
