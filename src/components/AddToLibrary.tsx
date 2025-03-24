@@ -95,14 +95,14 @@ export function AddToLibrary({
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="bg-popover dark:bg-gray-800 text-popover-foreground dark:text-gray-200 shadow-lg border border-gray-200 dark:border-gray-700 z-50"
+        className="dropdown-menu-content bg-white dark:bg-gray-800 text-foreground dark:text-white shadow-lg border border-gray-200 dark:border-gray-700 z-50"
         sideOffset={5}
       >
         {Object.entries(statusLabels).map(([status, label]) => (
           <DropdownMenuItem
             key={status}
             onClick={() => handleStatusChange(status as ReadingStatus)}
-            className={`${currentStatus === status ? "bg-muted dark:bg-gray-700" : ""} hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer`}
+            className={`${currentStatus === status ? "bg-muted dark:bg-gray-700" : ""} hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-foreground dark:text-white`}
           >
             {label}
           </DropdownMenuItem>
