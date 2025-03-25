@@ -45,7 +45,7 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
   const handleConnectClick = () => {
     console.log("Ouverture du formulaire de connexion");
     signIn('signup');
-    setShowLoginDialog(true); // Explicitly show the login dialog
+    setShowLoginDialog(true);
   };
 
   return (
@@ -61,13 +61,12 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
       />
       
       {!user && (
-        <div className="mt-2 text-sm text-center">
+        <div className="mt-2 text-center">
           <p className="text-destructive mb-2">Vous devez vous connecter ou créer un compte pour faire une recherche.</p>
           <Button 
             onClick={handleConnectClick} 
-            variant="default"
-            size="sm"
-            className="mx-auto"
+            variant="outline"
+            className="text-sm"
           >
             Se connecter / Créer un compte
           </Button>

@@ -2,7 +2,6 @@
 import { Link } from "react-router-dom";
 import { AddManualBook } from '@/components/AddManualBook';
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
-import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -11,13 +10,8 @@ interface HeaderSectionProps {
 }
 
 export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
-  const { user, signIn, setShowLoginDialog } = useSupabaseAuth();
+  const { user } = useSupabaseAuth();
   const isMobile = useIsMobile();
-
-  const handleSignIn = () => {
-    console.log("Join adventure button clicked");
-    signIn('signup');
-  };
 
   return (
     <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mb-8 sm:mb-12">
@@ -29,29 +23,19 @@ export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
           Explorez, partagez et découvrez de nouveaux livres
         </p>
       </div>
-      <div className="flex gap-4 items-center w-full sm:w-auto">
-        {user ? (
-          <>
-            <AddManualBook onBookAdded={onBookAdded} />
-            <Link 
-              to="/" 
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-            >
-              <BookOpen className="h-4 w-4" />
-              {!isMobile && "Ma Bibliothèque"}
-            </Link>
-          </>
-        ) : (
-          <Button 
-            onClick={handleSignIn} 
-            size="lg" 
-            className="flex items-center gap-2"
+      
+      {user && (
+        <div className="flex gap-4 items-center w-full sm:w-auto">
+          <AddManualBook onBookAdded={onBookAdded} />
+          <Link 
+            to="/" 
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
           >
-            <BookOpen className="h-5 w-5" />
-            Rejoindre l'aventure
-          </Button>
-        )}
-      </div>
+            <BookOpen className="h-4 w-4" />
+            {!isMobile && "Ma Bibliothèque"}
+          </Link>
+        </div>
+      )}
     </div>
   );
 };
