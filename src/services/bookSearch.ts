@@ -10,7 +10,7 @@ export type LanguageFilter = 'fr' | 'en';
 const ISBNDB_API_KEY = '60264_3de7f2f024bc350bfa823cbbd9e64315';
 const ISBNDB_BASE_URL = 'https://api2.isbndb.com';
 
-// Configuration de l'instance axios avec nouvelle approche CORS
+// Configuration de l'instance axios avec headers d'autorisation
 const api = axios.create({
   headers: {
     'Authorization': ISBNDB_API_KEY,
@@ -19,24 +19,18 @@ const api = axios.create({
   }
 });
 
-// Nouvelle fonction pour construire l'URL avec proxy CORS
-const getProxiedUrl = (url: string) => {
-  // Utilisation du proxy CORS Anywhere qui est plus fiable
-  return `https://cors-anywhere.herokuapp.com/${url}`;
-};
-
 // Fonction pour faire une recherche par auteur avec l'endpoint correct
 export async function searchAuthorBooks(authorName: string, language: LanguageFilter = 'fr', maxResults: number = 100): Promise<Book[]> {
   if (!authorName.trim()) return [];
   
   try {
     const encodedAuthorName = encodeURIComponent(authorName);
-    // Construire l'URL avec le proxy
-    const proxiedUrl = getProxiedUrl(`${ISBNDB_BASE_URL}/author/${encodedAuthorName}?pageSize=${maxResults}&language=${language}`);
+    // Requête directe à l'API sans proxy
+    const url = `${ISBNDB_BASE_URL}/author/${encodedAuthorName}?pageSize=${maxResults}&language=${language}`;
     
-    console.log(`Recherche par auteur via proxy: ${proxiedUrl}`);
+    console.log(`Recherche par auteur: ${url}`);
     
-    const response = await api.get(proxiedUrl);
+    const response = await api.get(url);
     
     console.log('Statut de réponse:', response.status);
     
@@ -71,11 +65,11 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
 // Méthode de recherche alternative en cas d'échec de la première
 async function fallbackAuthorSearch(authorName: string, language: LanguageFilter, maxResults: number): Promise<Book[]> {
   try {
-    const proxiedUrl = getProxiedUrl(`${ISBNDB_BASE_URL}/books/${encodeURIComponent(authorName)}?pageSize=${maxResults}&language=${language}`);
+    const url = `${ISBNDB_BASE_URL}/books/${encodeURIComponent(authorName)}?pageSize=${maxResults}&language=${language}`;
     
-    console.log(`Recherche alternative via proxy: ${proxiedUrl}`);
+    console.log(`Recherche alternative: ${url}`);
     
-    const response = await api.get(proxiedUrl);
+    const response = await api.get(url);
     
     console.log('Statut de réponse (fallback):', response.status);
     
@@ -100,11 +94,11 @@ export async function searchBooksByTitle(title: string, language: LanguageFilter
   if (!title.trim()) return [];
   
   try {
-    const proxiedUrl = getProxiedUrl(`${ISBNDB_BASE_URL}/books/${encodeURIComponent(title)}?pageSize=${maxResults}&language=${language}`);
+    const url = `${ISBNDB_BASE_URL}/books/${encodeURIComponent(title)}?pageSize=${maxResults}&language=${language}`;
     
-    console.log(`Recherche par titre via proxy: ${proxiedUrl}`);
+    console.log(`Recherche par titre: ${url}`);
     
-    const response = await api.get(proxiedUrl);
+    const response = await api.get(url);
     
     console.log('Statut de réponse (titre):', response.status);
     
@@ -150,7 +144,7 @@ export async function getBulkBookDetails(isbns: string[], language: LanguageFilt
   try {
     // Créer un tableau de promesses pour chaque ISBN
     const requests = isbns.map(isbn => {
-      const url = getProxiedUrl(`${ISBNDB_BASE_URL}/book/${isbn}`);
+      const url = `${ISBNDB_BASE_URL}/book/${isbn}`;
       return api.get(url).catch(err => {
         console.error(`Erreur pour l'ISBN ${isbn}:`, err);
         return { data: null }; // Retourner un objet null en cas d'erreur

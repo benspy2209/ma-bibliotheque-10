@@ -16,12 +16,6 @@ const getHeaders = () => {
   };
 };
 
-// Fonction pour construire l'URL avec le proxy CORS
-const getProxiedUrl = (url: string) => {
-  // Utilisation du proxy CORS Anywhere qui est plus fiable
-  return `https://cors-anywhere.herokuapp.com/${url}`;
-};
-
 // Instance axios pré-configurée
 const api = axios.create({
   headers: getHeaders()
@@ -43,12 +37,11 @@ export async function getBookDetails(bookId: string, language: LanguageFilter = 
       return {};
     }
 
-    const originalUrl = `${ISBNDB_BASE_URL}/book/${isbn}`;
-    const proxiedUrl = getProxiedUrl(originalUrl);
+    const url = `${ISBNDB_BASE_URL}/book/${isbn}`;
     
-    console.log(`Récupération des détails du livre via proxy: ${proxiedUrl}`);
+    console.log(`Récupération des détails du livre: ${url}`);
 
-    const response = await api.get(proxiedUrl);
+    const response = await api.get(url);
     console.log('Détails du livre récupérés:', response.data);
 
     if (!response.data || !response.data.book) {
@@ -101,7 +94,7 @@ export async function getMultipleBookDetails(bookIds: string[], language: Langua
   try {
     // Créer un tableau de promesses pour chaque ISBN
     const requests = validBookIds.map(isbn => {
-      const url = getProxiedUrl(`${ISBNDB_BASE_URL}/book/${isbn}`);
+      const url = `${ISBNDB_BASE_URL}/book/${isbn}`;
       return api.get(url).catch(err => {
         console.error(`Erreur pour l'ISBN ${isbn}:`, err);
         return { data: null }; // Retourner un objet null en cas d'erreur
