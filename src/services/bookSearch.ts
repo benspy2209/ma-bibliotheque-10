@@ -1,7 +1,6 @@
 
 import { Book } from '@/types/book';
 import { removeDuplicateBooks } from '@/lib/utils';
-import { SearchLanguage } from '@/components/search/SearchBar';
 
 export type SearchType = 'author' | 'title' | 'general' | 'isbn';
 
@@ -9,7 +8,7 @@ export type SearchType = 'author' | 'title' | 'general' | 'isbn';
 const ISBNDB_API_KEY = '60264_3de7f2f024bc350bfa823cbbd9e64315';
 const ISBNDB_BASE_URL = 'https://api2.isbndb.com';
 
-export async function searchIsbndb(query: string, searchType: SearchType = 'general', language: SearchLanguage = 'fr'): Promise<Book[]> {
+export async function searchIsbndb(query: string, searchType: SearchType = 'general'): Promise<Book[]> {
   if (!query.trim()) return [];
   
   try {
@@ -36,13 +35,8 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'gene
         params = '?page=1&pageSize=20';
     }
 
-    // Ajouter le paramètre de langue si ce n'est pas l'endpoint book
-    if (searchType !== 'isbn' && params) {
-      params += `&language=${language}`;
-    }
-
     const url = `${ISBNDB_BASE_URL}${endpoint}${params}`;
-    console.log(`[ISBNDB] Envoi requête (${searchType}, langue: ${language}): ${url}`);
+    console.log(`[ISBNDB] Envoi requête (${searchType}): ${url}`);
 
     const response = await fetch(url, {
       method: 'GET',
@@ -77,14 +71,14 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'gene
         console.log(`[ISBNDB] Auteur trouvé: ${author.name} avec ${author.books?.length || 0} livres`);
         
         if (author.books && author.books.length > 0) {
-          const authorBooks = author.books.map((book: any) => mapIsbndbBookToBook(book, author.name, language));
+          const authorBooks = author.books.map((book: any) => mapIsbndbBookToBook(book, author.name));
           books = [...books, ...authorBooks];
         }
       }
     } else if (searchType === 'isbn' && data.book) {
       // Pour la recherche par ISBN, on reçoit directement un livre
       console.log('[ISBNDB] Livre trouvé par ISBN:', data.book.title);
-      books = [mapIsbndbBookToBook(data.book, undefined, language)];
+      books = [mapIsbndbBookToBook(data.book)];
     } else if (data.books) {
       // Pour les recherches par titre ou générales
       console.log(`[ISBNDB] Nombre de livres reçus: ${data.books.length}`);
@@ -93,12 +87,7 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'gene
         console.log('[ISBNDB] Premier livre exemple:', JSON.stringify(data.books[0], null, 2));
       }
       
-      books = data.books.map((book: any) => mapIsbndbBookToBook(book, undefined, language));
-    }
-
-    // Filtrer par langue si nécessaire (hors recherche ISBN)
-    if (searchType !== 'isbn') {
-      books = books.filter(book => !book.language || book.language.includes(language));
+      books = data.books.map((book: any) => mapIsbndbBookToBook(book));
     }
 
     console.log(`[ISBNDB] Nombre de livres transformés: ${books.length}`);
@@ -109,7 +98,7 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'gene
   }
 }
 
-function mapIsbndbBookToBook(isbndbBook: any, defaultAuthor?: string, prefLanguage: SearchLanguage = 'fr'): Book {
+function mapIsbndbBookToBook(isbndbBook: any, defaultAuthor?: string): Book {
   try {
     // Log pour déboguer la transformation d'un livre
     console.log(`[ISBNDB] Mappage du livre: ${isbndbBook.title || isbndbBook.title_long || 'Sans titre'}`);
@@ -127,9 +116,6 @@ function mapIsbndbBookToBook(isbndbBook: any, defaultAuthor?: string, prefLangua
     // Déterminer l'identifiant unique
     const id = isbndbBook.isbn13 || isbndbBook.isbn || `isbndb-${Math.random().toString(36).substring(2, 9)}`;
     
-    // Définir la langue du livre
-    const bookLanguage = isbndbBook.language ? [isbndbBook.language] : [prefLanguage];
-    
     // Extraire les informations pertinentes et les adapter au format Book
     return {
       id,
@@ -137,7 +123,7 @@ function mapIsbndbBookToBook(isbndbBook: any, defaultAuthor?: string, prefLangua
       title: isbndbBook.title || isbndbBook.title_long || 'Titre inconnu',
       author,
       cover: isbndbBook.image || '',
-      language: bookLanguage,
+      language: isbndbBook.language ? [isbndbBook.language] : ['fr'],
       isbn: isbndbBook.isbn13 || isbndbBook.isbn,
       publishers: isbndbBook.publisher ? [isbndbBook.publisher] : [],
       subjects: isbndbBook.subjects || [],
@@ -153,19 +139,19 @@ function mapIsbndbBookToBook(isbndbBook: any, defaultAuthor?: string, prefLangua
       id: `isbndb-error-${Math.random().toString(36).substring(2, 9)}`,
       title: isbndbBook?.title || 'Erreur de conversion',
       author: isbndbBook?.author || defaultAuthor || 'Inconnu',
-      language: [prefLanguage], // Champ obligatoire dans le type Book
+      language: ['fr'], // Champ obligatoire dans le type Book
     };
   }
 }
 
-export async function searchAllBooks(query: string, searchType: SearchType = 'general', language: SearchLanguage = 'fr'): Promise<Book[]> {
+export async function searchAllBooks(query: string, searchType: SearchType = 'general'): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
-    console.log(`[SEARCH] Démarrage recherche: "${query}" (type: ${searchType}, langue: ${language})`);
+    console.log(`[SEARCH] Démarrage recherche: "${query}" (type: ${searchType})`);
     
     // Tentative avec ISBNDB
-    const books = await searchIsbndb(query, searchType, language);
+    const books = await searchIsbndb(query, searchType);
     
     // Suppression des doublons
     const uniqueBooks = removeDuplicateBooks(books);

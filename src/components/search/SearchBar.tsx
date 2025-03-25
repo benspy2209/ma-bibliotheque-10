@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Input } from "@/components/ui/input";
-import { Search, Globe } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -13,17 +13,14 @@ import {
 } from "@/components/ui/select";
 import { SearchType } from '@/services/bookSearch';
 
-export type SearchLanguage = 'fr' | 'en';
-
 interface SearchBarProps {
-  onSearch: (query: string, searchType: SearchType, language: SearchLanguage) => void;
+  onSearch: (query: string, searchType: SearchType) => void;
   placeholder?: string;
 }
 
 export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState<SearchType>('general');
-  const [language, setLanguage] = useState<SearchLanguage>('fr');
   const { user } = useSupabaseAuth();
   const { toast } = useToast();
 
@@ -37,16 +34,16 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
     }
     
     const timeoutId = setTimeout(() => {
-      onSearch(value, searchType, language);
+      onSearch(value, searchType);
     }, 500);
 
     return () => clearTimeout(timeoutId);
   };
 
-  const handleLanguageChange = (value: SearchLanguage) => {
-    setLanguage(value);
+  const handleSearchTypeChange = (value: SearchType) => {
+    setSearchType(value);
     if (searchQuery && user) {
-      onSearch(searchQuery, searchType, value);
+      onSearch(searchQuery, value);
     }
   };
 
@@ -75,28 +72,17 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
           />
         </div>
         <Select 
-          value={language} 
-          onValueChange={(value) => handleLanguageChange(value as SearchLanguage)}
+          value={searchType} 
+          onValueChange={(value) => handleSearchTypeChange(value as SearchType)}
         >
           <SelectTrigger className="w-[180px] h-12">
-            <SelectValue placeholder="Langue">
-              <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4" />
-                {language === 'fr' ? 'Français' : 'Anglais'}
-              </div>
-            </SelectValue>
+            <SelectValue placeholder="Type de recherche" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="fr" className="flex items-center gap-2">
-              <div className="flex items-center gap-2">
-                <span>🇫🇷</span> Français
-              </div>
-            </SelectItem>
-            <SelectItem value="en" className="flex items-center gap-2">
-              <div className="flex items-center gap-2">
-                <span>🇬🇧</span> Anglais
-              </div>
-            </SelectItem>
+            <SelectItem value="general">Recherche globale</SelectItem>
+            <SelectItem value="author">Par auteur</SelectItem>
+            <SelectItem value="title">Par titre</SelectItem>
+            <SelectItem value="isbn">Par ISBN</SelectItem>
           </SelectContent>
         </Select>
       </div>

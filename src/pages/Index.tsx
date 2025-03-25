@@ -7,7 +7,7 @@ import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
 import { useToast } from "@/hooks/use-toast";
 import NavBar from '@/components/NavBar';
-import { SearchBar, SearchLanguage } from '@/components/search/SearchBar';
+import { SearchBar } from '@/components/search/SearchBar';
 import { BookGrid } from '@/components/search/BookGrid';
 import { HeaderSection } from '@/components/search/HeaderSection';
 import Footer from '@/components/Footer';
@@ -19,14 +19,9 @@ import { SearchLimitResponse, isSearchLimitResponse } from '@/types/searchLimits
 const BOOKS_PER_PAGE = 12;
 
 const Index = () => {
-  const [searchParams, setSearchParams] = useState<{ 
-    query: string; 
-    type: SearchType;
-    language: SearchLanguage;
-  }>({ 
+  const [searchParams, setSearchParams] = useState<{ query: string; type: SearchType }>({ 
     query: '', 
-    type: 'general',
-    language: 'fr'
+    type: 'author' 
   });
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [displayedBooks, setDisplayedBooks] = useState(BOOKS_PER_PAGE);
@@ -126,10 +121,10 @@ const Index = () => {
   };
 
   // Fonction de recherche avec vérification des limites
-  const handleSearch = async (query: string, searchType: SearchType, language: SearchLanguage) => {
+  const handleSearch = async (query: string, searchType: SearchType) => {
     // Si la recherche est vide, ne pas incrémenter le compteur
     if (!query.trim()) {
-      setSearchParams({ query: '', type: searchType, language });
+      setSearchParams({ query: '', type: searchType });
       return;
     }
     
@@ -157,7 +152,7 @@ const Index = () => {
     await incrementSearchCount();
     
     // Si la limite n'est pas atteinte, effectuer la recherche
-    setSearchParams({ query, type: searchType, language });
+    setSearchParams({ query, type: searchType });
   };
 
   // Utiliser useQuery pour la recherche unifiée
@@ -166,8 +161,8 @@ const Index = () => {
     isLoading,
     refetch 
   } = useQuery({
-    queryKey: ['allBooks', searchParams.query, searchParams.type, searchParams.language, refreshKey],
-    queryFn: () => searchAllBooks(searchParams.query, searchParams.type, searchParams.language),
+    queryKey: ['allBooks', searchParams.query, searchParams.type, refreshKey],
+    queryFn: () => searchAllBooks(searchParams.query, searchParams.type),
     enabled: searchParams.query.length > 0 && !searchLimitReached && !!user
   });
 
