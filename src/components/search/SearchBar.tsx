@@ -13,7 +13,7 @@ interface SearchBarProps {
 
 export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const { user, signIn } = useSupabaseAuth();
+  const { user, signIn, setShowLoginDialog } = useSupabaseAuth();
   const { toast } = useToast();
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,6 +45,7 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
   const handleConnectClick = () => {
     console.log("Ouverture du formulaire de connexion");
     signIn('signup');
+    setShowLoginDialog(true); // Explicitly show the login dialog
   };
 
   return (
