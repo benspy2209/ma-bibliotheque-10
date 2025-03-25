@@ -51,7 +51,7 @@ const Homepage = () => {
               <div className="lg:w-1/2">
                 <div className="relative">
                   <img 
-                    src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158" 
+                    src="/photo1.jpg" 
                     alt="Personne lisant et organisant sa bibliothèque" 
                     className="rounded-lg shadow-2xl object-cover"
                   />
@@ -166,7 +166,7 @@ const Homepage = () => {
               
               <div className="lg:w-1/2">
                 <img 
-                  src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b" 
+                  src="/photo2.jpg" 
                   alt="Application BiblioPulse sur différents appareils" 
                   className="rounded-lg shadow-xl object-cover w-full h-auto"
                 />
