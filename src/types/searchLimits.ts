@@ -10,11 +10,15 @@ export interface SearchLimitResponse {
   count?: number;
 }
 
-// Type guard pour vérifier si un objet est de type SearchLimitResponse
+// Type guard to check if an object is of type SearchLimitResponse
 export function isSearchLimitResponse(obj: Json): obj is SearchLimitResponse {
   return (
     typeof obj === 'object' && 
     obj !== null && 
-    ('remaining' in obj || 'can_search' in obj || 'success' in obj)
+    // Check for common properties without assuming the entire structure
+    'remaining' in obj && 
+    typeof obj.remaining === 'number' &&
+    'message' in obj && 
+    typeof obj.message === 'string'
   );
 }
