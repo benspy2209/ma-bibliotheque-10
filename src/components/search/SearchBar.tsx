@@ -11,16 +11,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SearchType } from '@/services/bookSearch';
+import { SearchType, LanguageFilter } from '@/services/bookSearch';
 
 interface SearchBarProps {
-  onSearch: (query: string, searchType: SearchType) => void;
+  onSearch: (query: string, searchType: SearchType, language: LanguageFilter) => void;
   placeholder?: string;
 }
 
 export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState<SearchType>('author');
+  const [language, setLanguage] = useState<LanguageFilter>('fr');
   const { user } = useSupabaseAuth();
   const { toast } = useToast();
 
@@ -34,7 +35,7 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
     }
     
     const timeoutId = setTimeout(() => {
-      onSearch(value, searchType);
+      onSearch(value, searchType, language);
     }, 500);
 
     return () => clearTimeout(timeoutId);
@@ -43,7 +44,14 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
   const handleSearchTypeChange = (value: SearchType) => {
     setSearchType(value);
     if (searchQuery && user) {
-      onSearch(searchQuery, value);
+      onSearch(searchQuery, value, language);
+    }
+  };
+
+  const handleLanguageChange = (value: LanguageFilter) => {
+    setLanguage(value);
+    if (searchQuery && user) {
+      onSearch(searchQuery, searchType, value);
     }
   };
 
@@ -72,16 +80,15 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
           />
         </div>
         <Select 
-          value={searchType} 
-          onValueChange={(value) => handleSearchTypeChange(value as SearchType)}
+          value={language} 
+          onValueChange={(value) => handleLanguageChange(value as LanguageFilter)}
         >
           <SelectTrigger className="w-[180px] h-12">
-            <SelectValue placeholder="Type de recherche" />
+            <SelectValue placeholder="Langue" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="author">Par auteur</SelectItem>
-            <SelectItem value="title">Par titre</SelectItem>
-            <SelectItem value="general">Général</SelectItem>
+            <SelectItem value="fr">Français</SelectItem>
+            <SelectItem value="en">Anglais</SelectItem>
           </SelectContent>
         </Select>
       </div>

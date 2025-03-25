@@ -1,5 +1,6 @@
 
 import { Book } from '@/types/book';
+import { LanguageFilter } from '@/services/bookSearch';
 
 // Clé API ISBNDB
 const ISBNDB_API_KEY = '60264_3de7f2f024bc350bfa823cbbd9e64315';
@@ -32,8 +33,8 @@ function cleanDescription(description: string): string {
   return cleaned;
 }
 
-export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
-  console.log('Récupération des détails pour le livre:', bookId);
+export async function getBookDetails(bookId: string, language: LanguageFilter = 'fr'): Promise<Partial<Book>> {
+  console.log('Récupération des détails pour le livre:', bookId, 'langue:', language);
   
   try {
     // Vérifier si l'ID est un ISBN
@@ -51,8 +52,9 @@ export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
     }
     
     const endpoint = `/book/${bookId}`;
+    const languageParam = language ? `?language=${language}` : '';
     
-    const response = await fetch(`${ISBNDB_BASE_URL}${endpoint}`, {
+    const response = await fetch(`${ISBNDB_BASE_URL}${endpoint}${languageParam}`, {
       method: 'GET',
       headers: {
         'Authorization': ISBNDB_API_KEY,
@@ -77,7 +79,7 @@ export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
         publishDate: book.date_published || '',
         publishers: book.publisher ? [book.publisher] : [],
         isbn: book.isbn13 || book.isbn,
-        language: book.language ? [book.language] : ['fr'],
+        language: book.language ? [book.language] : [language],
       };
     }
     

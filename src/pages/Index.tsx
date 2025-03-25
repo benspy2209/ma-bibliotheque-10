@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { searchAllBooks, SearchType } from '@/services/bookSearch';
+import { searchAllBooks, SearchType, LanguageFilter } from '@/services/bookSearch';
 import { getBookDetails } from '@/services/bookDetails';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
@@ -19,9 +19,14 @@ import { SearchLimitResponse, isSearchLimitResponse } from '@/types/searchLimits
 const BOOKS_PER_PAGE = 12;
 
 const Index = () => {
-  const [searchParams, setSearchParams] = useState<{ query: string; type: SearchType }>({ 
+  const [searchParams, setSearchParams] = useState<{ 
+    query: string; 
+    type: SearchType;
+    language: LanguageFilter;
+  }>({ 
     query: '', 
-    type: 'author' 
+    type: 'author',
+    language: 'fr'
   });
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [displayedBooks, setDisplayedBooks] = useState(BOOKS_PER_PAGE);
@@ -121,10 +126,10 @@ const Index = () => {
   };
 
   // Fonction de recherche avec vérification des limites
-  const handleSearch = async (query: string, searchType: SearchType) => {
+  const handleSearch = async (query: string, searchType: SearchType, language: LanguageFilter) => {
     // Si la recherche est vide, ne pas incrémenter le compteur
     if (!query.trim()) {
-      setSearchParams({ query: '', type: searchType });
+      setSearchParams({ query: '', type: searchType, language });
       return;
     }
     
@@ -152,7 +157,7 @@ const Index = () => {
     await incrementSearchCount();
     
     // Si la limite n'est pas atteinte, effectuer la recherche
-    setSearchParams({ query, type: searchType });
+    setSearchParams({ query, type: searchType, language });
   };
 
   // Utiliser useQuery pour la recherche unifiée
@@ -161,8 +166,8 @@ const Index = () => {
     isLoading,
     refetch 
   } = useQuery({
-    queryKey: ['allBooks', searchParams.query, searchParams.type, refreshKey],
-    queryFn: () => searchAllBooks(searchParams.query, searchParams.type),
+    queryKey: ['allBooks', searchParams.query, searchParams.type, searchParams.language, refreshKey],
+    queryFn: () => searchAllBooks(searchParams.query, searchParams.type, searchParams.language),
     enabled: searchParams.query.length > 0 && !searchLimitReached && !!user
   });
 
@@ -175,7 +180,7 @@ const Index = () => {
         });
         return;
       }
-      const details = await getBookDetails(book.id);
+      const details = await getBookDetails(book.id, searchParams.language);
       setSelectedBook({ ...book, ...details });
     } catch (error) {
       console.error("Erreur lors du chargement des détails:", error);
