@@ -1,8 +1,6 @@
 
 export type ReadingStatus = 'to-read' | 'reading' | 'completed';
 
-export type BookFormat = 'print' | 'audio' | 'ebook' | 'unknown';
-
 export type Book = {
   id: string;
   sourceId?: string; // ID original du livre depuis des sources externes (Google Books, Open Library)
@@ -22,7 +20,7 @@ export type Book = {
   status?: ReadingStatus;
   completionDate?: string;
   readingTimeDays?: number;
-  format?: BookFormat;
+  format?: string; // Format du livre (broché, relié, audio, etc.)
   review?: {
     content: string;
     date: string;

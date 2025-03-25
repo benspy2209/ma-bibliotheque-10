@@ -37,27 +37,50 @@ export function removeDuplicateBooks(books: Book[]): Book[] {
   });
 }
 
-// Liste étendue de mots-clés techniques pour le post-filtrage
+// Liste étendue et améliorée de mots-clés techniques à exclure
 const TECHNICAL_KEYWORDS = [
+  // Ouvrages techniques et académiques
   'manuel', 'guide', 'prospection', 'minier', 'minière', 'géologie', 'scientifique',
   'technique', 'rapport', 'étude', 'ingénierie', 'document', 'actes', 'conférence',
   'colloque', 'symposium', 'proceedings', 'thèse', 'mémoire', 'doctorat',
+  
+  // Ouvrages de référence
   'dictionnaire', 'encyclopédie', 'lexique', 'glossaire', 'référence', 'répertoire',
   'catalogue', 'index', 'annuaire', 'bibliographie', 'revue', 'périodique', 'collection',
   'compilation', 'atlas', 'critique', 'édition critique', 'chronologie', 'chronique',
-  'recueil', 'almanach', 'traité', 'précis', 'abrégé', 'compendium',
-  'anthologie', 'mélanges', 'festschrift', 'correspondance', 'lettres', 'journal',
-  'carnets', 'cahiers', 'notes', 'essais', 'études', 'leçons', 'cours', 'conférences',
-  'méthode', 'guide pratique', 'manuel de'
+  
+  // Formats spécifiques
+  'coffret', 'intégrale', 'recueil', 'almanach', 'traité', 'précis', 'abrégé', 
+  'compendium', 'anthologie', 'mélanges', 'festschrift',
+  
+  // Documents personnels
+  'correspondance', 'lettres', 'journal', 'carnets', 'cahiers', 'notes',
+  
+  // Contenus académiques/éducatifs
+  'essais', 'études', 'leçons', 'cours', 'conférences', 'méthode', 
+  'guide pratique', 'manuel de', 'théorie'
 ];
 
-// Mots-clés spécifiques aux types de livres non désirés - liste étendue
+// Formats de livres à exclure dans les titres
+const UNWANTED_FORMATS = [
+  'audio cd', 'audiobook', 'audio book', 'livre audio', 'mp3', 
+  'coffret', 'boxed set', 'box set', 'collector', 'édition spéciale', 
+  'edition spéciale', 'special edition', 'collector\'s edition'
+];
+
+// Mots-clés spécifiques aux types de livres non désirés - liste étendue et améliorée
 const UNWANTED_TYPES = [
-  'dictionnaire', 'critiq', 'theolog', 'dogmat', 'canoni', 'universel', 'ecclesiasti',
-  'sciences', 'geographi', 'chronologi', 'histori', 'encyclopédie', 'traité', 'manuel',
-  'revue', 'journal', 'magazine', 'périodique', 'bulletin', 'lexique', 'répertoire',
-  'compendium', 'abrégé', 'précis', 'actes', 'proceedings', 'études', 'annales',
-  'méthode', 'guide pratique', 'cours de'
+  // Types d'ouvrages académiques/référence
+  'dictionnaire', 'encyclopédie', 'traité', 'manuel', 'revue', 'journal',
+  'magazine', 'périodique', 'bulletin', 'lexique', 'répertoire', 'compendium',
+  'abrégé', 'précis', 'actes', 'proceedings', 'études', 'annales',
+  'méthode', 'guide pratique', 'cours de',
+  
+  // Mots-clés religieux/théologiques
+  'theolog', 'dogmat', 'canoni', 'ecclesiasti',
+  
+  // Mots-clés académiques
+  'critiq', 'universel', 'sciences', 'geographi', 'chronologi', 'histori'
 ];
 
 export function filterNonBookResults(books: Book[]): Book[] {
@@ -70,14 +93,21 @@ export function filterNonBookResults(books: Book[]): Book[] {
       : (book.author || '').toLowerCase();
     const subjectsString = (book.subjects || []).join(' ').toLowerCase();
     const descriptionLower = (book.description || '').toLowerCase();
+    const formatLower = (book.format || '').toLowerCase();
     
-    const allText = `${titleLower} ${authorString} ${subjectsString} ${descriptionLower}`;
+    const allText = `${titleLower} ${authorString} ${subjectsString} ${descriptionLower} ${formatLower}`;
     
-    // Exclure les livres qui contiennent des mots-clés techniques ou des types non désirés
+    // Exclure les formats non désirés (audio, coffrets, etc.)
+    const isUnwantedFormat = UNWANTED_FORMATS.some(format => 
+      allText.includes(format.toLowerCase())
+    );
+    
+    // Exclure les livres qui contiennent des mots-clés techniques
     const containsTechnicalKeywords = TECHNICAL_KEYWORDS.some(keyword => 
       allText.includes(keyword.toLowerCase())
     );
     
+    // Exclure les livres dont le titre contient des types non désirés
     const containsUnwantedTypes = UNWANTED_TYPES.some(keyword => 
       titleLower.includes(keyword.toLowerCase())
     );
@@ -88,9 +118,21 @@ export function filterNonBookResults(books: Book[]): Book[] {
                               titleLower.startsWith('oeuvres complètes') ||
                               titleLower.startsWith('œuvres complètes') ||
                               titleLower.includes('collection') ||
-                              titleLower.includes('anthologie');
+                              titleLower.includes('anthologie') ||
+                              titleLower.includes('coffret') ||
+                              titleLower.includes('l\'intégrale') ||
+                              titleLower.includes('intégrale');
     
-    return !containsTechnicalKeywords && !containsUnwantedTypes && !isSuspiciousTitle;
+    // Exclure les formats audio explicites
+    const isAudioBook = formatLower.includes('audio') || 
+                        titleLower.includes('audio cd') || 
+                        titleLower.includes('livre audio');
+    
+    return !containsTechnicalKeywords && 
+           !containsUnwantedTypes && 
+           !isSuspiciousTitle && 
+           !isUnwantedFormat && 
+           !isAudioBook;
   });
 }
 
@@ -163,3 +205,4 @@ export function isDuplicateBook(existingBooks: Book[], newBook: Book): boolean {
     return existingBookTitle === newBookTitle && existingBookAuthor === newBookAuthor;
   });
 }
+

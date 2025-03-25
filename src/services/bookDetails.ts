@@ -1,21 +1,10 @@
 
 import { Book } from '@/types/book';
 import { LanguageFilter } from '@/services/bookSearch';
-import axios from 'axios';
 
 // Clé API ISBNDB
 const ISBNDB_API_KEY = '60264_3de7f2f024bc350bfa823cbbd9e64315';
 const ISBNDB_BASE_URL = 'https://api2.isbndb.com';
-
-// Créer une instance axios avec la configuration de base
-const isbndbApi = axios.create({
-  baseURL: ISBNDB_BASE_URL,
-  headers: {
-    'Authorization': ISBNDB_API_KEY,
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  }
-});
 
 function cleanDescription(description: string): string {
   if (!description) return '';
@@ -65,9 +54,19 @@ export async function getBookDetails(bookId: string, language: LanguageFilter = 
     const endpoint = `/book/${bookId}`;
     const languageParam = language ? `?language=${language}` : '';
     
-    const response = await isbndbApi.get(`${endpoint}${languageParam}`);
-    const data = response.data;
+    const response = await fetch(`${ISBNDB_BASE_URL}${endpoint}${languageParam}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': ISBNDB_API_KEY,
+        'Accept': 'application/json',
+      }
+    });
     
+    if (!response.ok) {
+      throw new Error(`Erreur ISBNDB: ${response.status} ${response.statusText}`);
+    }
+    
+    const data = await response.json();
     console.log('Détails du livre:', data);
     
     if (data.book) {
