@@ -4,6 +4,17 @@ import { Book } from '@/types/book';
 const ISBNDB_API_KEY = '60264_3de7f2f024bc350bfa823cbbd9e64315';
 const ISBNDB_BASE_URL = 'https://api2.isbndb.com';
 
+// Configuration des en-têtes pour les requêtes
+const getHeaders = () => {
+  return {
+    'Authorization': ISBNDB_API_KEY,
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
+    'Access-Control-Allow-Origin': '*' // Demande explicite de CORS
+  };
+};
+
 export async function getBookDetails(bookId: string, language: string = 'fr'): Promise<Partial<Book>> {
   try {
     console.log(`Récupération des détails pour le livre ID: ${bookId}, langue: ${language}`);
@@ -23,17 +34,25 @@ export async function getBookDetails(bookId: string, language: string = 'fr'): P
     const url = `${ISBNDB_BASE_URL}/book/${encodedBookId}`;
     
     console.log(`URL de l'API pour les détails: ${url}`);
+    console.log('En-têtes envoyés (détails):', getHeaders());
     
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Authorization': ISBNDB_API_KEY,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
+      headers: getHeaders(),
+      mode: 'cors' // Explicitement demander un mode CORS
     });
     
+    console.log('Statut de réponse (détails):', response.status, response.statusText);
+    
     if (!response.ok) {
+      // Afficher le corps de la réponse en cas d'erreur pour le diagnostic
+      try {
+        const errorBody = await response.text();
+        console.error('Corps de la réponse d\'erreur (détails):', errorBody);
+      } catch (e) {
+        console.error('Impossible de lire le corps de la réponse d\'erreur (détails)');
+      }
+      
       console.error(`Erreur API détails du livre: ${response.status} ${response.statusText}`);
       return {};
     }

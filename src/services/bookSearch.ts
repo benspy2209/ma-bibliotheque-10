@@ -9,6 +9,17 @@ export type LanguageFilter = 'fr' | 'en';
 const ISBNDB_API_KEY = '60264_3de7f2f024bc350bfa823cbbd9e64315';
 const ISBNDB_BASE_URL = 'https://api2.isbndb.com';
 
+// Configuration des en-têtes pour les requêtes
+const getHeaders = () => {
+  return {
+    'Authorization': ISBNDB_API_KEY,
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
+    'Access-Control-Allow-Origin': '*' // Demande explicite de CORS
+  };
+};
+
 // Fonction pour faire une recherche par auteur avec l'endpoint correct
 export async function searchAuthorBooks(authorName: string, language: LanguageFilter = 'fr', maxResults: number = 100): Promise<Book[]> {
   if (!authorName.trim()) return [];
@@ -19,18 +30,28 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
     const url = `${ISBNDB_BASE_URL}/author/${encodedAuthorName}?pageSize=${maxResults}&language=${language}`;
     
     console.log(`Recherche par auteur: ${url}`);
+    console.log('En-têtes envoyés:', getHeaders());
     
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Authorization': ISBNDB_API_KEY,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
+      headers: getHeaders(),
+      mode: 'cors' // Explicitement demander un mode CORS
     });
+    
+    console.log('Statut de réponse:', response.status, response.statusText);
+    console.log('En-têtes de réponse:', Object.fromEntries([...response.headers.entries()]));
     
     if (!response.ok) {
       console.error(`Erreur ISBNDB (recherche auteur): ${response.status} ${response.statusText}`);
+      
+      // Afficher le corps de la réponse en cas d'erreur pour le diagnostic
+      try {
+        const errorBody = await response.text();
+        console.error('Corps de la réponse d\'erreur:', errorBody);
+      } catch (e) {
+        console.error('Impossible de lire le corps de la réponse d\'erreur');
+      }
+      
       throw new Error(`Erreur ISBNDB (recherche auteur): ${response.status} ${response.statusText}`);
     }
     
@@ -71,17 +92,25 @@ async function fallbackAuthorSearch(authorName: string, language: LanguageFilter
   const url = `${ISBNDB_BASE_URL}/books/${encodeURIComponent(authorName)}?pageSize=${maxResults}&language=${language}`;
   
   console.log(`Recherche alternative: ${url}`);
+  console.log('En-têtes envoyés (fallback):', getHeaders());
   
   const response = await fetch(url, {
     method: 'GET',
-    headers: {
-      'Authorization': ISBNDB_API_KEY,
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    }
+    headers: getHeaders(),
+    mode: 'cors' // Explicitement demander un mode CORS
   });
   
+  console.log('Statut de réponse (fallback):', response.status, response.statusText);
+  
   if (!response.ok) {
+    // Afficher le corps de la réponse en cas d'erreur pour le diagnostic
+    try {
+      const errorBody = await response.text();
+      console.error('Corps de la réponse d\'erreur (fallback):', errorBody);
+    } catch (e) {
+      console.error('Impossible de lire le corps de la réponse d\'erreur (fallback)');
+    }
+    
     throw new Error(`Erreur recherche alternative: ${response.status}`);
   }
   
@@ -109,17 +138,25 @@ export async function searchBooksByTitle(title: string, language: LanguageFilter
     const url = `${ISBNDB_BASE_URL}/books/${encodedTitle}?pageSize=${maxResults}&language=${language}`;
     
     console.log(`Recherche par titre: ${url}`);
+    console.log('En-têtes envoyés (titre):', getHeaders());
     
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Authorization': ISBNDB_API_KEY,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
+      headers: getHeaders(),
+      mode: 'cors' // Explicitement demander un mode CORS
     });
     
+    console.log('Statut de réponse (titre):', response.status, response.statusText);
+    
     if (!response.ok) {
+      // Afficher le corps de la réponse en cas d'erreur pour le diagnostic
+      try {
+        const errorBody = await response.text();
+        console.error('Corps de la réponse d\'erreur (titre):', errorBody);
+      } catch (e) {
+        console.error('Impossible de lire le corps de la réponse d\'erreur (titre)');
+      }
+      
       throw new Error(`Erreur ISBNDB (recherche titre): ${response.status} ${response.statusText}`);
     }
     

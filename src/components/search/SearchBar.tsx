@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Input } from "@/components/ui/input";
 import { Search, BookOpen, User, BookText } from 'lucide-react';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
@@ -32,6 +32,8 @@ export const SearchBar = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState<SearchType>('author');
   const [language, setLanguage] = useState<LanguageFilter>('fr');
+  const [isSearching, setIsSearching] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { user } = useSupabaseAuth();
   const { toast } = useToast();
 
@@ -44,24 +46,42 @@ export const SearchBar = ({
       return;
     }
     
-    const timeoutId = setTimeout(() => {
-      onSearch(value, searchType, language);
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
+    // Annuler le timeout précédent si existant
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    // Définir un délai avant d'effectuer la recherche pour éviter les requêtes excessives
+    searchTimeoutRef.current = setTimeout(() => {
+      if (value.trim().length > 2) { // Rechercher seulement si la requête a plus de 2 caractères
+        setIsSearching(true);
+        onSearch(value, searchType, language)
+          .finally(() => {
+            setIsSearching(false);
+          });
+      }
+    }, 800); // Délai plus long pour réduire les requêtes API
   };
 
   const handleSearchTypeChange = (value: SearchType) => {
     setSearchType(value);
-    if (searchQuery && user) {
-      onSearch(searchQuery, value, language);
+    if (searchQuery && searchQuery.trim().length > 2 && user) {
+      setIsSearching(true);
+      onSearch(searchQuery, value, language)
+        .finally(() => {
+          setIsSearching(false);
+        });
     }
   };
 
   const handleLanguageChange = (value: LanguageFilter) => {
     setLanguage(value);
-    if (searchQuery && user) {
-      onSearch(searchQuery, searchType, value);
+    if (searchQuery && searchQuery.trim().length > 2 && user) {
+      setIsSearching(true);
+      onSearch(searchQuery, searchType, value)
+        .finally(() => {
+          setIsSearching(false);
+        });
     }
   };
 
@@ -81,11 +101,37 @@ export const SearchBar = ({
     }
   };
 
+  const handleSubmitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!user) {
+      toast({
+        title: "Connexion requise",
+        description: "Vous devez vous connecter ou créer un compte pour faire une recherche.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (searchQuery.trim().length > 2) {
+      setIsSearching(true);
+      onSearch(searchQuery, searchType, language)
+        .finally(() => {
+          setIsSearching(false);
+        });
+    } else if (searchQuery.trim().length > 0) {
+      toast({
+        description: "Veuillez entrer au moins 3 caractères pour la recherche.",
+        variant: "default"
+      });
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-2 sm:flex-row">
+      <form onSubmit={handleSubmitSearch} className="flex flex-col gap-2 sm:flex-row">
         <div className="relative flex-grow">
-          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+          <Search className={`absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 ${isSearching ? 'text-primary animate-pulse' : 'text-gray-400'}`} />
           <Input
             type="search"
             placeholder={placeholder}
@@ -142,7 +188,15 @@ export const SearchBar = ({
             <SelectItem value="en">Anglais</SelectItem>
           </SelectContent>
         </Select>
-      </div>
+        
+        <Button 
+          type="submit" 
+          className="h-12 sm:w-auto"
+          disabled={isSearching || !user}
+        >
+          {isSearching ? 'Recherche...' : 'Rechercher'}
+        </Button>
+      </form>
       
       {hasMoreResults && searchQuery && (
         <div className="flex justify-center mt-2">
