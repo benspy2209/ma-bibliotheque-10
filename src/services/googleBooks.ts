@@ -13,35 +13,31 @@ const TECHNICAL_KEYWORDS = [
 
 function isTechnicalBook(title: string, description: string = '', subjects: string[] = []): boolean {
   const allText = `${title} ${description} ${subjects.join(' ')}`.toLowerCase();
-  
-  // Vérifier si le titre ou la description contient des mots-clés techniques
   return TECHNICAL_KEYWORDS.some(keyword => allText.includes(keyword.toLowerCase()));
 }
 
-function isAuthorMatch(authorNames: string[], searchQuery: string): boolean {
-  if (!authorNames || authorNames.length === 0) return false;
-  
-  const searchTerms = searchQuery.toLowerCase().split(' ');
-  
-  return authorNames.some(author => {
-    if (!author) return false;
-    const authorLower = author.toLowerCase();
-    
-    // Si le nom de l'auteur contient tous les termes de recherche
-    return searchTerms.every(term => authorLower.includes(term));
-  });
-}
-
-export async function searchGoogleBooks(query: string): Promise<Book[]> {
+export async function searchGoogleBooks(query: string, searchType: 'author' | 'title' | 'general' = 'author'): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
-    // Construire la requête avec "inauthor:" pour cibler les auteurs
-    const authorQuery = `inauthor:"${query}"`;
+    // Construire la requête selon le type de recherche
+    let searchQuery = '';
+    switch (searchType) {
+      case 'author':
+        searchQuery = `inauthor:"${query}"`;
+        break;
+      case 'title':
+        searchQuery = `intitle:"${query}"`;
+        break;
+      case 'general':
+      default:
+        searchQuery = query;
+        break;
+    }
     
     // Ajout du filtre de langue 'fr' pour récupérer seulement des livres en français
     const response = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(authorQuery)}&langRestrict=fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(searchQuery)}&langRestrict=fr&maxResults=40&fields=items(id,volumeInfo)&key=${GOOGLE_BOOKS_API_KEY}`
     );
 
     if (!response.ok) {
@@ -100,9 +96,9 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
           return null; // Exclure les livres techniques
         }
         
-        // Vérifier si l'auteur correspond à la recherche
-        if (!isAuthorMatch(book.author, query)) {
-          return null; // Exclure les livres d'autres auteurs
+        // Si recherche par auteur, vérifier la correspondance
+        if (searchType === 'author' && !isAuthorMatch(book.author, query)) {
+          return null;
         }
         
         return book;
@@ -110,10 +106,25 @@ export async function searchGoogleBooks(query: string): Promise<Book[]> {
 
     // Filtrer les nulls (livres techniques exclus et auteurs ne correspondant pas)
     const filteredBooks = books.filter(Boolean);
-    console.log(`Google Books: Trouvé ${filteredBooks.length} livres en français de l'auteur "${query}"`);
+    console.log(`Google Books: Trouvé ${filteredBooks.length} livres en français pour "${query}"`);
     return filteredBooks;
   } catch (error) {
     console.error('Erreur lors de la recherche Google Books:', error);
     return [];
   }
+}
+
+// Fonction utilitaire pour vérifier si un auteur correspond à la recherche
+function isAuthorMatch(authorNames: string[], searchQuery: string): boolean {
+  if (!authorNames || authorNames.length === 0) return false;
+  
+  const searchTerms = searchQuery.toLowerCase().split(' ');
+  
+  return authorNames.some(author => {
+    if (!author) return false;
+    const authorLower = author.toLowerCase();
+    
+    // Si le nom de l'auteur contient tous les termes de recherche
+    return searchTerms.every(term => authorLower.includes(term));
+  });
 }

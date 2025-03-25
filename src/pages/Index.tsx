@@ -1,12 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { useQueries } from '@tanstack/react-query';
-import { searchBooks } from '@/services/openLibrary';
-import { searchGoogleBooks } from '@/services/googleBooks';
+import { useQuery } from '@tanstack/react-query';
+import { searchAllBooks, SearchType } from '@/services/bookSearch';
 import { getBookDetails } from '@/services/bookDetails';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
-import { removeDuplicateBooks } from '@/lib/utils';
 import { useToast } from "@/hooks/use-toast";
 import NavBar from '@/components/NavBar';
 import { SearchBar } from '@/components/search/SearchBar';
@@ -21,7 +19,10 @@ import { SearchLimitResponse, isSearchLimitResponse } from '@/types/searchLimits
 const BOOKS_PER_PAGE = 12;
 
 const Index = () => {
-  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [searchParams, setSearchParams] = useState<{ query: string; type: SearchType }>({ 
+    query: '', 
+    type: 'author' 
+  });
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [displayedBooks, setDisplayedBooks] = useState(BOOKS_PER_PAGE);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -83,7 +84,7 @@ const Index = () => {
 
   // Incrémenter le compteur de recherche
   const incrementSearchCount = async () => {
-    if (!debouncedQuery || !user) return; // Ne pas incrémenter si aucun utilisateur ou aucune requête
+    if (!searchParams.query || !user) return; // Ne pas incrémenter si aucun utilisateur ou aucune requête
     
     try {
       const ip = await getUserIp();
@@ -120,10 +121,10 @@ const Index = () => {
   };
 
   // Fonction de recherche avec vérification des limites
-  const handleSearch = async (query: string) => {
+  const handleSearch = async (query: string, searchType: SearchType) => {
     // Si la recherche est vide, ne pas incrémenter le compteur
     if (!query.trim()) {
-      setDebouncedQuery('');
+      setSearchParams({ query: '', type: searchType });
       return;
     }
     
@@ -151,37 +152,19 @@ const Index = () => {
     await incrementSearchCount();
     
     // Si la limite n'est pas atteinte, effectuer la recherche
-    setDebouncedQuery(query);
+    setSearchParams({ query, type: searchType });
   };
 
-  const results = useQueries({
-    queries: [
-      {
-        queryKey: ['openLibrary', debouncedQuery, refreshKey],
-        queryFn: () => searchBooks(debouncedQuery),
-        enabled: debouncedQuery.length > 0 && !searchLimitReached && !!user
-      },
-      {
-        queryKey: ['googleBooks', debouncedQuery, refreshKey],
-        queryFn: () => searchGoogleBooks(debouncedQuery),
-        enabled: debouncedQuery.length > 0 && !searchLimitReached && !!user
-      }
-    ]
+  // Utiliser useQuery pour la recherche unifiée
+  const { 
+    data: books = [], 
+    isLoading,
+    refetch 
+  } = useQuery({
+    queryKey: ['allBooks', searchParams.query, searchParams.type, refreshKey],
+    queryFn: () => searchAllBooks(searchParams.query, searchParams.type),
+    enabled: searchParams.query.length > 0 && !searchLimitReached && !!user
   });
-
-  const isLoading = results.some(result => result.isLoading);
-  const allBooks = [
-    ...(results[0].data || []), 
-    ...(results[1].data || [])
-  ].filter(book => 
-    book && 
-    book.title && 
-    book.language && 
-    (book.language.includes('fr') || book.language.includes('fre') || book.language.includes('fra'))
-  );
-  const books = removeDuplicateBooks(allBooks);
-  
-  console.log(`Total des résultats combinés en français: ${books.length} livres`);
 
   const handleBookClick = async (book: Book) => {
     try {
@@ -216,7 +199,7 @@ const Index = () => {
   const handleBookUpdate = () => {
     setRefreshKey(prev => prev + 1);
     // Forcer l'actualisation des données
-    results.forEach(result => result.refetch());
+    refetch();
   };
 
   const visibleBooks = books.slice(0, displayedBooks);
@@ -243,13 +226,13 @@ const Index = () => {
           </div>
 
           <BookGrid 
-            books={!debouncedQuery ? [] : visibleBooks}
+            books={!searchParams.query ? [] : visibleBooks}
             onBookClick={handleBookClick}
             displayedBooks={displayedBooks}
             totalBooks={books.length}
             onLoadMore={handleLoadMore}
             isLoading={isLoading}
-            searchQuery={debouncedQuery}
+            searchQuery={searchParams.query}
           />
 
           {selectedBook && (
