@@ -33,14 +33,14 @@ function cleanDescription(description: string): string {
 }
 
 export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
-  console.log('[DETAIL] Récupération des détails pour le livre:', bookId);
+  console.log('Récupération des détails pour le livre:', bookId);
   
   try {
     // Vérifier si l'ID est un ISBN
     const isIsbn = bookId.match(/^[0-9]{10}$|^[0-9]{13}$/);
     
     if (!isIsbn) {
-      console.log('[DETAIL] L\'ID fourni n\'est pas un ISBN valide:', bookId);
+      console.log('L\'ID fourni n\'est pas un ISBN valide:', bookId);
       return {
         description: '',
         subjects: [],
@@ -51,11 +51,8 @@ export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
     }
     
     const endpoint = `/book/${bookId}`;
-    const url = `${ISBNDB_BASE_URL}${endpoint}`;
     
-    console.log(`[DETAIL] Envoi requête détails: ${url}`);
-    
-    const response = await fetch(url, {
+    const response = await fetch(`${ISBNDB_BASE_URL}${endpoint}`, {
       method: 'GET',
       headers: {
         'Authorization': ISBNDB_API_KEY,
@@ -63,18 +60,15 @@ export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
       }
     });
     
-    console.log(`[DETAIL] Statut réponse: ${response.status} ${response.statusText}`);
-    
     if (!response.ok) {
       throw new Error(`Erreur ISBNDB: ${response.status} ${response.statusText}`);
     }
     
     const data = await response.json();
-    console.log('[DETAIL] Structure de la réponse:', Object.keys(data));
+    console.log('Détails du livre:', data);
     
     if (data.book) {
       const book = data.book;
-      console.log('[DETAIL] Détails reçus:', JSON.stringify(book, null, 2));
       
       return {
         description: cleanDescription(book.synopsis || ''),
@@ -87,7 +81,6 @@ export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
       };
     }
     
-    console.log('[DETAIL] Aucun détail trouvé pour ce livre');
     return {
       description: '',
       subjects: [],
@@ -96,7 +89,7 @@ export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
       publishers: [],
     };
   } catch (error) {
-    console.error('[DETAIL] Erreur lors de la récupération des détails du livre:', error);
+    console.error('Erreur lors de la récupération des détails du livre:', error);
     return {
       description: '',
       subjects: [],
