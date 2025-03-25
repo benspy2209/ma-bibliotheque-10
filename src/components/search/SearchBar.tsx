@@ -33,7 +33,6 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
       return;
     }
     
-    // Retarder la recherche pour éviter trop de requêtes
     const timeoutId = setTimeout(() => {
       onSearch(value, searchType);
     }, 500);
@@ -43,23 +42,6 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
 
   const handleSearchTypeChange = (value: SearchType) => {
     setSearchType(value);
-    
-    // Afficher des conseils en fonction du type de recherche
-    if (value === 'isbn') {
-      toast({
-        title: "Conseil de recherche",
-        description: "Pour les ISBN, entrez le code à 10 ou 13 chiffres avec ou sans tirets.",
-      });
-    } else if (value === 'author') {
-      toast({
-        description: "Entrez le nom de l'auteur pour trouver tous ses livres.",
-      });
-    } else if (value === 'general') {
-      toast({
-        description: "La recherche globale trouve des livres par titre, auteur, ISBN et plus encore.",
-      });
-    }
-    
     if (searchQuery && user) {
       onSearch(searchQuery, value);
     }
@@ -75,20 +57,6 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
     }
   };
 
-  // Modifier le placeholder en fonction du type de recherche
-  const getPlaceholder = () => {
-    switch (searchType) {
-      case 'author':
-        return "Nom de l'auteur...";
-      case 'title':
-        return "Titre du livre...";
-      case 'isbn':
-        return "Code ISBN (ex: 9782352949091 ou 978-2352949091)...";
-      default:
-        return "Recherche globale (titre, auteur, ISBN...)";
-    }
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex gap-2">
@@ -96,7 +64,7 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
           <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
           <Input
             type="search"
-            placeholder={getPlaceholder()}
+            placeholder={placeholder}
             className="pl-10 h-12"
             value={searchQuery}
             onChange={handleSearch}

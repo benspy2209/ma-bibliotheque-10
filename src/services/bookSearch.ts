@@ -1,3 +1,4 @@
+
 import { Book } from '@/types/book';
 import { removeDuplicateBooks } from '@/lib/utils';
 
@@ -25,16 +26,13 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'gene
         params = '?page=1&pageSize=20';
         break;
       case 'isbn':
-        // Pour les ISBN, utiliser l'endpoint général /search/books
-        const cleanedIsbn = query.replace(/-/g, '');
-        endpoint = `/search/books`;
-        params = `?page=1&pageSize=20&isbn13=${encodeURIComponent(cleanedIsbn)}`;
+        // Si c'est un ISBN valide, on utilise l'endpoint book directement
+        endpoint = `/book/${encodeURIComponent(query)}`;
         break;
       case 'general':
       default:
-        // Pour une recherche générale, utiliser l'endpoint /search
-        endpoint = `/search`;
-        params = `?page=1&pageSize=20&q=${encodeURIComponent(query)}`;
+        endpoint = `/books/${encodeURIComponent(query)}`;
+        params = '?page=1&pageSize=20';
     }
 
     const url = `${ISBNDB_BASE_URL}${endpoint}${params}`;
@@ -52,38 +50,6 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'gene
     console.log(`[ISBNDB] Statut réponse: ${response.status} ${response.statusText}`);
     
     if (!response.ok) {
-      // Si la recherche échoue et qu'il s'agit d'un ISBN, essayer l'endpoint de recherche général
-      if (searchType === 'isbn' && endpoint !== '/search') {
-        console.log('[ISBNDB] Recherche ISBN échouée, tentative avec l\'endpoint /search');
-        
-        const cleanedIsbn = query.replace(/-/g, '');
-        const fallbackUrl = `${ISBNDB_BASE_URL}/search?page=1&pageSize=20&q=${encodeURIComponent(cleanedIsbn)}`;
-        
-        console.log(`[ISBNDB] Tentative alternative: ${fallbackUrl}`);
-        
-        const fallbackResponse = await fetch(fallbackUrl, {
-          method: 'GET',
-          headers: {
-            'Authorization': ISBNDB_API_KEY,
-            'Accept': 'application/json',
-          }
-        });
-        
-        if (!fallbackResponse.ok) {
-          throw new Error(`Erreur ISBNDB (fallback): ${fallbackResponse.status} ${fallbackResponse.statusText}`);
-        }
-        
-        const fallbackData = await fallbackResponse.json();
-        console.log('[ISBNDB] Structure de la réponse (fallback):', Object.keys(fallbackData));
-        
-        if (fallbackData.books && fallbackData.books.length > 0) {
-          console.log(`[ISBNDB] ${fallbackData.books.length} livres trouvés par la recherche générale`);
-          return fallbackData.books.map((book: any) => mapIsbndbBookToBook(book));
-        }
-        
-        return [];
-      }
-      
       throw new Error(`Erreur ISBNDB: ${response.status} ${response.statusText}`);
     }
 
@@ -110,11 +76,11 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'gene
         }
       }
     } else if (searchType === 'isbn' && data.book) {
-      // Pour la recherche par ISBN avec endpoint direct, on reçoit directement un livre
+      // Pour la recherche par ISBN, on reçoit directement un livre
       console.log('[ISBNDB] Livre trouvé par ISBN:', data.book.title);
       books = [mapIsbndbBookToBook(data.book)];
     } else if (data.books) {
-      // Pour les recherches par titre, générales ou par recherche ISBN
+      // Pour les recherches par titre ou générales
       console.log(`[ISBNDB] Nombre de livres reçus: ${data.books.length}`);
       
       if (data.books.length > 0) {
@@ -122,19 +88,6 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'gene
       }
       
       books = data.books.map((book: any) => mapIsbndbBookToBook(book));
-    } else if (data.results) {
-      // Format spécifique de l'endpoint /search
-      console.log(`[ISBNDB] Résultats de recherche générale: ${data.results.length} éléments`);
-      
-      // Filtrer uniquement les livres dans les résultats
-      const bookResults = data.results.filter((result: any) => result.type === 'book');
-      console.log(`[ISBNDB] Nombre de livres dans les résultats: ${bookResults.length}`);
-      
-      if (bookResults.length > 0) {
-        console.log('[ISBNDB] Premier exemple de résultat:', JSON.stringify(bookResults[0], null, 2));
-      }
-      
-      books = bookResults.map((result: any) => mapIsbndbBookToBook(result.book || result));
     }
 
     console.log(`[ISBNDB] Nombre de livres transformés: ${books.length}`);
