@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 import { removeDuplicateBooks, filterNonBookResults, isAuthorMatch } from '@/lib/utils';
 import axios from 'axios';
@@ -207,7 +206,7 @@ export async function searchAllBooks(query: string, searchType: SearchType = 'au
     // Appliquer un filtre supplémentaire pour éliminer les dictionnaires et autres ouvrages techniques
     const filteredBooks = filterNonBookResults(books);
     
-    // Suppression des doublons
+    // Suppression des doublons avec notre fonction améliorée
     const uniqueBooks = removeDuplicateBooks(filteredBooks);
     
     console.log(`Total des résultats après filtrage: ${uniqueBooks.length} livres (avant filtrage: ${books.length})`);

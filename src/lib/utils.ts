@@ -1,4 +1,3 @@
-
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { Book } from '@/types/book'
@@ -42,19 +41,135 @@ export function getAmazonAffiliateUrl(book: Book) {
 }
 
 export function removeDuplicateBooks(books: Book[]): Book[] {
-  const seen = new Set();
+  const uniqueBooks: Book[] = [];
+  const seenTitles = new Map<string, boolean>();
+  const seenIds = new Set<string>();
   
-  return books.filter(book => {
-    // Créer une clé unique basée sur le titre et le premier auteur
-    const key = `${book.title.toLowerCase()}_${Array.isArray(book.author) ? book.author[0].toLowerCase() : book.author.toLowerCase()}`;
+  for (const book of books) {
+    // Skip books with no title or author
+    if (!book.title || !book.author) continue;
     
-    if (seen.has(key)) {
-      return false;
+    // Create normalized keys for comparison
+    const titleNormalized = normalizeString(book.title);
+    const authorNormalized = Array.isArray(book.author) 
+      ? book.author.map(a => normalizeString(a)).sort().join('|')
+      : normalizeString(book.author);
+    
+    // Create a unique key combining title and author
+    const bookKey = `${titleNormalized}___${authorNormalized}`;
+    
+    // Skip if we've seen this title/author combination or this exact ID before
+    if (seenTitles.has(bookKey) || seenIds.has(book.id)) {
+      continue;
     }
     
-    seen.add(key);
-    return true;
+    // Add the book and mark it as seen
+    uniqueBooks.push(book);
+    seenTitles.set(bookKey, true);
+    seenIds.add(book.id);
+  }
+  
+  return uniqueBooks;
+}
+
+// Helper function to normalize strings for comparison
+function normalizeString(str: string): string {
+  if (!str) return '';
+  
+  return str
+    .toLowerCase()
+    .replace(/[^\w\s]/g, '') // Remove punctuation
+    .replace(/\s+/g, ' ')     // Normalize whitespace
+    .trim();
+}
+
+export function isAuthorMatch(book: Book, searchQuery: string): boolean {
+  if (!book.author || (Array.isArray(book.author) && book.author.length === 0)) {
+    return false;
+  }
+  
+  const searchTerms = searchQuery.toLowerCase().split(' ');
+  const authors = Array.isArray(book.author) ? book.author : [book.author];
+  
+  // Pour chaque auteur dans le livre
+  return authors.some(author => {
+    if (!author) return false;
+    const authorLower = author.toLowerCase();
+    
+    // 1. Vérification exacte (match parfait)
+    if (authorLower === searchQuery.toLowerCase()) {
+      return true;
+    }
+    
+    // 2. Vérification que tous les termes de recherche sont présents dans l'auteur
+    const allTermsPresent = searchTerms.every(term => authorLower.includes(term));
+    
+    // 3. Vérification plus stricte: les termes doivent être dans l'ordre
+    // (pour éviter que "King Stephen" corresponde à "Stephen King")
+    const searchPattern = searchTerms.join('.*');
+    const regexOrder = new RegExp(searchPattern, 'i');
+    const termsInOrder = regexOrder.test(authorLower);
+    
+    // Vérification que l'auteur n'est pas trop générique
+    const isGenericAuthor = authorLower.includes('collectif') || 
+                            authorLower.includes('divers') ||
+                            authorLower.includes('various') ||
+                            authorLower.includes('auteurs') ||
+                            authorLower.includes('authors');
+    
+    // L'auteur correspond si tous les termes sont présents, dans le bon ordre, et que ce n'est pas un auteur générique
+    return allTermsPresent && termsInOrder && !isGenericAuthor;
   });
+}
+
+export function isDuplicateBook(existingBooks: Book[], newBook: Book): boolean {
+  if (!newBook || !newBook.title || !newBook.author) return false;
+  
+  // Normalize the book data for comparison
+  const newBookTitle = normalizeString(newBook.title);
+  const newBookAuthor = Array.isArray(newBook.author)
+    ? newBook.author.map(a => normalizeString(a)).sort().join('|')
+    : normalizeString(newBook.author);
+  
+  // Build a unique key for the new book
+  const newBookKey = `${newBookTitle}___${newBookAuthor}`;
+  
+  // Check against existing books
+  for (const book of existingBooks) {
+    // Skip if same ID (it's the same book)
+    if (book.id === newBook.id) continue;
+    
+    if (!book.title || !book.author) continue;
+    
+    // Normalize existing book data
+    const existingBookTitle = normalizeString(book.title);
+    const existingBookAuthor = Array.isArray(book.author)
+      ? book.author.map(a => normalizeString(a)).sort().join('|')
+      : normalizeString(book.author);
+    
+    // Build a unique key for the existing book
+    const existingBookKey = `${existingBookTitle}___${existingBookAuthor}`;
+    
+    // Compare keys
+    if (existingBookKey === newBookKey) {
+      // Found a duplicate
+      return true;
+    }
+    
+    // Additional check for subtitle variations (common in book titles)
+    // For example "Book Title" and "Book Title: The Sequel"
+    if (existingBookTitle.includes(newBookTitle) || newBookTitle.includes(existingBookTitle)) {
+      // If titles have overlap, check if authors are the same
+      if (existingBookAuthor === newBookAuthor) {
+        // Check if one title is a subset of the other (potential subtitle)
+        if (Math.abs(existingBookTitle.length - newBookTitle.length) > 3) {
+          return true;
+        }
+      }
+    }
+  }
+  
+  return false;
 }
 
 // Liste étendue et améliorée de mots-clés techniques à exclure
@@ -204,75 +319,5 @@ export function filterNonBookResults(books: Book[]): Book[] {
            !isUnwantedFormat && 
            !isAudioBook &&
            !isTitleTooLong;
-  });
-}
-
-export function isAuthorMatch(book: Book, searchQuery: string): boolean {
-  if (!book.author || (Array.isArray(book.author) && book.author.length === 0)) {
-    return false;
-  }
-  
-  const searchTerms = searchQuery.toLowerCase().split(' ');
-  const authors = Array.isArray(book.author) ? book.author : [book.author];
-  
-  // Pour chaque auteur dans le livre
-  return authors.some(author => {
-    if (!author) return false;
-    const authorLower = author.toLowerCase();
-    
-    // 1. Vérification exacte (match parfait)
-    if (authorLower === searchQuery.toLowerCase()) {
-      return true;
-    }
-    
-    // 2. Vérification que tous les termes de recherche sont présents dans l'auteur
-    const allTermsPresent = searchTerms.every(term => authorLower.includes(term));
-    
-    // 3. Vérification plus stricte: les termes doivent être dans l'ordre
-    // (pour éviter que "King Stephen" corresponde à "Stephen King")
-    const searchPattern = searchTerms.join('.*');
-    const regexOrder = new RegExp(searchPattern, 'i');
-    const termsInOrder = regexOrder.test(authorLower);
-    
-    // Vérification que l'auteur n'est pas trop générique
-    const isGenericAuthor = authorLower.includes('collectif') || 
-                            authorLower.includes('divers') ||
-                            authorLower.includes('various') ||
-                            authorLower.includes('auteurs') ||
-                            authorLower.includes('authors');
-    
-    // L'auteur correspond si tous les termes sont présents, dans le bon ordre, et que ce n'est pas un auteur générique
-    return allTermsPresent && termsInOrder && !isGenericAuthor;
-  });
-}
-
-export function isDuplicateBook(existingBooks: Book[], newBook: Book): boolean {
-  if (!newBook || !newBook.title || !newBook.author) return false;
-  
-  // Création d'une clé unique pour le nouveau livre basée sur le titre et l'auteur (méthode normalisée)
-  const newBookTitle = newBook.title.toLowerCase().trim();
-  const newBookAuthor = Array.isArray(newBook.author) 
-    ? newBook.author[0]?.toLowerCase().trim() 
-    : newBook.author.toLowerCase().trim();
-  
-  if (!newBookAuthor) return false;
-  
-  // Vérifier parmi les livres existants
-  return existingBooks.some(book => {
-    // Ignorer la comparaison avec le même livre (même ID)
-    if (book.id === newBook.id) return false;
-    
-    if (!book || !book.title || !book.author) return false;
-    
-    // Normaliser les données du livre existant
-    const existingBookTitle = book.title.toLowerCase().trim();
-    const existingBookAuthor = Array.isArray(book.author) 
-      ? book.author[0]?.toLowerCase().trim() 
-      : book.author.toLowerCase().trim();
-    
-    if (!existingBookAuthor) return false;
-    
-    // Comparer titre et auteur
-    return existingBookTitle === newBookTitle && existingBookAuthor === newBookAuthor;
   });
 }
