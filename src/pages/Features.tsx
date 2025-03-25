@@ -18,6 +18,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
+import { LoginDialog } from "@/components/auth/LoginDialog"; // Importation directe du composant LoginDialog
 
 // Type pour les cartes de fonctionnalités
 interface FeatureCardProps {
@@ -127,7 +128,8 @@ const Features = () => {
   // Fonction pour gérer le clic sur le bouton de connexion
   const handleSignInClick = () => {
     console.log("Opening login dialog from Features page");
-    signIn('signup');
+    setShowLoginDialog(true); // Ouvrir directement la fenêtre modale
+    signIn('signup'); // Définir le mode d'authentification
   };
 
   return (
@@ -201,6 +203,9 @@ const Features = () => {
 
         <Footer />
       </div>
+      
+      {/* Inclusion directe du LoginDialog dans la page pour s'assurer qu'il est bien présent */}
+      <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
     </>
   );
 };
