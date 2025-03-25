@@ -43,7 +43,7 @@ const Homepage = () => {
                     </Button>
                   ) : (
                     <Button size="lg" asChild>
-                      <Link to="/search">Découvrir des livres</Link>
+                      <Link to="/library">Découvrir des livres</Link>
                     </Button>
                   )}
                   <Button variant="outline" size="lg" asChild>
@@ -202,7 +202,7 @@ const Homepage = () => {
                 </Button>
               ) : (
                 <Button size="lg" asChild>
-                  <Link to="/">Accéder à ma bibliothèque</Link>
+                  <Link to="/library">Accéder à ma bibliothèque</Link>
                 </Button>
               )}
               <Button variant="outline" size="lg" asChild>
