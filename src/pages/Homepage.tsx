@@ -13,6 +13,8 @@ const Homepage = () => {
   const { user, signIn, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
 
   const handleSignUp = () => {
+    console.log("Opening login dialog from Homepage");
+    setShowLoginDialog(true);
     signIn('signup');
   };
 
@@ -35,8 +37,8 @@ const Homepage = () => {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                   {!user ? (
-                    <Button size="lg" onClick={handleSignUp} className="pulse-effect">
-                      Commencer gratuitement
+                    <Button size="lg" onClick={handleSignUp} className="pulse-effect flex items-center gap-2">
+                      <Heart className="h-5 w-5 fill-white" /> Commencer gratuitement
                     </Button>
                   ) : (
                     <Button size="lg" asChild>
@@ -184,8 +186,8 @@ const Homepage = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {!user ? (
-                <Button size="lg" onClick={handleSignUp} className="pulse-effect">
-                  Créer un compte gratuitement
+                <Button size="lg" onClick={handleSignUp} className="pulse-effect flex items-center gap-2">
+                  <Heart className="h-5 w-5 fill-white" /> Créer un compte gratuitement
                 </Button>
               ) : (
                 <Button size="lg" asChild>

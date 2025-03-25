@@ -13,7 +13,8 @@ import {
   Clock,
   Filter,
   Download,
-  Upload
+  Upload,
+  Heart
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -187,13 +188,13 @@ const Features = () => {
               
               {!user && (
                 <div className="relative inline-block">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/50 opacity-75"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500/50 opacity-75"></span>
                   <Button 
                     size="lg" 
                     onClick={handleSignInClick}
-                    className="relative z-10 font-semibold text-base transition-all duration-300 shadow-md hover:shadow-lg"
+                    className="relative z-10 font-semibold text-base transition-all duration-300 shadow-md hover:shadow-lg pulse-effect flex items-center gap-2"
                   >
-                    Commencer à créer votre bibliothèque !
+                    <Heart className="h-5 w-5 fill-white" /> Commencer à créer votre bibliothèque !
                   </Button>
                 </div>
               )}
