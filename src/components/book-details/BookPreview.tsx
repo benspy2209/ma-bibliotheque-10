@@ -53,12 +53,21 @@ export function BookPreview({
   return (
     <div className="grid grid-cols-[150px,1fr] gap-4 py-2">
       <div className="relative group">
-        <img
-          src={book.cover || '/placeholder.svg'}
-          alt={book.title}
-          className="w-full rounded-lg shadow-lg object-cover h-[200px]"
-          onError={handleImageError}
-        />
+        {book.cover ? (
+          <img
+            src={book.cover}
+            alt={book.title}
+            className="w-full rounded-lg shadow-lg object-cover h-[200px]"
+            onError={handleImageError}
+          />
+        ) : (
+          <div className="w-full rounded-lg shadow-lg h-[200px] bg-muted flex flex-col items-center justify-center p-2 text-center">
+            <div className="text-xs text-muted-foreground mb-2">
+              Pas de couverture trouvée<br />
+              {isEditing ? "Cliquez pour ajouter la vôtre !" : "Passez en mode édition pour ajouter la vôtre !"}
+            </div>
+          </div>
+        )}
         {isEditing && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
             <input

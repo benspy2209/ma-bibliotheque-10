@@ -101,42 +101,17 @@ export const BookList = ({ books, onBookClick }: BookListProps) => {
               )}
               
               {(!book.purchased && (!book.status || book.status === 'to-read')) && (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Badge 
-                      variant="destructive" 
-                      className="flex items-center gap-1 cursor-pointer hover:bg-red-600 transition-colors border-0"
-                    >
-                      <ShoppingCart className="size-3" />
-                      À acheter
-                    </Badge>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-2">
-                    <a 
-                      href={getAmazonAffiliateUrl(book)}
-                      onClick={handleAmazonClick}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded"
-                    >
-                      <ShoppingCart className="h-4 w-4" />
-                      Acheter sur Amazon
-                    </a>
-                  </PopoverContent>
-                </Popover>
+                <a 
+                  href={getAmazonAffiliateUrl(book)}
+                  onClick={handleAmazonClick}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="badge flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white rounded-full"
+                >
+                  <ShoppingCart className="size-3" />
+                  Amazon
+                </a>
               )}
-              
-              {/* Amazon direct badge - maintenant pour TOUS les livres */}
-              <a 
-                href={getAmazonAffiliateUrl(book)}
-                onClick={handleAmazonClick}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="badge flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white rounded-full"
-              >
-                <ShoppingCart className="size-3" />
-                Amazon
-              </a>
               
               {book.status === 'completed' && book.completionDate && (
                 <Badge variant="outline" className="bg-muted/50">
@@ -149,4 +124,4 @@ export const BookList = ({ books, onBookClick }: BookListProps) => {
       ))}
     </div>
   );
-};
+}
