@@ -1,4 +1,3 @@
-
 import { Helmet } from "react-helmet-async";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
@@ -19,7 +18,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
-import { LoginDialog } from "@/components/auth/LoginDialog"; // Importation directe du composant LoginDialog
+import { LoginDialog } from "@/components/auth/LoginDialog";
 
 // Type pour les cartes de fonctionnalités
 interface FeatureCardProps {
@@ -129,8 +128,8 @@ const Features = () => {
   // Fonction pour gérer le clic sur le bouton de connexion
   const handleSignInClick = () => {
     console.log("Opening login dialog from Features page");
-    setShowLoginDialog(true); // Ouvrir directement la fenêtre modale
-    signIn('signup'); // Définir le mode d'authentification
+    setShowLoginDialog(true);
+    signIn('signup');
   };
 
   return (
@@ -148,17 +147,13 @@ const Features = () => {
         
         <main className="flex-1 py-12 px-4 sm:px-6 lg:px-8 bg-background">
           <div className="max-w-7xl mx-auto">
-            {/* En-tête de la page */}
-            <div className="text-center mb-16">
-              <h1 className="text-4xl sm:text-5xl font-bold mb-6 tracking-tight">
-                Fonctionnalités de Bibliopulse
-              </h1>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                Découvrez tout ce que Bibliopulse peut faire pour transformer votre expérience de lecture et la gestion de votre bibliothèque personnelle.
-              </p>
-            </div>
+            <h1 className="text-4xl sm:text-5xl font-bold mb-6 tracking-tight text-center">
+              Fonctionnalités de Bibliopulse
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto text-center mb-16">
+              Découvrez tout ce que Bibliopulse peut faire pour transformer votre expérience de lecture et la gestion de votre bibliothèque personnelle.
+            </p>
 
-            {/* Sections de fonctionnalités */}
             <div className="space-y-20">
               {featureSections.map((section, index) => (
                 <div key={index} className="space-y-8">
@@ -179,7 +174,6 @@ const Features = () => {
               ))}
             </div>
 
-            {/* Appel à l'action avec bouton pulsant */}
             <div className="mt-24 text-center bg-primary/5 py-16 px-6 rounded-lg">
               <h2 className="text-3xl font-bold mb-4">Prêt à organiser votre bibliothèque ?</h2>
               <p className="text-xl mb-8 max-w-3xl mx-auto">
@@ -195,7 +189,7 @@ const Features = () => {
                       onClick={handleSignInClick}
                       className="relative z-10 font-semibold text-base transition-all duration-300 shadow-md hover:shadow-lg pulse-effect flex items-center gap-2"
                     >
-                      <Heart className="h-5 w-5 fill-white" /> Commencer à créer votre bibliothèque !
+                      <Heart className="h-5 w-5 fill-white" /> Commencez à créer votre bibliothèque !
                     </Button>
                   </div>
                 </div>
@@ -207,7 +201,6 @@ const Features = () => {
         <Footer />
       </div>
       
-      {/* Inclusion directe du LoginDialog dans la page pour s'assurer qu'il est bien présent */}
       <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
     </>
   );
