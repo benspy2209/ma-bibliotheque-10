@@ -7,9 +7,6 @@ import axios from 'axios';
 const ISBNDB_API_KEY = '60264_3de7f2f024bc350bfa823cbbd9e64315';
 const ISBNDB_BASE_URL = 'https://api2.isbndb.com';
 
-// Proxy CORS pour contourner les limitations CORS
-const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
-
 // Configuration des en-têtes pour les requêtes
 const getHeaders = () => {
   return {
@@ -21,7 +18,8 @@ const getHeaders = () => {
 
 // Fonction pour construire l'URL avec le proxy CORS
 const getProxiedUrl = (url: string) => {
-  return `${CORS_PROXY}${encodeURIComponent(url)}`;
+  // Utilisation d'un proxy CORS alternatif plus robuste
+  return `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(url)}`;
 };
 
 // Instance axios pré-configurée
@@ -48,7 +46,7 @@ export async function getBookDetails(bookId: string, language: LanguageFilter = 
     const originalUrl = `${ISBNDB_BASE_URL}/book/${isbn}`;
     const proxiedUrl = getProxiedUrl(originalUrl);
     
-    console.log(`Récupération des détails du livre: ${originalUrl}`);
+    console.log(`Récupération des détails du livre via proxy: ${proxiedUrl}`);
 
     const response = await api.get(proxiedUrl);
     console.log('Détails du livre récupérés:', response.data);
