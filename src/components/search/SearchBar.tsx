@@ -61,12 +61,12 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
       />
       
       {!user && (
-        <div className="mt-2 text-center">
+        <div className="mt-6 text-center flex flex-col items-center justify-center">
           <p className="text-destructive mb-4">Vous devez vous connecter ou créer un compte pour faire une recherche.</p>
           <Button 
             onClick={handleLoginClick} 
             size="lg" 
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 px-8 max-w-xs mx-auto"
           >
             <BookOpen className="h-5 w-5" />
             Rejoindre l'aventure
