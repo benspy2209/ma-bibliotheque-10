@@ -20,13 +20,18 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
     
     console.log(`Recherche par auteur: ${url}`);
     
+    // Mise à jour des headers selon l'exemple fourni
+    const headers = {
+      'Authorization': ISBNDB_API_KEY,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    };
+    
+    console.log('Headers utilisés pour recherche auteur:', headers);
+    
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Authorization': ISBNDB_API_KEY,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
+      headers: headers
     });
     
     if (!response.ok) {
@@ -72,13 +77,17 @@ async function fallbackAuthorSearch(authorName: string, language: LanguageFilter
   
   console.log(`Recherche alternative: ${url}`);
   
+  const headers = {
+    'Authorization': ISBNDB_API_KEY,
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  };
+  
+  console.log('Headers utilisés pour recherche alternative:', headers);
+  
   const response = await fetch(url, {
     method: 'GET',
-    headers: {
-      'Authorization': ISBNDB_API_KEY,
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    }
+    headers: headers
   });
   
   if (!response.ok) {
@@ -110,13 +119,17 @@ export async function searchBooksByTitle(title: string, language: LanguageFilter
     
     console.log(`Recherche par titre: ${url}`);
     
+    const headers = {
+      'Authorization': ISBNDB_API_KEY,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    };
+    
+    console.log('Headers utilisés pour recherche titre:', headers);
+    
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Authorization': ISBNDB_API_KEY,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
+      headers: headers
     });
     
     if (!response.ok) {
