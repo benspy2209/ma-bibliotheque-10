@@ -58,6 +58,7 @@ export async function getBookDetails(bookId: string, language: LanguageFilter = 
       method: 'GET',
       headers: {
         'Authorization': ISBNDB_API_KEY,
+        'Content-Type': 'application/json',
         'Accept': 'application/json',
       }
     });
