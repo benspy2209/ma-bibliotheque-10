@@ -33,6 +33,7 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
       return;
     }
     
+    // Retarder la recherche pour éviter trop de requêtes
     const timeoutId = setTimeout(() => {
       onSearch(value, searchType);
     }, 500);
@@ -43,11 +44,19 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
   const handleSearchTypeChange = (value: SearchType) => {
     setSearchType(value);
     
-    // Afficher un conseil pour la recherche par ISBN
+    // Afficher des conseils en fonction du type de recherche
     if (value === 'isbn') {
       toast({
         title: "Conseil de recherche",
-        description: "Pour les ISBN, essayez avec ou sans tirets (ex: 978-2352949091 ou 9782352949091).",
+        description: "Pour les ISBN, entrez le code à 10 ou 13 chiffres avec ou sans tirets.",
+      });
+    } else if (value === 'author') {
+      toast({
+        description: "Entrez le nom de l'auteur pour trouver tous ses livres.",
+      });
+    } else if (value === 'general') {
+      toast({
+        description: "La recherche globale trouve des livres par titre, auteur, ISBN et plus encore.",
       });
     }
     
@@ -74,9 +83,9 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
       case 'title':
         return "Titre du livre...";
       case 'isbn':
-        return "Code ISBN (10 ou 13 chiffres)...";
+        return "Code ISBN (ex: 9782352949091 ou 978-2352949091)...";
       default:
-        return placeholder;
+        return "Recherche globale (titre, auteur, ISBN...)";
     }
   };
 

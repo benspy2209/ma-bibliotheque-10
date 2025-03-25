@@ -53,12 +53,13 @@ export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
       };
     }
     
-    const endpoint = `/book/${cleanedIsbn}`;
-    const url = `${ISBNDB_BASE_URL}${endpoint}`;
+    // Essayer d'abord l'endpoint direct
+    let endpoint = `/book/${cleanedIsbn}`;
+    let url = `${ISBNDB_BASE_URL}${endpoint}`;
     
     console.log(`[DETAIL] Envoi requête détails: ${url}`);
     
-    const response = await fetch(url, {
+    let response = await fetch(url, {
       method: 'GET',
       headers: {
         'Authorization': ISBNDB_API_KEY,
@@ -68,13 +69,29 @@ export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
     
     console.log(`[DETAIL] Statut réponse: ${response.status} ${response.statusText}`);
     
+    // Si l'endpoint direct échoue, essayer l'endpoint de recherche général
     if (!response.ok) {
-      // Si la recherche directe échoue, essayer avec l'endpoint de recherche
-      if (response.status === 404 || response.status === 400) {
-        console.log('[DETAIL] ISBN non trouvé avec l\'endpoint direct, tentative avec la recherche');
+      console.log('[DETAIL] ISBN non trouvé avec l\'endpoint direct, tentative avec l\'endpoint /search');
+      
+      const searchUrl = `${ISBNDB_BASE_URL}/search?page=1&pageSize=1&q=${cleanedIsbn}`;
+      console.log(`[DETAIL] Nouvelle tentative avec: ${searchUrl}`);
+      
+      response = await fetch(searchUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': ISBNDB_API_KEY,
+          'Accept': 'application/json',
+        }
+      });
+      
+      if (!response.ok) {
+        console.log(`[DETAIL] Échec de la recherche générale, statut: ${response.status}`);
         
-        const searchUrl = `${ISBNDB_BASE_URL}/search/books?page=1&pageSize=1&isbn13=${cleanedIsbn}`;
-        const searchResponse = await fetch(searchUrl, {
+        // Si ça échoue encore, essayer avec l'endpoint spécifique pour les ISBN
+        const isbnSearchUrl = `${ISBNDB_BASE_URL}/search/books?page=1&pageSize=1&isbn13=${cleanedIsbn}`;
+        console.log(`[DETAIL] Dernière tentative avec: ${isbnSearchUrl}`);
+        
+        const isbnResponse = await fetch(isbnSearchUrl, {
           method: 'GET',
           headers: {
             'Authorization': ISBNDB_API_KEY,
@@ -82,14 +99,14 @@ export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
           }
         });
         
-        if (!searchResponse.ok) {
-          throw new Error(`Erreur ISBNDB (recherche): ${searchResponse.status} ${searchResponse.statusText}`);
+        if (!isbnResponse.ok) {
+          throw new Error(`Erreur ISBNDB (recherche ISBN): ${isbnResponse.status} ${isbnResponse.statusText}`);
         }
         
-        const searchData = await searchResponse.json();
+        const isbnData = await isbnResponse.json();
         
-        if (searchData.books && searchData.books.length > 0) {
-          const book = searchData.books[0];
+        if (isbnData.books && isbnData.books.length > 0) {
+          const book = isbnData.books[0];
           console.log('[DETAIL] Livre trouvé par recherche ISBN:', book.title);
           
           return {
@@ -102,15 +119,16 @@ export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
             language: book.language ? [book.language] : ['fr'],
           };
         }
+        
+        throw new Error(`Aucun livre trouvé avec cet ISBN: ${cleanedIsbn}`);
       }
-      
-      throw new Error(`Erreur ISBNDB: ${response.status} ${response.statusText}`);
     }
     
     const data = await response.json();
     console.log('[DETAIL] Structure de la réponse:', Object.keys(data));
     
     if (data.book) {
+      // Format de réponse de l'endpoint /book/{isbn}
       const book = data.book;
       console.log('[DETAIL] Détails reçus:', JSON.stringify(book, null, 2));
       
@@ -123,6 +141,24 @@ export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
         isbn: book.isbn13 || book.isbn,
         language: book.language ? [book.language] : ['fr'],
       };
+    } else if (data.results && data.results.length > 0) {
+      // Format de réponse de l'endpoint /search
+      const bookResults = data.results.filter((result: any) => result.type === 'book');
+      
+      if (bookResults.length > 0) {
+        const book = bookResults[0].book || bookResults[0];
+        console.log('[DETAIL] Livre trouvé via recherche générale:', book.title);
+        
+        return {
+          description: cleanDescription(book.synopsis || ''),
+          subjects: book.subjects || [],
+          numberOfPages: book.pages || 0,
+          publishDate: book.date_published || '',
+          publishers: book.publisher ? [book.publisher] : [],
+          isbn: book.isbn13 || book.isbn,
+          language: book.language ? [book.language] : ['fr'],
+        };
+      }
     }
     
     console.log('[DETAIL] Aucun détail trouvé pour ce livre');

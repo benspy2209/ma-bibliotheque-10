@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 import { removeDuplicateBooks } from '@/lib/utils';
 
@@ -26,22 +25,16 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'gene
         params = '?page=1&pageSize=20';
         break;
       case 'isbn':
-        // Vérifier si c'est un ISBN valide (format basique)
-        const isValidIsbn = /^[0-9Xx]{10,13}$/.test(query.replace(/-/g, ''));
-        
-        if (isValidIsbn) {
-          // D'abord essayer l'endpoint book direct pour un ISBN exact
-          endpoint = `/book/${encodeURIComponent(query.replace(/-/g, ''))}`;
-        } else {
-          // Si ce n'est pas un ISBN valide formatté, utiliser la recherche
-          endpoint = `/search/books`;
-          params = `?page=1&pageSize=20&isbn13=${encodeURIComponent(query)}`;
-        }
+        // Pour les ISBN, utiliser l'endpoint général /search/books
+        const cleanedIsbn = query.replace(/-/g, '');
+        endpoint = `/search/books`;
+        params = `?page=1&pageSize=20&isbn13=${encodeURIComponent(cleanedIsbn)}`;
         break;
       case 'general':
       default:
-        endpoint = `/books/${encodeURIComponent(query)}`;
-        params = '?page=1&pageSize=20';
+        // Pour une recherche générale, utiliser l'endpoint /search
+        endpoint = `/search`;
+        params = `?page=1&pageSize=20&q=${encodeURIComponent(query)}`;
     }
 
     const url = `${ISBNDB_BASE_URL}${endpoint}${params}`;
@@ -59,15 +52,16 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'gene
     console.log(`[ISBNDB] Statut réponse: ${response.status} ${response.statusText}`);
     
     if (!response.ok) {
-      // Si la première tentative échoue pour l'ISBN et que nous avons utilisé l'endpoint book direct
-      if (searchType === 'isbn' && endpoint.startsWith('/book/') && (response.status === 404 || response.status === 400)) {
-        console.log('[ISBNDB] ISBN non trouvé avec l\'endpoint direct, tentative avec la recherche générale');
+      // Si la recherche échoue et qu'il s'agit d'un ISBN, essayer l'endpoint de recherche général
+      if (searchType === 'isbn' && endpoint !== '/search') {
+        console.log('[ISBNDB] Recherche ISBN échouée, tentative avec l\'endpoint /search');
         
-        // Tenter une recherche alternative par l'endpoint de recherche
-        const searchUrl = `${ISBNDB_BASE_URL}/search/books?page=1&pageSize=20&isbn13=${encodeURIComponent(query.replace(/-/g, ''))}`;
-        console.log(`[ISBNDB] Deuxième tentative: ${searchUrl}`);
+        const cleanedIsbn = query.replace(/-/g, '');
+        const fallbackUrl = `${ISBNDB_BASE_URL}/search?page=1&pageSize=20&q=${encodeURIComponent(cleanedIsbn)}`;
         
-        const searchResponse = await fetch(searchUrl, {
+        console.log(`[ISBNDB] Tentative alternative: ${fallbackUrl}`);
+        
+        const fallbackResponse = await fetch(fallbackUrl, {
           method: 'GET',
           headers: {
             'Authorization': ISBNDB_API_KEY,
@@ -75,16 +69,16 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'gene
           }
         });
         
-        if (!searchResponse.ok) {
-          throw new Error(`Erreur ISBNDB (deuxième tentative): ${searchResponse.status} ${searchResponse.statusText}`);
+        if (!fallbackResponse.ok) {
+          throw new Error(`Erreur ISBNDB (fallback): ${fallbackResponse.status} ${fallbackResponse.statusText}`);
         }
         
-        const searchData = await searchResponse.json();
-        console.log('[ISBNDB] Structure de la réponse (deuxième tentative):', Object.keys(searchData));
+        const fallbackData = await fallbackResponse.json();
+        console.log('[ISBNDB] Structure de la réponse (fallback):', Object.keys(fallbackData));
         
-        if (searchData.books && searchData.books.length > 0) {
-          console.log(`[ISBNDB] ${searchData.books.length} livres trouvés par la recherche ISBN`);
-          return searchData.books.map((book: any) => mapIsbndbBookToBook(book));
+        if (fallbackData.books && fallbackData.books.length > 0) {
+          console.log(`[ISBNDB] ${fallbackData.books.length} livres trouvés par la recherche générale`);
+          return fallbackData.books.map((book: any) => mapIsbndbBookToBook(book));
         }
         
         return [];
@@ -128,6 +122,19 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'gene
       }
       
       books = data.books.map((book: any) => mapIsbndbBookToBook(book));
+    } else if (data.results) {
+      // Format spécifique de l'endpoint /search
+      console.log(`[ISBNDB] Résultats de recherche générale: ${data.results.length} éléments`);
+      
+      // Filtrer uniquement les livres dans les résultats
+      const bookResults = data.results.filter((result: any) => result.type === 'book');
+      console.log(`[ISBNDB] Nombre de livres dans les résultats: ${bookResults.length}`);
+      
+      if (bookResults.length > 0) {
+        console.log('[ISBNDB] Premier exemple de résultat:', JSON.stringify(bookResults[0], null, 2));
+      }
+      
+      books = bookResults.map((result: any) => mapIsbndbBookToBook(result.book || result));
     }
 
     console.log(`[ISBNDB] Nombre de livres transformés: ${books.length}`);
