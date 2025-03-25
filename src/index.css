@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -101,9 +102,9 @@
 }
 
 @keyframes titlePulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.6; }
-  100% { opacity: 1; }
+  0% { opacity: 1; color: #ea384c; }
+  50% { opacity: 0.6; color: #c5182b; }
+  100% { opacity: 1; color: #ea384c; }
 }
 
 @keyframes glow {
