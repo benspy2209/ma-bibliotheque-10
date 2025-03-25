@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
@@ -180,7 +179,7 @@ const Homepage = () => {
           <div className="container px-4 mx-auto text-center">
             <h2 className="text-3xl font-bold mb-4">Prêt à organiser votre bibliothèque ?</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-              Rejoignez des milliers de lecteurs qui ont déjà transformé leur expérience littéraire avec BiblioPulse.
+              Rejoignez les lecteurs qui ont déjà transformé leur expérience littéraire avec BiblioPulse.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {!user ? (
