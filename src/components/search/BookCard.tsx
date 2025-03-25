@@ -54,11 +54,8 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
               }}
             />
           ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted">
-              <Bookmark className="h-12 w-12 text-muted-foreground/40 mb-2" />
-              <p className="text-xs text-center text-muted-foreground px-2">
-                Pas de couverture trouvée<br />Vous pourrez ajouter la vôtre !
-              </p>
+            <div className="absolute inset-0 flex items-center justify-center bg-muted">
+              <Bookmark className="h-12 w-12 text-muted-foreground/40" />
               <span className="sr-only">{book.title}</span>
             </div>
           )}
