@@ -18,8 +18,8 @@ const getHeaders = () => {
 
 // Fonction pour construire l'URL avec le proxy CORS
 const getProxiedUrl = (url: string) => {
-  // Utilisation d'un proxy CORS alternatif plus robuste
-  return `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(url)}`;
+  // Utilisation du proxy CORS Anywhere qui est plus fiable
+  return `https://cors-anywhere.herokuapp.com/${url}`;
 };
 
 // Instance axios pré-configurée

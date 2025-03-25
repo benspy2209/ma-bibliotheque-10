@@ -21,8 +21,8 @@ const api = axios.create({
 
 // Nouvelle fonction pour construire l'URL avec proxy CORS
 const getProxiedUrl = (url: string) => {
-  // Utilisation d'un proxy CORS alternatif plus robuste
-  return `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(url)}`;
+  // Utilisation du proxy CORS Anywhere qui est plus fiable
+  return `https://cors-anywhere.herokuapp.com/${url}`;
 };
 
 // Fonction pour faire une recherche par auteur avec l'endpoint correct
