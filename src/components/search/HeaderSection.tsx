@@ -28,7 +28,7 @@ export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
         <div className="flex gap-4 items-center w-full sm:w-auto">
           <AddManualBook onBookAdded={onBookAdded} />
           <Link 
-            to="/" 
+            to="/library" 
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
           >
             <BookOpen className="h-4 w-4" />
