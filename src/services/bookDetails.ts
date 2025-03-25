@@ -36,8 +36,11 @@ export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
   console.log('[DETAIL] Récupération des détails pour le livre:', bookId);
   
   try {
-    // Vérifier si l'ID est un ISBN
-    const isIsbn = bookId.match(/^[0-9]{10}$|^[0-9]{13}$/);
+    // Nettoyer l'ISBN des tirets éventuels
+    const cleanedIsbn = bookId.replace(/-/g, '');
+    
+    // Vérifier si l'ID est un ISBN (format basique)
+    const isIsbn = /^[0-9Xx]{10,13}$/.test(cleanedIsbn);
     
     if (!isIsbn) {
       console.log('[DETAIL] L\'ID fourni n\'est pas un ISBN valide:', bookId);
@@ -50,7 +53,7 @@ export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
       };
     }
     
-    const endpoint = `/book/${bookId}`;
+    const endpoint = `/book/${cleanedIsbn}`;
     const url = `${ISBNDB_BASE_URL}${endpoint}`;
     
     console.log(`[DETAIL] Envoi requête détails: ${url}`);
@@ -66,6 +69,41 @@ export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
     console.log(`[DETAIL] Statut réponse: ${response.status} ${response.statusText}`);
     
     if (!response.ok) {
+      // Si la recherche directe échoue, essayer avec l'endpoint de recherche
+      if (response.status === 404 || response.status === 400) {
+        console.log('[DETAIL] ISBN non trouvé avec l\'endpoint direct, tentative avec la recherche');
+        
+        const searchUrl = `${ISBNDB_BASE_URL}/search/books?page=1&pageSize=1&isbn13=${cleanedIsbn}`;
+        const searchResponse = await fetch(searchUrl, {
+          method: 'GET',
+          headers: {
+            'Authorization': ISBNDB_API_KEY,
+            'Accept': 'application/json',
+          }
+        });
+        
+        if (!searchResponse.ok) {
+          throw new Error(`Erreur ISBNDB (recherche): ${searchResponse.status} ${searchResponse.statusText}`);
+        }
+        
+        const searchData = await searchResponse.json();
+        
+        if (searchData.books && searchData.books.length > 0) {
+          const book = searchData.books[0];
+          console.log('[DETAIL] Livre trouvé par recherche ISBN:', book.title);
+          
+          return {
+            description: cleanDescription(book.synopsis || ''),
+            subjects: book.subjects || [],
+            numberOfPages: book.pages || 0,
+            publishDate: book.date_published || '',
+            publishers: book.publisher ? [book.publisher] : [],
+            isbn: book.isbn13 || book.isbn,
+            language: book.language ? [book.language] : ['fr'],
+          };
+        }
+      }
+      
       throw new Error(`Erreur ISBNDB: ${response.status} ${response.statusText}`);
     }
     

@@ -26,8 +26,17 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'gene
         params = '?page=1&pageSize=20';
         break;
       case 'isbn':
-        // Si c'est un ISBN valide, on utilise l'endpoint book directement
-        endpoint = `/book/${encodeURIComponent(query)}`;
+        // Vérifier si c'est un ISBN valide (format basique)
+        const isValidIsbn = /^[0-9Xx]{10,13}$/.test(query.replace(/-/g, ''));
+        
+        if (isValidIsbn) {
+          // D'abord essayer l'endpoint book direct pour un ISBN exact
+          endpoint = `/book/${encodeURIComponent(query.replace(/-/g, ''))}`;
+        } else {
+          // Si ce n'est pas un ISBN valide formatté, utiliser la recherche
+          endpoint = `/search/books`;
+          params = `?page=1&pageSize=20&isbn13=${encodeURIComponent(query)}`;
+        }
         break;
       case 'general':
       default:
@@ -50,6 +59,37 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'gene
     console.log(`[ISBNDB] Statut réponse: ${response.status} ${response.statusText}`);
     
     if (!response.ok) {
+      // Si la première tentative échoue pour l'ISBN et que nous avons utilisé l'endpoint book direct
+      if (searchType === 'isbn' && endpoint.startsWith('/book/') && (response.status === 404 || response.status === 400)) {
+        console.log('[ISBNDB] ISBN non trouvé avec l\'endpoint direct, tentative avec la recherche générale');
+        
+        // Tenter une recherche alternative par l'endpoint de recherche
+        const searchUrl = `${ISBNDB_BASE_URL}/search/books?page=1&pageSize=20&isbn13=${encodeURIComponent(query.replace(/-/g, ''))}`;
+        console.log(`[ISBNDB] Deuxième tentative: ${searchUrl}`);
+        
+        const searchResponse = await fetch(searchUrl, {
+          method: 'GET',
+          headers: {
+            'Authorization': ISBNDB_API_KEY,
+            'Accept': 'application/json',
+          }
+        });
+        
+        if (!searchResponse.ok) {
+          throw new Error(`Erreur ISBNDB (deuxième tentative): ${searchResponse.status} ${searchResponse.statusText}`);
+        }
+        
+        const searchData = await searchResponse.json();
+        console.log('[ISBNDB] Structure de la réponse (deuxième tentative):', Object.keys(searchData));
+        
+        if (searchData.books && searchData.books.length > 0) {
+          console.log(`[ISBNDB] ${searchData.books.length} livres trouvés par la recherche ISBN`);
+          return searchData.books.map((book: any) => mapIsbndbBookToBook(book));
+        }
+        
+        return [];
+      }
+      
       throw new Error(`Erreur ISBNDB: ${response.status} ${response.statusText}`);
     }
 
@@ -76,11 +116,11 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'gene
         }
       }
     } else if (searchType === 'isbn' && data.book) {
-      // Pour la recherche par ISBN, on reçoit directement un livre
+      // Pour la recherche par ISBN avec endpoint direct, on reçoit directement un livre
       console.log('[ISBNDB] Livre trouvé par ISBN:', data.book.title);
       books = [mapIsbndbBookToBook(data.book)];
     } else if (data.books) {
-      // Pour les recherches par titre ou générales
+      // Pour les recherches par titre, générales ou par recherche ISBN
       console.log(`[ISBNDB] Nombre de livres reçus: ${data.books.length}`);
       
       if (data.books.length > 0) {
