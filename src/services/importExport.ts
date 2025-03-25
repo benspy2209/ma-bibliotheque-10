@@ -1,35 +1,50 @@
 
-import { Book, ReadingStatus } from '@/types/book';
-import { supabase } from '@/integrations/supabase/client';
-import { saveBook } from './supabaseBooks';
-import { v4 as uuidv4 } from 'uuid';
+import { supabase } from "@/integrations/supabase/client";
+import { Book } from "@/types/book";
+import { Json } from "@/types/supabase";
+
+// Type pour les données d'exportation
+interface ExportData {
+  version: string;
+  timestamp: string;
+  userId: string;
+  email: string | null;
+  books: Book[];
+}
+
+// Type pour les résultats d'importation/exportation
+interface ImportExportResult {
+  success: boolean;
+  data?: ExportData;
+  error?: string;
+  message?: string;
+  imported?: number;
+}
 
 /**
- * Exporte la bibliothèque de l'utilisateur actuel au format JSON
+ * Exporte la bibliothèque de l'utilisateur au format JSON
  */
-export async function exportLibrary(): Promise<{success: boolean, data?: any, error?: string}> {
+export const exportLibrary = async (): Promise<ImportExportResult> => {
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !user) {
-      console.error('Erreur d\'authentification:', authError);
-      return { 
-        success: false, 
-        error: 'Vous devez être connecté pour exporter votre bibliothèque'
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return {
+        success: false,
+        error: 'Utilisateur non connecté'
       };
     }
     
-    // Récupération de tous les livres de l'utilisateur
+    // Récupérer tous les livres de l'utilisateur
     const { data, error } = await supabase
-      .from('books')
-      .select('*')
+      .from('user_books')
+      .select('book_id, book_data, status, completion_date')
       .eq('user_id', user.id);
     
     if (error) {
-      console.error('Erreur lors de l\'exportation:', error);
-      return { 
-        success: false, 
-        error: `Erreur lors de l'exportation: ${error.message}` 
+      console.error('Erreur lors de la récupération des livres:', error);
+      return {
+        success: false,
+        error: error.message
       };
     }
     
@@ -49,17 +64,18 @@ export async function exportLibrary(): Promise<{success: boolean, data?: any, er
     }
     
     // Formatage des données pour l'export
-    const exportData = {
+    const exportData: ExportData = {
       version: '1.0',
       timestamp: new Date().toISOString(),
       userId: user.id,
       email: user.email,
       books: data.map(book => {
         // S'assurer que toutes les données du livre sont incluses
+        const bookData = book.book_data as Book;
         return {
-          ...book.book_data,
-          status: book.status || book.book_data?.status || 'to-read',
-          completion_date: book.completion_date || book.book_data?.completionDate
+          ...bookData,
+          status: book.status as Book['status'] || bookData?.status || 'to-read',
+          completion_date: book.completion_date || bookData?.completion_date
         };
       })
     };
@@ -72,233 +88,93 @@ export async function exportLibrary(): Promise<{success: boolean, data?: any, er
     };
   } catch (error) {
     console.error('Erreur lors de l\'exportation:', error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Erreur inconnue lors de l\'exportation' 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Erreur inconnue lors de l\'exportation'
     };
   }
-}
+};
 
 /**
- * Importe une bibliothèque depuis un fichier JSON
+ * Importe une bibliothèque au format JSON
  */
-export async function importLibrary(
-  importData: any
-): Promise<{success: boolean, imported: number, errors: number, message?: string}> {
+export const importLibrary = async (data: any): Promise<ImportExportResult> => {
   try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !user) {
-      console.error('Erreur d\'authentification:', authError);
-      return { 
-        success: false, 
-        imported: 0, 
-        errors: 0, 
-        message: 'Vous devez être connecté pour importer une bibliothèque'
-      };
-    }
-    
-    console.log('Structure des données importées:', JSON.stringify(importData, null, 2).substring(0, 500) + '...');
-    
-    // Détection du format des données
-    let booksToImport: any[] = [];
-    
-    // Format 1: { books: [...] }
-    if (importData.books && Array.isArray(importData.books)) {
-      console.log('Format détecté: { books: [...] }');
-      booksToImport = importData.books;
-    } 
-    // Format 2: [...] (tableau direct de livres)
-    else if (Array.isArray(importData)) {
-      console.log('Format détecté: tableau direct');
-      booksToImport = importData;
-    }
-    // Format 3: Recherche récursive pour trouver un tableau de livres
-    else {
-      console.log('Recherche récursive de données...');
-      const findBooksArray = (obj: any): any[] | null => {
-        if (!obj || typeof obj !== 'object') return null;
-        
-        // Si c'est un tableau avec des objets qui ont des propriétés comme title, author
-        if (Array.isArray(obj) && obj.length > 0 && 
-            obj[0] && typeof obj[0] === 'object' && 
-            (obj[0].title || (obj[0].book_data && obj[0].book_data.title))) {
-          return obj;
-        }
-        
-        // Recherche dans toutes les propriétés
-        for (const key in obj) {
-          if (key === 'books' && Array.isArray(obj[key])) {
-            return obj[key];
-          }
-          
-          const result = findBooksArray(obj[key]);
-          if (result) return result;
-        }
-        
-        return null;
-      };
-      
-      const foundBooks = findBooksArray(importData);
-      if (foundBooks) {
-        console.log(`Format détecté: structure imbriquée, ${foundBooks.length} livres trouvés`);
-        booksToImport = foundBooks;
-      } else {
-        // Tentative de dernière chance - rechercher des propriétés ressemblant à des livres
-        for (const key in importData) {
-          if (importData[key] && Array.isArray(importData[key])) {
-            console.log(`Essai avec la propriété: ${key} (${importData[key].length} éléments)`);
-            booksToImport = importData[key];
-            if (booksToImport.length > 0 && 
-                (booksToImport[0].title || 
-                 (booksToImport[0].book_data && booksToImport[0].book_data.title))) {
-              console.log(`Format détecté: propriété ${key}`);
-              break;
-            }
-          }
-        }
-      }
-    }
-    
-    // Vérification finale que nous avons des livres à importer
-    if (!booksToImport.length) {
-      console.error('Aucun livre trouvé dans les données importées');
+    // Vérifier que les données sont correctement formatées
+    if (!data || !data.books || !Array.isArray(data.books)) {
       return {
         success: false,
-        imported: 0,
-        errors: 0,
-        message: 'Format de données invalide: aucun livre trouvé'
+        message: "Format de données invalide pour l'importation"
       };
     }
     
-    console.log(`${booksToImport.length} livres trouvés dans les données importées`);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return {
+        success: false,
+        message: "Utilisateur non connecté"
+      };
+    }
     
-    // Statistiques d'importation
-    let imported = 0;
-    let errors = 0;
-    let duplicates = 0;
+    // Compteur pour les livres importés avec succès
+    let importedCount = 0;
     
-    // Pour chaque livre dans le fichier d'import
-    for (let i = 0; i < booksToImport.length; i++) {
-      try {
-        const bookItem = booksToImport[i];
-        console.log(`Traitement du livre ${i+1}/${booksToImport.length}: ${JSON.stringify(bookItem).substring(0, 100)}...`);
+    // Parcourir tous les livres à importer
+    for (const book of data.books) {
+      // Vérifier si le livre existe déjà pour cet utilisateur
+      const { data: existingBook } = await supabase
+        .from('user_books')
+        .select('book_id')
+        .eq('user_id', user.id)
+        .eq('book_id', book.id)
+        .maybeSingle();
         
-        // Trouver les données du livre selon différents formats possibles
-        let bookData = bookItem;
-        let bookStatus: ReadingStatus = 'to-read';
-        let completionDate = undefined;
-        
-        // Format où les données du livre sont dans book_data
-        if (bookItem.book_data) {
-          bookData = bookItem.book_data;
-          // FIX: Vérifier que le statut est valide avant de l'assigner
-          const status = bookItem.status || bookData.status || 'to-read';
-          bookStatus = validateReadingStatus(status);
-          completionDate = bookItem.completion_date || bookData.completionDate;
-        } else {
-          // Si le statut est une propriété directe
-          const status = bookItem.status || 'to-read';
-          bookStatus = validateReadingStatus(status);
-          completionDate = bookItem.completionDate || bookItem.completion_date;
+      // Préparer les données du livre pour l'insertion/mise à jour
+      const bookData = {
+        user_id: user.id,
+        book_id: book.id,
+        book_data: book,
+        status: book.status || 'to-read',
+        completion_date: book.completion_date
+      };
+      
+      if (existingBook) {
+        // Mettre à jour le livre existant
+        const { error: updateError } = await supabase
+          .from('user_books')
+          .update(bookData)
+          .eq('user_id', user.id)
+          .eq('book_id', book.id);
+          
+        if (updateError) {
+          console.error('Erreur lors de la mise à jour du livre:', updateError);
+          continue; // Passer au livre suivant
         }
-        
-        // Vérification de base pour s'assurer que c'est un livre valide
-        if (!bookData.title && !bookData.author) {
-          console.warn(`Livre #${i+1} ignoré: données de base manquantes`, bookData);
-          errors++;
-          continue;
+      } else {
+        // Insérer un nouveau livre
+        const { error: insertError } = await supabase
+          .from('user_books')
+          .insert(bookData);
+          
+        if (insertError) {
+          console.error('Erreur lors de l\'insertion du livre:', insertError);
+          continue; // Passer au livre suivant
         }
-        
-        // Construction du livre avec un nouvel ID
-        const book: Book = {
-          id: uuidv4(), // Nouvel ID pour éviter les conflits
-          title: bookData.title || 'Titre inconnu',
-          author: bookData.author || 'Auteur inconnu',
-          language: Array.isArray(bookData.language) ? bookData.language : ['unknown'],
-          status: bookStatus,
-          completionDate: completionDate
-        };
-        
-        // Copie des propriétés optionnelles si elles existent
-        if (bookData.sourceId) book.sourceId = bookData.sourceId;
-        if (bookData.cover) book.cover = bookData.cover;
-        if (bookData.rating) book.rating = bookData.rating;
-        if (bookData.purchased !== undefined) book.purchased = bookData.purchased;
-        if (bookData.numberOfPages) book.numberOfPages = bookData.numberOfPages;
-        if (bookData.publishDate) book.publishDate = bookData.publishDate;
-        if (bookData.series) book.series = bookData.series;
-        if (bookData.description) book.description = bookData.description;
-        if (bookData.publishers) book.publishers = bookData.publishers;
-        if (bookData.subjects) book.subjects = bookData.subjects;
-        if (bookData.isbn) book.isbn = bookData.isbn;
-        if (bookData.readingTimeDays) book.readingTimeDays = bookData.readingTimeDays;
-        if (bookData.review) book.review = bookData.review;
-        
-        // Sauvegarde du livre dans la base de données
-        const result = await saveBook(book);
-        
-        if (result.success) {
-          imported++;
-          console.log(`Livre importé avec succès: "${book.title}"`);
-        } else {
-          if (result.error === 'duplicate') {
-            duplicates++;
-            console.log(`Livre dupliqué ignoré: "${book.title}"`);
-          } else {
-            errors++;
-            console.error(`Erreur lors de l'importation du livre "${book.title}":`, result.message);
-          }
-        }
-      } catch (error) {
-        errors++;
-        console.error('Erreur lors du traitement d\'un livre:', error);
       }
+      
+      importedCount++;
     }
     
     return {
       success: true,
-      imported,
-      errors,
-      message: `Importation terminée: ${imported} livres importés, ${errors} erreurs, ${duplicates} doublons ignorés`
+      imported: importedCount,
+      message: `${importedCount} livres ont été importés avec succès.`
     };
   } catch (error) {
     console.error('Erreur lors de l\'importation:', error);
     return {
       success: false,
-      imported: 0,
-      errors: 0,
-      message: error instanceof Error ? error.message : 'Erreur inconnue lors de l\'importation'
+      message: error instanceof Error ? error.message : "Erreur inconnue lors de l'importation"
     };
   }
-}
-
-/**
- * Valide et normalise un statut de lecture
- * Si le statut n'est pas valide, retourne 'to-read' par défaut
- */
-function validateReadingStatus(status: string): ReadingStatus {
-  const validStatuses: ReadingStatus[] = ['to-read', 'reading', 'completed'];
-  
-  // Vérification directe
-  if (validStatuses.includes(status as ReadingStatus)) {
-    return status as ReadingStatus;
-  }
-  
-  // Tentative de normalisation pour différentes variations possibles
-  const normalizedStatus = status.toLowerCase().trim();
-  
-  if (normalizedStatus === 'to-read' || normalizedStatus === 'to read' || normalizedStatus === 'à lire' || normalizedStatus === 'a lire') {
-    return 'to-read';
-  }
-  if (normalizedStatus === 'reading' || normalizedStatus === 'en cours' || normalizedStatus === 'en lecture' || normalizedStatus === 'lu partiellement') {
-    return 'reading';
-  }
-  if (normalizedStatus === 'completed' || normalizedStatus === 'read' || normalizedStatus === 'lu' || normalizedStatus === 'terminé' || normalizedStatus === 'termine') {
-    return 'completed';
-  }
-  
-  // Statut par défaut si aucune correspondance
-  console.log(`Statut non reconnu "${status}", utilisation de la valeur par défaut "to-read"`);
-  return 'to-read';
-}
+};

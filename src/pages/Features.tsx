@@ -187,15 +187,17 @@ const Features = () => {
               </p>
               
               {!user && (
-                <div className="relative inline-block">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500/50 opacity-75"></span>
-                  <Button 
-                    size="lg" 
-                    onClick={handleSignInClick}
-                    className="relative z-10 font-semibold text-base transition-all duration-300 shadow-md hover:shadow-lg pulse-effect flex items-center gap-2"
-                  >
-                    <Heart className="h-5 w-5 fill-white" /> Commencer à créer votre bibliothèque !
-                  </Button>
+                <div className="flex justify-center">
+                  <div className="relative inline-block">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500/50 opacity-75"></span>
+                    <Button 
+                      size="lg" 
+                      onClick={handleSignInClick}
+                      className="relative z-10 font-semibold text-base transition-all duration-300 shadow-md hover:shadow-lg pulse-effect flex items-center gap-2"
+                    >
+                      <Heart className="h-5 w-5 fill-white" /> Commencer à créer votre bibliothèque !
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
