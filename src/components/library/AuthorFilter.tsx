@@ -2,7 +2,7 @@
 import React, { useMemo, useState } from 'react';
 import { Book } from '@/types/book';
 import { Button } from "@/components/ui/button";
-import { X, Check, ChevronsUpDown } from "lucide-react";
+import { X, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Select,
