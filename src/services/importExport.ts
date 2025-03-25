@@ -1,9 +1,8 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { Book } from "@/types/book";
-import { Json } from "@/types/supabase";
 
-// Type pour les données d'exportation
+// Type for export data
 interface ExportData {
   version: string;
   timestamp: string;
@@ -12,7 +11,7 @@ interface ExportData {
   books: Book[];
 }
 
-// Type pour les résultats d'importation/exportation
+// Type for import/export results
 interface ImportExportResult {
   success: boolean;
   data?: ExportData;
@@ -22,7 +21,7 @@ interface ImportExportResult {
 }
 
 /**
- * Exporte la bibliothèque de l'utilisateur au format JSON
+ * Exports the user's library to JSON format
  */
 export const exportLibrary = async (): Promise<ImportExportResult> => {
   try {
@@ -34,10 +33,10 @@ export const exportLibrary = async (): Promise<ImportExportResult> => {
       };
     }
     
-    // Récupérer tous les livres de l'utilisateur
+    // Retrieve all user's books
     const { data, error } = await supabase
-      .from('user_books')
-      .select('book_id, book_data, status, completion_date')
+      .from('books')
+      .select('book_data, status, completion_date')
       .eq('user_id', user.id);
     
     if (error) {
@@ -48,7 +47,7 @@ export const exportLibrary = async (): Promise<ImportExportResult> => {
       };
     }
     
-    // Vérifier si des livres ont été récupérés
+    // Check if any books were retrieved
     if (!data || data.length === 0) {
       console.log('Aucun livre trouvé pour l\'exportation');
       return {
@@ -63,19 +62,19 @@ export const exportLibrary = async (): Promise<ImportExportResult> => {
       };
     }
     
-    // Formatage des données pour l'export
+    // Format data for export
     const exportData: ExportData = {
       version: '1.0',
       timestamp: new Date().toISOString(),
       userId: user.id,
       email: user.email,
       books: data.map(book => {
-        // S'assurer que toutes les données du livre sont incluses
+        // Ensure all book data is included
         const bookData = book.book_data as Book;
         return {
           ...bookData,
           status: book.status as Book['status'] || bookData?.status || 'to-read',
-          completion_date: book.completion_date || bookData?.completion_date
+          completionDate: book.completion_date || bookData?.completionDate
         };
       })
     };
@@ -96,11 +95,11 @@ export const exportLibrary = async (): Promise<ImportExportResult> => {
 };
 
 /**
- * Importe une bibliothèque au format JSON
+ * Imports a library from JSON format
  */
 export const importLibrary = async (data: any): Promise<ImportExportResult> => {
   try {
-    // Vérifier que les données sont correctement formatées
+    // Verify data is properly formatted
     if (!data || !data.books || !Array.isArray(data.books)) {
       return {
         success: false,
@@ -116,49 +115,49 @@ export const importLibrary = async (data: any): Promise<ImportExportResult> => {
       };
     }
     
-    // Compteur pour les livres importés avec succès
+    // Counter for successfully imported books
     let importedCount = 0;
     
-    // Parcourir tous les livres à importer
+    // Process all books to import
     for (const book of data.books) {
-      // Vérifier si le livre existe déjà pour cet utilisateur
+      // Check if the book already exists for this user
       const { data: existingBook } = await supabase
-        .from('user_books')
-        .select('book_id')
+        .from('books')
+        .select('id')
         .eq('user_id', user.id)
-        .eq('book_id', book.id)
+        .eq('id', book.id)
         .maybeSingle();
         
-      // Préparer les données du livre pour l'insertion/mise à jour
+      // Prepare book data for insertion/update
       const bookData = {
         user_id: user.id,
-        book_id: book.id,
+        id: book.id,
         book_data: book,
         status: book.status || 'to-read',
-        completion_date: book.completion_date
+        completion_date: book.completionDate
       };
       
       if (existingBook) {
-        // Mettre à jour le livre existant
+        // Update existing book
         const { error: updateError } = await supabase
-          .from('user_books')
+          .from('books')
           .update(bookData)
           .eq('user_id', user.id)
-          .eq('book_id', book.id);
+          .eq('id', book.id);
           
         if (updateError) {
           console.error('Erreur lors de la mise à jour du livre:', updateError);
-          continue; // Passer au livre suivant
+          continue; // Continue to the next book
         }
       } else {
-        // Insérer un nouveau livre
+        // Insert a new book
         const { error: insertError } = await supabase
-          .from('user_books')
+          .from('books')
           .insert(bookData);
           
         if (insertError) {
           console.error('Erreur lors de l\'insertion du livre:', insertError);
-          continue; // Passer au livre suivant
+          continue; // Continue to the next book
         }
       }
       
