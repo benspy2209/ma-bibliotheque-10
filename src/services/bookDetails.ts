@@ -1,6 +1,7 @@
 
 import { Book } from '@/types/book';
 import { LanguageFilter } from '@/services/bookSearch';
+import axios from 'axios';
 
 // Clé API ISBNDB
 const ISBNDB_API_KEY = '60264_3de7f2f024bc350bfa823cbbd9e64315';
@@ -23,6 +24,11 @@ const getProxiedUrl = (url: string) => {
   return `${CORS_PROXY}${encodeURIComponent(url)}`;
 };
 
+// Instance axios pré-configurée
+const api = axios.create({
+  headers: getHeaders()
+});
+
 // Fonction pour récupérer les détails d'un livre par son ISBN
 export async function getBookDetails(bookId: string, language: LanguageFilter = 'fr'): Promise<Partial<Book>> {
   if (!bookId) {
@@ -44,35 +50,15 @@ export async function getBookDetails(bookId: string, language: LanguageFilter = 
     
     console.log(`Récupération des détails du livre: ${originalUrl}`);
 
-    const response = await fetch(proxiedUrl, {
-      method: 'GET',
-      headers: getHeaders(),
-      mode: 'cors'
-    });
+    const response = await api.get(proxiedUrl);
+    console.log('Détails du livre récupérés:', response.data);
 
-    if (!response.ok) {
-      console.error(`Erreur lors de la récupération des détails du livre: ${response.status} ${response.statusText}`);
-      
-      // Essayons de récupérer le message d'erreur spécifique
-      try {
-        const errorBody = await response.text();
-        console.error('Corps de la réponse d\'erreur:', errorBody);
-      } catch (e) {
-        console.error('Impossible de lire le corps de la réponse d\'erreur');
-      }
-      
-      return {};
-    }
-
-    const data = await response.json();
-    console.log('Détails du livre récupérés:', data);
-
-    if (!data.book) {
+    if (!response.data || !response.data.book) {
       console.log('Aucun détail de livre trouvé');
       return {};
     }
 
-    const book = data.book;
+    const book = response.data.book;
     return {
       title: book.title,
       author: book.authors?.[0] || book.author || '',
@@ -88,6 +74,71 @@ export async function getBookDetails(bookId: string, language: LanguageFilter = 
     };
   } catch (error) {
     console.error('Erreur lors de la récupération des détails du livre:', error);
+    
+    // Tenter d'extraire plus d'informations sur l'erreur
+    if (axios.isAxiosError(error)) {
+      console.error('Détails de l\'erreur Axios:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data
+      });
+    }
+    
     return {};
+  }
+}
+
+// Nouvelle fonction pour récupérer plusieurs livres par ISBN en parallèle
+export async function getMultipleBookDetails(bookIds: string[], language: LanguageFilter = 'fr'): Promise<Partial<Book>[]> {
+  if (!bookIds.length) return [];
+  
+  // Filtrer les IDs invalides
+  const validBookIds = bookIds.filter(id => id && (id.startsWith('isbndb-') ? false : true));
+  
+  if (!validBookIds.length) {
+    console.error('Aucun ISBN valide fourni pour la récupération des détails');
+    return [];
+  }
+  
+  try {
+    // Créer un tableau de promesses pour chaque ISBN
+    const requests = validBookIds.map(isbn => {
+      const url = getProxiedUrl(`${ISBNDB_BASE_URL}/book/${isbn}`);
+      return api.get(url).catch(err => {
+        console.error(`Erreur pour l'ISBN ${isbn}:`, err);
+        return { data: null }; // Retourner un objet null en cas d'erreur
+      });
+    });
+    
+    // Exécuter toutes les requêtes en parallèle
+    const responses = await Promise.all(requests);
+    
+    // Traiter les réponses et mapper les résultats
+    const books = responses.map((response, index) => {
+      if (!response.data || !response.data.book) {
+        console.log(`Aucun détail trouvé pour l'ISBN ${validBookIds[index]}`);
+        return { isbn: validBookIds[index] };
+      }
+      
+      const book = response.data.book;
+      return {
+        title: book.title,
+        author: book.authors?.[0] || book.author || '',
+        cover: book.image,
+        description: book.synopsis || '',
+        isbn: book.isbn13 || book.isbn,
+        publishers: book.publisher ? [book.publisher] : [],
+        numberOfPages: book.pages || 0,
+        publishDate: book.date_published || '',
+        language: book.language ? [book.language] : [language],
+        subjects: book.subjects || [],
+        format: book.format || '',
+      };
+    }).filter(book => Object.keys(book).length > 1); // Ne garder que les livres avec des détails
+    
+    return books;
+  } catch (error) {
+    console.error('Erreur lors de la récupération en masse des détails de livres:', error);
+    return [];
   }
 }
