@@ -24,7 +24,7 @@ export function getAmazonAffiliateUrl(book: Book) {
     for (let i = 0; i < 9; i++) {
       sum += parseInt(asin.charAt(i)) * (10 - i);
     }
-    let checkDigit = 11 - (sum % 11);
+    let checkDigit: string | number = 11 - (sum % 11);
     if (checkDigit === 10) checkDigit = 'X';
     else if (checkDigit === 11) checkDigit = 0;
     
