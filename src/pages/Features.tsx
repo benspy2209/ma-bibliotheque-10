@@ -122,10 +122,11 @@ const featureSections = [
 ];
 
 const Features = () => {
-  const { signIn, user } = useSupabaseAuth();
+  const { signIn, user, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
 
   // Fonction pour gérer le clic sur le bouton de connexion
   const handleSignInClick = () => {
+    console.log("Opening login dialog from Features page");
     signIn('signup');
   };
 
