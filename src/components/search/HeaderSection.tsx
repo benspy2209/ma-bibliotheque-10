@@ -4,6 +4,7 @@ import { AddManualBook } from '@/components/AddManualBook';
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { BookOpen } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "@/components/ui/button";
 
 interface HeaderSectionProps {
   onBookAdded: () => void;
@@ -27,13 +28,15 @@ export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
       {user && (
         <div className="flex gap-4 items-center w-full sm:w-auto">
           <AddManualBook onBookAdded={onBookAdded} />
-          <Link 
-            to="/library" 
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-          >
-            <BookOpen className="h-4 w-4" />
-            {!isMobile && "Ma Bibliothèque"}
-          </Link>
+          <Button asChild>
+            <Link 
+              to="/library" 
+              className="w-full sm:w-auto flex items-center justify-center gap-2"
+            >
+              <BookOpen className="h-4 w-4" />
+              {!isMobile && "Ma Bibliothèque"}
+            </Link>
+          </Button>
         </div>
       )}
     </div>
