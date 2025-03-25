@@ -27,7 +27,6 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-      // Ajouter mode: 'cors' pour résoudre les problèmes CORS
       mode: 'cors'
     });
     
@@ -142,7 +141,7 @@ export async function searchBooksByTitle(title: string, language: LanguageFilter
   }
 }
 
-// Ancienne fonction de recherche ISBNDB (conservée pour les autres types de recherche)
+// Fonction de recherche ISBNDB
 export async function searchIsbndb(query: string, searchType: SearchType = 'author', language: LanguageFilter = 'fr', maxResults: number = 100): Promise<Book[]> {
   if (!query.trim()) return [];
   
