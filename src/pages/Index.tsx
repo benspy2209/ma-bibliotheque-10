@@ -16,6 +16,7 @@ import Footer from '@/components/Footer';
 import { LoginDialog } from '@/components/auth/LoginDialog';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { supabase } from '@/integrations/supabase/client';
+import { SearchLimitResponse, isSearchLimitResponse } from '@/types/searchLimits';
 
 const BOOKS_PER_PAGE = 12;
 
@@ -59,7 +60,7 @@ const Index = () => {
         return;
       }
 
-      if (data) {
+      if (data && isSearchLimitResponse(data)) {
         setSearchLimitReached(!data.can_search);
         setRemainingSearches(data.remaining);
         
@@ -92,7 +93,7 @@ const Index = () => {
         return;
       }
 
-      if (data) {
+      if (data && isSearchLimitResponse(data)) {
         setRemainingSearches(data.remaining);
         
         if (!data.success) {
