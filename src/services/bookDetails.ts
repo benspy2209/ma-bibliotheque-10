@@ -1,5 +1,6 @@
 
 import { Book } from '@/types/book';
+import { SearchLanguage } from '@/components/search/SearchBar';
 
 // Clé API ISBNDB
 const ISBNDB_API_KEY = '60264_3de7f2f024bc350bfa823cbbd9e64315';
@@ -32,7 +33,7 @@ function cleanDescription(description: string): string {
   return cleaned;
 }
 
-export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
+export async function getBookDetails(bookId: string, language: SearchLanguage = 'fr'): Promise<Partial<Book>> {
   console.log('[DETAIL] Récupération des détails pour le livre:', bookId);
   
   try {
@@ -83,7 +84,7 @@ export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
         publishDate: book.date_published || '',
         publishers: book.publisher ? [book.publisher] : [],
         isbn: book.isbn13 || book.isbn,
-        language: book.language ? [book.language] : ['fr'],
+        language: book.language ? [book.language] : [language],
       };
     }
     
