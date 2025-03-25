@@ -43,6 +43,7 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
   };
 
   const handleConnectClick = () => {
+    console.log("Ouverture du formulaire de connexion");
     signIn('signup');
   };
 
