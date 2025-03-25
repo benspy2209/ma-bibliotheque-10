@@ -1,3 +1,4 @@
+
 import { NavLink } from "react-router-dom";
 import { Search, BookOpen, BarChart2, Sun, Moon, LogIn, Menu } from "lucide-react";
 import { Button } from "./ui/button";
@@ -26,6 +27,14 @@ const NavBar = () => {
     <>
       <NavLink 
         to="/" 
+        className={({ isActive }) => `flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
+        end
+      >
+        <BookOpen className="h-4 w-4" />
+        Accueil
+      </NavLink>
+      <NavLink 
+        to="/library" 
         className={({ isActive }) => `flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
       >
         <BookOpen className="h-4 w-4" />

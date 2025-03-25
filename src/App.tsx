@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
+import Homepage from "./pages/Homepage";
 import Index from "./pages/Index";
 import Library from "./pages/Library";
 import Statistics from "./pages/Statistics";
@@ -24,7 +25,8 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Library />} />
+            <Route path="/" element={<Homepage />} />
+            <Route path="/library" element={<Library />} />
             <Route path="/search" element={<Index />} />
             <Route path="/statistics" element={<Statistics />} />
             <Route path="/book/:id" element={<BookPage />} />
