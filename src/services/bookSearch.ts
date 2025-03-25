@@ -1,6 +1,7 @@
 
 import { Book } from '@/types/book';
 import { removeDuplicateBooks, filterNonBookResults, isAuthorMatch, isTitleMatch } from '@/lib/utils';
+import axios from 'axios';
 
 export type SearchType = 'author' | 'title' | 'general';
 export type LanguageFilter = 'fr' | 'en';
@@ -9,6 +10,15 @@ export type LanguageFilter = 'fr' | 'en';
 const ISBNDB_API_KEY = '60264_3de7f2f024bc350bfa823cbbd9e64315';
 const ISBNDB_BASE_URL = 'https://api2.isbndb.com';
 
+// Création d'une instance axios configurée pour ISBNDB
+const isbndbClient = axios.create({
+  baseURL: ISBNDB_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': ISBNDB_API_KEY,
+  }
+});
+
 // Fonction pour faire une recherche par auteur avec l'endpoint correct
 export async function searchAuthorBooks(authorName: string, language: LanguageFilter = 'fr', maxResults: number = 100): Promise<Book[]> {
   if (!authorName.trim()) return [];
@@ -16,31 +26,17 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
   try {
     const encodedAuthorName = encodeURIComponent(authorName);
     // Utiliser l'endpoint /author/ spécifique comme indiqué dans l'API
-    const url = `${ISBNDB_BASE_URL}/author/${encodedAuthorName}?pageSize=${maxResults}&language=${language}`;
+    const url = `/author/${encodedAuthorName}?pageSize=${maxResults}&language=${language}`;
     
-    console.log(`Recherche par auteur: ${url}`);
+    console.log(`Recherche par auteur: ${ISBNDB_BASE_URL}${url}`);
     
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Authorization': ISBNDB_API_KEY,
-        'Accept': 'application/json'
-      },
-      // Ajouter mode: 'cors' pour résoudre les problèmes CORS
-      mode: 'cors'
-    });
+    const response = await isbndbClient.get(url);
     
-    if (!response.ok) {
-      console.error(`Erreur ISBNDB (recherche auteur): ${response.status} ${response.statusText}`);
-      throw new Error(`Erreur ISBNDB (recherche auteur): ${response.status} ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    console.log('Réponse de la recherche par auteur:', data);
+    console.log('Réponse de la recherche par auteur:', response.data);
     
     // Vérifier si l'API a retourné les livres de l'auteur
-    if (data.books && Array.isArray(data.books)) {
-      const books = data.books.map((book: any) => mapIsbndbBookToBook(book, authorName));
+    if (response.data.books && Array.isArray(response.data.books)) {
+      const books = response.data.books.map((book: any) => mapIsbndbBookToBook(book, authorName));
       
       // Application des filtres améliorés
       const filteredBooks = books.filter(book => {
@@ -74,35 +70,22 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
   }
 }
 
-// Nouvelle fonction pour rechercher par titre
+// Recherche par titre avec axios
 export async function searchBooksByTitle(title: string, language: LanguageFilter = 'fr', maxResults: number = 100): Promise<Book[]> {
   if (!title.trim()) return [];
   
   try {
     const encodedTitle = encodeURIComponent(title);
-    const url = `${ISBNDB_BASE_URL}/books/${encodedTitle}?pageSize=${maxResults}&language=${language}`;
+    const url = `/books/${encodedTitle}?pageSize=${maxResults}&language=${language}`;
     
-    console.log(`Recherche par titre: ${url}`);
+    console.log(`Recherche par titre: ${ISBNDB_BASE_URL}${url}`);
     
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Authorization': ISBNDB_API_KEY,
-        'Accept': 'application/json'
-      },
-      mode: 'cors'
-    });
+    const response = await isbndbClient.get(url);
     
-    if (!response.ok) {
-      console.error(`Erreur ISBNDB (recherche titre): ${response.status} ${response.statusText}`);
-      throw new Error(`Erreur ISBNDB (recherche titre): ${response.status} ${response.statusText}`);
-    }
+    console.log('Réponse de la recherche par titre:', response.data);
     
-    const data = await response.json();
-    console.log('Réponse de la recherche par titre:', data);
-    
-    if (data.books && Array.isArray(data.books)) {
-      const books = data.books.map((book: any) => mapIsbndbBookToBook(book));
+    if (response.data.books && Array.isArray(response.data.books)) {
+      const books = response.data.books.map((book: any) => mapIsbndbBookToBook(book));
       
       // Application des filtres spécifiques aux titres
       const filteredBooks = books.filter(book => {
@@ -121,33 +104,44 @@ export async function searchBooksByTitle(title: string, language: LanguageFilter
   }
 }
 
+// Recherche multiple de livres par ISBN (nouveau)
+export async function searchBooksByIsbns(isbns: string[]): Promise<Book[]> {
+  if (!isbns.length) return [];
+  
+  try {
+    const isbnString = isbns.join(',');
+    console.log(`Recherche par ISBNs: ${isbnString}`);
+    
+    const response = await isbndbClient.post('/books', `isbns=${isbnString}`);
+    
+    console.log('Réponse de la recherche par ISBNs:', response.data);
+    
+    if (response.data.books && Array.isArray(response.data.books)) {
+      return response.data.books.map((book: any) => mapIsbndbBookToBook(book));
+    }
+    
+    return [];
+  } catch (error) {
+    console.error('Erreur lors de la recherche par ISBNs:', error);
+    return [];
+  }
+}
+
 // Méthode de recherche alternative en cas d'échec de la première
 async function fallbackAuthorSearch(authorName: string, language: LanguageFilter, maxResults: number): Promise<Book[]> {
-  const url = `${ISBNDB_BASE_URL}/books/${encodeURIComponent(authorName)}?pageSize=${maxResults}&language=${language}`;
+  const url = `/books/${encodeURIComponent(authorName)}?pageSize=${maxResults}&language=${language}`;
   
-  console.log(`Recherche alternative: ${url}`);
+  console.log(`Recherche alternative: ${ISBNDB_BASE_URL}${url}`);
   
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': ISBNDB_API_KEY,
-      'Accept': 'application/json'
-    },
-    mode: 'cors'
-  });
+  const response = await isbndbClient.get(url);
   
-  if (!response.ok) {
-    throw new Error(`Erreur recherche alternative: ${response.status}`);
-  }
+  console.log('Réponse de la recherche alternative:', response.data);
   
-  const data = await response.json();
-  console.log('Réponse de la recherche alternative:', data);
-  
-  if (!data.books || !Array.isArray(data.books)) {
+  if (!response.data.books || !Array.isArray(response.data.books)) {
     return [];
   }
   
-  const books = data.books.map((book: any) => mapIsbndbBookToBook(book));
+  const books = response.data.books.map((book: any) => mapIsbndbBookToBook(book));
   
   // Filtrage plus strict des résultats
   const filteredBooks = books.filter(book => {
@@ -163,7 +157,7 @@ async function fallbackAuthorSearch(authorName: string, language: LanguageFilter
   return filterNonBookResults(filteredBooks);
 }
 
-// Ancienne fonction de recherche ISBNDB (conservée pour les autres types de recherche)
+// Ancienne fonction de recherche ISBNDB modifiée pour utiliser axios
 export async function searchIsbndb(query: string, searchType: SearchType = 'author', language: LanguageFilter = 'fr', maxResults: number = 100): Promise<Book[]> {
   if (!query.trim()) return [];
   
@@ -180,27 +174,15 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'auth
         // Utiliser la recherche générale
         const endpoint = `/books/${encodeURIComponent(query)}`;
         const params = `?pageSize=${maxResults}&language=${language}`;
-        const url = `${ISBNDB_BASE_URL}${endpoint}${params}`;
-        console.log(`Requête ISBNDB (${searchType}): ${url}`);
+        const url = `${endpoint}${params}`;
+        console.log(`Requête ISBNDB (${searchType}): ${ISBNDB_BASE_URL}${url}`);
 
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Authorization': ISBNDB_API_KEY,
-            'Accept': 'application/json',
-          },
-          mode: 'cors'
-        });
+        const response = await isbndbClient.get(url);
 
-        if (!response.ok) {
-          throw new Error(`Erreur ISBNDB: ${response.status} ${response.statusText}`);
-        }
+        console.log('Réponse ISBNDB:', response.data);
 
-        const data = await response.json();
-        console.log('Réponse ISBNDB:', data);
-
-        if (data.books) {
-          const books = data.books.map((book: any) => mapIsbndbBookToBook(book));
+        if (response.data.books) {
+          const books = response.data.books.map((book: any) => mapIsbndbBookToBook(book));
           return filterNonBookResults(books);
         }
         return [];
