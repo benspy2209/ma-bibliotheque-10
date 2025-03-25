@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Heart, Star, Compass, ZAP, CircleCheck } from 'lucide-react';
+import { BookOpen, Heart, Star, Compass, Zap, CircleCheck } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent } from '@/components/ui/card';
 import NavBar from '@/components/NavBar';
