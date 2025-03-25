@@ -2,8 +2,10 @@
 import { useNavigate } from 'react-router-dom';
 import { Book } from '@/types/book';
 import { Card, CardContent } from "@/components/ui/card";
-import { Bookmark } from 'lucide-react';
+import { Bookmark, Amazon, ShoppingCart } from 'lucide-react';
 import { getAmazonAffiliateUrl } from '@/lib/utils';
+import { AddToLibrary } from '@/components/AddToLibrary';
+import { Badge } from '@/components/ui/badge';
 
 interface BookCardProps {
   book: Book;
@@ -36,6 +38,11 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
     ? book.author[0] || 'Auteur inconnu' 
     : book.author || 'Auteur inconnu';
 
+  const handleAmazonClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Empêche le déclenchement du clic sur la carte
+    window.open(amazonUrl, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <Card 
       className="h-full flex flex-col relative overflow-hidden hover:shadow-md transition-shadow cursor-pointer transform hover:scale-[1.01] transition-transform"
@@ -54,9 +61,11 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
               }}
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-muted">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted">
               <Bookmark className="h-12 w-12 text-muted-foreground/40" />
-              <span className="sr-only">{book.title}</span>
+              <span className="text-xs text-center text-muted-foreground mt-2 px-2">
+                Pas de couverture trouvée. Vous pourrez ajouter la vôtre !
+              </span>
             </div>
           )}
           
@@ -65,6 +74,31 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
               Audio
             </div>
           )}
+
+          {/* Badge d'actions en haut à gauche */}
+          <div className="absolute top-2 left-2 flex flex-col gap-2">
+            {/* Badge Amazon */}
+            <Badge 
+              onClick={handleAmazonClick}
+              className="cursor-pointer bg-orange-500 hover:bg-orange-600 text-white flex items-center gap-1"
+            >
+              <Amazon size={12} />
+              <span className="text-xs">Amazon</span>
+            </Badge>
+            
+            {/* Badge Ajouter à la bibliothèque */}
+            <div onClick={(e) => e.stopPropagation()} className="z-10">
+              <AddToLibrary 
+                onStatusChange={(status) => {
+                  // Le changement de statut est géré dans le composant AddToLibrary
+                }}
+                bookId={book.id}
+                bookTitle={book.title}
+                bookAuthor={book.author}
+                currentStatus={book.status}
+              />
+            </div>
+          </div>
         </div>
         
         <div className="p-3 flex-1 flex flex-col">
