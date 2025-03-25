@@ -1,5 +1,5 @@
 
-import { Book, BookDetails } from '@/types/book';
+import { Book } from '@/types/book';
 
 const ISBNDB_API_KEY = '60264_3de7f2f024bc350bfa823cbbd9e64315';
 const ISBNDB_BASE_URL = 'https://api2.isbndb.com';
