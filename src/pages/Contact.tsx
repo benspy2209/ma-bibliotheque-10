@@ -30,7 +30,8 @@ const Contact = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simuler l'envoi du formulaire
+    // Ici, nous simulons l'envoi du formulaire pour le moment
+    // Dans une implémentation future, nous ajouterons l'envoi réel des emails
     setTimeout(() => {
       toast({
         title: "Message envoyé",
@@ -71,7 +72,9 @@ const Contact = () => {
                   <Mail className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Email</h3>
-                <p className="text-muted-foreground">contact@bibliopulse.com</p>
+                <a href="mailto:contact@bibliopulse.com" className="text-primary hover:underline">
+                  contact@bibliopulse.com
+                </a>
               </CardContent>
             </Card>
             
@@ -81,7 +84,9 @@ const Contact = () => {
                   <Phone className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Téléphone</h3>
-                <p className="text-muted-foreground">+33 (0)1 23 45 67 89</p>
+                <a href="tel:+32497363065" className="text-primary hover:underline">
+                  +32 497 36 30 65
+                </a>
               </CardContent>
             </Card>
             
@@ -91,7 +96,10 @@ const Contact = () => {
                   <MapPin className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Adresse</h3>
-                <p className="text-muted-foreground">123 Avenue des Livres<br />75000 Paris, France</p>
+                <p className="text-muted-foreground">
+                  Rhode-Saint-Genèse<br />
+                  Belgique
+                </p>
               </CardContent>
             </Card>
           </div>
