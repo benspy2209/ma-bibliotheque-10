@@ -15,17 +15,17 @@
   100% { box-shadow: 0 0 0 0 rgba(234, 56, 76, 0); }
 }
 
-/* Nouvelle animation plus subtile pour le titre */
+/* Refined title animation - much more subtle */
 @keyframes titlePulse {
-  0% { opacity: 0.95; color: #d63a4f; }
-  50% { opacity: 0.75; color: #e05566; }
-  100% { opacity: 0.95; color: #d63a4f; }
+  0% { opacity: 0.98; color: #d63a4f; }
+  50% { opacity: 0.90; color: #db4c5f; }
+  100% { opacity: 0.98; color: #d63a4f; }
 }
 
 @keyframes glow {
-  0% { text-shadow: 0 0 5px rgba(255, 255, 255, 0.6); }
-  50% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.6), 0 0 15px rgba(234, 56, 76, 0.3); }
-  100% { text-shadow: 0 0 5px rgba(255, 255, 255, 0.6); }
+  0% { text-shadow: 0 0 2px rgba(255, 255, 255, 0.3); }
+  50% { text-shadow: 0 0 5px rgba(255, 255, 255, 0.3), 0 0 7px rgba(234, 56, 76, 0.1); }
+  100% { text-shadow: 0 0 2px rgba(255, 255, 255, 0.3); }
 }
 
 @keyframes bounce {
@@ -41,11 +41,11 @@
   animation: slideIn 0.3s ease-out forwards;
 }
 
-/* Nouvelle version plus élégante de l'animation du titre */
+/* More subtle title animation with slower timing */
 .title-pulse {
   display: inline-block;
-  animation: titlePulse 3s ease-in-out infinite, glow 3s infinite;
-  transition: all 0.5s ease;
+  animation: titlePulse 5s ease-in-out infinite, glow 5s infinite;
+  transition: all 0.8s ease;
 }
 
 /* Signup button animations */
