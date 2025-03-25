@@ -22,6 +22,7 @@ const handler = async (req: Request): Promise<Response> => {
   
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
+    console.log("Handling CORS preflight request");
     return new Response(null, { headers: corsHeaders });
   }
 
@@ -29,7 +30,15 @@ const handler = async (req: Request): Promise<Response> => {
     const body = await req.text();
     console.log("Request body:", body);
     
-    const { name, email, subject, message }: ContactEmailRequest = JSON.parse(body);
+    let data: ContactEmailRequest;
+    try {
+      data = JSON.parse(body);
+    } catch (error) {
+      console.error("Error parsing JSON:", error);
+      throw new Error("Invalid JSON in request body");
+    }
+    
+    const { name, email, subject, message } = data;
 
     // Validation des champs
     if (!name || !email || !subject || !message) {

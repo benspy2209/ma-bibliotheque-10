@@ -37,10 +37,21 @@ const Contact = () => {
     setError('');
     
     try {
-      console.log("Envoi des données:", formData);
+      console.log("Préparation de l'envoi des données:", formData);
+      
+      // Validation côté client
+      if (!formData.name || !formData.email || !formData.subject || !formData.message) {
+        throw new Error("Tous les champs sont requis");
+      }
+      
+      console.log("Envoi des données à la fonction Edge Supabase...");
       
       // Envoi du formulaire via la fonction Edge Supabase
       const { data, error: supabaseError } = await supabase.functions.invoke('send-contact-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(formData)
       });
 
