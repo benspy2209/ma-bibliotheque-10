@@ -20,17 +20,15 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
     
     console.log(`Recherche par auteur: ${url}`);
     
-    // Format exact comme montré dans l'exemple de l'API
-    const headers = {
-      "Content-Type": "application/json",
-      "Authorization": ISBNDB_API_KEY
-    };
-    
-    console.log('Headers utilisés pour recherche auteur:', headers);
-    
     const response = await fetch(url, {
       method: 'GET',
-      headers: headers
+      headers: {
+        'Authorization': ISBNDB_API_KEY,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      // Ajouter mode: 'cors' pour résoudre les problèmes CORS
+      mode: 'cors'
     });
     
     if (!response.ok) {
@@ -76,16 +74,14 @@ async function fallbackAuthorSearch(authorName: string, language: LanguageFilter
   
   console.log(`Recherche alternative: ${url}`);
   
-  const headers = {
-    "Content-Type": "application/json",
-    "Authorization": ISBNDB_API_KEY
-  };
-  
-  console.log('Headers utilisés pour recherche alternative:', headers);
-  
   const response = await fetch(url, {
     method: 'GET',
-    headers: headers
+    headers: {
+      'Authorization': ISBNDB_API_KEY,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    mode: 'cors'
   });
   
   if (!response.ok) {
@@ -117,16 +113,14 @@ export async function searchBooksByTitle(title: string, language: LanguageFilter
     
     console.log(`Recherche par titre: ${url}`);
     
-    const headers = {
-      "Content-Type": "application/json",
-      "Authorization": ISBNDB_API_KEY
-    };
-    
-    console.log('Headers utilisés pour recherche titre:', headers);
-    
     const response = await fetch(url, {
       method: 'GET',
-      headers: headers
+      headers: {
+        'Authorization': ISBNDB_API_KEY,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      mode: 'cors'
     });
     
     if (!response.ok) {
@@ -148,7 +142,7 @@ export async function searchBooksByTitle(title: string, language: LanguageFilter
   }
 }
 
-// Fonction de recherche ISBNDB
+// Ancienne fonction de recherche ISBNDB (conservée pour les autres types de recherche)
 export async function searchIsbndb(query: string, searchType: SearchType = 'author', language: LanguageFilter = 'fr', maxResults: number = 100): Promise<Book[]> {
   if (!query.trim()) return [];
   
