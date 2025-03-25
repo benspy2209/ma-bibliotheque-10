@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Search } from 'lucide-react';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
@@ -12,13 +12,8 @@ interface SearchBarProps {
 
 export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const { user, setShowLoginDialog } = useSupabaseAuth();
+  const { user } = useSupabaseAuth();
   const { toast } = useToast();
-
-  // Vérifier l'état du dialogue pour debugging
-  useEffect(() => {
-    console.log("État du dialogue dans SearchBar:", showLoginDialog);
-  }, [showLoginDialog]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -59,7 +54,7 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
       />
       
       {!user && (
-        <div className="mt-6 text-center">
+        <div className="mt-2 text-center">
           <p className="text-destructive">Vous devez vous connecter ou créer un compte pour faire une recherche.</p>
         </div>
       )}
