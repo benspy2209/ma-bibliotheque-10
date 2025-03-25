@@ -16,6 +16,7 @@ export const ImportExportLibrary = ({ onUpdate }: ImportExportLibraryProps) => {
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleExport = async () => {
     try {
@@ -56,12 +57,25 @@ export const ImportExportLibrary = ({ onUpdate }: ImportExportLibraryProps) => {
     }
   };
 
-  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+    }
+  };
+
+  const handleImport = async () => {
+    if (!selectedFile) {
+      toast({
+        variant: "destructive",
+        description: "Veuillez sélectionner un fichier à importer",
+      });
+      return;
+    }
+
     try {
       setIsLoading(true);
-      const file = e.target.files?.[0];
-      if (!file) return;
-
+      
       const reader = new FileReader();
       
       reader.onload = async (event) => {
@@ -77,6 +91,7 @@ export const ImportExportLibrary = ({ onUpdate }: ImportExportLibraryProps) => {
               variant: "destructive",
               description: "Le fichier n'est pas au format JSON valide",
             });
+            setIsLoading(false);
             return;
           }
           
@@ -88,6 +103,8 @@ export const ImportExportLibrary = ({ onUpdate }: ImportExportLibraryProps) => {
             });
             // Rafraîchir la bibliothèque
             onUpdate();
+            // Fermer le dialogue
+            setImportDialogOpen(false);
           } else {
             toast({
               variant: "destructive",
@@ -102,13 +119,11 @@ export const ImportExportLibrary = ({ onUpdate }: ImportExportLibraryProps) => {
           });
         } finally {
           setIsLoading(false);
-          setImportDialogOpen(false);
-          // Reset the file input
-          e.target.value = '';
+          setSelectedFile(null);
         }
       };
       
-      reader.readAsText(file);
+      reader.readAsText(selectedFile);
     } catch (error) {
       console.error("Erreur lors de l'importation:", error);
       toast({
@@ -116,7 +131,6 @@ export const ImportExportLibrary = ({ onUpdate }: ImportExportLibraryProps) => {
         description: "Une erreur est survenue lors de l'importation",
       });
       setIsLoading(false);
-      setImportDialogOpen(false);
     }
   };
 
@@ -181,7 +195,7 @@ export const ImportExportLibrary = ({ onUpdate }: ImportExportLibraryProps) => {
                   <input
                     type="file"
                     accept=".json"
-                    onChange={handleImport}
+                    onChange={handleFileSelect}
                     className="block w-full text-sm text-slate-500
                       file:mr-4 file:py-2 file:px-4
                       file:rounded-md file:border-0
@@ -189,12 +203,24 @@ export const ImportExportLibrary = ({ onUpdate }: ImportExportLibraryProps) => {
                       file:bg-primary file:text-primary-foreground
                       hover:file:bg-primary/90"
                   />
+                  {selectedFile && (
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Fichier sélectionné: {selectedFile.name}
+                    </p>
+                  )}
                 </div>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isLoading}>Annuler</AlertDialogCancel>
+            <Button 
+              onClick={handleImport} 
+              disabled={isLoading || !selectedFile}
+              className="ml-2"
+            >
+              {isLoading ? "Importation en cours..." : "Importer"}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -221,7 +247,7 @@ export const ImportExportLibrary = ({ onUpdate }: ImportExportLibraryProps) => {
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isLoading}>Annuler</AlertDialogCancel>
             <AlertDialogAction onClick={handleExport} disabled={isLoading}>
-              {isLoading ? "Exportation..." : "Exporter"}
+              {isLoading ? "Exportation en cours..." : "Exporter"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
