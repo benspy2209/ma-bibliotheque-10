@@ -166,11 +166,20 @@ const Index = () => {
     queryFn: () => searchAllBooks(searchParams.query, searchParams.type, searchParams.language, MAX_SEARCH_RESULTS),
     enabled: searchParams.query.length > 0 && !searchLimitReached && !!user,
     retry: 1,
-    onError: (error) => {
-      console.error("Erreur lors de la recherche:", error);
-      setSearchError("Une erreur est survenue lors de la recherche. Veuillez réessayer plus tard.");
+    meta: {
+      onError: (error: Error) => {
+        console.error("Erreur lors de la recherche:", error);
+        setSearchError("Une erreur est survenue lors de la recherche. Veuillez réessayer plus tard.");
+      }
     }
   });
+
+  useEffect(() => {
+    if (queryError) {
+      console.error("Erreur lors de la recherche:", queryError);
+      setSearchError("Une erreur est survenue lors de la recherche. Veuillez réessayer plus tard.");
+    }
+  }, [queryError]);
 
   const handleBookClick = async (book: Book) => {
     try {
