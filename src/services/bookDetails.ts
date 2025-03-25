@@ -30,8 +30,7 @@ export async function getBookDetails(bookId: string, language: string = 'fr'): P
         'Authorization': ISBNDB_API_KEY,
         'Content-Type': 'application/json',
         'Accept': 'application/json'
-      },
-      mode: 'cors'
+      }
     });
     
     if (!response.ok) {

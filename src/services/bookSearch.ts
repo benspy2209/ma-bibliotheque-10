@@ -26,8 +26,7 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
         'Authorization': ISBNDB_API_KEY,
         'Content-Type': 'application/json',
         'Accept': 'application/json'
-      },
-      mode: 'cors'
+      }
     });
     
     if (!response.ok) {
@@ -79,8 +78,7 @@ async function fallbackAuthorSearch(authorName: string, language: LanguageFilter
       'Authorization': ISBNDB_API_KEY,
       'Content-Type': 'application/json',
       'Accept': 'application/json'
-    },
-    mode: 'cors'
+    }
   });
   
   if (!response.ok) {
@@ -118,8 +116,7 @@ export async function searchBooksByTitle(title: string, language: LanguageFilter
         'Authorization': ISBNDB_API_KEY,
         'Content-Type': 'application/json',
         'Accept': 'application/json'
-      },
-      mode: 'cors'
+      }
     });
     
     if (!response.ok) {
