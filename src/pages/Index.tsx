@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import { searchBooks } from '@/services/openLibrary';
@@ -13,6 +12,8 @@ import { SearchBar } from '@/components/search/SearchBar';
 import { BookGrid } from '@/components/search/BookGrid';
 import { HeaderSection } from '@/components/search/HeaderSection';
 import Footer from '@/components/Footer';
+import { LoginDialog } from '@/components/auth/LoginDialog';
+import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
 const BOOKS_PER_PAGE = 12;
 
@@ -22,6 +23,7 @@ const Index = () => {
   const [displayedBooks, setDisplayedBooks] = useState(BOOKS_PER_PAGE);
   const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
+  const { showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
 
   const results = useQueries({
     queries: [
@@ -125,6 +127,7 @@ const Index = () => {
         </div>
       </div>
       <Footer />
+      <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
     </div>
   );
 };
