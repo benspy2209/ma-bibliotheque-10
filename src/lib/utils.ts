@@ -1,4 +1,3 @@
-
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { Book } from '@/types/book'
@@ -58,14 +57,24 @@ const TECHNICAL_KEYWORDS = [
   
   // Contenus académiques/éducatifs
   'essais', 'études', 'leçons', 'cours', 'conférences', 'méthode', 
-  'guide pratique', 'manuel de', 'théorie'
+  'guide pratique', 'manuel de', 'théorie',
+  
+  // Ajouts de nouveaux mots-clés
+  'publication', 'acta', 'annales', 'bulletin', 'cahier', 'rapport', 'mémoires',
+  'compte-rendu', 'document', 'dossier', 'étude', 'fascicule', 'notice',
+  'précis', 'procès-verbal', 'recueil', 'travaux', 'selected works', 'œuvres choisies',
+  'œuvres complètes', 'complete works', 'selected writings', 'collected papers',
+  'mélanges', 'miscellanea', 'série', 'collection', 'tome', 'volume',
+  'agenda', 'éphéméride', 'yearbook', 'annuaire'
 ];
 
 // Formats de livres à exclure dans les titres
 const UNWANTED_FORMATS = [
   'audio cd', 'audiobook', 'audio book', 'livre audio', 'mp3', 
   'coffret', 'boxed set', 'box set', 'collector', 'édition spéciale', 
-  'edition spéciale', 'special edition', 'collector\'s edition'
+  'edition spéciale', 'special edition', 'collector\'s edition',
+  'intégrale', 'complete collection', 'complete set', 'complete edition',
+  'anthologie', 'anthology', 'collection complète', 'édition complète'
 ];
 
 // Mots-clés spécifiques aux types de livres non désirés - liste étendue et améliorée
@@ -80,9 +89,19 @@ const UNWANTED_TYPES = [
   'theolog', 'dogmat', 'canoni', 'ecclesiasti',
   
   // Mots-clés académiques
-  'critiq', 'universel', 'sciences', 'geographi', 'chronologi', 'histori'
+  'critiq', 'universel', 'sciences', 'geographi', 'chronologi', 'histori',
+  
+  // Nouveaux mots-clés à exclure
+  'technique', 'technologi', 'méthodologi', 'pédagogi', 'didacti',
+  'scientifi', 'académi', 'recherch', 'publi', 'éducati', 'enseignement',
+  'collège', 'université', 'scolaire', 'doctoral', 'doctorat',
+  'étudiant', 'bibliograph', 'bibliothéc', 'référence', 'document',
+  'analyse', 'conférence', 'séminaire', 'étude', 'synthèse', 'résumé',
+  'sommaire', 'abstract', 'proceedings', 'actes', 'recueil', 'collection',
+  'publication', 'périodique', 'revue', 'magazine', 'bulletin'
 ];
 
+// Améliorations de la fonction de filtrage pour exclure plus efficacement les contenus non désirés
 export function filterNonBookResults(books: Book[]): Book[] {
   return books.filter(book => {
     if (!book.title) return false;
@@ -121,18 +140,49 @@ export function filterNonBookResults(books: Book[]): Book[] {
                               titleLower.includes('anthologie') ||
                               titleLower.includes('coffret') ||
                               titleLower.includes('l\'intégrale') ||
-                              titleLower.includes('intégrale');
+                              titleLower.includes('intégrale') ||
+                              // Ajout de nouveaux filtres pour les titres suspects
+                              titleLower.includes('dictionnaire') ||
+                              titleLower.includes('encyclopédie') ||
+                              titleLower.includes('traité de') ||
+                              titleLower.includes('guide de') ||
+                              titleLower.includes('manuel de') ||
+                              titleLower.includes('précis de') ||
+                              titleLower.includes('mémento') ||
+                              titleLower.includes('bulletin') ||
+                              titleLower.includes('annales') ||
+                              titleLower.includes('mélanges') ||
+                              titleLower.includes('actes du');
     
     // Exclure les formats audio explicites
     const isAudioBook = formatLower.includes('audio') || 
                         titleLower.includes('audio cd') || 
                         titleLower.includes('livre audio');
     
+    // Filtrage des livres dont le titre est très long (souvent des publications académiques)
+    const isTitleTooLong = titleLower.length > 100;
+    
+    // Vérifier si l'ouvrage pourrait être un livre de fiction (romans, nouvelles, etc.)
+    const likelyFictionBook = titleLower.includes('roman') || 
+                              titleLower.includes('fiction') ||
+                              titleLower.includes('récit') ||
+                              titleLower.includes('conte') ||
+                              titleLower.includes('nouvelle') ||
+                              subjectsString.includes('fiction') ||
+                              subjectsString.includes('roman') ||
+                              subjectsString.includes('littérature');
+    
+    // Si c'est probablement un livre de fiction, nous voulons le garder quelles que soient les autres règles
+    if (likelyFictionBook) {
+      return !isAudioBook; // Exclure uniquement si c'est un livre audio
+    }
+    
     return !containsTechnicalKeywords && 
            !containsUnwantedTypes && 
            !isSuspiciousTitle && 
            !isUnwantedFormat && 
-           !isAudioBook;
+           !isAudioBook &&
+           !isTitleTooLong;
   });
 }
 
@@ -205,4 +255,3 @@ export function isDuplicateBook(existingBooks: Book[], newBook: Book): boolean {
     return existingBookTitle === newBookTitle && existingBookAuthor === newBookAuthor;
   });
 }
-
