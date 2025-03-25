@@ -20,7 +20,7 @@ interface SearchBarProps {
 
 export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchType, setSearchType] = useState<SearchType>('author');
+  const [searchType, setSearchType] = useState<SearchType>('general');
   const { user } = useSupabaseAuth();
   const { toast } = useToast();
 
@@ -79,9 +79,10 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
             <SelectValue placeholder="Type de recherche" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="general">Recherche globale</SelectItem>
             <SelectItem value="author">Par auteur</SelectItem>
             <SelectItem value="title">Par titre</SelectItem>
-            <SelectItem value="general">Général</SelectItem>
+            <SelectItem value="isbn">Par ISBN</SelectItem>
           </SelectContent>
         </Select>
       </div>

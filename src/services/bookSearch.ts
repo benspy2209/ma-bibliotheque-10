@@ -2,13 +2,13 @@
 import { Book } from '@/types/book';
 import { removeDuplicateBooks } from '@/lib/utils';
 
-export type SearchType = 'author' | 'title' | 'general';
+export type SearchType = 'author' | 'title' | 'general' | 'isbn';
 
 // Clé API ISBNDB
 const ISBNDB_API_KEY = '60264_3de7f2f024bc350bfa823cbbd9e64315';
 const ISBNDB_BASE_URL = 'https://api2.isbndb.com';
 
-export async function searchIsbndb(query: string, searchType: SearchType = 'author'): Promise<Book[]> {
+export async function searchIsbndb(query: string, searchType: SearchType = 'general'): Promise<Book[]> {
   if (!query.trim()) return [];
   
   try {
@@ -16,20 +16,23 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'auth
     let params = '';
     
     // Déterminer l'endpoint en fonction du type de recherche
-    // Utiliser les endpoints corrects en se basant sur la documentation ISBNDB
     switch (searchType) {
       case 'author':
-        endpoint = `/author/${encodeURIComponent(query)}`;
+        endpoint = `/authors/${encodeURIComponent(query)}`;
         params = '?page=1&pageSize=20';
         break;
       case 'title':
         endpoint = `/books/${encodeURIComponent(query)}`;
+        params = '?page=1&pageSize=20';
+        break;
+      case 'isbn':
+        // Si c'est un ISBN valide, on utilise l'endpoint book directement
+        endpoint = `/book/${encodeURIComponent(query)}`;
         break;
       case 'general':
-        endpoint = `/books/${encodeURIComponent(query)}`;
-        break;
       default:
         endpoint = `/books/${encodeURIComponent(query)}`;
+        params = '?page=1&pageSize=20';
     }
 
     const url = `${ISBNDB_BASE_URL}${endpoint}${params}`;
@@ -54,21 +57,36 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'auth
     
     // Log détaillé de la structure de réponse
     console.log('[ISBNDB] Structure de la réponse:', Object.keys(data));
-    console.log(`[ISBNDB] Nombre de livres reçus: ${data.books ? data.books.length : 0}`);
     
-    if (data.books && data.books.length > 0) {
-      console.log('[ISBNDB] Premier livre exemple:', JSON.stringify(data.books[0], null, 2));
-    }
-
     // Transformer les résultats ISBNDB en format Book
     let books: Book[] = [];
     
-    if (searchType === 'author' && data.books) {
-      // Si c'est une recherche par auteur, la structure de réponse est différente
-      const author = query; // Utiliser le nom de l'auteur qu'on a cherché
-      books = data.books.map((book: any) => mapIsbndbBookToBook(book, author));
+    if (searchType === 'author' && data.authors) {
+      // Pour la recherche par auteur, on récupère les livres associés
+      console.log(`[ISBNDB] Recherche par auteur: ${data.authors.length} auteurs trouvés`);
+      
+      // On prend tous les livres de tous les auteurs qui correspondent
+      books = [];
+      for (const author of data.authors) {
+        console.log(`[ISBNDB] Auteur trouvé: ${author.name} avec ${author.books?.length || 0} livres`);
+        
+        if (author.books && author.books.length > 0) {
+          const authorBooks = author.books.map((book: any) => mapIsbndbBookToBook(book, author.name));
+          books = [...books, ...authorBooks];
+        }
+      }
+    } else if (searchType === 'isbn' && data.book) {
+      // Pour la recherche par ISBN, on reçoit directement un livre
+      console.log('[ISBNDB] Livre trouvé par ISBN:', data.book.title);
+      books = [mapIsbndbBookToBook(data.book)];
     } else if (data.books) {
       // Pour les recherches par titre ou générales
+      console.log(`[ISBNDB] Nombre de livres reçus: ${data.books.length}`);
+      
+      if (data.books.length > 0) {
+        console.log('[ISBNDB] Premier livre exemple:', JSON.stringify(data.books[0], null, 2));
+      }
+      
       books = data.books.map((book: any) => mapIsbndbBookToBook(book));
     }
 
@@ -76,7 +94,6 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'auth
     return books;
   } catch (error) {
     console.error('[ISBNDB] Erreur lors de la recherche:', error);
-    // Rethrow pour permettre une meilleure gestion par l'appelant
     throw error;
   }
 }
@@ -86,12 +103,25 @@ function mapIsbndbBookToBook(isbndbBook: any, defaultAuthor?: string): Book {
     // Log pour déboguer la transformation d'un livre
     console.log(`[ISBNDB] Mappage du livre: ${isbndbBook.title || isbndbBook.title_long || 'Sans titre'}`);
     
+    // Obtenir l'auteur du livre
+    let author: string = 'Auteur inconnu';
+    if (isbndbBook.author) {
+      author = isbndbBook.author;
+    } else if (isbndbBook.authors && isbndbBook.authors.length > 0) {
+      author = isbndbBook.authors[0];
+    } else if (defaultAuthor) {
+      author = defaultAuthor;
+    }
+    
+    // Déterminer l'identifiant unique
+    const id = isbndbBook.isbn13 || isbndbBook.isbn || `isbndb-${Math.random().toString(36).substring(2, 9)}`;
+    
     // Extraire les informations pertinentes et les adapter au format Book
     return {
-      id: isbndbBook.isbn13 || isbndbBook.isbn || `isbndb-${Math.random().toString(36).substring(2, 9)}`,
+      id,
       sourceId: isbndbBook.isbn13 || isbndbBook.isbn,
       title: isbndbBook.title || isbndbBook.title_long || 'Titre inconnu',
-      author: isbndbBook.author || isbndbBook.authors?.[0] || defaultAuthor || 'Auteur inconnu',
+      author,
       cover: isbndbBook.image || '',
       language: isbndbBook.language ? [isbndbBook.language] : ['fr'],
       isbn: isbndbBook.isbn13 || isbndbBook.isbn,
@@ -103,16 +133,18 @@ function mapIsbndbBookToBook(isbndbBook: any, defaultAuthor?: string): Book {
     };
   } catch (error) {
     console.error('[ISBNDB] Erreur lors du mappage du livre:', error, 'Données du livre:', isbndbBook);
-    // En cas d'erreur, retourner un livre avec des informations minimales
+    
+    // En cas d'erreur, retourner un livre avec des informations minimales mais obligatoires
     return {
       id: `isbndb-error-${Math.random().toString(36).substring(2, 9)}`,
       title: isbndbBook?.title || 'Erreur de conversion',
       author: isbndbBook?.author || defaultAuthor || 'Inconnu',
+      language: ['fr'], // Champ obligatoire dans le type Book
     };
   }
 }
 
-export async function searchAllBooks(query: string, searchType: SearchType = 'author'): Promise<Book[]> {
+export async function searchAllBooks(query: string, searchType: SearchType = 'general'): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
@@ -129,8 +161,6 @@ export async function searchAllBooks(query: string, searchType: SearchType = 'au
     return uniqueBooks;
   } catch (error) {
     console.error('[SEARCH] Erreur lors de la recherche globale:', error);
-    
-    // Afficher une notification d'erreur ici ou gérer autrement
     
     // Retourner un tableau vide en cas d'erreur
     return [];
