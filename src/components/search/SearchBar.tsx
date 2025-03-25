@@ -29,7 +29,7 @@ export const SearchBar = ({
   const [language, setLanguage] = useState<LanguageFilter>('fr');
   const [isSearching, setIsSearching] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const { user, signIn, setShowLoginDialog, setAuthMode } = useSupabaseAuth();
+  const { user, signIn, setShowLoginDialog, setAuthMode, showLoginDialog } = useSupabaseAuth();
   const { toast } = useToast();
 
   const handleSearch = (value: string) => {
