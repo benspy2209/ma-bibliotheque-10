@@ -13,11 +13,14 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'auth
   
   try {
     let endpoint = '';
+    let params = '';
     
     // Déterminer l'endpoint en fonction du type de recherche
+    // Utiliser les endpoints corrects en se basant sur la documentation ISBNDB
     switch (searchType) {
       case 'author':
-        endpoint = `/authors/${encodeURIComponent(query)}`;
+        endpoint = `/author/${encodeURIComponent(query)}`;
+        params = '?page=1&pageSize=20';
         break;
       case 'title':
         endpoint = `/books/${encodeURIComponent(query)}`;
@@ -29,9 +32,10 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'auth
         endpoint = `/books/${encodeURIComponent(query)}`;
     }
 
-    console.log(`Requête ISBNDB (${searchType}): ${ISBNDB_BASE_URL}${endpoint}`);
+    const url = `${ISBNDB_BASE_URL}${endpoint}${params}`;
+    console.log(`Requête ISBNDB (${searchType}): ${url}`);
 
-    const response = await fetch(`${ISBNDB_BASE_URL}${endpoint}`, {
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Authorization': ISBNDB_API_KEY,
@@ -49,9 +53,9 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'auth
     // Transformer les résultats ISBNDB en format Book
     let books: Book[] = [];
     
-    if (searchType === 'author' && data.author && data.books) {
+    if (searchType === 'author' && data.books) {
       // Si c'est une recherche par auteur, la structure de réponse est différente
-      const author = data.author.name;
+      const author = query; // Utiliser le nom de l'auteur qu'on a cherché
       books = data.books.map((book: any) => mapIsbndbBookToBook(book, author));
     } else if (data.books) {
       // Pour les recherches par titre ou générales
@@ -70,8 +74,8 @@ function mapIsbndbBookToBook(isbndbBook: any, defaultAuthor?: string): Book {
   return {
     id: isbndbBook.isbn13 || isbndbBook.isbn || `isbndb-${Math.random().toString(36).substring(2, 9)}`,
     sourceId: isbndbBook.isbn13 || isbndbBook.isbn,
-    title: isbndbBook.title || 'Titre inconnu',
-    author: isbndbBook.authors?.[0] || defaultAuthor || 'Auteur inconnu',
+    title: isbndbBook.title || isbndbBook.title_long || 'Titre inconnu',
+    author: isbndbBook.author || isbndbBook.authors?.[0] || defaultAuthor || 'Auteur inconnu',
     cover: isbndbBook.image || '',
     language: isbndbBook.language ? [isbndbBook.language] : ['fr'],
     isbn: isbndbBook.isbn13 || isbndbBook.isbn,
