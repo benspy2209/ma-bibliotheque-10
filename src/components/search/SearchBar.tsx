@@ -1,3 +1,4 @@
+
 import { useState, useRef } from 'react';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { useToast } from '@/hooks/use-toast';
@@ -7,7 +8,6 @@ import { SearchInput } from './SearchInput';
 import { SearchTypeSelector } from './SearchTypeSelector';
 import { LanguageSelector } from './LanguageSelector';
 import { ShowAllResultsButton } from './ShowAllResultsButton';
-import { Heart } from 'lucide-react';
 
 interface SearchBarProps {
   onSearch: (query: string, searchType: SearchType, language: LanguageFilter) => Promise<void>;
@@ -29,7 +29,7 @@ export const SearchBar = ({
   const [language, setLanguage] = useState<LanguageFilter>('fr');
   const [isSearching, setIsSearching] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const { user, signIn, setShowLoginDialog, setAuthMode, showLoginDialog } = useSupabaseAuth();
+  const { user } = useSupabaseAuth();
   const { toast } = useToast();
 
   const handleSearch = (value: string) => {
@@ -118,19 +118,6 @@ export const SearchBar = ({
     }
   };
 
-  const handleSignInClick = () => {
-    console.log("Opening login dialog from SearchBar component");
-    setShowLoginDialog(true);
-    setAuthMode('signup');
-    
-    setTimeout(() => {
-      if (!showLoginDialog) {
-        console.log("Retrying to open login dialog...");
-        setShowLoginDialog(true);
-      }
-    }, 100);
-  };
-
   return (
     <div className="space-y-4">
       <form onSubmit={handleSubmitSearch} className="flex flex-col gap-2 sm:flex-row">
@@ -173,16 +160,6 @@ export const SearchBar = ({
       {!user && (
         <div className="mt-2 text-center">
           <p className="text-destructive mb-4">Vous devez vous connecter ou créer un compte pour faire une recherche.</p>
-          <div className="relative inline-block">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500/50 opacity-75"></span>
-            <Button 
-              onClick={handleSignInClick}
-              className="relative z-10 font-semibold text-base transition-all duration-300 shadow-md hover:shadow-lg pulse-effect flex items-center gap-2"
-              variant="pulse"
-            >
-              <Heart className="h-5 w-5 fill-white" /> Commencez à créer votre bibliothèque !
-            </Button>
-          </div>
         </div>
       )}
     </div>
