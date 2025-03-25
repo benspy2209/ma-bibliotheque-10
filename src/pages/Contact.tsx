@@ -27,17 +27,17 @@ const Contact = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    // Réinitialiser l'erreur lorsque l'utilisateur modifie le formulaire
+    // Reset error when user modifies the form
     if (error) setError('');
   };
 
   const validateForm = () => {
     const errors = [];
-    if (!formData.name.trim()) errors.push("Le nom est requis");
-    if (!formData.email.trim()) errors.push("L'email est requis");
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errors.push("Veuillez entrer une adresse email valide");
-    if (!formData.subject.trim()) errors.push("Le sujet est requis");
-    if (!formData.message.trim()) errors.push("Le message est requis");
+    if (!formData.name.trim()) errors.push("Name is required");
+    if (!formData.email.trim()) errors.push("Email is required");
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errors.push("Please enter a valid email address");
+    if (!formData.subject.trim()) errors.push("Subject is required");
+    if (!formData.message.trim()) errors.push("Message is required");
     
     return errors;
   };
@@ -45,12 +45,12 @@ const Contact = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validation côté client
+    // Client-side validation
     const validationErrors = validateForm();
     if (validationErrors.length > 0) {
       setError(validationErrors.join('. '));
       toast({
-        title: "Erreur de validation",
+        title: "Validation Error",
         description: validationErrors.join('. '),
         variant: "destructive"
       });
@@ -61,35 +61,30 @@ const Contact = () => {
     setError('');
     
     try {
-      console.log("Préparation de l'envoi des données:", formData);
+      console.log("Preparing to send data:", formData);
       
-      const jsonData = JSON.stringify(formData);
-      console.log("Données JSON préparées:", jsonData);
-      
-      console.log("Envoi des données à la fonction Edge Supabase...");
-      
-      // Envoi du formulaire via la fonction Edge Supabase
+      // Call the Edge Function with proper headers
       const { data, error: supabaseError } = await supabase.functions.invoke('send-contact-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: jsonData
+        body: formData
       });
 
       if (supabaseError) {
-        console.error("Erreur Supabase:", supabaseError);
-        throw new Error(supabaseError.message || "Une erreur est survenue lors de l'envoi du message");
+        console.error("Supabase Error:", supabaseError);
+        throw new Error(supabaseError.message || "An error occurred while sending the message");
       }
 
-      console.log("Réponse de la fonction Edge:", data);
+      console.log("Response from Edge Function:", data);
 
       toast({
-        title: "Message envoyé",
-        description: "Nous avons bien reçu votre message et reviendrons vers vous rapidement.",
+        title: "Message Sent",
+        description: "We have received your message and will get back to you shortly.",
       });
       
-      // Réinitialisation du formulaire après envoi réussi
+      // Reset form after successful submission
       setFormData({
         name: '',
         email: '',
@@ -97,11 +92,11 @@ const Contact = () => {
         message: ''
       });
     } catch (error: any) {
-      console.error("Erreur lors de l'envoi du message:", error);
-      setError(error.message || "Une erreur est survenue lors de l'envoi du message. Veuillez réessayer plus tard.");
+      console.error("Error sending message:", error);
+      setError(error.message || "An error occurred while sending the message. Please try again later.");
       toast({
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'envoi du message. Veuillez réessayer plus tard.",
+        title: "Error",
+        description: error.message || "An error occurred while sending the message. Please try again later.",
         variant: "destructive"
       });
     } finally {
@@ -113,7 +108,7 @@ const Contact = () => {
     <div className="flex flex-col min-h-screen">
       <Helmet>
         <title>Contact | BiblioPulse</title>
-        <meta name="description" content="Contactez-nous pour toute question ou suggestion concernant BiblioPulse" />
+        <meta name="description" content="Contact us with any questions or suggestions about BiblioPulse" />
       </Helmet>
       
       <NavBar />
@@ -121,9 +116,9 @@ const Contact = () => {
       <main className="flex-grow py-12 bg-black text-white">
         <div className="container px-4 mx-auto">
           <div className="mb-10 text-center">
-            <h1 className="text-4xl font-bold mb-4">Contactez-nous</h1>
+            <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Une question, une suggestion ou un problème ? N'hésitez pas à nous contacter, nous serons ravis de vous aider.
+              Have a question, suggestion, or issue? Don't hesitate to contact us, we're happy to help.
             </p>
           </div>
           
@@ -145,7 +140,7 @@ const Contact = () => {
                 <div className="bg-primary/10 p-3 rounded-full w-fit mx-auto mb-4">
                   <Phone className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2 text-white">Téléphone</h3>
+                <h3 className="text-xl font-semibold mb-2 text-white">Phone</h3>
                 <a href="tel:+32497363065" className="text-primary hover:underline">
                   +32 497 36 30 65
                 </a>
@@ -157,21 +152,21 @@ const Contact = () => {
                 <div className="bg-primary/10 p-3 rounded-full w-fit mx-auto mb-4">
                   <MapPin className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2 text-white">Adresse</h3>
+                <h3 className="text-xl font-semibold mb-2 text-white">Address</h3>
                 <p className="text-white">
                   Rhode-Saint-Genèse<br />
-                  Belgique
+                  Belgium
                 </p>
               </CardContent>
             </Card>
           </div>
           
           <div className="max-w-2xl mx-auto bg-zinc-900 rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-semibold mb-6 text-white">Formulaire de contact</h2>
+            <h2 className="text-2xl font-semibold mb-6 text-white">Contact Form</h2>
             
             {error && (
               <Alert variant="destructive" className="mb-6">
-                <AlertTitle>Erreur</AlertTitle>
+                <AlertTitle>Error</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
@@ -179,13 +174,13 @@ const Contact = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-white">Nom</Label>
+                  <Label htmlFor="name" className="text-white">Name</Label>
                   <Input 
                     id="name" 
                     name="name" 
                     value={formData.name} 
                     onChange={handleChange} 
-                    placeholder="Votre nom" 
+                    placeholder="Your name" 
                     required 
                     className="bg-zinc-800 border-zinc-700 text-white"
                   />
@@ -198,7 +193,7 @@ const Contact = () => {
                     type="email" 
                     value={formData.email} 
                     onChange={handleChange} 
-                    placeholder="votre@email.com" 
+                    placeholder="your@email.com" 
                     required 
                     className="bg-zinc-800 border-zinc-700 text-white"
                   />
@@ -206,13 +201,13 @@ const Contact = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="subject" className="text-white">Sujet</Label>
+                <Label htmlFor="subject" className="text-white">Subject</Label>
                 <Input 
                   id="subject" 
                   name="subject" 
                   value={formData.subject} 
                   onChange={handleChange} 
-                  placeholder="Sujet de votre message" 
+                  placeholder="Subject of your message" 
                   required 
                   className="bg-zinc-800 border-zinc-700 text-white"
                 />
@@ -225,7 +220,7 @@ const Contact = () => {
                   name="message" 
                   value={formData.message} 
                   onChange={handleChange} 
-                  placeholder="Votre message" 
+                  placeholder="Your message" 
                   rows={6} 
                   required 
                   className="bg-zinc-800 border-zinc-700 text-white"
@@ -240,12 +235,12 @@ const Contact = () => {
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">
                     <div className="h-4 w-4 rounded-full border-2 border-t-transparent border-white animate-spin"></div>
-                    Envoi en cours...
+                    Sending...
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
                     <Send className="h-4 w-4" />
-                    Envoyer le message
+                    Send Message
                   </span>
                 )}
               </Button>

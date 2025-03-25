@@ -87,7 +87,7 @@ const handler = async (req: Request): Promise<Response> => {
     
     const { name, email, subject, message } = data;
 
-    // Validation des champs
+    // Validation of fields
     if (!name || !email || !subject || !message) {
       const missingFields = [];
       if (!name) missingFields.push("name");
@@ -97,7 +97,7 @@ const handler = async (req: Request): Promise<Response> => {
       
       console.error("Missing required fields:", missingFields);
       return new Response(
-        JSON.stringify({ error: "Tous les champs sont requis", missingFields }),
+        JSON.stringify({ error: "All fields are required", missingFields }),
         {
           status: 400,
           headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -106,17 +106,17 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log("Sending admin email...");
-    // Email à l'administrateur
+    // Email to administrator
     try {
       const adminEmailResponse = await resend.emails.send({
         from: "BiblioPulse <contact@bibliopulse.be>",
         to: ["contact@bibliopulse.be"],
-        subject: `Nouveau message: ${subject}`,
+        subject: `New message: ${subject}`,
         html: `
-          <h1>Nouveau message de contact</h1>
-          <p><strong>Nom:</strong> ${name}</p>
+          <h1>New contact message</h1>
+          <p><strong>Name:</strong> ${name}</p>
           <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Sujet:</strong> ${subject}</p>
+          <p><strong>Subject:</strong> ${subject}</p>
           <p><strong>Message:</strong></p>
           <p>${message.replace(/\n/g, '<br/>')}</p>
         `,
@@ -124,31 +124,31 @@ const handler = async (req: Request): Promise<Response> => {
       console.log("Admin email response:", adminEmailResponse);
     } catch (emailError) {
       console.error("Error sending admin email:", emailError);
-      throw new Error(`Erreur lors de l'envoi de l'email administrateur: ${emailError.message}`);
+      throw new Error(`Error sending admin email: ${emailError.message}`);
     }
 
     console.log("Sending user confirmation email...");
-    // Email de confirmation à l'utilisateur
+    // Confirmation email to user
     try {
       const userEmailResponse = await resend.emails.send({
         from: "BiblioPulse <contact@bibliopulse.be>",
         to: [email],
-        subject: "Nous avons bien reçu votre message",
+        subject: "We have received your message",
         html: `
-          <h1>Merci de nous avoir contactés, ${name}!</h1>
-          <p>Nous avons bien reçu votre message concernant "${subject}" et nous reviendrons vers vous dès que possible.</p>
-          <p>Rappel de votre message:</p>
+          <h1>Thank you for contacting us, ${name}!</h1>
+          <p>We have received your message about "${subject}" and we will get back to you as soon as possible.</p>
+          <p>Your message:</p>
           <p>${message.replace(/\n/g, '<br/>')}</p>
-          <p>Cordialement,<br>L'équipe BiblioPulse</p>
+          <p>Best regards,<br>The BiblioPulse Team</p>
         `,
       });
       console.log("User email response:", userEmailResponse);
     } catch (emailError) {
       console.error("Error sending user confirmation email:", emailError);
-      throw new Error(`Erreur lors de l'envoi de l'email de confirmation: ${emailError.message}`);
+      throw new Error(`Error sending confirmation email: ${emailError.message}`);
     }
 
-    console.log("Emails envoyés avec succès");
+    console.log("Emails sent successfully");
 
     return new Response(
       JSON.stringify({ success: true }),
@@ -158,9 +158,9 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
   } catch (error: any) {
-    console.error("Erreur dans la fonction send-contact-email:", error);
+    console.error("Error in send-contact-email function:", error);
     return new Response(
-      JSON.stringify({ error: error.message || "Une erreur inconnue s'est produite" }),
+      JSON.stringify({ error: error.message || "An unknown error occurred" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
