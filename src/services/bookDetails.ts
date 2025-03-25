@@ -50,9 +50,9 @@ export async function getBookDetails(bookId: string): Promise<Partial<Book>> {
       };
     }
     
-    const endpoint = `${ISBNDB_BASE_URL}/book/${bookId}`;
+    const endpoint = `/book/${bookId}`;
     
-    const response = await fetch(endpoint, {
+    const response = await fetch(`${ISBNDB_BASE_URL}${endpoint}`, {
       method: 'GET',
       headers: {
         'Authorization': ISBNDB_API_KEY,

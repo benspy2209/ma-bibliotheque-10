@@ -17,21 +17,21 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'auth
     // Déterminer l'endpoint en fonction du type de recherche
     switch (searchType) {
       case 'author':
-        endpoint = `${ISBNDB_BASE_URL}/authors/${encodeURIComponent(query)}`;
+        endpoint = `/authors/${encodeURIComponent(query)}`;
         break;
       case 'title':
-        endpoint = `${ISBNDB_BASE_URL}/books/${encodeURIComponent(query)}`;
+        endpoint = `/books/${encodeURIComponent(query)}`;
         break;
       case 'general':
-        endpoint = `${ISBNDB_BASE_URL}/books/${encodeURIComponent(query)}`;
+        endpoint = `/books/${encodeURIComponent(query)}`;
         break;
       default:
-        endpoint = `${ISBNDB_BASE_URL}/books/${encodeURIComponent(query)}`;
+        endpoint = `/books/${encodeURIComponent(query)}`;
     }
 
-    console.log(`Requête ISBNDB (${searchType}): ${endpoint}`);
+    console.log(`Requête ISBNDB (${searchType}): ${ISBNDB_BASE_URL}${endpoint}`);
 
-    const response = await fetch(endpoint, {
+    const response = await fetch(`${ISBNDB_BASE_URL}${endpoint}`, {
       method: 'GET',
       headers: {
         'Authorization': ISBNDB_API_KEY,
@@ -71,9 +71,9 @@ function mapIsbndbBookToBook(isbndbBook: any, defaultAuthor?: string): Book {
     id: isbndbBook.isbn13 || isbndbBook.isbn || `isbndb-${Math.random().toString(36).substring(2, 9)}`,
     sourceId: isbndbBook.isbn13 || isbndbBook.isbn,
     title: isbndbBook.title || 'Titre inconnu',
-    author: isbndbBook.authors || defaultAuthor || 'Auteur inconnu',
+    author: isbndbBook.authors?.[0] || defaultAuthor || 'Auteur inconnu',
     cover: isbndbBook.image || '',
-    language: isbndbBook.language || ['fr'],
+    language: isbndbBook.language ? [isbndbBook.language] : ['fr'],
     isbn: isbndbBook.isbn13 || isbndbBook.isbn,
     publishers: isbndbBook.publisher ? [isbndbBook.publisher] : [],
     subjects: isbndbBook.subjects || [],
