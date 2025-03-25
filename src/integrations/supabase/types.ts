@@ -65,12 +65,58 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      user_books_view: {
+        Row: {
+          author: string | null
+          book_id: string | null
+          completion_date: string | null
+          created_at: string | null
+          status: string | null
+          title: string | null
+          user_id: string | null
+          user_name: string | null
+        }
+        Insert: {
+          author?: never
+          book_id?: string | null
+          completion_date?: string | null
+          created_at?: string | null
+          status?: string | null
+          title?: never
+          user_id?: string | null
+          user_name?: never
+        }
+        Update: {
+          author?: never
+          book_id?: string | null
+          completion_date?: string | null
+          created_at?: string | null
+          status?: string | null
+          title?: never
+          user_id?: string | null
+          user_name?: never
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      can_perform_search: {
+        Args: {
+          p_user_id?: string
+          p_ip_address?: string
+        }
+        Returns: Json
+      }
       fetch_reading_goals: {
         Args: {
           p_user_id: string
+        }
+        Returns: Json
+      }
+      increment_search_count: {
+        Args: {
+          p_user_id?: string
+          p_ip_address?: string
         }
         Returns: Json
       }
