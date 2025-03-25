@@ -27,16 +27,25 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const body = await req.text();
-    console.log("Request body:", body);
+    const contentType = req.headers.get("content-type") || "";
+    console.log("Content-Type:", contentType);
     
     let data: ContactEmailRequest;
-    try {
-      data = JSON.parse(body);
-    } catch (error) {
-      console.error("Error parsing JSON:", error);
-      throw new Error("Invalid JSON in request body");
+    
+    if (contentType.includes("application/json")) {
+      data = await req.json();
+    } else {
+      const body = await req.text();
+      console.log("Request body (text):", body);
+      try {
+        data = JSON.parse(body);
+      } catch (error) {
+        console.error("Error parsing JSON:", error);
+        throw new Error("Invalid JSON in request body");
+      }
     }
+    
+    console.log("Parsed data:", data);
     
     const { name, email, subject, message } = data;
 
