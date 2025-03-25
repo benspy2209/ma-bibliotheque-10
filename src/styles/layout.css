@@ -1,0 +1,60 @@
+
+/* Grid Layout Styles */
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 2rem;
+}
+
+.book-card {
+  @apply relative overflow-hidden rounded-lg transition-all duration-300 hover:shadow-lg;
+  height: 360px;
+}
+
+.book-card img {
+  @apply h-full w-full object-cover transition-transform duration-300;
+}
+
+.book-card:hover img {
+  transform: scale(1.05);
+}
+
+.book-info {
+  @apply absolute bottom-0 left-0 right-0 bg-white/90 p-4 backdrop-blur-sm transition-all duration-300;
+}
+
+/* Page Transitions */
+.page-transition {
+  @apply transition-opacity duration-300;
+}
+
+.page-enter {
+  @apply opacity-0;
+}
+
+.page-enter-active {
+  @apply opacity-100;
+}
+
+.page-exit {
+  @apply opacity-100;
+}
+
+.page-exit-active {
+  @apply opacity-0;
+}
+
+/* Tabs customization */
+[data-sidebar="tabs"] {
+  @apply overflow-x-auto;
+}
+
+.tabs-list-scroll {
+  @apply flex-wrap justify-start h-auto py-1 overflow-x-auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.tabs-list-scroll::-webkit-scrollbar {
+  display: none;
+}
