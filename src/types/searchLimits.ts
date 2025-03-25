@@ -11,7 +11,7 @@ export interface SearchLimitResponse {
 }
 
 // Type guard to check if an object is of type SearchLimitResponse
-export function isSearchLimitResponse(obj: Json): obj is SearchLimitResponse {
+export function isSearchLimitResponse(obj: Json): obj is SearchLimitResponse & Json {
   if (typeof obj !== 'object' || obj === null) {
     return false;
   }
