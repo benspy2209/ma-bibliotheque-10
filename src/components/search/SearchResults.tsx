@@ -37,7 +37,10 @@ export function SearchResults({
     <>
       <BookGrid 
         books={!searchQuery ? [] : books}
-        onBookClick={onBookClick}
+        onBookClick={(book) => {
+          handleBookClick(book);
+          onBookClick(book);
+        }}
         displayedBooks={displayedBooks}
         totalBooks={totalBooks}
         onLoadMore={onLoadMore}

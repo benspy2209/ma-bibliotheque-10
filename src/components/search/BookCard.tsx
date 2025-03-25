@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Book, ReadingStatus } from '@/types/book';
 import { Card, CardContent } from "@/components/ui/card";
 import { Bookmark, ShoppingCart, Building2 } from 'lucide-react';
-import { getAmazonAffiliateUrl } from '@/lib/utils';
+import { getAmazonAffiliateUrl } from '@/lib/amazon-utils';
 import { AddToLibrary } from '@/components/AddToLibrary';
 import { Badge } from '@/components/ui/badge';
 import { saveBook } from '@/services/supabaseBooks';

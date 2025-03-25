@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StarRating } from '../StarRating';
 import { ShoppingCart, CheckSquare } from 'lucide-react';
-import { getAmazonAffiliateUrl } from '@/lib/utils';
+import { getAmazonAffiliateUrl } from '@/lib/amazon-utils';
 import {
   HoverCard,
   HoverCardContent,

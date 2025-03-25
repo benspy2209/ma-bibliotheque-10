@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Book, ReadingStatus } from '@/types/book';
 import { useToast } from '@/hooks/use-toast';
@@ -6,7 +5,7 @@ import { BookDetailsProps } from './book-details/types';
 import { saveBook } from '@/services/supabaseBooks';
 import { BookDetailsDialog } from './book-details/BookDetailsDialog';
 import { useQueryClient } from '@tanstack/react-query';
-import { getAmazonAffiliateUrl } from '@/lib/utils';
+import { getAmazonAffiliateUrl } from '@/lib/amazon-utils';
 
 export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProps) {
   const [currentBook, setCurrentBook] = useState(book);

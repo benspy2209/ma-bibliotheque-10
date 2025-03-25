@@ -2,7 +2,7 @@
 import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { loadBooks } from '@/services/supabaseBooks';
-import { getAmazonAffiliateUrl } from '@/lib/utils';
+import { getAmazonAffiliateUrl } from '@/lib/amazon-utils';
 import { useToast } from '@/hooks/use-toast';
 
 export async function updateAmazonLinksInLibrary() {
