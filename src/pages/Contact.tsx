@@ -31,18 +31,40 @@ const Contact = () => {
     if (error) setError('');
   };
 
+  const validateForm = () => {
+    const errors = [];
+    if (!formData.name.trim()) errors.push("Le nom est requis");
+    if (!formData.email.trim()) errors.push("L'email est requis");
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errors.push("Veuillez entrer une adresse email valide");
+    if (!formData.subject.trim()) errors.push("Le sujet est requis");
+    if (!formData.message.trim()) errors.push("Le message est requis");
+    
+    return errors;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation côté client
+    const validationErrors = validateForm();
+    if (validationErrors.length > 0) {
+      setError(validationErrors.join('. '));
+      toast({
+        title: "Erreur de validation",
+        description: validationErrors.join('. '),
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     setError('');
     
     try {
       console.log("Préparation de l'envoi des données:", formData);
       
-      // Validation côté client
-      if (!formData.name || !formData.email || !formData.subject || !formData.message) {
-        throw new Error("Tous les champs sont requis");
-      }
+      const jsonData = JSON.stringify(formData);
+      console.log("Données JSON préparées:", jsonData);
       
       console.log("Envoi des données à la fonction Edge Supabase...");
       
@@ -52,7 +74,7 @@ const Contact = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData)  // Explicitly stringify the data
+        body: jsonData
       });
 
       if (supabaseError) {
