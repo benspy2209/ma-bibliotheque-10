@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
@@ -46,7 +47,7 @@ const Homepage = () => {
                     </Button>
                   )}
                   <Button variant="outline" size="lg" asChild>
-                    <Link to="/search">Explorer</Link>
+                    <Link to="/features">Explorer</Link>
                   </Button>
                 </div>
               </div>
@@ -195,7 +196,7 @@ const Homepage = () => {
                 </Button>
               )}
               <Button variant="outline" size="lg" asChild>
-                <Link to="/search">Explorer les fonctionnalités</Link>
+                <Link to="/features">Explorer les fonctionnalités</Link>
               </Button>
             </div>
           </div>
