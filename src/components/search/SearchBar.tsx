@@ -5,6 +5,7 @@ import { Search, BookOpen } from 'lucide-react';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import { LoginForm } from '@/components/auth/LoginForm';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -71,14 +72,11 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
       {!user && (
         <div className="mt-6 text-center flex flex-col items-center justify-center">
           <p className="text-destructive mb-4">Vous devez vous connecter ou créer un compte pour faire une recherche.</p>
-          <Button 
-            onClick={handleLoginClick} 
-            size="lg" 
-            className="flex items-center gap-2 px-8 max-w-xs mx-auto"
-          >
-            <BookOpen className="h-5 w-5" />
-            Rejoindre l'aventure
-          </Button>
+          
+          <div className="w-full max-w-md mx-auto bg-white shadow-lg rounded-lg p-6 border">
+            <h3 className="text-xl font-bold text-center mb-6">Rejoindre l'aventure Bibliopulse</h3>
+            <LoginForm defaultTab="signup" />
+          </div>
         </div>
       )}
     </div>
