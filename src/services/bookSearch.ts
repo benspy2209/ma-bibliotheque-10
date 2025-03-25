@@ -1,32 +1,31 @@
 
 import { Book } from '@/types/book';
-import { searchGoogleBooks } from './googleBooks';
-import { searchBooks as searchOpenLibrary } from './openLibrary';
 import { removeDuplicateBooks } from '@/lib/utils';
 
 export type SearchType = 'author' | 'title' | 'general';
+
+// Placeholder pour la future implémentation ISBNDB
+export async function searchIsbndb(query: string, searchType: SearchType = 'author'): Promise<Book[]> {
+  // Cette fonction sera implémentée plus tard avec l'API ISBNDB
+  console.log(`Requête ISBNDB (${searchType}): ${query}`);
+  return [];
+}
 
 export async function searchAllBooks(query: string, searchType: SearchType = 'author'): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
-    // Lancer les deux recherches en parallèle
-    const [googleResults, openLibraryResults] = await Promise.all([
-      searchGoogleBooks(query, searchType),
-      searchOpenLibrary(query, searchType)
-    ]);
-
-    // Combiner les résultats
-    const allBooks = [...googleResults, ...openLibraryResults];
+    // Temporairement, retourne un tableau vide jusqu'à ce que l'API ISBNDB soit implémentée
+    const books = await searchIsbndb(query, searchType);
     
-    // Supprimer les doublons (en se basant sur le titre et l'auteur)
-    const uniqueBooks = removeDuplicateBooks(allBooks);
+    // Suppression des doublons
+    const uniqueBooks = removeDuplicateBooks(books);
     
-    console.log(`Total des résultats combinés en français: ${uniqueBooks.length} livres`);
+    console.log(`Total des résultats: ${uniqueBooks.length} livres`);
     
     return uniqueBooks;
   } catch (error) {
-    console.error('Erreur lors de la recherche combinée:', error);
+    console.error('Erreur lors de la recherche:', error);
     return [];
   }
 }
