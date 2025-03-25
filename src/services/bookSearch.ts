@@ -9,16 +9,16 @@ export type LanguageFilter = 'fr' | 'en';
 const ISBNDB_API_KEY = '60264_3de7f2f024bc350bfa823cbbd9e64315';
 const ISBNDB_BASE_URL = 'https://api2.isbndb.com';
 
-// Nouvelle fonction pour faire une recherche par auteur avec le nouvel endpoint
-export async function searchAuthorBooks(authorName: string, language: LanguageFilter = 'fr', maxResults: number = 50): Promise<Book[]> {
+// Fonction pour faire une recherche par auteur avec l'endpoint correct
+export async function searchAuthorBooks(authorName: string, language: LanguageFilter = 'fr', maxResults: number = 100): Promise<Book[]> {
   if (!authorName.trim()) return [];
   
   try {
     const encodedAuthorName = encodeURIComponent(authorName);
-    // Augmenter la taille de page pour obtenir plus de résultats (max 50 par requête)
-    const url = `${ISBNDB_BASE_URL}/author/${encodedAuthorName}?page=1&pageSize=${maxResults}&language=${language}`;
+    // Utiliser l'endpoint /author/ spécifique comme indiqué dans l'API
+    const url = `${ISBNDB_BASE_URL}/author/${encodedAuthorName}?pageSize=${maxResults}&language=${language}`;
     
-    console.log(`Recherche par auteur avec le nouvel endpoint: ${url}`);
+    console.log(`Recherche par auteur: ${url}`);
     
     const response = await fetch(url, {
       method: 'GET',
@@ -38,16 +38,21 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
     const data = await response.json();
     console.log('Réponse de la recherche par auteur:', data);
     
-    // Vérifie si l'API a retourné les livres de l'auteur
+    // Vérifier si l'API a retourné les livres de l'auteur
     if (data.books && Array.isArray(data.books)) {
       const books = data.books.map((book: any) => mapIsbndbBookToBook(book, authorName));
       
-      // Filtrer les résultats inappropriés en utilisant la fonction améliorée
+      // Application des filtres améliorés
       const filteredBooks = books.filter(book => {
-        // S'assurer que le livre est bien de l'auteur recherché avec un filtrage plus strict
+        // S'assurer que le livre est bien de l'auteur recherché
         return isAuthorMatch(book, authorName) && 
+               // Exclure certains types de livres par titre
                !book.title.toLowerCase().includes('dictionnaire') &&
-               !book.title.toLowerCase().includes('encyclopédie');
+               !book.title.toLowerCase().includes('encyclopédie') &&
+               !book.title.toLowerCase().includes('manuel de') &&
+               !book.title.toLowerCase().includes('guide pratique') &&
+               !book.title.toLowerCase().includes('méthode') &&
+               !book.title.toLowerCase().includes('cours de');
       });
       
       console.log(`Livres filtrés pour l'auteur ${authorName}: ${filteredBooks.length} sur ${books.length}`);
@@ -71,7 +76,7 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
 
 // Méthode de recherche alternative en cas d'échec de la première
 async function fallbackAuthorSearch(authorName: string, language: LanguageFilter, maxResults: number): Promise<Book[]> {
-  const url = `${ISBNDB_BASE_URL}/books/${encodeURIComponent(authorName)}?page=1&pageSize=${maxResults}&language=${language}`;
+  const url = `${ISBNDB_BASE_URL}/books/${encodeURIComponent(authorName)}?pageSize=${maxResults}&language=${language}`;
   
   console.log(`Recherche alternative: ${url}`);
   
@@ -98,12 +103,21 @@ async function fallbackAuthorSearch(authorName: string, language: LanguageFilter
   const books = data.books.map((book: any) => mapIsbndbBookToBook(book));
   
   // Filtrage plus strict des résultats
-  const filteredBooks = books.filter(book => isAuthorMatch(book, authorName));
+  const filteredBooks = books.filter(book => {
+    return isAuthorMatch(book, authorName) && 
+           !book.title.toLowerCase().includes('dictionnaire') &&
+           !book.title.toLowerCase().includes('encyclopédie') &&
+           !book.title.toLowerCase().includes('manuel de') &&
+           !book.title.toLowerCase().includes('guide pratique') &&
+           !book.title.toLowerCase().includes('méthode') &&
+           !book.title.toLowerCase().includes('cours de');
+  });
+  
   return filterNonBookResults(filteredBooks);
 }
 
 // Ancienne fonction de recherche ISBNDB (conservée pour les autres types de recherche)
-export async function searchIsbndb(query: string, searchType: SearchType = 'author', language: LanguageFilter = 'fr', maxResults: number = 50): Promise<Book[]> {
+export async function searchIsbndb(query: string, searchType: SearchType = 'author', language: LanguageFilter = 'fr', maxResults: number = 100): Promise<Book[]> {
   if (!query.trim()) return [];
   
   try {
@@ -117,15 +131,15 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'auth
         return searchAuthorBooks(query, language, maxResults);
       case 'title':
         endpoint = `/books/${encodeURIComponent(query)}`;
-        params = `?page=1&pageSize=${maxResults}&language=${language}`;
+        params = `?pageSize=${maxResults}&language=${language}`;
         break;
       case 'general':
         endpoint = `/books/${encodeURIComponent(query)}`;
-        params = `?page=1&pageSize=${maxResults}&language=${language}`;
+        params = `?pageSize=${maxResults}&language=${language}`;
         break;
       default:
         endpoint = `/books/${encodeURIComponent(query)}`;
-        params = `?page=1&pageSize=${maxResults}&language=${language}`;
+        params = `?pageSize=${maxResults}&language=${language}`;
     }
 
     const url = `${ISBNDB_BASE_URL}${endpoint}${params}`;
@@ -184,7 +198,7 @@ function mapIsbndbBookToBook(isbndbBook: any, defaultAuthor?: string): Book {
   };
 }
 
-export async function searchAllBooks(query: string, searchType: SearchType = 'author', language: LanguageFilter = 'fr', maxResults: number = 50): Promise<Book[]> {
+export async function searchAllBooks(query: string, searchType: SearchType = 'author', language: LanguageFilter = 'fr', maxResults: number = 100): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {

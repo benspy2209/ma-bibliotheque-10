@@ -34,8 +34,11 @@ export const BookGrid = ({
 
   if (isLoading) {
     return (
-      <div className="text-center text-gray-600">
-        Recherche en cours...
+      <div className="text-center py-8 text-gray-600">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="h-10 w-10 rounded-full bg-muted mb-4"></div>
+          <div className="text-lg">Recherche en cours...</div>
+        </div>
       </div>
     );
   }
@@ -55,7 +58,8 @@ export const BookGrid = ({
     return (
       <div className="flex flex-col items-center space-y-4 mt-8">
         <div className="text-center text-gray-600 mb-4">
-          Aucun livre trouvé pour "{searchQuery}"
+          <p className="text-lg">Aucun livre trouvé pour "{searchQuery}"</p>
+          <p className="text-sm mt-2">Essayez avec un nom d'auteur différent ou vérifiez l'orthographe.</p>
         </div>
       </div>
     );

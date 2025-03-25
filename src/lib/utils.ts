@@ -1,3 +1,4 @@
+
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { Book } from '@/types/book'
@@ -46,7 +47,8 @@ const TECHNICAL_KEYWORDS = [
   'compilation', 'atlas', 'critique', 'édition critique', 'chronologie', 'chronique',
   'recueil', 'almanach', 'traité', 'précis', 'abrégé', 'compendium',
   'anthologie', 'mélanges', 'festschrift', 'correspondance', 'lettres', 'journal',
-  'carnets', 'cahiers', 'notes', 'essais', 'études', 'leçons', 'cours', 'conférences'
+  'carnets', 'cahiers', 'notes', 'essais', 'études', 'leçons', 'cours', 'conférences',
+  'méthode', 'guide pratique', 'manuel de'
 ];
 
 // Mots-clés spécifiques aux types de livres non désirés - liste étendue
@@ -54,7 +56,8 @@ const UNWANTED_TYPES = [
   'dictionnaire', 'critiq', 'theolog', 'dogmat', 'canoni', 'universel', 'ecclesiasti',
   'sciences', 'geographi', 'chronologi', 'histori', 'encyclopédie', 'traité', 'manuel',
   'revue', 'journal', 'magazine', 'périodique', 'bulletin', 'lexique', 'répertoire',
-  'compendium', 'abrégé', 'précis', 'actes', 'proceedings', 'études', 'annales'
+  'compendium', 'abrégé', 'précis', 'actes', 'proceedings', 'études', 'annales',
+  'méthode', 'guide pratique', 'cours de'
 ];
 
 export function filterNonBookResults(books: Book[]): Book[] {
