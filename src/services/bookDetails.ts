@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 import { LanguageFilter } from '@/services/bookSearch';
 
@@ -54,15 +53,23 @@ export async function getBookDetails(bookId: string, language: LanguageFilter = 
     const endpoint = `/book/${bookId}`;
     const languageParam = language ? `?language=${language}` : '';
     
+    console.log(`URL de requête: ${ISBNDB_BASE_URL}${endpoint}${languageParam}`);
+    console.log('En-têtes:', { 'Authorization': ISBNDB_API_KEY, 'Accept': 'application/json' });
+    
     const response = await fetch(`${ISBNDB_BASE_URL}${endpoint}${languageParam}`, {
       method: 'GET',
       headers: {
+        'Content-Type': 'application/json',
         'Authorization': ISBNDB_API_KEY,
         'Accept': 'application/json',
       }
     });
     
+    console.log('Statut de la réponse:', response.status, response.statusText);
+    
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Erreur ISBNDB: ${response.status} ${response.statusText}`, errorText);
       throw new Error(`Erreur ISBNDB: ${response.status} ${response.statusText}`);
     }
     

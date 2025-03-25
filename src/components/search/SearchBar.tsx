@@ -44,9 +44,13 @@ export const SearchBar = ({
       return;
     }
     
+    // Attendre 300ms avant d'exécuter la recherche (debounce)
     const timeoutId = setTimeout(() => {
-      onSearch(value, searchType, language);
-    }, 500);
+      if (value.trim()) {
+        console.log(`Exécution de la recherche pour: "${value}" (type: ${searchType}, langue: ${language})`);
+        onSearch(value, searchType, language);
+      }
+    }, 300);
 
     return () => clearTimeout(timeoutId);
   };
@@ -54,6 +58,7 @@ export const SearchBar = ({
   const handleSearchTypeChange = (value: SearchType) => {
     setSearchType(value);
     if (searchQuery && user) {
+      console.log(`Changement de type de recherche vers: ${value}`);
       onSearch(searchQuery, value, language);
     }
   };
@@ -61,6 +66,7 @@ export const SearchBar = ({
   const handleLanguageChange = (value: LanguageFilter) => {
     setLanguage(value);
     if (searchQuery && user) {
+      console.log(`Changement de langue vers: ${value}`);
       onSearch(searchQuery, searchType, value);
     }
   };
@@ -77,6 +83,7 @@ export const SearchBar = ({
 
   const handleShowAllResults = () => {
     if (showAllResults) {
+      console.log("Affichage de tous les résultats demandé");
       showAllResults();
     }
   };

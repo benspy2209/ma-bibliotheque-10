@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 import { removeDuplicateBooks, filterNonBookResults, isAuthorMatch } from '@/lib/utils';
 
@@ -19,19 +18,22 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
     const url = `${ISBNDB_BASE_URL}/author/${encodedAuthorName}?pageSize=${maxResults}&language=${language}`;
     
     console.log(`Recherche par auteur: ${url}`);
+    console.log('En-têtes:', { 'Authorization': ISBNDB_API_KEY, 'Accept': 'application/json' });
     
     const response = await fetch(url, {
       method: 'GET',
       headers: {
+        'Content-Type': 'application/json',
         'Authorization': ISBNDB_API_KEY,
         'Accept': 'application/json'
-      },
-      // Ajouter mode: 'cors' pour résoudre les problèmes CORS
-      mode: 'cors'
+      }
     });
     
+    console.log('Statut de la réponse:', response.status, response.statusText);
+    
     if (!response.ok) {
-      console.error(`Erreur ISBNDB (recherche auteur): ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      console.error(`Erreur ISBNDB (recherche auteur): ${response.status} ${response.statusText}`, errorText);
       throw new Error(`Erreur ISBNDB (recherche auteur): ${response.status} ${response.statusText}`);
     }
     
@@ -72,17 +74,22 @@ async function fallbackAuthorSearch(authorName: string, language: LanguageFilter
   const url = `${ISBNDB_BASE_URL}/books/${encodeURIComponent(authorName)}?pageSize=${maxResults}&language=${language}`;
   
   console.log(`Recherche alternative: ${url}`);
+  console.log('En-têtes:', { 'Authorization': ISBNDB_API_KEY, 'Accept': 'application/json' });
   
   const response = await fetch(url, {
     method: 'GET',
     headers: {
+      'Content-Type': 'application/json',
       'Authorization': ISBNDB_API_KEY,
       'Accept': 'application/json'
-    },
-    mode: 'cors'
+    }
   });
   
+  console.log('Statut de la réponse fallback:', response.status, response.statusText);
+  
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`Erreur recherche alternative: ${response.status}`, errorText);
     throw new Error(`Erreur recherche alternative: ${response.status}`);
   }
   
@@ -129,17 +136,22 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'auth
 
     const url = `${ISBNDB_BASE_URL}${endpoint}${params}`;
     console.log(`Requête ISBNDB (${searchType}): ${url}`);
+    console.log('En-têtes:', { 'Authorization': ISBNDB_API_KEY, 'Accept': 'application/json' });
 
     const response = await fetch(url, {
       method: 'GET',
       headers: {
+        'Content-Type': 'application/json',
         'Authorization': ISBNDB_API_KEY,
         'Accept': 'application/json',
-      },
-      mode: 'cors'
+      }
     });
 
+    console.log('Statut de la réponse:', response.status, response.statusText);
+
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Erreur ISBNDB: ${response.status} ${response.statusText}`, errorText);
       throw new Error(`Erreur ISBNDB: ${response.status} ${response.statusText}`);
     }
 
