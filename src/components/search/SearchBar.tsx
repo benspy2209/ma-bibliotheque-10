@@ -11,14 +11,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { SearchType, LanguageFilter } from '@/services/bookSearch';
 
 interface SearchBarProps {
   onSearch: (query: string, searchType: SearchType, language: LanguageFilter) => void;
   placeholder?: string;
+  showAllResults?: () => void;
+  hasMoreResults?: boolean;
 }
 
-export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBarProps) => {
+export const SearchBar = ({ 
+  onSearch, 
+  placeholder = "Rechercher...", 
+  showAllResults,
+  hasMoreResults 
+}: SearchBarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState<SearchType>('author');
   const [language, setLanguage] = useState<LanguageFilter>('fr');
@@ -65,6 +73,12 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
     }
   };
 
+  const handleShowAllResults = () => {
+    if (showAllResults) {
+      showAllResults();
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex gap-2">
@@ -92,6 +106,19 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
           </SelectContent>
         </Select>
       </div>
+      
+      {hasMoreResults && searchQuery && (
+        <div className="flex justify-center mt-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleShowAllResults}
+            className="text-sm"
+          >
+            Afficher tous les livres de l'auteur
+          </Button>
+        </div>
+      )}
       
       {!user && (
         <div className="mt-2 text-center">

@@ -9,8 +9,10 @@ interface BookGridProps {
   displayedBooks: number;
   totalBooks: number;
   onLoadMore: () => void;
+  onShowAll?: () => void;
   isLoading: boolean;
   searchQuery: string;
+  isShowingAll?: boolean;
 }
 
 export const BookGrid = ({ 
@@ -19,8 +21,10 @@ export const BookGrid = ({
   displayedBooks, 
   totalBooks, 
   onLoadMore,
+  onShowAll,
   isLoading,
-  searchQuery
+  searchQuery,
+  isShowingAll = false
 }: BookGridProps) => {
   const hasMoreBooks = displayedBooks < totalBooks;
 
@@ -56,14 +60,31 @@ export const BookGrid = ({
 
       {searchQuery && books.length > 0 && (
         <div className="mt-12 text-center">
-          {hasMoreBooks ? (
-            <Button 
-              variant="outline" 
-              className="hover:bg-secondary"
-              onClick={onLoadMore}
-            >
-              Voir plus de livres
-            </Button>
+          {hasMoreBooks && !isShowingAll ? (
+            <div className="space-y-4">
+              <Button 
+                variant="outline" 
+                className="hover:bg-secondary"
+                onClick={onLoadMore}
+              >
+                Voir plus de livres
+              </Button>
+              
+              {onShowAll && (
+                <div className="pt-2">
+                  <Button 
+                    variant="link"
+                    onClick={onShowAll}
+                  >
+                    Afficher tous les {totalBooks} livres de l'auteur
+                  </Button>
+                </div>
+              )}
+            </div>
+          ) : isShowingAll ? (
+            <p className="text-gray-600">
+              Tous les {totalBooks} livres de l'auteur sont affichés
+            </p>
           ) : totalBooks > 0 && (
             <p className="text-gray-600">
               Tous les livres ont été affichés

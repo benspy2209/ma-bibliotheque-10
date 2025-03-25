@@ -33,6 +33,7 @@ const Index = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [searchLimitReached, setSearchLimitReached] = useState(false);
   const [remainingSearches, setRemainingSearches] = useState<number | null>(null);
+  const [showAllResults, setShowAllResults] = useState(false);
   const { toast } = useToast();
   const { user, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
 
@@ -130,6 +131,7 @@ const Index = () => {
     // Si la recherche est vide, ne pas incrémenter le compteur
     if (!query.trim()) {
       setSearchParams({ query: '', type: searchType, language });
+      setShowAllResults(false);
       return;
     }
     
@@ -152,6 +154,10 @@ const Index = () => {
       });
       return;
     }
+    
+    // Réinitialiser l'affichage de tous les résultats lors d'une nouvelle recherche
+    setShowAllResults(false);
+    setDisplayedBooks(BOOKS_PER_PAGE);
     
     // Incrémenter le compteur de recherche
     await incrementSearchCount();
@@ -201,13 +207,21 @@ const Index = () => {
     setDisplayedBooks(prev => prev + BOOKS_PER_PAGE);
   };
 
+  const handleShowAllBooks = () => {
+    setShowAllResults(true);
+    setDisplayedBooks(books.length);
+    toast({
+      description: `Affichage de tous les ${books.length} livres de l'auteur.`,
+    });
+  };
+
   const handleBookUpdate = () => {
     setRefreshKey(prev => prev + 1);
     // Forcer l'actualisation des données
     refetch();
   };
 
-  const visibleBooks = books.slice(0, displayedBooks);
+  const visibleBooks = showAllResults ? books : books.slice(0, displayedBooks);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -220,6 +234,8 @@ const Index = () => {
             <SearchBar 
               onSearch={handleSearch}
               placeholder="Rechercher un livre, un auteur..."
+              showAllResults={handleShowAllBooks}
+              hasMoreResults={books.length > displayedBooks && !showAllResults}
             />
             {user && remainingSearches !== null && remainingSearches !== -1 && (
               <div className="text-sm text-muted-foreground mt-2">
@@ -236,8 +252,10 @@ const Index = () => {
             displayedBooks={displayedBooks}
             totalBooks={books.length}
             onLoadMore={handleLoadMore}
+            onShowAll={handleShowAllBooks}
             isLoading={isLoading}
             searchQuery={searchParams.query}
+            isShowingAll={showAllResults}
           />
 
           {selectedBook && (
