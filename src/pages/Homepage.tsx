@@ -7,6 +7,7 @@ import { LoginDialog } from '@/components/auth/LoginDialog';
 import { HeroSection } from '@/components/homepage/HeroSection';
 import { FeaturesSection } from '@/components/homepage/FeaturesSection';
 import { BenefitsSection } from '@/components/homepage/BenefitsSection';
+import { TestimonialsSection } from '@/components/homepage/TestimonialsSection';
 import { CallToAction } from '@/components/homepage/CallToAction';
 
 const Homepage = () => {
@@ -20,6 +21,7 @@ const Homepage = () => {
         <HeroSection />
         <FeaturesSection />
         <BenefitsSection />
+        <TestimonialsSection />
         <CallToAction />
       </main>
 
