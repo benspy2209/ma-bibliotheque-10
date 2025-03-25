@@ -43,7 +43,7 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
   };
 
   const handleLoginClick = () => {
-    console.log("Rejoindre l'aventure button clicked");
+    console.log("Rejoindre l'aventure button clicked - Opening login dialog");
     signIn('signup');
     setShowLoginDialog(true);
   };
