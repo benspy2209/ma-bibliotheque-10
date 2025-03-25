@@ -47,15 +47,13 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
     }
   };
 
+  // Reproduire EXACTEMENT la même fonction que dans NavBar
   const handleLoginClick = () => {
-    console.log("Rejoindre l'aventure button clicked - Opening login dialog");
-    // Ouvrir explicitement le dialogue et définir le mode d'authentification
-    setShowLoginDialog(true);
+    console.log("Rejoindre l'aventure button clicked - Reproduisant le comportement du bouton Se connecter");
+    // D'abord définir le mode à 'signup'
     signIn('signup');
-    // Ajout d'une vérification pour s'assurer que showLoginDialog a été mis à jour
-    setTimeout(() => {
-      console.log("État du dialogue après clic:", showLoginDialog);
-    }, 100);
+    // Puis définir explicitement le dialogue à true, dans cet ordre exact
+    setShowLoginDialog(true);
   };
 
   return (
