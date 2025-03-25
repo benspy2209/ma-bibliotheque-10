@@ -9,15 +9,22 @@ export type LanguageFilter = 'fr' | 'en';
 const ISBNDB_API_KEY = '60264_3de7f2f024bc350bfa823cbbd9e64315';
 const ISBNDB_BASE_URL = 'https://api2.isbndb.com';
 
+// Proxy CORS pour contourner les limitations CORS
+const CORS_PROXY = 'https://corsproxy.io/?';
+
 // Configuration des en-têtes pour les requêtes
 const getHeaders = () => {
   return {
     'Authorization': ISBNDB_API_KEY,
     'Content-Type': 'application/json',
     'Accept': 'application/json',
-    'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
-    'Access-Control-Allow-Origin': '*' // Demande explicite de CORS
+    'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7'
   };
+};
+
+// Fonction pour construire l'URL avec le proxy CORS
+const getProxiedUrl = (url: string) => {
+  return `${CORS_PROXY}${encodeURIComponent(url)}`;
 };
 
 // Fonction pour faire une recherche par auteur avec l'endpoint correct
@@ -26,25 +33,25 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
   
   try {
     const encodedAuthorName = encodeURIComponent(authorName);
-    // Utiliser l'endpoint /author/ spécifique comme indiqué dans l'API
-    const url = `${ISBNDB_BASE_URL}/author/${encodedAuthorName}?pageSize=${maxResults}&language=${language}`;
+    // Construire l'URL d'origine
+    const originalUrl = `${ISBNDB_BASE_URL}/author/${encodedAuthorName}?pageSize=${maxResults}&language=${language}`;
+    // Construire l'URL avec le proxy
+    const proxiedUrl = getProxiedUrl(originalUrl);
     
-    console.log(`Recherche par auteur: ${url}`);
+    console.log(`Recherche par auteur: ${originalUrl}`);
     console.log('En-têtes envoyés:', getHeaders());
     
-    const response = await fetch(url, {
+    const response = await fetch(proxiedUrl, {
       method: 'GET',
       headers: getHeaders(),
-      mode: 'cors' // Explicitement demander un mode CORS
+      mode: 'cors'
     });
     
     console.log('Statut de réponse:', response.status, response.statusText);
-    console.log('En-têtes de réponse:', Object.fromEntries([...response.headers.entries()]));
     
     if (!response.ok) {
       console.error(`Erreur ISBNDB (recherche auteur): ${response.status} ${response.statusText}`);
       
-      // Afficher le corps de la réponse en cas d'erreur pour le diagnostic
       try {
         const errorBody = await response.text();
         console.error('Corps de la réponse d\'erreur:', errorBody);
@@ -89,15 +96,16 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
 
 // Méthode de recherche alternative en cas d'échec de la première
 async function fallbackAuthorSearch(authorName: string, language: LanguageFilter, maxResults: number): Promise<Book[]> {
-  const url = `${ISBNDB_BASE_URL}/books/${encodeURIComponent(authorName)}?pageSize=${maxResults}&language=${language}`;
+  const originalUrl = `${ISBNDB_BASE_URL}/books/${encodeURIComponent(authorName)}?pageSize=${maxResults}&language=${language}`;
+  const proxiedUrl = getProxiedUrl(originalUrl);
   
-  console.log(`Recherche alternative: ${url}`);
+  console.log(`Recherche alternative: ${originalUrl}`);
   console.log('En-têtes envoyés (fallback):', getHeaders());
   
-  const response = await fetch(url, {
+  const response = await fetch(proxiedUrl, {
     method: 'GET',
     headers: getHeaders(),
-    mode: 'cors' // Explicitement demander un mode CORS
+    mode: 'cors'
   });
   
   console.log('Statut de réponse (fallback):', response.status, response.statusText);
@@ -135,15 +143,16 @@ export async function searchBooksByTitle(title: string, language: LanguageFilter
   
   try {
     const encodedTitle = encodeURIComponent(title);
-    const url = `${ISBNDB_BASE_URL}/books/${encodedTitle}?pageSize=${maxResults}&language=${language}`;
+    const originalUrl = `${ISBNDB_BASE_URL}/books/${encodedTitle}?pageSize=${maxResults}&language=${language}`;
+    const proxiedUrl = getProxiedUrl(originalUrl);
     
-    console.log(`Recherche par titre: ${url}`);
+    console.log(`Recherche par titre: ${originalUrl}`);
     console.log('En-têtes envoyés (titre):', getHeaders());
     
-    const response = await fetch(url, {
+    const response = await fetch(proxiedUrl, {
       method: 'GET',
       headers: getHeaders(),
-      mode: 'cors' // Explicitement demander un mode CORS
+      mode: 'cors'
     });
     
     console.log('Statut de réponse (titre):', response.status, response.statusText);
