@@ -1,121 +1,96 @@
 
-import { Book, ReadingStatus } from '@/types/book';
-import { Card } from "@/components/ui/card";
-import { ShoppingCart, BookmarkPlus, BookOpen, CheckCircle, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Book } from '@/types/book';
+import { Card, CardContent } from "@/components/ui/card";
+import { Bookmark } from 'lucide-react';
 import { getAmazonAffiliateUrl } from '@/lib/utils';
-import { Badge } from "@/components/ui/badge";
-import { useState, useEffect } from 'react';
-import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
-import { saveBook } from '@/services/supabaseBooks';
-import { useToast } from "@/hooks/use-toast";
-import { AddToLibrary } from '@/components/AddToLibrary';
-import { useQueryClient } from '@tanstack/react-query';
 
 interface BookCardProps {
   book: Book;
-  onBookClick: (book: Book) => void;
+  onBookClick?: (book: Book) => void;
 }
 
 export const BookCard = ({ book, onBookClick }: BookCardProps) => {
-  const [isHovering, setIsHovering] = useState(false);
-  const [currentStatus, setCurrentStatus] = useState<ReadingStatus | undefined>(book.status);
-  const { user, signIn } = useSupabaseAuth();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  // Mettre à jour currentStatus lorsque book.status change
-  useEffect(() => {
-    if (book.status !== currentStatus) {
-      console.log(`Mise à jour du statut: ${book.status} (était ${currentStatus})`);
-      setCurrentStatus(book.status);
-    }
-  }, [book.status]);
-
-  const handleAmazonClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.stopPropagation(); // Éviter de déclencher handleBookClick
-  };
-
-  const handleAddToLibrary = async (status: ReadingStatus) => {
-    if (!user) {
-      signIn('login');
-      return;
-    }
-
-    try {
-      // Mettre à jour l'état local immédiatement pour refléter le changement
-      setCurrentStatus(status);
-      
-      const updatedBook = { ...book, status };
-      const result = await saveBook(updatedBook);
-      
-      if (!result.success && result.error === 'duplicate') {
-        toast({
-          description: "Ce livre est déjà dans votre bibliothèque."
-        });
-      }
-      
-      // Force une invalidation du cache pour actualiser les données
-      await queryClient.invalidateQueries({ 
-        queryKey: ['books'],
-        refetchType: 'all',
-        exact: false
-      });
-      
-      // Log pour déboguer
-      console.log(`Statut mis à jour avec succès pour le livre ${book.id}: ${status}`);
-      
-    } catch (error) {
-      // En cas d'erreur, rétablir le statut précédent
-      setCurrentStatus(book.status);
-      
-      console.error("Erreur lors de l'ajout du livre:", error);
-      toast({
-        variant: "destructive",
-        description: "Erreur lors de l'ajout du livre à votre bibliothèque."
-      });
+  const navigate = useNavigate();
+  const amazonUrl = getAmazonAffiliateUrl(book);
+  
+  // Déterminer si c'est un livre audio
+  const isAudioBook = (book.format?.toLowerCase().includes('audio') || 
+                      book.title.toLowerCase().includes('audio cd') || 
+                      book.title.toLowerCase().includes('livre audio'));
+  
+  // Traiter le titre pour éviter les titres trop longs
+  const displayTitle = book.title.length > 60 
+    ? book.title.substring(0, 57) + '...' 
+    : book.title;
+  
+  // Gestion du clic sur le livre
+  const handleClick = () => {
+    if (onBookClick) {
+      onBookClick(book);
     }
   };
+  
+  // Déterminer l'auteur à afficher
+  const displayAuthor = Array.isArray(book.author) 
+    ? book.author[0] || 'Auteur inconnu' 
+    : book.author || 'Auteur inconnu';
 
   return (
     <Card 
-      key={book.id} 
-      className="book-card group cursor-pointer relative overflow-hidden"
-      onClick={() => onBookClick(book)}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
+      className="h-full flex flex-col relative overflow-hidden hover:shadow-md transition-shadow cursor-pointer transform hover:scale-[1.01] transition-transform"
+      onClick={handleClick}
     >
-      {/* Badge d'ajout à la bibliothèque */}
-      <div className="absolute top-2 right-2 z-10">
-        <AddToLibrary
-          onStatusChange={handleAddToLibrary}
-          currentStatus={currentStatus}
-          bookId={book.id}
-          bookTitle={book.title}
-          bookAuthor={book.author}
-        />
-      </div>
-
-      <img
-        src={book.cover}
-        alt={book.title}
-        className="transition-transform duration-300 group-hover:scale-105"
-      />
-      <div className="book-info">
-        <h3 className="text-lg font-semibold dark:text-black">{book.title}</h3>
-        <p className="text-sm text-gray-600 dark:text-gray-800">
-          {Array.isArray(book.author) ? book.author[0] : book.author}
-        </p>
-        <a 
-          href={getAmazonAffiliateUrl(book)}
-          onClick={handleAmazonClick}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="absolute bottom-2 right-2 bg-amber-500 hover:bg-amber-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 shadow-lg hover:shadow-amber-500/50"
-          title="Acheter sur Amazon"
-        >
-          <ShoppingCart className="h-4 w-4" />
-        </a>
-      </div>
+      <CardContent className="p-0 flex-1 flex flex-col">
+        <div className="relative w-full pt-[140%] bg-gray-100">
+          {book.cover ? (
+            <img 
+              src={book.cover} 
+              alt={`Couverture: ${book.title}`}
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/placeholder.svg';
+              }}
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-muted">
+              <Bookmark className="h-12 w-12 text-muted-foreground/40" />
+              <span className="sr-only">{book.title}</span>
+            </div>
+          )}
+          
+          {isAudioBook && (
+            <div className="absolute top-2 right-2 px-2 py-1 bg-amber-500 text-white text-xs rounded-md font-medium">
+              Audio
+            </div>
+          )}
+        </div>
+        
+        <div className="p-3 flex-1 flex flex-col">
+          <h3 className="font-medium text-base mb-1 line-clamp-2" title={book.title}>
+            {displayTitle}
+          </h3>
+          <p className="text-sm text-muted-foreground mb-2">
+            {displayAuthor}
+          </p>
+          
+          <div className="mt-auto flex flex-wrap gap-1">
+            {book.language && book.language[0] && (
+              <span className="text-xs px-2 py-0.5 bg-secondary text-secondary-foreground rounded-full">
+                {book.language[0] === 'fr' ? 'Français' : 
+                 book.language[0] === 'en' ? 'Anglais' : book.language[0]}
+              </span>
+            )}
+            
+            {book.numberOfPages > 0 && (
+              <span className="text-xs px-2 py-0.5 bg-slate-100 text-slate-700 rounded-full">
+                {book.numberOfPages} p.
+              </span>
+            )}
+          </div>
+        </div>
+      </CardContent>
     </Card>
   );
-};
+}

@@ -20,6 +20,7 @@ export type Book = {
   status?: ReadingStatus;
   completionDate?: string;
   readingTimeDays?: number;
+  format?: string; // Format du livre (broché, relié, audio, etc.)
   review?: {
     content: string;
     date: string;

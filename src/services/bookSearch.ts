@@ -45,14 +45,7 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
       // Application des filtres améliorés
       const filteredBooks = books.filter(book => {
         // S'assurer que le livre est bien de l'auteur recherché
-        return isAuthorMatch(book, authorName) && 
-               // Exclure certains types de livres par titre
-               !book.title.toLowerCase().includes('dictionnaire') &&
-               !book.title.toLowerCase().includes('encyclopédie') &&
-               !book.title.toLowerCase().includes('manuel de') &&
-               !book.title.toLowerCase().includes('guide pratique') &&
-               !book.title.toLowerCase().includes('méthode') &&
-               !book.title.toLowerCase().includes('cours de');
+        return isAuthorMatch(book, authorName);
       });
       
       console.log(`Livres filtrés pour l'auteur ${authorName}: ${filteredBooks.length} sur ${books.length}`);
@@ -102,16 +95,8 @@ async function fallbackAuthorSearch(authorName: string, language: LanguageFilter
   
   const books = data.books.map((book: any) => mapIsbndbBookToBook(book));
   
-  // Filtrage plus strict des résultats
-  const filteredBooks = books.filter(book => {
-    return isAuthorMatch(book, authorName) && 
-           !book.title.toLowerCase().includes('dictionnaire') &&
-           !book.title.toLowerCase().includes('encyclopédie') &&
-           !book.title.toLowerCase().includes('manuel de') &&
-           !book.title.toLowerCase().includes('guide pratique') &&
-           !book.title.toLowerCase().includes('méthode') &&
-           !book.title.toLowerCase().includes('cours de');
-  });
+  // Filtrer pour ne garder que les livres qui correspondent vraiment à l'auteur
+  const filteredBooks = books.filter(book => isAuthorMatch(book, authorName));
   
   return filterNonBookResults(filteredBooks);
 }
@@ -195,6 +180,7 @@ function mapIsbndbBookToBook(isbndbBook: any, defaultAuthor?: string): Book {
     description: isbndbBook.synopsis || '',
     numberOfPages: isbndbBook.pages || 0,
     publishDate: isbndbBook.date_published || '',
+    format: isbndbBook.format || '',
   };
 }
 
