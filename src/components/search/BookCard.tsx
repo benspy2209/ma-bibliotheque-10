@@ -1,7 +1,7 @@
 
 import { Book, ReadingStatus } from '@/types/book';
 import { Card } from "@/components/ui/card";
-import { ShoppingCart, BookmarkPlus, BookOpen, CheckCircle, X } from 'lucide-react';
+import { ShoppingCart, BookmarkPlus, BookOpen, CheckCircle, X, Headphones } from 'lucide-react';
 import { getAmazonAffiliateUrl } from '@/lib/utils';
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from 'react';
@@ -94,6 +94,16 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
           bookAuthor={book.author}
         />
       </div>
+
+      {/* Badge pour les livres audio */}
+      {book.format === 'audio' && (
+        <div className="absolute top-2 left-2 z-10">
+          <Badge className="bg-purple-500 hover:bg-purple-600 flex items-center gap-1 px-2">
+            <Headphones className="h-3 w-3" />
+            <span>Audio</span>
+          </Badge>
+        </div>
+      )}
 
       <img
         src={book.cover}
