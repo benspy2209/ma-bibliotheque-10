@@ -47,13 +47,16 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
     }
   };
 
-  // Reproduire EXACTEMENT la même fonction que dans NavBar
   const handleLoginClick = () => {
-    console.log("Rejoindre l'aventure button clicked - Reproduisant le comportement du bouton Se connecter");
+    console.log("Rejoindre l'aventure button clicked");
+    
     // D'abord définir le mode à 'signup'
     signIn('signup');
-    // Puis définir explicitement le dialogue à true, dans cet ordre exact
+    
+    // Puis définir explicitement le dialogue à true
     setShowLoginDialog(true);
+    
+    console.log("État du dialogue après clic:", showLoginDialog);
   };
 
   return (
