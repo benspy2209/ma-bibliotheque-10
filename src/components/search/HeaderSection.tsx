@@ -17,10 +17,10 @@ export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
     <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mb-8 sm:mb-12">
       <div className="text-center sm:text-left flex-1">
         <h1 className="mb-3 text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900 dark:text-white">
-          Découvrez votre prochaine lecture
+          Recherchez des livres
         </h1>
         <p className="text-base sm:text-lg text-gray-600 dark:text-gray-200">
-          Explorez, partagez et découvrez de nouveaux livres
+          Trouvez et ajoutez des livres à votre bibliothèque personnelle
         </p>
       </div>
       
