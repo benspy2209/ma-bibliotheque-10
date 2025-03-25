@@ -29,7 +29,7 @@ export const SearchBar = ({
   const [language, setLanguage] = useState<LanguageFilter>('fr');
   const [isSearching, setIsSearching] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const { user, signIn, setShowLoginDialog } = useSupabaseAuth();
+  const { user, signIn, setShowLoginDialog, setAuthMode } = useSupabaseAuth();
   const { toast } = useToast();
 
   const handleSearch = (value: string) => {
@@ -121,7 +121,14 @@ export const SearchBar = ({
   const handleSignInClick = () => {
     console.log("Opening login dialog from SearchBar component");
     setShowLoginDialog(true);
-    signIn('signup');
+    setAuthMode('signup');
+    
+    setTimeout(() => {
+      if (!showLoginDialog) {
+        console.log("Retrying to open login dialog...");
+        setShowLoginDialog(true);
+      }
+    }, 100);
   };
 
   return (
