@@ -87,7 +87,13 @@ export function useSupabaseAuth() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}`
+          redirectTo: `${window.location.origin}`,
+          queryParams: {
+            // Personnalisation de l'affichage pour Google Auth
+            prompt: 'select_account',
+            access_type: 'offline',
+            hd: 'bibliopulse.com' // Domaine suggéré (optionnel)
+          }
         }
       });
       

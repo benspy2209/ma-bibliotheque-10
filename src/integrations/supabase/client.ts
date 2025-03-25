@@ -16,6 +16,9 @@ export const supabase = createClient<Database>(
       persistSession: true,
       autoRefreshToken: true,
       storage: localStorage,
+      flowType: 'pkce',
+      // Utiliser un nom d'application plus convivial pour les redirections
+      redirectTo: 'https://bibliopulse.com',
     },
     global: {
       headers: {

@@ -1,3 +1,6 @@
 
 # ID du projet Supabase actuel
 project_id = "kbmnsxakgyokifzoiajo"
+
+# Site URL personnalisée pour les redirections d'authentification
+site_url = "https://bibliopulse.com"
