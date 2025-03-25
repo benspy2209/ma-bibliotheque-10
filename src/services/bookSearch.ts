@@ -20,11 +20,10 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
     
     console.log(`Recherche par auteur: ${url}`);
     
-    // Mise à jour des headers selon l'exemple fourni
+    // Format exact comme montré dans l'exemple de l'API
     const headers = {
-      'Authorization': ISBNDB_API_KEY,
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
+      "Content-Type": "application/json",
+      "Authorization": ISBNDB_API_KEY
     };
     
     console.log('Headers utilisés pour recherche auteur:', headers);
@@ -78,9 +77,8 @@ async function fallbackAuthorSearch(authorName: string, language: LanguageFilter
   console.log(`Recherche alternative: ${url}`);
   
   const headers = {
-    'Authorization': ISBNDB_API_KEY,
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
+    "Content-Type": "application/json",
+    "Authorization": ISBNDB_API_KEY
   };
   
   console.log('Headers utilisés pour recherche alternative:', headers);
@@ -120,9 +118,8 @@ export async function searchBooksByTitle(title: string, language: LanguageFilter
     console.log(`Recherche par titre: ${url}`);
     
     const headers = {
-      'Authorization': ISBNDB_API_KEY,
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
+      "Content-Type": "application/json",
+      "Authorization": ISBNDB_API_KEY
     };
     
     console.log('Headers utilisés pour recherche titre:', headers);

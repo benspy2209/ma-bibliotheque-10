@@ -24,11 +24,10 @@ export async function getBookDetails(bookId: string, language: string = 'fr'): P
     
     console.log(`URL de l'API pour les détails: ${url}`);
     
-    // Mise à jour du format selon l'exemple fourni
+    // Format exact comme montré dans l'exemple de l'API
     const headers = {
-      'Authorization': ISBNDB_API_KEY,
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
+      "Content-Type": "application/json",
+      "Authorization": ISBNDB_API_KEY
     };
     
     console.log('Headers utilisés:', headers);
