@@ -1,6 +1,6 @@
 
 import { NavLink } from "react-router-dom";
-import { Search, BookOpen, BarChart2, Sun, Moon, LogIn, Menu } from "lucide-react";
+import { Search, BookOpen, BarChart2, Sun, Moon, LogIn, Menu, Lightbulb } from "lucide-react";
 import { Button } from "./ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
@@ -53,6 +53,13 @@ const NavBar = () => {
       >
         <BarChart2 className="h-4 w-4" />
         Statistiques
+      </NavLink>
+      <NavLink 
+        to="/features" 
+        className={({ isActive }) => `flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
+      >
+        <Lightbulb className="h-4 w-4" />
+        Fonctionnalités
       </NavLink>
     </>
   );
