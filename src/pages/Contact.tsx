@@ -96,7 +96,7 @@ const Contact = () => {
                   <MapPin className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Adresse</h3>
-                <p className="text-muted-foreground">
+                <p className="text-primary">
                   Rhode-Saint-Genèse<br />
                   Belgique
                 </p>
