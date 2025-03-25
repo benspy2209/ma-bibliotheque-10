@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Search } from 'lucide-react';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
 interface SearchBarProps {
@@ -13,7 +12,7 @@ interface SearchBarProps {
 
 export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const { user, signIn, setShowLoginDialog } = useSupabaseAuth();
+  const { user } = useSupabaseAuth();
   const { toast } = useToast();
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,12 +41,6 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
     }
   };
 
-  const handleConnectClick = () => {
-    console.log("Ouverture du formulaire de connexion");
-    signIn('signup');
-    setShowLoginDialog(true);
-  };
-
   return (
     <div className="relative w-full">
       <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
@@ -62,14 +55,7 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
       
       {!user && (
         <div className="mt-2 text-center">
-          <p className="text-destructive mb-2">Vous devez vous connecter ou créer un compte pour faire une recherche.</p>
-          <Button 
-            onClick={handleConnectClick} 
-            variant="outline"
-            className="text-sm"
-          >
-            Se connecter / Créer un compte
-          </Button>
+          <p className="text-destructive">Vous devez vous connecter ou créer un compte pour faire une recherche.</p>
         </div>
       )}
     </div>
