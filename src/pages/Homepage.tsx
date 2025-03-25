@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
@@ -7,9 +8,10 @@ import { Separator } from '@/components/ui/separator';
 import { Card, CardContent } from '@/components/ui/card';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
+import { LoginDialog } from '@/components/auth/LoginDialog';
 
 const Homepage = () => {
-  const { user, signIn } = useSupabaseAuth();
+  const { user, signIn, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
 
   const handleSignUp = () => {
     signIn('signup');
@@ -200,6 +202,7 @@ const Homepage = () => {
       </main>
 
       <Footer />
+      <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
     </div>
   );
 };
