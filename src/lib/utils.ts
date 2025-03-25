@@ -26,7 +26,7 @@ export function removeDuplicateBooks(books: Book[]): Book[] {
   
   return books.filter(book => {
     // Créer une clé unique basée sur le titre et le premier auteur
-    const key = `${book.title.toLowerCase()}_${Array.isArray(book.author) ? book.author[0].toLowerCase() : book.author.toLowerCase()}`;
+    const key = `${book.title.toLowerCase()}_${Array.isArray(book.author) ? book.author[0]?.toLowerCase() : book.author?.toLowerCase()}`;
     
     if (seen.has(key)) {
       return false;
@@ -48,7 +48,8 @@ const TECHNICAL_KEYWORDS = [
   'recueil', 'almanach', 'traité', 'précis', 'abrégé', 'compendium',
   'anthologie', 'mélanges', 'festschrift', 'correspondance', 'lettres', 'journal',
   'carnets', 'cahiers', 'notes', 'essais', 'études', 'leçons', 'cours', 'conférences',
-  'méthode', 'guide pratique', 'manuel de'
+  'méthode', 'guide pratique', 'manuel de', 'formation', 'graphologie', 'sevices', 'ssiap',
+  'cuisine', 'bébé', 'comptines', 'éducation', 'organisation', 'transmettre'
 ];
 
 // Mots-clés spécifiques aux types de livres non désirés - liste étendue
@@ -57,7 +58,8 @@ const UNWANTED_TYPES = [
   'sciences', 'geographi', 'chronologi', 'histori', 'encyclopédie', 'traité', 'manuel',
   'revue', 'journal', 'magazine', 'périodique', 'bulletin', 'lexique', 'répertoire',
   'compendium', 'abrégé', 'précis', 'actes', 'proceedings', 'études', 'annales',
-  'méthode', 'guide pratique', 'cours de'
+  'méthode', 'guide pratique', 'cours de', 'formation', 'agents', 'securite', 'incendie',
+  'graphologie', 'sevices', 'ssiap', 'cuisine', 'transmettre', 'comptines', 'vente'
 ];
 
 export function filterNonBookResults(books: Book[]): Book[] {
@@ -131,6 +133,38 @@ export function isAuthorMatch(book: Book, searchQuery: string): boolean {
     // L'auteur correspond si tous les termes sont présents, dans le bon ordre, et que ce n'est pas un auteur générique
     return allTermsPresent && termsInOrder && !isGenericAuthor;
   });
+}
+
+// Nouvelle fonction pour vérifier si un livre correspond au titre recherché
+export function isTitleMatch(book: Book, searchQuery: string): boolean {
+  if (!book.title) return false;
+  
+  const searchLower = searchQuery.toLowerCase().trim();
+  const titleLower = book.title.toLowerCase().trim();
+  
+  // Correspondance exacte du titre
+  if (titleLower === searchLower) {
+    return true;
+  }
+  
+  // Vérifier si le titre contient tous les mots de la recherche
+  const searchWords = searchLower.split(/\s+/).filter(word => word.length > 1);
+  
+  if (searchWords.length === 0) return false;
+  
+  const allWordsPresent = searchWords.every(word => titleLower.includes(word));
+  
+  // Vérifier si au moins 60% des mots de la recherche sont présents dans le titre
+  const matchingWords = searchWords.filter(word => titleLower.includes(word));
+  const matchingPercentage = (matchingWords.length / searchWords.length) * 100;
+  
+  // Vérifier si le titre commence par le terme de recherche
+  const titleStartsWithSearch = titleLower.startsWith(searchLower);
+  
+  // Le livre correspond si le titre contient tous les mots de la recherche
+  // ou si au moins 60% des mots de la recherche sont présents dans le titre
+  // ou si le titre commence par le terme de recherche
+  return allWordsPresent || matchingPercentage >= 60 || titleStartsWithSearch;
 }
 
 export function isDuplicateBook(existingBooks: Book[], newBook: Book): boolean {
