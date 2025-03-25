@@ -1,5 +1,6 @@
+
 import { Book } from '@/types/book';
-import { removeDuplicateBooks } from '@/lib/utils';
+import { removeDuplicateBooks, filterNonBookResults, isAuthorMatch } from '@/lib/utils';
 
 export type SearchType = 'author' | 'title' | 'general';
 export type LanguageFilter = 'fr' | 'en';
@@ -36,7 +37,16 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
     
     // Vérifie si l'API a retourné les livres de l'auteur
     if (data.books && Array.isArray(data.books)) {
-      return data.books.map((book: any) => mapIsbndbBookToBook(book, authorName));
+      const books = data.books.map((book: any) => mapIsbndbBookToBook(book, authorName));
+      
+      // Filtrer les résultats inappropriés en utilisant la fonction améliorée
+      const filteredBooks = books.filter(book => {
+        // S'assurer que le livre est bien de l'auteur recherché
+        return isAuthorMatch(book, authorName) && !book.title.toLowerCase().includes('dictionnaire');
+      });
+      
+      console.log(`Livres filtrés pour l'auteur ${authorName}: ${filteredBooks.length} sur ${books.length}`);
+      return filterNonBookResults(filteredBooks);
     }
     
     return [];
@@ -95,6 +105,11 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'auth
     
     if (data.books) {
       books = data.books.map((book: any) => mapIsbndbBookToBook(book));
+      
+      // Filtrer les résultats si on cherche par titre
+      if (searchType === 'title') {
+        books = filterNonBookResults(books);
+      }
     }
 
     return books;
@@ -128,10 +143,13 @@ export async function searchAllBooks(query: string, searchType: SearchType = 'au
   try {
     const books = await searchIsbndb(query, searchType, language, maxResults);
     
-    // Suppression des doublons
-    const uniqueBooks = removeDuplicateBooks(books);
+    // Appliquer un filtre supplémentaire pour éliminer les dictionnaires et autres ouvrages techniques
+    const filteredBooks = filterNonBookResults(books);
     
-    console.log(`Total des résultats: ${uniqueBooks.length} livres`);
+    // Suppression des doublons
+    const uniqueBooks = removeDuplicateBooks(filteredBooks);
+    
+    console.log(`Total des résultats après filtrage: ${uniqueBooks.length} livres (avant filtrage: ${books.length})`);
     
     return uniqueBooks;
   } catch (error) {

@@ -1,3 +1,4 @@
+
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { Book } from '@/types/book'
@@ -40,7 +41,17 @@ export function removeDuplicateBooks(books: Book[]): Book[] {
 const TECHNICAL_KEYWORDS = [
   'manuel', 'guide', 'prospection', 'minier', 'minière', 'géologie', 'scientifique',
   'technique', 'rapport', 'étude', 'ingénierie', 'document', 'actes', 'conférence',
-  'colloque', 'symposium', 'proceedings', 'thèse', 'mémoire', 'doctorat'
+  'colloque', 'symposium', 'proceedings', 'thèse', 'mémoire', 'doctorat',
+  'dictionnaire', 'encyclopédie', 'lexique', 'glossaire', 'référence', 'répertoire',
+  'catalogue', 'index', 'annuaire', 'bibliographie', 'revue', 'périodique', 'collection',
+  'compilation', 'atlas', 'critique', 'édition critique', 'chronologie', 'chronique',
+  'recueil', 'almanach', 'traité', 'précis', 'abrégé', 'compendium'
+];
+
+// Mots-clés spécifiques aux types de livres non désirés
+const UNWANTED_TYPES = [
+  'dictionnaire', 'critiq', 'theolog', 'dogmat', 'canoni', 'universel', 'ecclesiasti',
+  'sciences', 'geographi', 'chronologi', 'histori'
 ];
 
 export function filterNonBookResults(books: Book[]): Book[] {
@@ -57,8 +68,16 @@ export function filterNonBookResults(books: Book[]): Book[] {
     
     const allText = `${titleLower} ${authorString} ${subjectsString} ${descriptionLower}`;
     
-    // Exclure les livres qui contiennent des mots-clés techniques
-    return !TECHNICAL_KEYWORDS.some(keyword => allText.includes(keyword.toLowerCase()));
+    // Exclure les livres qui contiennent des mots-clés techniques ou des types non désirés
+    const containsTechnicalKeywords = TECHNICAL_KEYWORDS.some(keyword => 
+      allText.includes(keyword.toLowerCase())
+    );
+    
+    const containsUnwantedTypes = UNWANTED_TYPES.some(keyword => 
+      titleLower.includes(keyword.toLowerCase())
+    );
+    
+    return !containsTechnicalKeywords && !containsUnwantedTypes;
   });
 }
 
@@ -70,11 +89,27 @@ export function isAuthorMatch(book: Book, searchQuery: string): boolean {
   const searchTerms = searchQuery.toLowerCase().split(' ');
   const authors = Array.isArray(book.author) ? book.author : [book.author];
   
+  // Pour chaque auteur dans le livre
   return authors.some(author => {
     if (!author) return false;
     const authorLower = author.toLowerCase();
     
-    // Vérifie si le nom de l'auteur contient tous les termes de la recherche
+    // Vérification plus stricte: l'auteur doit correspondre exactement au nom recherché
+    // ou contenir tous les termes de recherche dans l'ordre
+    
+    // Vérification 1: correspondance exacte
+    if (authorLower === searchQuery.toLowerCase()) {
+      return true;
+    }
+    
+    // Vérification 2: tous les termes dans l'ordre
+    const searchPattern = searchTerms.join('.*');
+    const regexPattern = new RegExp(searchPattern, 'i');
+    if (regexPattern.test(authorLower)) {
+      return true;
+    }
+    
+    // Vérification 3: tous les termes mais pas nécessairement dans l'ordre
     return searchTerms.every(term => authorLower.includes(term));
   });
 }
