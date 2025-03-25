@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
+import { supabase } from '@/integrations/supabase/client';
 
 const Contact = () => {
   const { toast } = useToast();
@@ -26,25 +27,42 @@ const Contact = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Ici, nous simulons l'envoi du formulaire pour le moment
-    // Dans une implémentation future, nous ajouterons l'envoi réel des emails
-    setTimeout(() => {
+    try {
+      // Envoi du formulaire via la fonction Edge Supabase
+      const { data, error } = await supabase.functions.invoke('send-contact-email', {
+        body: JSON.stringify(formData)
+      });
+
+      if (error) {
+        throw new Error(error.message || "Une erreur est survenue lors de l'envoi du message");
+      }
+
       toast({
         title: "Message envoyé",
         description: "Nous avons bien reçu votre message et reviendrons vers vous rapidement.",
       });
+      
+      // Réinitialisation du formulaire après envoi réussi
       setFormData({
         name: '',
         email: '',
         subject: '',
         message: ''
       });
+    } catch (error: any) {
+      console.error("Erreur lors de l'envoi du message:", error);
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de l'envoi du message. Veuillez réessayer plus tard.",
+        variant: "destructive"
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -72,8 +90,8 @@ const Contact = () => {
                   <Mail className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Email</h3>
-                <a href="mailto:contact@bibliopulse.com" className="text-primary hover:underline">
-                  contact@bibliopulse.com
+                <a href="mailto:contact@bibliopulse.be" className="text-primary hover:underline">
+                  contact@bibliopulse.be
                 </a>
               </CardContent>
             </Card>
