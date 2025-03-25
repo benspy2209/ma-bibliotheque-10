@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Input } from "@/components/ui/input";
-import { Search, BookOpen } from 'lucide-react';
+import { Search, BookOpen, User, Book } from 'lucide-react';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -83,7 +83,7 @@ export const SearchBar = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         <div className="relative flex-grow">
           <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
           <Input
@@ -95,18 +95,44 @@ export const SearchBar = ({
             onFocus={handleInputFocus}
           />
         </div>
-        <Select 
-          value={language} 
-          onValueChange={(value) => handleLanguageChange(value as LanguageFilter)}
-        >
-          <SelectTrigger className="w-[180px] h-12">
-            <SelectValue placeholder="Langue" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="fr">Français</SelectItem>
-            <SelectItem value="en">Anglais</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex gap-2">
+          <Select 
+            value={searchType} 
+            onValueChange={(value) => handleSearchTypeChange(value as SearchType)}
+          >
+            <SelectTrigger className="w-[180px] h-12">
+              <SelectValue placeholder="Type de recherche" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="author" className="flex items-center">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  <span>Auteur</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="title" className="flex items-center">
+                <div className="flex items-center gap-2">
+                  <Book className="h-4 w-4" />
+                  <span>Titre</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="general">Général</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select 
+            value={language} 
+            onValueChange={(value) => handleLanguageChange(value as LanguageFilter)}
+          >
+            <SelectTrigger className="w-[120px] h-12">
+              <SelectValue placeholder="Langue" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="fr">Français</SelectItem>
+              <SelectItem value="en">Anglais</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       
       {hasMoreResults && searchQuery && (
@@ -118,7 +144,9 @@ export const SearchBar = ({
             className="flex items-center gap-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground"
           >
             <BookOpen className="h-4 w-4" />
-            Afficher tous les {totalBooks} livres de l'auteur
+            {searchType === 'author' ? 
+              `Afficher tous les ${totalBooks} livres de l'auteur` : 
+              `Afficher tous les ${totalBooks} résultats`}
           </Button>
         </div>
       )}

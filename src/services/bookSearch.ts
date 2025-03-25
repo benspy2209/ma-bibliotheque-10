@@ -71,6 +71,49 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
   }
 }
 
+// Nouveau: Fonction dédiée pour la recherche par titre
+export async function searchBooksByTitle(title: string, language: LanguageFilter = 'fr', maxResults: number = 100): Promise<Book[]> {
+  if (!title.trim()) return [];
+  
+  try {
+    const encodedTitle = encodeURIComponent(title);
+    // Utiliser l'endpoint /books avec paramètre page_size pour la recherche par titre
+    const url = `/books/${encodedTitle}?page=1&pageSize=${maxResults}&column=title&language=${language}`;
+    
+    console.log(`Recherche par titre: ${url}`);
+    
+    const response = await isbndbApi.get(url);
+    
+    console.log('Réponse de la recherche par titre:', response.data);
+    
+    if (response.data.books && Array.isArray(response.data.books)) {
+      const books = response.data.books.map((book: any) => mapIsbndbBookToBook(book));
+      
+      // Filtrer les résultats pour qu'ils correspondent mieux au titre recherché
+      const filteredBooks = books.filter(book => {
+        const bookTitle = book.title.toLowerCase();
+        const searchTitle = title.toLowerCase();
+        
+        // Vérification plus stricte pour les correspondances de titre
+        return (bookTitle.includes(searchTitle) || 
+                searchTitle.includes(bookTitle.substring(0, Math.min(bookTitle.length, 10)))) &&
+               !bookTitle.includes('dictionnaire') &&
+               !bookTitle.includes('encyclopédie') &&
+               !bookTitle.includes('manuel de') &&
+               !bookTitle.includes('guide pratique');
+      });
+      
+      console.log(`Livres filtrés pour le titre ${title}: ${filteredBooks.length} sur ${books.length}`);
+      return filterNonBookResults(filteredBooks);
+    }
+    
+    return [];
+  } catch (error) {
+    console.error('Erreur lors de la recherche par titre:', error);
+    return [];
+  }
+}
+
 // Méthode de recherche alternative en cas d'échec de la première
 async function fallbackAuthorSearch(authorName: string, language: LanguageFilter, maxResults: number): Promise<Book[]> {
   try {
@@ -106,7 +149,7 @@ async function fallbackAuthorSearch(authorName: string, language: LanguageFilter
   }
 }
 
-// Nouvelle fonction pour rechercher plusieurs livres par ISBN en une seule requête
+// Fonction pour rechercher plusieurs livres par ISBN en une seule requête
 export async function searchBooksByIsbns(isbns: string[]): Promise<Book[]> {
   if (!isbns || isbns.length === 0) return [];
   
@@ -129,51 +172,27 @@ export async function searchBooksByIsbns(isbns: string[]): Promise<Book[]> {
   }
 }
 
-// Ancienne fonction de recherche ISBNDB (conservée pour les autres types de recherche)
+// Ancienne fonction de recherche ISBNDB (mise à jour pour utiliser des fonctions spécifiques)
 export async function searchIsbndb(query: string, searchType: SearchType = 'author', language: LanguageFilter = 'fr', maxResults: number = 100): Promise<Book[]> {
   if (!query.trim()) return [];
   
   try {
-    let endpoint = '';
-    let params = '';
-    
-    // Déterminer l'endpoint en fonction du type de recherche
+    // Déterminer le type de recherche et utiliser la fonction appropriée
     switch (searchType) {
       case 'author':
-        // Utiliser le nouvel endpoint pour les auteurs
         return searchAuthorBooks(query, language, maxResults);
       case 'title':
-        endpoint = `/books/${encodeURIComponent(query)}`;
-        params = `?pageSize=${maxResults}&language=${language}`;
-        break;
+        return searchBooksByTitle(query, language, maxResults);
       case 'general':
-        endpoint = `/books/${encodeURIComponent(query)}`;
-        params = `?pageSize=${maxResults}&language=${language}`;
-        break;
+        // Pour une recherche générale, on peut combiner les résultats des deux types de recherche
+        const authorResults = await searchAuthorBooks(query, language, maxResults/2);
+        const titleResults = await searchBooksByTitle(query, language, maxResults/2);
+        
+        // Fusionner les résultats en évitant les doublons
+        return removeDuplicateBooks([...authorResults, ...titleResults]).slice(0, maxResults);
       default:
-        endpoint = `/books/${encodeURIComponent(query)}`;
-        params = `?pageSize=${maxResults}&language=${language}`;
+        return searchBooksByTitle(query, language, maxResults);
     }
-
-    const url = `${endpoint}${params}`;
-    console.log(`Requête ISBNDB (${searchType}): ${url}`);
-
-    const response = await isbndbApi.get(url);
-    console.log('Réponse ISBNDB:', response.data);
-
-    // Transformer les résultats ISBNDB en format Book
-    let books: Book[] = [];
-    
-    if (response.data.books) {
-      books = response.data.books.map((book: any) => mapIsbndbBookToBook(book));
-      
-      // Filtrer les résultats si on cherche par titre
-      if (searchType === 'title') {
-        books = filterNonBookResults(books);
-      }
-    }
-
-    return books;
   } catch (error) {
     console.error('Erreur lors de la recherche ISBNDB:', error);
     return [];
@@ -232,10 +251,13 @@ export async function searchAllBooks(query: string, searchType: SearchType = 'au
     const books = await searchIsbndb(query, searchType, language, maxResults);
     
     if (books.length === 0) {
-      console.log("Aucun résultat trouvé via ISBNDB, tentative avec la méthode alternative");
+      console.log(`Aucun résultat trouvé via la recherche ${searchType}, tentative avec la méthode alternative`);
+      
+      // Si la recherche par auteur échoue, essayer la recherche par titre, et vice versa
       if (searchType === 'author') {
-        // Tenter avec la recherche alternative si aucun résultat n'est trouvé
-        return await fallbackAuthorSearch(query, language, maxResults);
+        return await searchBooksByTitle(query, language, maxResults);
+      } else if (searchType === 'title') {
+        return await searchAuthorBooks(query, language, maxResults);
       }
     }
     

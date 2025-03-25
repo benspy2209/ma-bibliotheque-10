@@ -62,10 +62,8 @@ export async function getBookDetails(bookId: string, language: LanguageFilter = 
       };
     }
     
-    const endpoint = `/book/${bookId}`;
-    const languageParam = language ? `?language=${language}` : '';
-    
-    const response = await isbndbApi.get(`${endpoint}${languageParam}`);
+    // Utiliser l'endpoint book/ISBN spécifique pour obtenir les détails complets d'un livre
+    const response = await isbndbApi.get(`/book/${bookId}`);
     const data = response.data;
     
     console.log('Détails du livre:', data);
@@ -93,6 +91,30 @@ export async function getBookDetails(bookId: string, language: LanguageFilter = 
     };
   } catch (error) {
     console.error('Erreur lors de la récupération des détails du livre:', error);
+    
+    // Essayer avec une recherche alternative si la première méthode échoue
+    try {
+      console.log('Tentative de récupération avec méthode alternative...');
+      // Utiliser l'endpoint /books pour trouver le livre par ISBN
+      const altResponse = await isbndbApi.get(`/books/${bookId}?language=${language}`);
+      
+      if (altResponse.data.books && altResponse.data.books.length > 0) {
+        const book = altResponse.data.books[0];
+        
+        return {
+          description: cleanDescription(book.synopsis || ''),
+          subjects: book.subjects || [],
+          numberOfPages: book.pages || 0,
+          publishDate: book.date_published || '',
+          publishers: book.publisher ? [book.publisher] : [],
+          isbn: book.isbn13 || book.isbn,
+          language: book.language ? [book.language] : [language],
+        };
+      }
+    } catch (altError) {
+      console.error('Échec de la méthode alternative:', altError);
+    }
+    
     return {
       description: '',
       subjects: [],
