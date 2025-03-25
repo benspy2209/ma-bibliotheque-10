@@ -18,19 +18,25 @@ interface ContactEmailRequest {
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  console.log("Received request to send-contact-email");
+  
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { name, email, subject, message }: ContactEmailRequest = await req.json();
+    const body = await req.text();
+    console.log("Request body:", body);
+    
+    const { name, email, subject, message }: ContactEmailRequest = JSON.parse(body);
 
     // Validation des champs
     if (!name || !email || !subject || !message) {
       throw new Error("Tous les champs sont requis");
     }
 
+    console.log("Sending admin email...");
     // Email à l'administrateur
     const adminEmailResponse = await resend.emails.send({
       from: "BiblioPulse <contact@bibliopulse.be>",
@@ -45,7 +51,9 @@ const handler = async (req: Request): Promise<Response> => {
         <p>${message.replace(/\n/g, '<br/>')}</p>
       `,
     });
+    console.log("Admin email response:", adminEmailResponse);
 
+    console.log("Sending user confirmation email...");
     // Email de confirmation à l'utilisateur
     const userEmailResponse = await resend.emails.send({
       from: "BiblioPulse <contact@bibliopulse.be>",
@@ -59,6 +67,7 @@ const handler = async (req: Request): Promise<Response> => {
         <p>Cordialement,<br>L'équipe BiblioPulse</p>
       `,
     });
+    console.log("User email response:", userEmailResponse);
 
     console.log("Emails envoyés avec succès:", { adminEmail: adminEmailResponse, userEmail: userEmailResponse });
 
