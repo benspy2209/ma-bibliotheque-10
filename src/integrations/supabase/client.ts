@@ -17,8 +17,8 @@ export const supabase = createClient<Database>(
       autoRefreshToken: true,
       storage: localStorage,
       flowType: 'pkce',
-      // Utiliser un nom d'application plus convivial pour les redirections
-      redirectTo: 'https://bibliopulse.com',
+      // Assurer que l'URL absolue complète est utilisée pour les redirections
+      redirectTo: 'https://bibliopulse.com/auth/callback',
     },
     global: {
       headers: {

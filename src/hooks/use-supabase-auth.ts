@@ -84,15 +84,17 @@ export function useSupabaseAuth() {
 
   const signInWithGoogle = async () => {
     try {
+      // Utilisation d'une URL absolue complète pour bibliopulse.com
+      const redirectUrl = 'https://bibliopulse.com/auth/callback';
+      console.log(`Redirection vers Google avec l'URL: ${redirectUrl}`);
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}`,
+          redirectTo: redirectUrl,
           queryParams: {
-            // Personnalisation de l'affichage pour Google Auth
             prompt: 'select_account',
-            access_type: 'offline',
-            hd: 'bibliopulse.com' // Domaine suggéré (optionnel)
+            access_type: 'offline'
           }
         }
       });
