@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { exportLibrary, importLibrary } from "@/services/importExport";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { FileJson, FileUp, FileDown, FileSpreadsheet } from "lucide-react";
+import { FileJson, FileUp, FileDown } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ImportExportLibraryProps {
@@ -21,6 +21,10 @@ export const ImportExportLibrary = ({ onUpdate }: ImportExportLibraryProps) => {
   const handleExport = async () => {
     try {
       setIsLoading(true);
+      toast({
+        description: "Exportation de votre bibliothèque en cours...",
+      });
+      
       const result = await exportLibrary();
       
       if (result.success && result.data) {
@@ -36,8 +40,9 @@ export const ImportExportLibrary = ({ onUpdate }: ImportExportLibraryProps) => {
         downloadLink.click();
         document.body.removeChild(downloadLink);
         
+        const bookCount = result.data.books?.length || 0;
         toast({
-          description: "Votre bibliothèque a été exportée avec succès",
+          description: `Votre bibliothèque a été exportée avec succès (${bookCount} livres)`,
         });
       } else {
         toast({
@@ -75,6 +80,9 @@ export const ImportExportLibrary = ({ onUpdate }: ImportExportLibraryProps) => {
 
     try {
       setIsLoading(true);
+      toast({
+        description: "Importation de votre bibliothèque en cours...",
+      });
       
       const reader = new FileReader();
       
@@ -85,6 +93,7 @@ export const ImportExportLibrary = ({ onUpdate }: ImportExportLibraryProps) => {
           
           try {
             data = JSON.parse(content);
+            console.log("Données JSON importées:", data);
           } catch (parseError) {
             console.error("Erreur lors du parsing JSON:", parseError);
             toast({

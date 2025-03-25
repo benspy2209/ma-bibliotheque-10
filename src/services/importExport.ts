@@ -33,14 +33,38 @@ export async function exportLibrary(): Promise<{success: boolean, data?: any, er
       };
     }
     
+    // Vérifier si des livres ont été récupérés
+    if (!data || data.length === 0) {
+      console.log('Aucun livre trouvé pour l\'exportation');
+      return {
+        success: true,
+        data: {
+          version: '1.0',
+          timestamp: new Date().toISOString(),
+          userId: user.id,
+          email: user.email,
+          books: []
+        }
+      };
+    }
+    
     // Formatage des données pour l'export
     const exportData = {
       version: '1.0',
       timestamp: new Date().toISOString(),
       userId: user.id,
       email: user.email,
-      books: data
+      books: data.map(book => {
+        // S'assurer que toutes les données du livre sont incluses
+        return {
+          ...book.book_data,
+          status: book.status || book.book_data?.status || 'to-read',
+          completion_date: book.completion_date || book.book_data?.completionDate
+        };
+      })
     };
+    
+    console.log(`Exportation de ${data.length} livres terminée avec succès.`);
     
     return { 
       success: true, 
