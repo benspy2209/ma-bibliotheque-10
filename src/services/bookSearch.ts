@@ -2,7 +2,7 @@ import { Book } from '@/types/book';
 import { removeDuplicateBooks, filterNonBookResults, isAuthorMatch } from '@/lib/utils';
 import axios from 'axios';
 
-export type SearchType = 'author' | 'title' | 'general';
+export type SearchType = 'author' | 'title';
 export type LanguageFilter = 'fr' | 'en';
 
 // Clé API ISBNDB
@@ -123,9 +123,6 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'auth
       case 'author':
         return searchAuthorBooks(query, language, maxResults);
       case 'title':
-        return searchBooksByTitle(query, language, maxResults);
-      case 'general':
-        // Pour la recherche générale, on utilise la recherche par titre comme base
         return searchBooksByTitle(query, language, maxResults);
       default:
         return searchBooksByTitle(query, language, maxResults);

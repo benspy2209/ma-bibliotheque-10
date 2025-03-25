@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { Input } from "@/components/ui/input";
 import { Search, BookOpen, User, BookText } from 'lucide-react';
@@ -15,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { SearchType, LanguageFilter } from '@/services/bookSearch';
 
 interface SearchBarProps {
-  onSearch: (query: string, searchType: SearchType, language: LanguageFilter) => Promise<void>; // Updated to Promise<void>
+  onSearch: (query: string, searchType: SearchType, language: LanguageFilter) => Promise<void>;
   placeholder?: string;
   showAllResults?: () => void;
   hasMoreResults?: boolean;
@@ -150,7 +149,6 @@ export const SearchBar = ({
             <div className="flex items-center gap-2">
               {searchType === 'author' && <User className="h-4 w-4" />}
               {searchType === 'title' && <BookText className="h-4 w-4" />}
-              {searchType === 'general' && <Search className="h-4 w-4" />}
               <SelectValue placeholder="Type de recherche" />
             </div>
           </SelectTrigger>
@@ -165,12 +163,6 @@ export const SearchBar = ({
               <div className="flex items-center gap-2">
                 <BookText className="h-4 w-4" />
                 <span>Titre</span>
-              </div>
-            </SelectItem>
-            <SelectItem value="general">
-              <div className="flex items-center gap-2">
-                <Search className="h-4 w-4" />
-                <span>Général</span>
               </div>
             </SelectItem>
           </SelectContent>
