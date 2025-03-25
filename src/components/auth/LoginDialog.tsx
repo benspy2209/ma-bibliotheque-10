@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { LoginForm } from "./LoginForm";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
+import { useEffect } from "react";
 
 interface LoginDialogProps {
   open: boolean;
@@ -17,7 +18,10 @@ interface LoginDialogProps {
 export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const { authMode } = useSupabaseAuth();
   
-  console.log("LoginDialog rendering with authMode:", authMode);
+  useEffect(() => {
+    console.log("LoginDialog rendering with open state:", open);
+    console.log("LoginDialog rendering with authMode:", authMode);
+  }, [open, authMode]);
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

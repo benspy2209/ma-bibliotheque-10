@@ -15,6 +15,11 @@ export function useSupabaseAuth() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Log l'état du dialogue pour débogage
+    console.log("État actuel du dialogue de connexion:", showLoginDialog);
+  }, [showLoginDialog]);
+
+  useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
       const newUser = newSession?.user ?? null;
       setSession(newSession);
@@ -25,6 +30,8 @@ export function useSupabaseAuth() {
         newUser ? `User ID: ${newUser.id}` : 'No user');
       
       if (event === 'SIGNED_IN') {
+        // Fermer le dialogue après connexion réussie
+        setShowLoginDialog(false);
         toast({
           description: "Connexion réussie"
         });
@@ -68,7 +75,9 @@ export function useSupabaseAuth() {
   const signIn = (mode: 'login' | 'signup' | 'reset' = 'signup') => {
     console.log(`signIn called with mode: ${mode}`);
     setAuthMode(mode);
+    // Définir explicitement le dialogue à true
     setShowLoginDialog(true);
+    console.log("showLoginDialog défini à true:", showLoginDialog);
   };
 
   const signOut = async () => {

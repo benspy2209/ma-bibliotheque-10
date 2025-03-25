@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Search, BookOpen } from 'lucide-react';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
@@ -13,8 +13,13 @@ interface SearchBarProps {
 
 export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const { user, signIn, setShowLoginDialog } = useSupabaseAuth();
+  const { user, signIn, setShowLoginDialog, showLoginDialog } = useSupabaseAuth();
   const { toast } = useToast();
+
+  // Vérifier l'état du dialogue pour debugging
+  useEffect(() => {
+    console.log("État du dialogue dans SearchBar:", showLoginDialog);
+  }, [showLoginDialog]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -44,8 +49,13 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
 
   const handleLoginClick = () => {
     console.log("Rejoindre l'aventure button clicked - Opening login dialog");
-    signIn('signup');
+    // Ouvrir explicitement le dialogue et définir le mode d'authentification
     setShowLoginDialog(true);
+    signIn('signup');
+    // Ajout d'une vérification pour s'assurer que showLoginDialog a été mis à jour
+    setTimeout(() => {
+      console.log("État du dialogue après clic:", showLoginDialog);
+    }, 100);
   };
 
   return (
