@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { searchAllBooks, SearchType, LanguageFilter } from '@/services/bookSearch';
@@ -35,31 +34,28 @@ const Index = () => {
   const [searchLimitReached, setSearchLimitReached] = useState(false);
   const [remainingSearches, setRemainingSearches] = useState<number | null>(null);
   const [showAllResults, setShowAllResults] = useState(false);
+  const [searchError, setSearchError] = useState<string | undefined>(undefined);
   const { toast } = useToast();
   const { user, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
 
-  // Vérifier les limites de recherche à l'initialisation
   useEffect(() => {
     if (user) {
       checkSearchLimits();
     }
   }, [user]);
 
-  // Fonction pour obtenir l'adresse IP de l'utilisateur (simplifiée pour la démo)
   const getUserIp = async (): Promise<string> => {
     try {
-      // En production, il faudrait utiliser un service comme ipify.org
-      return '127.0.0.1'; // Adresse IP par défaut pour la démo
+      return '127.0.0.1';
     } catch (error) {
       console.error("Erreur lors de la récupération de l'IP:", error);
       return '127.0.0.1';
     }
   };
 
-  // Vérifier si l'utilisateur peut effectuer une recherche
   const checkSearchLimits = async () => {
-    if (!user) return; // Ne pas vérifier les limites si l'utilisateur n'est pas connecté
-    
+    if (!user) return;
+
     try {
       const ip = await getUserIp();
       const { data, error } = await supabase.rpc('can_perform_search', {
@@ -89,10 +85,9 @@ const Index = () => {
     }
   };
 
-  // Incrémenter le compteur de recherche
   const incrementSearchCount = async () => {
-    if (!searchParams.query || !user) return; // Ne pas incrémenter si aucun utilisateur ou aucune requête
-    
+    if (!searchParams.query || !user) return;
+
     try {
       const ip = await getUserIp();
       const { data, error } = await supabase.rpc('increment_search_count', {
@@ -116,7 +111,6 @@ const Index = () => {
             variant: "destructive"
           });
         } else if (data.remaining !== -1) {
-          // Ne pas afficher pour l'administrateur qui a un nombre illimité (-1)
           toast({
             description: `Il vous reste ${data.remaining} recherche(s) aujourd'hui.`
           });
@@ -127,16 +121,15 @@ const Index = () => {
     }
   };
 
-  // Fonction de recherche avec vérification des limites
   const handleSearch = async (query: string, searchType: SearchType, language: LanguageFilter) => {
-    // Si la recherche est vide, ne pas incrémenter le compteur
+    setSearchError(undefined);
+    
     if (!query.trim()) {
       setSearchParams({ query: '', type: searchType, language });
       setShowAllResults(false);
       return;
     }
     
-    // Vérifier si l'utilisateur est connecté
     if (!user) {
       toast({
         title: "Connexion requise",
@@ -146,7 +139,6 @@ const Index = () => {
       return;
     }
     
-    // Vérifier si l'utilisateur a déjà atteint sa limite
     if (searchLimitReached) {
       toast({
         title: "Limite de recherche atteinte",
@@ -156,26 +148,28 @@ const Index = () => {
       return;
     }
     
-    // Réinitialiser l'affichage de tous les résultats lors d'une nouvelle recherche
     setShowAllResults(false);
     setDisplayedBooks(BOOKS_PER_PAGE);
     
-    // Incrémenter le compteur de recherche
     await incrementSearchCount();
     
-    // Si la limite n'est pas atteinte, effectuer la recherche
     setSearchParams({ query, type: searchType, language });
   };
 
-  // Utiliser useQuery pour la recherche unifiée
   const { 
     data: books = [], 
     isLoading,
-    refetch 
+    refetch,
+    error: queryError 
   } = useQuery({
     queryKey: ['allBooks', searchParams.query, searchParams.type, searchParams.language, refreshKey],
     queryFn: () => searchAllBooks(searchParams.query, searchParams.type, searchParams.language, MAX_SEARCH_RESULTS),
-    enabled: searchParams.query.length > 0 && !searchLimitReached && !!user
+    enabled: searchParams.query.length > 0 && !searchLimitReached && !!user,
+    retry: 1,
+    onError: (error) => {
+      console.error("Erreur lors de la recherche:", error);
+      setSearchError("Une erreur est survenue lors de la recherche. Veuillez réessayer plus tard.");
+    }
   });
 
   const handleBookClick = async (book: Book) => {
@@ -218,7 +212,6 @@ const Index = () => {
 
   const handleBookUpdate = () => {
     setRefreshKey(prev => prev + 1);
-    // Forcer l'actualisation des données
     refetch();
   };
 
@@ -258,9 +251,9 @@ const Index = () => {
             isLoading={isLoading}
             searchQuery={searchParams.query}
             isShowingAll={showAllResults}
+            searchError={searchError}
           />
 
-          {/* Affichage du message "Tous les livres sont affichés" */}
           {showAllResults && books.length > 0 && (
             <div className="mt-4 text-center bg-muted/30 py-2 rounded-md">
               Tous les {books.length} livres de l'auteur sont affichés

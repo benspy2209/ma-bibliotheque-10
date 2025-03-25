@@ -25,10 +25,13 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
       headers: {
         'Authorization': ISBNDB_API_KEY,
         'Accept': 'application/json'
-      }
+      },
+      // Ajouter mode: 'cors' pour résoudre les problèmes CORS
+      mode: 'cors'
     });
     
     if (!response.ok) {
+      console.error(`Erreur ISBNDB (recherche auteur): ${response.status} ${response.statusText}`);
       throw new Error(`Erreur ISBNDB (recherche auteur): ${response.status} ${response.statusText}`);
     }
     
@@ -41,8 +44,10 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
       
       // Filtrer les résultats inappropriés en utilisant la fonction améliorée
       const filteredBooks = books.filter(book => {
-        // S'assurer que le livre est bien de l'auteur recherché
-        return isAuthorMatch(book, authorName) && !book.title.toLowerCase().includes('dictionnaire');
+        // S'assurer que le livre est bien de l'auteur recherché avec un filtrage plus strict
+        return isAuthorMatch(book, authorName) && 
+               !book.title.toLowerCase().includes('dictionnaire') &&
+               !book.title.toLowerCase().includes('encyclopédie');
       });
       
       console.log(`Livres filtrés pour l'auteur ${authorName}: ${filteredBooks.length} sur ${books.length}`);
@@ -52,8 +57,49 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
     return [];
   } catch (error) {
     console.error('Erreur lors de la recherche par auteur:', error);
+    
+    // En cas d'erreur, essayer la méthode de recherche alternative
+    console.log("Tentative avec la méthode de recherche alternative...");
+    try {
+      return await fallbackAuthorSearch(authorName, language, maxResults);
+    } catch (fallbackError) {
+      console.error('Échec de la recherche alternative:', fallbackError);
+      return [];
+    }
+  }
+}
+
+// Méthode de recherche alternative en cas d'échec de la première
+async function fallbackAuthorSearch(authorName: string, language: LanguageFilter, maxResults: number): Promise<Book[]> {
+  const url = `${ISBNDB_BASE_URL}/books/${encodeURIComponent(authorName)}?page=1&pageSize=${maxResults}&language=${language}`;
+  
+  console.log(`Recherche alternative: ${url}`);
+  
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Authorization': ISBNDB_API_KEY,
+      'Accept': 'application/json'
+    },
+    mode: 'cors'
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Erreur recherche alternative: ${response.status}`);
+  }
+  
+  const data = await response.json();
+  console.log('Réponse de la recherche alternative:', data);
+  
+  if (!data.books || !Array.isArray(data.books)) {
     return [];
   }
+  
+  const books = data.books.map((book: any) => mapIsbndbBookToBook(book));
+  
+  // Filtrage plus strict des résultats
+  const filteredBooks = books.filter(book => isAuthorMatch(book, authorName));
+  return filterNonBookResults(filteredBooks);
 }
 
 // Ancienne fonction de recherche ISBNDB (conservée pour les autres types de recherche)
@@ -90,7 +136,8 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'auth
       headers: {
         'Authorization': ISBNDB_API_KEY,
         'Accept': 'application/json',
-      }
+      },
+      mode: 'cors'
     });
 
     if (!response.ok) {
@@ -141,7 +188,17 @@ export async function searchAllBooks(query: string, searchType: SearchType = 'au
   if (!query.trim()) return [];
 
   try {
+    console.log(`Démarrage de la recherche: "${query}" (type: ${searchType}, langue: ${language})`);
+    
     const books = await searchIsbndb(query, searchType, language, maxResults);
+    
+    if (books.length === 0) {
+      console.log("Aucun résultat trouvé via ISBNDB, tentative avec la méthode alternative");
+      if (searchType === 'author') {
+        // Tenter avec la recherche alternative si aucun résultat n'est trouvé
+        return await fallbackAuthorSearch(query, language, maxResults);
+      }
+    }
     
     // Appliquer un filtre supplémentaire pour éliminer les dictionnaires et autres ouvrages techniques
     const filteredBooks = filterNonBookResults(books);

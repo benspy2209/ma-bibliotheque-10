@@ -1,4 +1,3 @@
-
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { Book } from '@/types/book'
@@ -37,7 +36,7 @@ export function removeDuplicateBooks(books: Book[]): Book[] {
   });
 }
 
-// Liste de mots-clés techniques pour le post-filtrage
+// Liste étendue de mots-clés techniques pour le post-filtrage
 const TECHNICAL_KEYWORDS = [
   'manuel', 'guide', 'prospection', 'minier', 'minière', 'géologie', 'scientifique',
   'technique', 'rapport', 'étude', 'ingénierie', 'document', 'actes', 'conférence',
@@ -45,24 +44,27 @@ const TECHNICAL_KEYWORDS = [
   'dictionnaire', 'encyclopédie', 'lexique', 'glossaire', 'référence', 'répertoire',
   'catalogue', 'index', 'annuaire', 'bibliographie', 'revue', 'périodique', 'collection',
   'compilation', 'atlas', 'critique', 'édition critique', 'chronologie', 'chronique',
-  'recueil', 'almanach', 'traité', 'précis', 'abrégé', 'compendium'
+  'recueil', 'almanach', 'traité', 'précis', 'abrégé', 'compendium',
+  'anthologie', 'mélanges', 'festschrift', 'correspondance', 'lettres', 'journal',
+  'carnets', 'cahiers', 'notes', 'essais', 'études', 'leçons', 'cours', 'conférences'
 ];
 
-// Mots-clés spécifiques aux types de livres non désirés
+// Mots-clés spécifiques aux types de livres non désirés - liste étendue
 const UNWANTED_TYPES = [
   'dictionnaire', 'critiq', 'theolog', 'dogmat', 'canoni', 'universel', 'ecclesiasti',
-  'sciences', 'geographi', 'chronologi', 'histori'
+  'sciences', 'geographi', 'chronologi', 'histori', 'encyclopédie', 'traité', 'manuel',
+  'revue', 'journal', 'magazine', 'périodique', 'bulletin', 'lexique', 'répertoire',
+  'compendium', 'abrégé', 'précis', 'actes', 'proceedings', 'études', 'annales'
 ];
 
 export function filterNonBookResults(books: Book[]): Book[] {
   return books.filter(book => {
-    // Vérifier si le titre contient des mots-clés techniques
     if (!book.title) return false;
     
     const titleLower = book.title.toLowerCase();
     const authorString = Array.isArray(book.author) 
       ? book.author.join(' ').toLowerCase() 
-      : book.author.toLowerCase();
+      : (book.author || '').toLowerCase();
     const subjectsString = (book.subjects || []).join(' ').toLowerCase();
     const descriptionLower = (book.description || '').toLowerCase();
     
@@ -77,7 +79,15 @@ export function filterNonBookResults(books: Book[]): Book[] {
       titleLower.includes(keyword.toLowerCase())
     );
     
-    return !containsTechnicalKeywords && !containsUnwantedTypes;
+    // Exclure les livres dont le titre est trop générique ou suspect
+    const isSuspiciousTitle = titleLower.startsWith('oeuvres de') || 
+                              titleLower.startsWith('œuvres de') ||
+                              titleLower.startsWith('oeuvres complètes') ||
+                              titleLower.startsWith('œuvres complètes') ||
+                              titleLower.includes('collection') ||
+                              titleLower.includes('anthologie');
+    
+    return !containsTechnicalKeywords && !containsUnwantedTypes && !isSuspiciousTitle;
   });
 }
 
@@ -94,23 +104,29 @@ export function isAuthorMatch(book: Book, searchQuery: string): boolean {
     if (!author) return false;
     const authorLower = author.toLowerCase();
     
-    // Vérification plus stricte: l'auteur doit correspondre exactement au nom recherché
-    // ou contenir tous les termes de recherche dans l'ordre
-    
-    // Vérification 1: correspondance exacte
+    // 1. Vérification exacte (match parfait)
     if (authorLower === searchQuery.toLowerCase()) {
       return true;
     }
     
-    // Vérification 2: tous les termes dans l'ordre
-    const searchPattern = searchTerms.join('.*');
-    const regexPattern = new RegExp(searchPattern, 'i');
-    if (regexPattern.test(authorLower)) {
-      return true;
-    }
+    // 2. Vérification que tous les termes de recherche sont présents dans l'auteur
+    const allTermsPresent = searchTerms.every(term => authorLower.includes(term));
     
-    // Vérification 3: tous les termes mais pas nécessairement dans l'ordre
-    return searchTerms.every(term => authorLower.includes(term));
+    // 3. Vérification plus stricte: les termes doivent être dans l'ordre
+    // (pour éviter que "King Stephen" corresponde à "Stephen King")
+    const searchPattern = searchTerms.join('.*');
+    const regexOrder = new RegExp(searchPattern, 'i');
+    const termsInOrder = regexOrder.test(authorLower);
+    
+    // Vérification que l'auteur n'est pas trop générique
+    const isGenericAuthor = authorLower.includes('collectif') || 
+                            authorLower.includes('divers') ||
+                            authorLower.includes('various') ||
+                            authorLower.includes('auteurs') ||
+                            authorLower.includes('authors');
+    
+    // L'auteur correspond si tous les termes sont présents, dans le bon ordre, et que ce n'est pas un auteur générique
+    return allTermsPresent && termsInOrder && !isGenericAuthor;
   });
 }
 

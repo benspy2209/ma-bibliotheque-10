@@ -2,7 +2,8 @@
 import { Book } from '@/types/book';
 import { Button } from "@/components/ui/button";
 import { BookCard } from './BookCard';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface BookGridProps {
   books: Book[];
@@ -14,6 +15,7 @@ interface BookGridProps {
   isLoading: boolean;
   searchQuery: string;
   isShowingAll?: boolean;
+  searchError?: string;
 }
 
 export const BookGrid = ({ 
@@ -25,7 +27,8 @@ export const BookGrid = ({
   onShowAll,
   isLoading,
   searchQuery,
-  isShowingAll = false
+  isShowingAll = false,
+  searchError
 }: BookGridProps) => {
   const hasMoreBooks = displayedBooks < totalBooks;
 
@@ -34,6 +37,17 @@ export const BookGrid = ({
       <div className="text-center text-gray-600">
         Recherche en cours...
       </div>
+    );
+  }
+
+  if (searchError) {
+    return (
+      <Alert variant="destructive" className="mt-4">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          {searchError}
+        </AlertDescription>
+      </Alert>
     );
   }
 
@@ -97,4 +111,4 @@ export const BookGrid = ({
       )}
     </>
   );
-};
+}
