@@ -1,11 +1,14 @@
 
 import { useNavigate } from 'react-router-dom';
-import { Book } from '@/types/book';
+import { Book, ReadingStatus } from '@/types/book';
 import { Card, CardContent } from "@/components/ui/card";
 import { Bookmark, ShoppingCart } from 'lucide-react';
 import { getAmazonAffiliateUrl } from '@/lib/utils';
 import { AddToLibrary } from '@/components/AddToLibrary';
 import { Badge } from '@/components/ui/badge';
+import { saveBook } from '@/services/supabaseBooks';
+import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface BookCardProps {
   book: Book;
@@ -15,6 +18,8 @@ interface BookCardProps {
 export const BookCard = ({ book, onBookClick }: BookCardProps) => {
   const navigate = useNavigate();
   const amazonUrl = getAmazonAffiliateUrl(book);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   // Déterminer si c'est un livre audio
   const isAudioBook = (book.format?.toLowerCase().includes('audio') || 
@@ -41,6 +46,52 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
   const handleAmazonClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Empêche le déclenchement du clic sur la carte
     window.open(amazonUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleStatusChange = async (status: ReadingStatus) => {
+    try {
+      console.log("Changing book status to:", status);
+      
+      // Créer une copie du livre avec le nouveau statut
+      const bookToSave: Book = {
+        ...book,
+        status
+      };
+      
+      console.log("Saving book with ID:", bookToSave.id);
+      const result = await saveBook(bookToSave);
+      
+      if (result.success) {
+        // Forcer une invalidation du cache pour mettre à jour l'interface
+        await queryClient.invalidateQueries({ 
+          queryKey: ['books'],
+          refetchType: 'all',
+          exact: false 
+        });
+        
+        // Forcer une actualisation des données
+        await queryClient.refetchQueries({ 
+          queryKey: ['books'],
+          exact: false 
+        });
+        
+        console.log("Book saved successfully, cache invalidated");
+      } else {
+        console.error("Error saving book:", result.message);
+        if (result.error !== 'duplicate') {
+          toast({
+            variant: "destructive",
+            description: result.message || "Une erreur est survenue lors de l'ajout du livre",
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error in handleStatusChange:", error);
+      toast({
+        variant: "destructive",
+        description: error instanceof Error ? error.message : "Une erreur est survenue",
+      });
+    }
   };
 
   return (
@@ -89,9 +140,7 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
             {/* Badge Ajouter à la bibliothèque */}
             <div onClick={(e) => e.stopPropagation()} className="z-10">
               <AddToLibrary 
-                onStatusChange={(status) => {
-                  // Le changement de statut est géré dans le composant AddToLibrary
-                }}
+                onStatusChange={handleStatusChange}
                 bookId={book.id}
                 bookTitle={book.title}
                 bookAuthor={book.author}

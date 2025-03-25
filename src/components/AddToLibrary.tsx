@@ -119,11 +119,12 @@ export function AddToLibrary({
     <DropdownMenu>
       <DropdownMenuTrigger>
         <div 
-          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold cursor-pointer backdrop-blur-sm shadow-sm ${getBadgeClass()} ${isLoading ? 'opacity-50' : ''}`}
+          className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold cursor-pointer backdrop-blur-sm shadow-sm ${getBadgeClass()} ${isLoading ? 'opacity-50' : ''}`}
         >
           {status 
             ? statusConfig[status].icon 
-            : <BookmarkPlus className="h-4 w-4" />}
+            : <BookmarkPlus className="h-5 w-5 mr-1" />}
+          {!status && <span className="ml-1">Ajouter</span>}
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent className={theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-white text-gray-800'}>
