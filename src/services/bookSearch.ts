@@ -10,15 +10,14 @@ const ISBNDB_API_KEY = '60264_3de7f2f024bc350bfa823cbbd9e64315';
 const ISBNDB_BASE_URL = 'https://api2.isbndb.com';
 
 // Proxy CORS pour contourner les limitations CORS
-const CORS_PROXY = 'https://corsproxy.io/?';
+const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
 
 // Configuration des en-têtes pour les requêtes
 const getHeaders = () => {
   return {
     'Authorization': ISBNDB_API_KEY,
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7'
+    'Accept': 'application/json'
   };
 };
 
@@ -39,7 +38,6 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
     const proxiedUrl = getProxiedUrl(originalUrl);
     
     console.log(`Recherche par auteur: ${originalUrl}`);
-    console.log('En-têtes envoyés:', getHeaders());
     
     const response = await fetch(proxiedUrl, {
       method: 'GET',
@@ -100,41 +98,45 @@ async function fallbackAuthorSearch(authorName: string, language: LanguageFilter
   const proxiedUrl = getProxiedUrl(originalUrl);
   
   console.log(`Recherche alternative: ${originalUrl}`);
-  console.log('En-têtes envoyés (fallback):', getHeaders());
   
-  const response = await fetch(proxiedUrl, {
-    method: 'GET',
-    headers: getHeaders(),
-    mode: 'cors'
-  });
-  
-  console.log('Statut de réponse (fallback):', response.status, response.statusText);
-  
-  if (!response.ok) {
-    // Afficher le corps de la réponse en cas d'erreur pour le diagnostic
-    try {
-      const errorBody = await response.text();
-      console.error('Corps de la réponse d\'erreur (fallback):', errorBody);
-    } catch (e) {
-      console.error('Impossible de lire le corps de la réponse d\'erreur (fallback)');
+  try {
+    const response = await fetch(proxiedUrl, {
+      method: 'GET',
+      headers: getHeaders(),
+      mode: 'cors'
+    });
+    
+    console.log('Statut de réponse (fallback):', response.status, response.statusText);
+    
+    if (!response.ok) {
+      // Afficher le corps de la réponse en cas d'erreur pour le diagnostic
+      try {
+        const errorBody = await response.text();
+        console.error('Corps de la réponse d\'erreur (fallback):', errorBody);
+      } catch (e) {
+        console.error('Impossible de lire le corps de la réponse d\'erreur (fallback)');
+      }
+      
+      throw new Error(`Erreur recherche alternative: ${response.status}`);
     }
     
-    throw new Error(`Erreur recherche alternative: ${response.status}`);
-  }
-  
-  const data = await response.json();
-  console.log('Réponse de la recherche alternative:', data);
-  
-  if (!data.books || !Array.isArray(data.books)) {
+    const data = await response.json();
+    console.log('Réponse de la recherche alternative:', data);
+    
+    if (!data.books || !Array.isArray(data.books)) {
+      return [];
+    }
+    
+    const books = data.books.map((book: any) => mapIsbndbBookToBook(book));
+    
+    // Filtrer pour ne garder que les livres qui correspondent vraiment à l'auteur
+    const filteredBooks = books.filter(book => isAuthorMatch(book, authorName));
+    
+    return filterNonBookResults(filteredBooks);
+  } catch (error) {
+    console.error('Erreur lors de la recherche alternative:', error);
     return [];
   }
-  
-  const books = data.books.map((book: any) => mapIsbndbBookToBook(book));
-  
-  // Filtrer pour ne garder que les livres qui correspondent vraiment à l'auteur
-  const filteredBooks = books.filter(book => isAuthorMatch(book, authorName));
-  
-  return filterNonBookResults(filteredBooks);
 }
 
 // Fonction pour la recherche par titre
@@ -147,7 +149,6 @@ export async function searchBooksByTitle(title: string, language: LanguageFilter
     const proxiedUrl = getProxiedUrl(originalUrl);
     
     console.log(`Recherche par titre: ${originalUrl}`);
-    console.log('En-têtes envoyés (titre):', getHeaders());
     
     const response = await fetch(proxiedUrl, {
       method: 'GET',

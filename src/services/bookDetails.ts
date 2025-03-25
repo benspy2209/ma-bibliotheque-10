@@ -7,15 +7,14 @@ const ISBNDB_API_KEY = '60264_3de7f2f024bc350bfa823cbbd9e64315';
 const ISBNDB_BASE_URL = 'https://api2.isbndb.com';
 
 // Proxy CORS pour contourner les limitations CORS
-const CORS_PROXY = 'https://corsproxy.io/?';
+const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
 
 // Configuration des en-têtes pour les requêtes
 const getHeaders = () => {
   return {
     'Authorization': ISBNDB_API_KEY,
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7'
+    'Accept': 'application/json'
   };
 };
 
@@ -53,6 +52,15 @@ export async function getBookDetails(bookId: string, language: LanguageFilter = 
 
     if (!response.ok) {
       console.error(`Erreur lors de la récupération des détails du livre: ${response.status} ${response.statusText}`);
+      
+      // Essayons de récupérer le message d'erreur spécifique
+      try {
+        const errorBody = await response.text();
+        console.error('Corps de la réponse d\'erreur:', errorBody);
+      } catch (e) {
+        console.error('Impossible de lire le corps de la réponse d\'erreur');
+      }
+      
       return {};
     }
 
