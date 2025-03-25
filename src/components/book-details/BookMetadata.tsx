@@ -3,7 +3,7 @@ import { Book } from '@/types/book';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Users, Calendar, Book as BookIcon, ListTree, Layers, Clock } from 'lucide-react';
+import { Users, Calendar, Book as BookIcon, ListTree, Layers, Clock, Building2 } from 'lucide-react';
 
 interface BookMetadataProps {
   book: Book;
@@ -27,6 +27,26 @@ export function BookMetadata({ book, isEditing, onInputChange }: BookMetadataPro
           />
         ) : (
           <p className="text-sm text-muted-foreground">{Array.isArray(book.author) ? book.author.join(', ') : book.author}</p>
+        )}
+      </div>
+
+      <div>
+        <h3 className="text-sm font-semibold flex items-center gap-2">
+          <Building2 className="h-4 w-4" />
+          Maison d'édition
+        </h3>
+        {isEditing ? (
+          <Input
+            value={book.publishers ? book.publishers.join(', ') : ''}
+            onChange={(e) => onInputChange('publishers', e.target.value)}
+            placeholder="Maison d'édition"
+          />
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {book.publishers && book.publishers.length > 0 
+              ? book.publishers.join(', ') 
+              : "Information non disponible"}
+          </p>
         )}
       </div>
 

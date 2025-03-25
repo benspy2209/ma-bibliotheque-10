@@ -6,6 +6,7 @@ import { BookDetailsProps } from './book-details/types';
 import { saveBook } from '@/services/supabaseBooks';
 import { BookDetailsDialog } from './book-details/BookDetailsDialog';
 import { useQueryClient } from '@tanstack/react-query';
+import { getAmazonAffiliateUrl } from '@/lib/utils';
 
 export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProps) {
   const [currentBook, setCurrentBook] = useState(book);
@@ -15,7 +16,17 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
   useEffect(() => {
     // Force une actualisation lorsque le composant est monté ou le livre change
     queryClient.invalidateQueries({ queryKey: ['books'] });
-  }, [queryClient, isOpen]); // S'exécute uniquement lorsque le modal s'ouvre
+    
+    // S'assurer que le livre a un lien Amazon correct
+    if (book && book.id) {
+      // Mise à jour du lien Amazon
+      const amazonUrl = getAmazonAffiliateUrl(book);
+      setCurrentBook(prev => ({
+        ...prev,
+        amazonUrl: amazonUrl
+      }));
+    }
+  }, [queryClient, isOpen, book]); // S'exécute uniquement lorsque le modal s'ouvre
 
   const handleStatusChange = async (status: ReadingStatus) => {
     const updatedBook = { ...currentBook, status };
@@ -91,6 +102,16 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
       setCurrentBook(prev => ({
         ...prev,
         author: authorArray
+      }));
+      return;
+    }
+    
+    // Traitement spécial pour les maisons d'édition
+    if (field === 'publishers' && value.trim()) {
+      const publishersArray = value.split(',').map(p => p.trim()).filter(Boolean);
+      setCurrentBook(prev => ({
+        ...prev,
+        publishers: publishersArray
       }));
       return;
     }

@@ -21,6 +21,7 @@ export type Book = {
   completionDate?: string;
   readingTimeDays?: number;
   format?: string; // Format du livre (broché, relié, audio, etc.)
+  amazonUrl?: string; // URL d'affiliation Amazon
   review?: {
     content: string;
     date: string;

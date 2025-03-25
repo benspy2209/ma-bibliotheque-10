@@ -2,7 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Book, ReadingStatus } from '@/types/book';
 import { Card, CardContent } from "@/components/ui/card";
-import { Bookmark, ShoppingCart } from 'lucide-react';
+import { Bookmark, ShoppingCart, Building2 } from 'lucide-react';
 import { getAmazonAffiliateUrl } from '@/lib/utils';
 import { AddToLibrary } from '@/components/AddToLibrary';
 import { Badge } from '@/components/ui/badge';
@@ -42,6 +42,11 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
   const displayAuthor = Array.isArray(book.author) 
     ? book.author[0] || 'Auteur inconnu' 
     : book.author || 'Auteur inconnu';
+    
+  // Déterminer la maison d'édition à afficher
+  const displayPublisher = book.publishers && book.publishers.length > 0
+    ? book.publishers[0]
+    : null;
 
   const handleAmazonClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Empêche le déclenchement du clic sur la carte
@@ -55,7 +60,8 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
       // Créer une copie du livre avec le nouveau statut
       const bookToSave: Book = {
         ...book,
-        status
+        status,
+        amazonUrl // Ajouter le lien Amazon correct
       };
       
       console.log("Saving book with ID:", bookToSave.id);
@@ -157,6 +163,13 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
           <p className="text-sm text-muted-foreground mb-2">
             {displayAuthor}
           </p>
+          
+          {displayPublisher && (
+            <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+              <Building2 size={12} />
+              {displayPublisher}
+            </p>
+          )}
           
           <div className="mt-auto flex flex-wrap gap-1">
             {book.language && book.language[0] && (
