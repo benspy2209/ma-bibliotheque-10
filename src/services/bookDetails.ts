@@ -1,110 +1,68 @@
-import { Book } from '@/types/book';
-import { LanguageFilter } from '@/services/bookSearch';
 
-// Clé API ISBNDB
+import { Book } from '@/types/book';
+
 const ISBNDB_API_KEY = '60264_3de7f2f024bc350bfa823cbbd9e64315';
 const ISBNDB_BASE_URL = 'https://api2.isbndb.com';
 
-function cleanDescription(description: string): string {
-  if (!description) return '';
-  
-  // Remplacer les balises <br> et <p> par des sauts de ligne
-  let cleaned = description.replace(/<br\s*\/?>/gi, '\n');
-  cleaned = cleaned.replace(/<p>/gi, '\n');
-  cleaned = cleaned.replace(/<\/p>/gi, '\n');
-  
-  // Supprimer toutes les autres balises HTML
-  cleaned = cleaned.replace(/<[^>]*>/g, '');
-  
-  // Supprimer les caractères spéciaux et entités HTML
-  cleaned = cleaned.replace(/&quot;/g, '"');
-  cleaned = cleaned.replace(/&apos;/g, "'");
-  cleaned = cleaned.replace(/&amp;/g, '&');
-  cleaned = cleaned.replace(/&lt;/g, '<');
-  cleaned = cleaned.replace(/&gt;/g, '>');
-  
-  // Supprimer les sauts de ligne multiples
-  cleaned = cleaned.replace(/\n\s*\n/g, '\n\n');
-  
-  // Supprimer les espaces en début et fin
-  cleaned = cleaned.trim();
-
-  return cleaned;
-}
-
-export async function getBookDetails(bookId: string, language: LanguageFilter = 'fr'): Promise<Partial<Book>> {
-  console.log('Récupération des détails pour le livre:', bookId, 'langue:', language);
-  
+export async function getBookDetails(bookId: string, language: string = 'fr'): Promise<Partial<Book>> {
   try {
-    // Vérifier si l'ID est un ISBN
-    const isIsbn = bookId.match(/^[0-9]{10}$|^[0-9]{13}$/);
+    console.log(`Récupération des détails pour le livre ID: ${bookId}, langue: ${language}`);
     
-    if (!isIsbn) {
-      console.log('L\'ID fourni n\'est pas un ISBN valide:', bookId);
-      return {
-        description: '',
-        subjects: [],
-        numberOfPages: 0,
-        publishDate: '',
-        publishers: [],
-      };
+    if (!bookId) {
+      console.error("ID de livre non valide");
+      return {};
     }
     
-    const endpoint = `/book/${bookId}`;
-    const languageParam = language ? `?language=${language}` : '';
+    // Si l'ID commence par "isbndb-", c'est un ID généré et non un ISBN
+    if (bookId.startsWith('isbndb-')) {
+      console.log("ID généré détecté, impossible de récupérer plus de détails");
+      return {};
+    }
     
-    console.log(`URL de requête: ${ISBNDB_BASE_URL}${endpoint}${languageParam}`);
-    console.log('En-têtes:', { 'Authorization': ISBNDB_API_KEY, 'Accept': 'application/json' });
+    const encodedBookId = encodeURIComponent(bookId);
+    const url = `${ISBNDB_BASE_URL}/book/${encodedBookId}`;
     
-    const response = await fetch(`${ISBNDB_BASE_URL}${endpoint}${languageParam}`, {
+    console.log(`URL de l'API pour les détails: ${url}`);
+    
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': ISBNDB_API_KEY,
-        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
       }
     });
     
-    console.log('Statut de la réponse:', response.status, response.statusText);
-    
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Erreur ISBNDB: ${response.status} ${response.statusText}`, errorText);
-      throw new Error(`Erreur ISBNDB: ${response.status} ${response.statusText}`);
+      console.error(`Erreur API détails du livre: ${response.status} ${response.statusText}`);
+      return {};
     }
     
     const data = await response.json();
-    console.log('Détails du livre:', data);
+    console.log('Données détaillées du livre reçues:', data);
     
-    if (data.book) {
-      const book = data.book;
-      
-      return {
-        description: cleanDescription(book.synopsis || ''),
-        subjects: book.subjects || [],
-        numberOfPages: book.pages || 0,
-        publishDate: book.date_published || '',
-        publishers: book.publisher ? [book.publisher] : [],
-        isbn: book.isbn13 || book.isbn,
-        language: book.language ? [book.language] : [language],
-      };
+    if (!data.book) {
+      console.log("Aucune donnée de livre trouvée dans la réponse");
+      return {};
     }
     
+    const book = data.book;
+    
     return {
-      description: '',
-      subjects: [],
-      numberOfPages: 0,
-      publishDate: '',
-      publishers: [],
+      title: book.title || book.title_long,
+      author: book.author || (book.authors && book.authors[0]),
+      cover: book.image,
+      description: book.synopsis,
+      isbn: book.isbn13 || book.isbn,
+      publishers: book.publisher ? [book.publisher] : [],
+      subjects: book.subjects || [],
+      numberOfPages: book.pages ? parseInt(book.pages, 10) : 0,
+      publishDate: book.date_published,
+      language: book.language ? [book.language] : [language],
+      format: book.format,
     };
   } catch (error) {
     console.error('Erreur lors de la récupération des détails du livre:', error);
-    return {
-      description: '',
-      subjects: [],
-      numberOfPages: 0,
-      publishDate: '',
-      publishers: [],
-    };
+    return {};
   }
 }

@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Input } from "@/components/ui/input";
-import { Search, BookOpen } from 'lucide-react';
+import { Search, BookOpen, User, BookText } from 'lucide-react';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -44,13 +44,9 @@ export const SearchBar = ({
       return;
     }
     
-    // Attendre 300ms avant d'exécuter la recherche (debounce)
     const timeoutId = setTimeout(() => {
-      if (value.trim()) {
-        console.log(`Exécution de la recherche pour: "${value}" (type: ${searchType}, langue: ${language})`);
-        onSearch(value, searchType, language);
-      }
-    }, 300);
+      onSearch(value, searchType, language);
+    }, 500);
 
     return () => clearTimeout(timeoutId);
   };
@@ -58,7 +54,6 @@ export const SearchBar = ({
   const handleSearchTypeChange = (value: SearchType) => {
     setSearchType(value);
     if (searchQuery && user) {
-      console.log(`Changement de type de recherche vers: ${value}`);
       onSearch(searchQuery, value, language);
     }
   };
@@ -66,7 +61,6 @@ export const SearchBar = ({
   const handleLanguageChange = (value: LanguageFilter) => {
     setLanguage(value);
     if (searchQuery && user) {
-      console.log(`Changement de langue vers: ${value}`);
       onSearch(searchQuery, searchType, value);
     }
   };
@@ -83,14 +77,13 @@ export const SearchBar = ({
 
   const handleShowAllResults = () => {
     if (showAllResults) {
-      console.log("Affichage de tous les résultats demandé");
       showAllResults();
     }
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row">
         <div className="relative flex-grow">
           <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
           <Input
@@ -102,11 +95,46 @@ export const SearchBar = ({
             onFocus={handleInputFocus}
           />
         </div>
+        
+        <Select 
+          value={searchType} 
+          onValueChange={(value) => handleSearchTypeChange(value as SearchType)}
+        >
+          <SelectTrigger className="w-full sm:w-[180px] h-12">
+            <div className="flex items-center gap-2">
+              {searchType === 'author' && <User className="h-4 w-4" />}
+              {searchType === 'title' && <BookText className="h-4 w-4" />}
+              {searchType === 'general' && <Search className="h-4 w-4" />}
+              <SelectValue placeholder="Type de recherche" />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="author">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                <span>Auteur</span>
+              </div>
+            </SelectItem>
+            <SelectItem value="title">
+              <div className="flex items-center gap-2">
+                <BookText className="h-4 w-4" />
+                <span>Titre</span>
+              </div>
+            </SelectItem>
+            <SelectItem value="general">
+              <div className="flex items-center gap-2">
+                <Search className="h-4 w-4" />
+                <span>Général</span>
+              </div>
+            </SelectItem>
+          </SelectContent>
+        </Select>
+        
         <Select 
           value={language} 
           onValueChange={(value) => handleLanguageChange(value as LanguageFilter)}
         >
-          <SelectTrigger className="w-[180px] h-12">
+          <SelectTrigger className="w-full sm:w-[120px] h-12">
             <SelectValue placeholder="Langue" />
           </SelectTrigger>
           <SelectContent>
@@ -125,7 +153,7 @@ export const SearchBar = ({
             className="flex items-center gap-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground"
           >
             <BookOpen className="h-4 w-4" />
-            Afficher tous les {totalBooks} livres de l'auteur
+            Afficher tous les {totalBooks} livres {searchType === 'author' ? 'de l\'auteur' : 'trouvés'}
           </Button>
         </div>
       )}
