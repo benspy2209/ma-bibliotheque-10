@@ -52,7 +52,7 @@ const Contact = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: formData  // Supabase SDK will stringify this automatically
+        body: JSON.stringify(formData)  // Explicitly stringify the data
       });
 
       if (supabaseError) {
