@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Input } from "@/components/ui/input";
-import { Search } from 'lucide-react';
+import { Search, BookOpen } from 'lucide-react';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -19,13 +19,15 @@ interface SearchBarProps {
   placeholder?: string;
   showAllResults?: () => void;
   hasMoreResults?: boolean;
+  totalBooks?: number;
 }
 
 export const SearchBar = ({ 
   onSearch, 
   placeholder = "Rechercher...", 
   showAllResults,
-  hasMoreResults 
+  hasMoreResults,
+  totalBooks = 0
 }: SearchBarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState<SearchType>('author');
@@ -113,9 +115,10 @@ export const SearchBar = ({
             variant="outline" 
             size="sm" 
             onClick={handleShowAllResults}
-            className="text-sm"
+            className="flex items-center gap-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground"
           >
-            Afficher tous les livres de l'auteur
+            <BookOpen className="h-4 w-4" />
+            Afficher tous les {totalBooks} livres de l'auteur
           </Button>
         </div>
       )}

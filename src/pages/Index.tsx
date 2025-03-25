@@ -17,6 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { SearchLimitResponse, isSearchLimitResponse } from '@/types/searchLimits';
 
 const BOOKS_PER_PAGE = 12;
+const MAX_SEARCH_RESULTS = 100; // Increased limit for search results
 
 const Index = () => {
   const [searchParams, setSearchParams] = useState<{ 
@@ -173,7 +174,7 @@ const Index = () => {
     refetch 
   } = useQuery({
     queryKey: ['allBooks', searchParams.query, searchParams.type, searchParams.language, refreshKey],
-    queryFn: () => searchAllBooks(searchParams.query, searchParams.type, searchParams.language),
+    queryFn: () => searchAllBooks(searchParams.query, searchParams.type, searchParams.language, MAX_SEARCH_RESULTS),
     enabled: searchParams.query.length > 0 && !searchLimitReached && !!user
   });
 
@@ -236,6 +237,7 @@ const Index = () => {
               placeholder="Rechercher un livre, un auteur..."
               showAllResults={handleShowAllBooks}
               hasMoreResults={books.length > displayedBooks && !showAllResults}
+              totalBooks={books.length}
             />
             {user && remainingSearches !== null && remainingSearches !== -1 && (
               <div className="text-sm text-muted-foreground mt-2">
@@ -257,6 +259,13 @@ const Index = () => {
             searchQuery={searchParams.query}
             isShowingAll={showAllResults}
           />
+
+          {/* Affichage du message "Tous les livres sont affichés" */}
+          {showAllResults && books.length > 0 && (
+            <div className="mt-4 text-center bg-muted/30 py-2 rounded-md">
+              Tous les {books.length} livres de l'auteur sont affichés
+            </div>
+          )}
 
           {selectedBook && (
             <BookDetails
