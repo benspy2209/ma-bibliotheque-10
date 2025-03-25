@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
@@ -18,6 +19,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LoginDialog } from '@/components/auth/LoginDialog';
 import Footer from '@/components/Footer';
+import { ImportExportLibrary } from '@/components/library/ImportExportLibrary';
 
 export default function Library() {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
@@ -131,6 +133,9 @@ export default function Library() {
                   <ViewToggle viewMode={viewMode} onToggle={toggleView} />
                 </div>
               </div>
+
+              {/* Ajout du composant ImportExportLibrary */}
+              <ImportExportLibrary onUpdate={handleBookUpdate} />
 
               <div className="mb-6 flex flex-col gap-4">
                 <div className="w-full">
