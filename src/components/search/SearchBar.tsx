@@ -2,6 +2,9 @@
 import { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Search } from 'lucide-react';
+import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -10,16 +13,37 @@ interface SearchBarProps {
 
 export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const { user, signIn } = useSupabaseAuth();
+  const { toast } = useToast();
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
+    
+    if (!user) {
+      // Ne pas effectuer la recherche si l'utilisateur n'est pas connecté
+      return;
+    }
     
     const timeoutId = setTimeout(() => {
       onSearch(value);
     }, 500);
 
     return () => clearTimeout(timeoutId);
+  };
+
+  const handleInputFocus = () => {
+    if (!user) {
+      toast({
+        title: "Connexion requise",
+        description: "Vous devez vous connecter ou créer un compte pour faire une recherche.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleConnectClick = () => {
+    signIn('signup');
   };
 
   return (
@@ -31,7 +55,22 @@ export const SearchBar = ({ onSearch, placeholder = "Rechercher..." }: SearchBar
         className="pl-10 h-12"
         value={searchQuery}
         onChange={handleSearch}
+        onFocus={handleInputFocus}
       />
+      
+      {!user && (
+        <div className="mt-2 text-sm text-center">
+          <p className="text-destructive mb-2">Vous devez vous connecter ou créer un compte pour faire une recherche.</p>
+          <Button 
+            onClick={handleConnectClick} 
+            variant="default"
+            size="sm"
+            className="mx-auto"
+          >
+            Se connecter / Créer un compte
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

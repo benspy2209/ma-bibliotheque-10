@@ -32,7 +32,9 @@ const Index = () => {
 
   // Vérifier les limites de recherche à l'initialisation
   useEffect(() => {
-    checkSearchLimits();
+    if (user) {
+      checkSearchLimits();
+    }
   }, [user]);
 
   // Fonction pour obtenir l'adresse IP de l'utilisateur (simplifiée pour la démo)
@@ -48,10 +50,12 @@ const Index = () => {
 
   // Vérifier si l'utilisateur peut effectuer une recherche
   const checkSearchLimits = async () => {
+    if (!user) return; // Ne pas vérifier les limites si l'utilisateur n'est pas connecté
+    
     try {
       const ip = await getUserIp();
       const { data, error } = await supabase.rpc('can_perform_search', {
-        p_user_id: user?.id || null,
+        p_user_id: user.id,
         p_ip_address: ip
       });
 
@@ -79,12 +83,12 @@ const Index = () => {
 
   // Incrémenter le compteur de recherche
   const incrementSearchCount = async () => {
-    if (!debouncedQuery) return;
+    if (!debouncedQuery || !user) return; // Ne pas incrémenter si aucun utilisateur ou aucune requête
     
     try {
       const ip = await getUserIp();
       const { data, error } = await supabase.rpc('increment_search_count', {
-        p_user_id: user?.id || null,
+        p_user_id: user.id,
         p_ip_address: ip
       });
 
@@ -123,6 +127,16 @@ const Index = () => {
       return;
     }
     
+    // Vérifier si l'utilisateur est connecté
+    if (!user) {
+      toast({
+        title: "Connexion requise",
+        description: "Vous devez vous connecter ou créer un compte pour faire une recherche.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     // Vérifier si l'utilisateur a déjà atteint sa limite
     if (searchLimitReached) {
       toast({
@@ -145,12 +159,12 @@ const Index = () => {
       {
         queryKey: ['openLibrary', debouncedQuery, refreshKey],
         queryFn: () => searchBooks(debouncedQuery),
-        enabled: debouncedQuery.length > 0 && !searchLimitReached
+        enabled: debouncedQuery.length > 0 && !searchLimitReached && !!user
       },
       {
         queryKey: ['googleBooks', debouncedQuery, refreshKey],
         queryFn: () => searchGoogleBooks(debouncedQuery),
-        enabled: debouncedQuery.length > 0 && !searchLimitReached
+        enabled: debouncedQuery.length > 0 && !searchLimitReached && !!user
       }
     ]
   });
@@ -219,7 +233,7 @@ const Index = () => {
               onSearch={handleSearch}
               placeholder="Rechercher un livre, un auteur..."
             />
-            {remainingSearches !== null && remainingSearches !== -1 && (
+            {user && remainingSearches !== null && remainingSearches !== -1 && (
               <div className="text-sm text-muted-foreground mt-2">
                 {searchLimitReached 
                   ? "Vous avez atteint votre limite de 3 recherches par jour." 
