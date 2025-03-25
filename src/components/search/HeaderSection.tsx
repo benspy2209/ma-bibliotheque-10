@@ -5,14 +5,13 @@ import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { LoginDialog } from "@/components/auth/LoginDialog";
 
 interface HeaderSectionProps {
   onBookAdded: () => void;
 }
 
 export const HeaderSection = ({ onBookAdded }: HeaderSectionProps) => {
-  const { user, signIn, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
+  const { user, signIn, setShowLoginDialog } = useSupabaseAuth();
   const isMobile = useIsMobile();
 
   const handleSignIn = () => {
