@@ -2,7 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Book } from '@/types/book';
 import { Card, CardContent } from "@/components/ui/card";
-import { Bookmark, Amazon, ShoppingCart } from 'lucide-react';
+import { Bookmark, ShoppingCart } from 'lucide-react';
 import { getAmazonAffiliateUrl } from '@/lib/utils';
 import { AddToLibrary } from '@/components/AddToLibrary';
 import { Badge } from '@/components/ui/badge';
@@ -82,7 +82,7 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
               onClick={handleAmazonClick}
               className="cursor-pointer bg-orange-500 hover:bg-orange-600 text-white flex items-center gap-1"
             >
-              <Amazon size={12} />
+              <ShoppingCart size={12} />
               <span className="text-xs">Amazon</span>
             </Badge>
             
