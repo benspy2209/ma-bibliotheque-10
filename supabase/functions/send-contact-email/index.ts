@@ -31,7 +31,6 @@ const handler = async (req: Request): Promise<Response> => {
       console.error("RESEND_API_KEY is not set in environment variables");
       throw new Error("RESEND_API_KEY is not configured");
     }
-    console.log("RESEND_API_KEY exists: " + (apiKey ? "Yes" : "No"));
     
     // Initialize Resend with the API key
     const resend = new Resend(apiKey);
@@ -106,19 +105,6 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Additional basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      console.error("Invalid email format:", email);
-      return new Response(
-        JSON.stringify({ error: "Invalid email format" }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        }
-      );
-    }
-
     console.log("Sending admin email...");
     // Email to administrator
     try {
@@ -136,19 +122,8 @@ const handler = async (req: Request): Promise<Response> => {
         `,
       });
       console.log("Admin email response:", adminEmailResponse);
-      
-      if ('error' in adminEmailResponse) {
-        throw new Error(`Error from Resend API: ${JSON.stringify(adminEmailResponse.error)}`);
-      }
-    } catch (emailError: any) {
+    } catch (emailError) {
       console.error("Error sending admin email:", emailError);
-      
-      // Log detailed error information
-      if (emailError.response) {
-        console.error("Response data:", emailError.response.data);
-        console.error("Response status:", emailError.response.status);
-      }
-      
       throw new Error(`Error sending admin email: ${emailError.message}`);
     }
 
@@ -168,19 +143,8 @@ const handler = async (req: Request): Promise<Response> => {
         `,
       });
       console.log("User email response:", userEmailResponse);
-      
-      if ('error' in userEmailResponse) {
-        throw new Error(`Error from Resend API for user email: ${JSON.stringify(userEmailResponse.error)}`);
-      }
-    } catch (emailError: any) {
+    } catch (emailError) {
       console.error("Error sending user confirmation email:", emailError);
-      
-      // Log detailed error information
-      if (emailError.response) {
-        console.error("Response data:", emailError.response.data);
-        console.error("Response status:", emailError.response.status);
-      }
-      
       throw new Error(`Error sending confirmation email: ${emailError.message}`);
     }
 
