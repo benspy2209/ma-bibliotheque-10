@@ -12,6 +12,12 @@ const Footer = () => {
         </div>
         <div className="flex flex-col sm:flex-row gap-4 mt-2 sm:mt-0 items-center">
           <Link 
+            to="/contact" 
+            className="hover:text-primary transition-colors"
+          >
+            Contact
+          </Link>
+          <Link 
             to="/privacy-policy" 
             className="hover:text-primary transition-colors"
           >
