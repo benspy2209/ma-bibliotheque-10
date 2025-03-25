@@ -121,7 +121,7 @@ const Index = () => {
     }
   };
 
-  const handleSearch = async (query: string, searchType: SearchType, language: LanguageFilter) => {
+  const handleSearch = async (query: string, searchType: SearchType, language: LanguageFilter): Promise<void> => {
     setSearchError(undefined);
     
     if (!query.trim()) {

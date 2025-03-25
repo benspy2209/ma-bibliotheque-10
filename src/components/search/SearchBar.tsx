@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { SearchType, LanguageFilter } from '@/services/bookSearch';
 
 interface SearchBarProps {
-  onSearch: (query: string, searchType: SearchType, language: LanguageFilter) => void;
+  onSearch: (query: string, searchType: SearchType, language: LanguageFilter) => Promise<void>; // Updated to Promise<void>
   placeholder?: string;
   showAllResults?: () => void;
   hasMoreResults?: boolean;
