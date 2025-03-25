@@ -1,7 +1,6 @@
 
 import { Button } from "@/components/ui/button";
 import { AddManualBook } from "@/components/AddManualBook";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import { useUpdateAmazonLinks } from "@/services/updateExistingBooks";
 import { RefreshCw } from "lucide-react";
@@ -11,7 +10,6 @@ interface HeaderSectionProps {
 }
 
 export function HeaderSection({ onBookAdded }: HeaderSectionProps) {
-  const [searchType, setSearchType] = useState<"author" | "title">("author");
   const { updateLinks } = useUpdateAmazonLinks();
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -50,25 +48,6 @@ export function HeaderSection({ onBookAdded }: HeaderSectionProps) {
         </Button>
         
         <AddManualBook onBookAdded={onBookAdded} />
-        
-        <Tabs defaultValue="author" className="w-[300px]">
-          <TabsList className="w-full">
-            <TabsTrigger
-              value="author"
-              className="flex-1"
-              onClick={() => setSearchType("author")}
-            >
-              Par auteur
-            </TabsTrigger>
-            <TabsTrigger
-              value="title"
-              className="flex-1"
-              onClick={() => setSearchType("title")}
-            >
-              Par titre
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
       </div>
     </div>
   );
