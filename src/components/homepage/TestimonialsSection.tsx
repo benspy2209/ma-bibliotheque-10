@@ -1,12 +1,5 @@
 
 import React from 'react';
-import { 
-  Carousel, 
-  CarouselContent, 
-  CarouselItem, 
-  CarouselNext, 
-  CarouselPrevious 
-} from '@/components/ui/carousel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -72,19 +65,12 @@ export const TestimonialsSection = () => {
           </p>
         </div>
 
-        <Carousel className="mx-auto max-w-5xl">
-          <CarouselContent>
-            {testimonials.map((testimonial, index) => (
-              <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/2 px-4">
-                <TestimonialCard {...testimonial} />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <div className="hidden md:flex justify-end gap-2 mt-6">
-            <CarouselPrevious className="static transform-none" />
-            <CarouselNext className="static transform-none" />
-          </div>
-        </Carousel>
+        {/* Affichage statique des témoignages au lieu du carrousel */}
+        <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+          {testimonials.map((testimonial, index) => (
+            <TestimonialCard key={index} {...testimonial} />
+          ))}
+        </div>
       </div>
     </section>
   );
