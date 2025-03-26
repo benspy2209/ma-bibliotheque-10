@@ -1,6 +1,7 @@
 
-// Main entry point for carousel components
-import { Carousel } from "./Carousel";
+"use client";
+
+import { Carousel, type CarouselApi, type CarouselProps } from "./Carousel";
 import { CarouselContent } from "./CarouselContent";
 import { CarouselItem } from "./CarouselItem";
 import { CarouselPrevious } from "./CarouselPrevious";
@@ -14,5 +15,4 @@ export {
   CarouselNext,
 };
 
-// Re-export the types for better DX
-export type { CarouselApi, CarouselProps } from "./carousel-context";
+export type { CarouselApi, CarouselProps };
