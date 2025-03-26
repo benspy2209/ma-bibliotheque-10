@@ -1,6 +1,8 @@
 import { useMemo, useState, useEffect } from 'react';
 import { Book } from '@/types/book';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useReadingSpeed } from '@/hooks/use-reading-speed';
+import { ReadingSpeedSetting } from '@/components/statistics/ReadingSpeedSetting';
 import { 
   BarChart, 
   Bar, 
@@ -60,7 +62,8 @@ const COLORS = [
 export default function Statistics() {
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState<number | null>(currentYear);
-  
+  const { readingSpeed } = useReadingSpeed();
+
   const { data: books = [], refetch: refetchBooks } = useQuery({
     queryKey: ['books'],
     queryFn: loadBooks,
@@ -181,7 +184,7 @@ export default function Statistics() {
       readingSpeed = totalPages / (totalReadingDays || 1);
     }
 
-    const totalReadingTime = totalPages / 30;
+    const totalReadingTimeHours = totalPages / readingSpeed;
 
     const booksByMonth = completedBooks.reduce((acc, book) => {
       if (!book.completionDate) return acc;
@@ -310,7 +313,8 @@ export default function Statistics() {
       avgPagesPerBook,
       monthlyData,
       readingSpeed: readingSpeed.toFixed(1),
-      totalReadingTime: totalReadingTime.toFixed(1),
+      totalReadingTimeHours: totalReadingTimeHours.toFixed(1),
+      userReadingSpeed: readingSpeed,
       topAuthors,
       topGenres,
       booksThisYear,
@@ -326,7 +330,7 @@ export default function Statistics() {
       readingTimeDistribution,
       hasReadingTimeData: filteredReadingTimeDistribution.length > 0
     };
-  }, [completedBooks, readingBooks, toReadBooks, readingGoals]);
+  }, [completedBooks, readingBooks, toReadBooks, readingGoals, readingSpeed]);
 
   const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name, value }: any) => {
     if (value === 0) return null;
@@ -371,6 +375,7 @@ export default function Statistics() {
                   selectedYear={selectedYear}
                   onYearSelect={setSelectedYear}
                 />
+                <ReadingSpeedSetting />
               </div>
             </div>
             
@@ -548,12 +553,12 @@ export default function Statistics() {
                           <p className="text-sm font-medium text-muted-foreground">
                             Temps total estimé
                           </p>
-                          <p className="text-2xl font-bold">{stats.totalReadingTime} h</p>
+                          <p className="text-2xl font-bold">{stats.totalReadingTimeHours} h</p>
                         </div>
                         <Clock className="h-8 w-8 text-muted-foreground" />
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Basé sur une vitesse moyenne de 30 pages par heure
+                        Basé sur une vitesse moyenne de {readingSpeed} pages par heure
                       </p>
                     </CardContent>
                   </Card>
