@@ -48,8 +48,8 @@ export function YearlyBooksList({ books, selectedYear }: YearlyBooksListProps) {
           {filteredBooks.map(book => (
             <div key={book.id} className="flex items-start gap-3 pb-3 border-b">
               <Avatar className="h-14 w-14 rounded-md">
-                {book.thumbnail ? (
-                  <AvatarImage src={book.thumbnail} alt={book.title} />
+                {book.cover ? (
+                  <AvatarImage src={book.cover} alt={book.title} />
                 ) : (
                   <AvatarFallback className="rounded-md bg-primary/10 text-primary">
                     <BookOpen className="h-6 w-6" />

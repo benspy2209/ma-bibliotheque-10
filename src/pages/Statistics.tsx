@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from 'react';
 import { Book } from '@/types/book';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -25,7 +24,8 @@ import {
   BookMarked,
   Languages,
   Award,
-  FilterIcon
+  FilterIcon,
+  X
 } from 'lucide-react';
 import { format, differenceInDays, parseISO, getYear, differenceInMonths } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -48,6 +48,7 @@ import { useReadingGoals } from "@/hooks/use-reading-goals";
 import { YearFilter } from "@/components/statistics/YearFilter";
 import { YearlyBooksList } from "@/components/statistics/YearlyBooksList";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 const COLORS = [
   '#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE', '#00C49F',
