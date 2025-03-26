@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Book, ReadingStatus } from '@/types/book';
 import { useToast } from '@/hooks/use-toast';
@@ -29,6 +30,12 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
 
   const handleStatusChange = async (status: ReadingStatus) => {
     const updatedBook = { ...currentBook, status };
+    
+    // Si le statut passe à "reading" et qu'il n'y a pas de date de début, on l'ajoute automatiquement
+    if (status === 'reading' && !updatedBook.startReadingDate) {
+      updatedBook.startReadingDate = new Date().toISOString().split('T')[0];
+    }
+    
     setCurrentBook(updatedBook);
     await saveToLibrary(updatedBook);
   };
@@ -124,10 +131,18 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
   };
 
   const handleCompletionDateChange = (date: Date | undefined) => {
-    console.log('Date changed to:', date);
+    console.log('Completion date changed to:', date);
     setCurrentBook(prev => ({
       ...prev,
       completionDate: date ? date.toISOString().split('T')[0] : undefined
+    }));
+  };
+  
+  const handleStartReadingDateChange = (date: Date | undefined) => {
+    console.log('Start reading date changed to:', date);
+    setCurrentBook(prev => ({
+      ...prev,
+      startReadingDate: date ? date.toISOString().split('T')[0] : undefined
     }));
   };
 
@@ -157,6 +172,7 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
       onSaveToLibrary={saveToLibrary}
       onInputChange={handleInputChange}
       onCompletionDateChange={handleCompletionDateChange}
+      onStartDateChange={handleStartReadingDateChange}
       onRatingChange={handleRatingChange}
       onReviewChange={handleReviewChange}
     />

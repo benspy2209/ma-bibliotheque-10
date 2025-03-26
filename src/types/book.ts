@@ -19,6 +19,7 @@ export type Book = {
   isbn?: string;
   status?: ReadingStatus;
   completionDate?: string;
+  startReadingDate?: string;
   readingTimeDays?: number;
   format?: string; // Format du livre (broché, relié, audio, etc.)
   amazonUrl?: string; // URL d'affiliation Amazon

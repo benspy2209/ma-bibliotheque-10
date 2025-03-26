@@ -20,6 +20,12 @@ export interface CompletionDateProps {
   onDateChange: (date: Date | undefined) => void;
 }
 
+export interface StartReadingDateProps {
+  book: Book;
+  isEditing: boolean;
+  onDateChange: (date: Date | undefined) => void;
+}
+
 export interface BookDescriptionProps {
   description?: string;
   isEditing: boolean;
@@ -41,6 +47,7 @@ export interface BookFormProps {
   isEditing: boolean;
   onInputChange: (field: keyof Book, value: string) => void;
   onDateChange: (date: Date | undefined) => void;
+  onStartDateChange: (date: Date | undefined) => void;
   onRatingChange: (rating: number) => void;
   onReviewChange: (review: { content: string; date: string; } | undefined) => void;
 }

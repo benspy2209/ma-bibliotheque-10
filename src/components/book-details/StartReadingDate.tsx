@@ -5,21 +5,21 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { CompletionDateProps } from './types';
+import { StartReadingDateProps } from './types';
 import { Input } from '@/components/ui/input';
 import { useState, useEffect } from 'react';
 import { fr } from 'date-fns/locale';
 
-export function CompletionDate({ book, isEditing, onDateChange }: CompletionDateProps) {
+export function StartReadingDate({ book, isEditing, onDateChange }: StartReadingDateProps) {
   const [dateInput, setDateInput] = useState<string>('');
   const [isManualInput, setIsManualInput] = useState(false);
 
   // Initialiser l'input avec la date existante au montage du composant
   useEffect(() => {
-    if (book.completionDate) {
-      setDateInput(book.completionDate);
+    if (book.startReadingDate) {
+      setDateInput(book.startReadingDate);
     }
-  }, [book.completionDate]);
+  }, [book.startReadingDate]);
 
   // Gérer le changement de date via l'input manuel
   const handleManualDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,13 +46,13 @@ export function CompletionDate({ book, isEditing, onDateChange }: CompletionDate
     setIsManualInput(!isManualInput);
   };
 
-  if (!isEditing && !book.status) return null;
+  if (!isEditing && !book.startReadingDate && !book.status) return null;
 
   return (
     <div>
       <h3 className="font-semibold flex items-center gap-2">
         <CalendarIcon className="h-4 w-4" />
-        Date de fin de lecture
+        Date de début de lecture
       </h3>
       {isEditing ? (
         <div className="flex flex-col gap-2">
@@ -64,7 +64,7 @@ export function CompletionDate({ book, isEditing, onDateChange }: CompletionDate
                 onChange={handleManualDateChange}
                 onBlur={handleManualDateBlur}
                 className="w-[240px] pointer-events-auto"
-                disabled={book.status !== 'completed'}
+                disabled={book.status === 'to-read'}
               />
               <Button 
                 variant="outline" 
@@ -83,12 +83,12 @@ export function CompletionDate({ book, isEditing, onDateChange }: CompletionDate
                     variant="outline"
                     className={cn(
                       "w-[240px] pl-3 text-left font-normal pointer-events-auto",
-                      !book.completionDate && "text-muted-foreground"
+                      !book.startReadingDate && "text-muted-foreground"
                     )}
-                    disabled={book.status !== 'completed'}
+                    disabled={book.status === 'to-read'}
                   >
-                    {book.completionDate ? (
-                      format(new Date(book.completionDate), "dd/MM/yyyy")
+                    {book.startReadingDate ? (
+                      format(new Date(book.startReadingDate), "dd/MM/yyyy")
                     ) : (
                       <span>Choisir une date</span>
                     )}
@@ -98,7 +98,7 @@ export function CompletionDate({ book, isEditing, onDateChange }: CompletionDate
                 <PopoverContent className="w-auto p-0 pointer-events-auto z-50" align="start">
                   <Calendar
                     mode="single"
-                    selected={book.completionDate ? new Date(book.completionDate) : undefined}
+                    selected={book.startReadingDate ? new Date(book.startReadingDate) : undefined}
                     onSelect={onDateChange}
                     disabled={(date) => date > new Date()}
                     initialFocus
@@ -120,8 +120,8 @@ export function CompletionDate({ book, isEditing, onDateChange }: CompletionDate
           )}
         </div>
       ) : (
-        book.completionDate && (
-          <p>{format(new Date(book.completionDate), "dd MMMM yyyy", { locale: fr })}</p>
+        book.startReadingDate && (
+          <p>{format(new Date(book.startReadingDate), "dd MMMM yyyy", { locale: fr })}</p>
         )
       )}
     </div>

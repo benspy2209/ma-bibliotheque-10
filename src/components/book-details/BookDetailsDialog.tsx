@@ -23,6 +23,7 @@ interface BookDetailsDialogProps {
   onSaveToLibrary: (bookToSave: Book) => Promise<void>;
   onInputChange: (field: keyof Book, value: string) => void;
   onCompletionDateChange: (date: Date | undefined) => void;
+  onStartDateChange: (date: Date | undefined) => void;
   onRatingChange: (newRating: number) => Promise<void>;
   onReviewChange: (review: { content: string; date: string; } | undefined) => Promise<void>;
 }
@@ -36,6 +37,7 @@ export function BookDetailsDialog({
   onSaveToLibrary,
   onInputChange,
   onCompletionDateChange,
+  onStartDateChange,
   onRatingChange,
   onReviewChange
 }: BookDetailsDialogProps) {
@@ -71,6 +73,7 @@ export function BookDetailsDialog({
           isEditing={isEditing}
           onInputChange={onInputChange}
           onDateChange={onCompletionDateChange}
+          onStartDateChange={onStartDateChange}
           onRatingChange={onRatingChange}
           onReviewChange={onReviewChange}
         />

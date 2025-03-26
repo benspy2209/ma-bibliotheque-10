@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom';
 import { Book, ReadingStatus } from '@/types/book';
 import { Card, CardContent } from "@/components/ui/card";
@@ -63,6 +62,11 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
         status,
         amazonUrl // Ajouter le lien Amazon correct
       };
+      
+      // Si le statut est "reading" et qu'il n'y a pas de date de début, on l'ajoute automatiquement
+      if (status === 'reading' && !bookToSave.startReadingDate) {
+        bookToSave.startReadingDate = new Date().toISOString().split('T')[0];
+      }
       
       console.log("Saving book with ID:", bookToSave.id);
       const result = await saveBook(bookToSave);

@@ -3,6 +3,7 @@ import { Book } from '@/types/book';
 import { StarRating } from '../StarRating';
 import { BookMetadata } from './BookMetadata';
 import { CompletionDate } from './CompletionDate';
+import { StartReadingDate } from './StartReadingDate';
 import { Button } from '../ui/button';
 import { ImagePlus, Bookmark } from 'lucide-react';
 
@@ -12,6 +13,7 @@ interface BookPreviewProps {
   onRatingChange: (rating: number) => void;
   onInputChange: (field: keyof Book, value: string) => void;
   onDateChange: (date: Date | undefined) => void;
+  onStartDateChange: (date: Date | undefined) => void;
 }
 
 export function BookPreview({
@@ -19,7 +21,8 @@ export function BookPreview({
   isEditing,
   onRatingChange,
   onInputChange,
-  onDateChange
+  onDateChange,
+  onStartDateChange
 }: BookPreviewProps) {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     console.log("handleImageUpload called");
@@ -102,6 +105,12 @@ export function BookPreview({
           book={book}
           isEditing={isEditing}
           onInputChange={onInputChange}
+        />
+        
+        <StartReadingDate
+          book={book}
+          isEditing={isEditing}
+          onDateChange={onStartDateChange}
         />
         
         <CompletionDate

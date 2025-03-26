@@ -11,6 +11,7 @@ export function BookForm({
   isEditing, 
   onInputChange, 
   onDateChange, 
+  onStartDateChange,
   onRatingChange, 
   onReviewChange 
 }: BookFormProps) {
@@ -22,6 +23,7 @@ export function BookForm({
         onRatingChange={onRatingChange}
         onInputChange={onInputChange}
         onDateChange={onDateChange}
+        onStartDateChange={onStartDateChange}
       />
 
       <Separator className="my-4" />
