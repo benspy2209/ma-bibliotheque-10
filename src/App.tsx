@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
+import MainLayout from "./components/MainLayout";
 import Homepage from "./pages/Homepage";
 import Index from "./pages/Index";
 import Library from "./pages/Library";
@@ -27,17 +28,17 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Homepage />} />
-            <Route path="/library" element={<Library />} />
-            <Route path="/search" element={<Index />} />
-            <Route path="/statistics" element={<Statistics />} />
-            <Route path="/book/:id" element={<BookPage />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/legal-notice" element={<LegalNotice />} />
-            <Route path="/features" element={<Features />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="/" element={<MainLayout><Homepage /></MainLayout>} />
+            <Route path="/library" element={<MainLayout><Library /></MainLayout>} />
+            <Route path="/search" element={<MainLayout><Index /></MainLayout>} />
+            <Route path="/statistics" element={<MainLayout><Statistics /></MainLayout>} />
+            <Route path="/book/:id" element={<MainLayout><BookPage /></MainLayout>} />
+            <Route path="/reset-password" element={<MainLayout><ResetPassword /></MainLayout>} />
+            <Route path="/privacy-policy" element={<MainLayout><PrivacyPolicy /></MainLayout>} />
+            <Route path="/legal-notice" element={<MainLayout><LegalNotice /></MainLayout>} />
+            <Route path="/features" element={<MainLayout><Features /></MainLayout>} />
+            <Route path="/contact" element={<MainLayout><Contact /></MainLayout>} />
+            <Route path="*" element={<MainLayout><NotFound /></MainLayout>} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
