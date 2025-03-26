@@ -85,7 +85,7 @@ export function StatsCalculator({
           const daysDiff = Math.max(1, differenceInDays(endDate, startDate) + 1);
           return sum + daysDiff;
         } else if (book.completionDate) {
-          return sum + 14;
+          return sum + 14; // Default estimate if no specific data
         }
         return sum;
       }, 0);
@@ -95,9 +95,10 @@ export function StatsCalculator({
 
     // Calculate reading time in hours based on user's reading speed setting
     const pagesPerHour = readingSpeed;
-    const totalReadingTimeHoursNum = totalPages / readingSpeed;
+    const totalReadingTimeHoursNum = totalPages / pagesPerHour;
     const totalReadingTimeHoursFormatted = totalReadingTimeHoursNum.toFixed(1);
 
+    // Monthly data calculation
     const booksByMonth = completedBooks.reduce((acc, book) => {
       if (!book.completionDate) return acc;
       
@@ -122,6 +123,7 @@ export function StatsCalculator({
       .sort((a, b) => a.date.getTime() - b.date.getTime())
       .slice(-6);
 
+    // Authors stats
     const authorCounts = completedBooks.reduce((acc, book) => {
       const authors = Array.isArray(book.author) ? book.author : [book.author];
       
@@ -140,6 +142,7 @@ export function StatsCalculator({
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
+    // Genres stats
     const genreCounts = completedBooks.reduce((acc, book) => {
       const subjects = book.subjects || [];
       
@@ -158,6 +161,7 @@ export function StatsCalculator({
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
+    // Goals stats
     const currentYear = getYear(new Date());
     const booksThisYear = completedBooks.filter(book => 
       book.completionDate && getYear(new Date(book.completionDate)) === currentYear
@@ -175,6 +179,7 @@ export function StatsCalculator({
     const monthlyGoal = readingGoals.monthly_goal;
     const monthlyProgressPercentage = Math.min(100, (booksThisMonth / monthlyGoal) * 100);
 
+    // Reading time stats
     const booksWithReadingTime = completedBooks.filter(book => 
       (book.readingTimeDays !== undefined) || 
       (book.startReadingDate && book.completionDate)
@@ -190,6 +195,7 @@ export function StatsCalculator({
         }, 0) / booksWithReadingTime.length
       : 0;
     
+    // Reading time distribution
     const readingTimeDistribution = [
       { name: '1-7 jours', value: 0, color: '#8884d8' },
       { name: '8-14 jours', value: 0, color: '#82ca9d' },
@@ -197,6 +203,7 @@ export function StatsCalculator({
       { name: '31+ jours', value: 0, color: '#ff8042' }
     ];
     
+    // Count books by reading time duration
     completedBooks.forEach(book => {
       let days = book.readingTimeDays;
       
@@ -217,7 +224,9 @@ export function StatsCalculator({
       }
     });
 
+    // Filter out empty categories for display
     const filteredReadingTimeDistribution = readingTimeDistribution.filter(item => item.value > 0);
+    const hasReadingTimeData = filteredReadingTimeDistribution.length > 0;
 
     return {
       totalBooks,
@@ -239,8 +248,8 @@ export function StatsCalculator({
       toReadBooks: toReadBooks.length,
       totalReadingDays,
       avgReadingTime: avgReadingTime.toFixed(1),
-      readingTimeDistribution,
-      hasReadingTimeData: filteredReadingTimeDistribution.length > 0
+      readingTimeDistribution: hasReadingTimeData ? readingTimeDistribution : [],
+      hasReadingTimeData
     };
   }, [completedBooks, readingBooks, toReadBooks, readingGoals, readingSpeed]);
 

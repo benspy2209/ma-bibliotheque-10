@@ -55,10 +55,15 @@ export function ReadingTimeDistribution({
         fontSize={12}
         fontWeight="bold"
       >
-        {name} ({value})
+        {`${name} (${value})`}
       </text>
     ) : null;
   };
+
+  // Filter books with reading time data and sort by reading time (descending)
+  const booksWithReadingTime = completedBooks
+    .filter(book => book.readingTimeDays !== undefined)
+    .sort((a, b) => (b.readingTimeDays || 0) - (a.readingTimeDays || 0));
 
   return (
     <>
@@ -113,28 +118,27 @@ export function ReadingTimeDistribution({
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {completedBooks
-                .filter(book => book.readingTimeDays !== undefined)
-                .sort((a, b) => (b.readingTimeDays || 0) - (a.readingTimeDays || 0))
-                .slice(0, 5)
-                .map(book => (
+              {booksWithReadingTime.slice(0, 5).map(book => {
+                const readingDays = book.readingTimeDays || 0;
+                return (
                   <div key={book.id} className="space-y-2">
                     <div className="flex justify-between">
                       <p className="font-medium text-sm truncate" title={book.title}>
                         {book.title}
                       </p>
                       <span className="text-sm font-medium">
-                        {book.readingTimeDays} jour{book.readingTimeDays !== 1 ? 's' : ''}
+                        {readingDays} jour{readingDays !== 1 ? 's' : ''}
                       </span>
                     </div>
                     <Progress 
-                      value={Math.min(100, (book.readingTimeDays || 0) / 0.3)} 
+                      value={Math.min(100, (readingDays / 0.3) * 10)} 
                       className="h-2"
                     />
                   </div>
-                ))}
+                );
+              })}
               
-              {completedBooks.filter(book => book.readingTimeDays !== undefined).length === 0 && (
+              {booksWithReadingTime.length === 0 && (
                 <p className="text-center text-muted-foreground py-4">
                   Aucune donnée de temps de lecture disponible.
                   Ajoutez le temps de lecture à vos livres pour voir les statistiques.
@@ -161,10 +165,12 @@ export function ReadingTimeDistribution({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {completedBooks
-                .filter(book => book.readingTimeDays !== undefined)
-                .slice(0, 10)
-                .map((book) => (
+              {booksWithReadingTime.slice(0, 10).map((book) => {
+                const pagesPerDay = book.numberOfPages && book.readingTimeDays
+                  ? Math.round(book.numberOfPages / book.readingTimeDays)
+                  : undefined;
+                  
+                return (
                   <TableRow key={book.id}>
                     <TableCell className="font-medium">{book.title}</TableCell>
                     <TableCell>
@@ -173,12 +179,11 @@ export function ReadingTimeDistribution({
                     <TableCell className="text-right">{book.numberOfPages || '-'}</TableCell>
                     <TableCell className="text-right">{book.readingTimeDays}</TableCell>
                     <TableCell className="text-right">
-                      {book.numberOfPages && book.readingTimeDays
-                        ? Math.round(book.numberOfPages / book.readingTimeDays)
-                        : '-'}
+                      {pagesPerDay || '-'}
                     </TableCell>
                   </TableRow>
-                ))}
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>
