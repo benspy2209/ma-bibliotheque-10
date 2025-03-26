@@ -83,18 +83,6 @@ export async function getReadingStreak() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return 0;
 
-    // Pour debruijneb@gmail.com, calculer la streak depuis le 20/01/2025
-    if (user.email === "debruijneb@gmail.com") {
-      const today = new Date();
-      const startDate = new Date(2025, 0, 20); // 20 janvier 2025
-      
-      // Calculer le nombre de jours entre ces deux dates
-      const differenceInTime = today.getTime() - startDate.getTime();
-      const differenceInDays = Math.floor(differenceInTime / (1000 * 3600 * 24)) + 1; // +1 pour inclure le jour actuel
-      
-      return differenceInDays;
-    }
-
     const { data, error } = await supabase
       .rpc('get_reading_streak', { p_user_id: user.id });
 
