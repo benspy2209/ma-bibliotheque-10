@@ -19,6 +19,12 @@ const api = axios.create({
 });
 
 // Fonction pour faire une recherche par auteur avec l'endpoint correct
+export async function searchAuthor(authorName: string, searchType: SearchType = 'author', language: LanguageFilter = 'fr'): Promise<{results: Book[], total: number}> {
+  const results = await searchAllBooks(authorName, searchType, language);
+  return results;
+}
+
+// Fonction pour faire une recherche par auteur avec l'endpoint correct
 export async function searchAuthorBooks(authorName: string, language: LanguageFilter = 'fr', maxResults: number = 100): Promise<Book[]> {
   if (!authorName.trim()) return [];
   

@@ -1,7 +1,8 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { Book } from '@/types/book';
-import { updateBookData } from '@/services/bookDetails';
-import { searchAuthor, SearchType, LanguageFilter } from '@/services/bookSearch';
+// Remove the non-existent imports and use functions directly from the services
+import { searchAllBooks, SearchType, LanguageFilter } from '@/services/bookSearch';
 import { supabase } from '@/integrations/supabase/client';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
@@ -47,7 +48,7 @@ export function useBookSearch() {
         setRemainingSearches(result.remaining);
       }
       
-      // -1 signifie que l'utilisateur a des recherches illimitées (admin)
+      // Fix comparison: Check if remaining is 0 and it's not unlimited (-1)
       setSearchLimitReached(result.remaining === 0 && result.remaining !== -1);
       
       return result.can_search;
@@ -78,7 +79,13 @@ export function useBookSearch() {
         setRemainingSearches(result.remaining);
       }
       
-      setSearchLimitReached(result.remaining === 0 && result.remaining !== -1);
+      // Fix the comparison logic with strict type checks
+      if (result.remaining === 0) {
+        // Only set to true if not unlimited (-1)
+        setSearchLimitReached(result.remaining !== -1);
+      } else {
+        setSearchLimitReached(false);
+      }
       
     } catch (error) {
       console.error('Error in incrementSearchCount:', error);
@@ -109,7 +116,8 @@ export function useBookSearch() {
 
     try {
       await incrementSearchCount();
-      const { results, total } = await searchAuthor(searchParams, searchType, language);
+      // Use searchAllBooks instead of searchAuthor
+      const { results, total } = await searchAllBooks(searchParams, searchType, language);
       setBooks(results);
       setVisibleBooks(results.slice(0, displayedBooks));
       setTotalBooks(total);

@@ -1,6 +1,10 @@
 
 import * as React from "react"
-import { useEmblaCarousel } from "embla-carousel-react"
+import { type UseEmblaCarouselType } from "embla-carousel-react"
+import embla from "embla-carousel-react"
+
+// Extract the useEmblaCarousel function from the default export
+const useEmblaCarousel = embla.default
 
 export type CarouselApi = ReturnType<typeof useEmblaCarousel>[1]
 export type CarouselOptions = Parameters<typeof useEmblaCarousel>[0]

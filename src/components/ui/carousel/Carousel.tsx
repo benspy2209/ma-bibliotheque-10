@@ -1,8 +1,11 @@
 
 import * as React from "react"
-import useEmblaCarousel, {
-  type UseEmblaCarouselType,
-} from "embla-carousel-react"
+// Update the import to match the new structure
+import { type UseEmblaCarouselType } from "embla-carousel-react"
+import embla from "embla-carousel-react"
+
+// Extract the useEmblaCarousel function from the default export
+const useEmblaCarousel = embla.default
 
 import { cn } from "@/lib/utils"
 import { CarouselContext, type CarouselApi, type CarouselProps } from "./carousel-context"
