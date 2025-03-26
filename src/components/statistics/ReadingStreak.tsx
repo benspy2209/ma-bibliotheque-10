@@ -12,13 +12,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Flame, Award, Calendar, Check } from 'lucide-react';
+import { Flame, Award, Calendar, Check, X } from 'lucide-react';
 import { hasReadToday, markTodayAsRead, getReadingStreak } from '@/services/readingStreakService';
 
 export function ReadingStreak() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showCongrats, setShowCongrats] = useState(false);
+  const [showQuestion, setShowQuestion] = useState(false);
 
   // Récupérer le streak de lecture actuel
   const { data: streak = 0, isLoading: isLoadingStreak } = useQuery({
@@ -40,6 +41,7 @@ export function ReadingStreak() {
     onSuccess: (data) => {
       if (data.success) {
         setShowCongrats(true);
+        setShowQuestion(false);
         queryClient.invalidateQueries({ queryKey: ['readingStreak'] });
         queryClient.invalidateQueries({ queryKey: ['readToday'] });
         
@@ -71,6 +73,14 @@ export function ReadingStreak() {
 
   const handleMarkAsRead = () => {
     mutate();
+  };
+
+  const handleNoAnswer = () => {
+    setShowQuestion(false);
+    toast({
+      title: "Pas de souci",
+      description: "Vous pourrez confirmer votre lecture plus tard.",
+    });
   };
 
   const isLoading = isLoadingStreak || isCheckingToday || isPending;
@@ -129,9 +139,29 @@ export function ReadingStreak() {
             </div>
             <Calendar className="h-4 w-4" />
           </div>
+        ) : showQuestion ? (
+          <div className="w-full space-y-2">
+            <p className="text-center font-medium mb-2">Avez-vous lu aujourd'hui ?</p>
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleMarkAsRead} 
+                disabled={isLoading}
+                className="flex-1 bg-green-600 hover:bg-green-700"
+              >
+                <Check className="mr-1 h-4 w-4" /> Oui
+              </Button>
+              <Button 
+                onClick={handleNoAnswer}
+                variant="outline" 
+                className="flex-1"
+              >
+                <X className="mr-1 h-4 w-4" /> Non
+              </Button>
+            </div>
+          </div>
         ) : (
           <Button 
-            onClick={handleMarkAsRead} 
+            onClick={() => setShowQuestion(true)} 
             disabled={isLoading} 
             className="w-full"
           >

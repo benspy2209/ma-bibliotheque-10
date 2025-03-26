@@ -24,8 +24,32 @@ export function ReadingProgress({
     <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
       <ReadingStreak />
       <Card>
-        {/* Contenu existant des objectifs de lecture */}
+        {/* Contenu des objectifs de lecture */}
+        <div className="p-6 space-y-6">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium">Objectif annuel</p>
+              <p className="text-sm font-medium">
+                {booksThisYear} / {yearlyGoal} livres
+              </p>
+            </div>
+            <Progress value={yearlyProgressPercentage} />
+          </div>
+          
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium">Objectif mensuel</p>
+              <p className="text-sm font-medium">
+                {booksThisMonth} / {monthlyGoal} livres
+              </p>
+            </div>
+            <Progress value={monthlyProgressPercentage} />
+          </div>
+        </div>
       </Card>
     </div>
   );
 }
+
+// Importation du composant Progress nécessaire
+import { Progress } from "@/components/ui/progress";
