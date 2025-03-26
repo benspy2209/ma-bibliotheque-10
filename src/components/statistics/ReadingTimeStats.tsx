@@ -20,7 +20,7 @@ export function ReadingTimeStats({ totalReadingTimeHours, readingSpeed }: Readin
             <p className="text-sm font-medium text-muted-foreground">
               Temps total estimé
             </p>
-            <p className="text-2xl font-bold">{totalReadingTimeHours}</p>
+            <p className="text-2xl font-bold">{totalReadingTimeHours} <span className="text-sm font-normal">heures</span></p>
           </div>
           <Clock className="h-8 w-8 text-muted-foreground" />
         </div>
