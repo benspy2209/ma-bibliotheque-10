@@ -1,3 +1,4 @@
+
 import { useMemo, useState, useEffect } from 'react';
 import { Book } from '@/types/book';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -184,7 +185,9 @@ export default function Statistics() {
       readingSpeed = totalPages / (totalReadingDays || 1);
     }
 
-    const totalReadingTimeHoursNum = totalPages / readingSpeed;
+    // Calculate reading time in hours based on user's reading speed setting
+    const pagesPerHour = readingSpeed;
+    const totalReadingTimeHoursNum = totalPages / pagesPerHour;
     const totalReadingTimeHoursFormatted = totalReadingTimeHoursNum.toFixed(1);
 
     const booksByMonth = completedBooks.reduce((acc, book) => {
