@@ -10,9 +10,12 @@ interface YearFilterProps {
   years: number[];
   selectedYear: number | null;
   onYearSelect: (year: number | null) => void;
+  defaultOpen?: boolean;
 }
 
-export function YearFilter({ years, selectedYear, onYearSelect }: YearFilterProps) {
+export function YearFilter({ years, selectedYear, onYearSelect, defaultOpen = false }: YearFilterProps) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
   // Organize years in grid
   const yearGrid = useMemo(() => {
     // Sort years in descending order
@@ -28,7 +31,7 @@ export function YearFilter({ years, selectedYear, onYearSelect }: YearFilterProp
 
   return (
     <div className="flex items-center space-x-2">
-      <Popover>
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button 
             variant="outline" 
@@ -53,7 +56,10 @@ export function YearFilter({ years, selectedYear, onYearSelect }: YearFilterProp
                         "h-8 w-16",
                         year === selectedYear ? "bg-primary text-primary-foreground" : "text-muted-foreground"
                       )}
-                      onClick={() => onYearSelect(year === selectedYear ? null : year)}
+                      onClick={() => {
+                        onYearSelect(year === selectedYear ? null : year);
+                        setIsOpen(false);
+                      }}
                     >
                       {year}
                     </Button>
@@ -66,7 +72,10 @@ export function YearFilter({ years, selectedYear, onYearSelect }: YearFilterProp
                 variant="ghost" 
                 size="sm" 
                 className="w-full mt-2 flex items-center justify-center" 
-                onClick={() => onYearSelect(null)}
+                onClick={() => {
+                  onYearSelect(null);
+                  setIsOpen(false);
+                }}
               >
                 <X className="h-4 w-4 mr-1" />
                 Voir toutes les années

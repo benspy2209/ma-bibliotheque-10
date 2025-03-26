@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Book } from '@/types/book';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { 
@@ -58,7 +58,8 @@ const COLORS = [
 ];
 
 export default function Statistics() {
-  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const currentYear = new Date().getFullYear();
+  const [selectedYear, setSelectedYear] = useState<number | null>(currentYear);
   
   const { data: books = [], refetch: refetchBooks } = useQuery({
     queryKey: ['books'],
@@ -108,17 +109,38 @@ export default function Statistics() {
       }
     });
     
+    years.add(currentYear);
+    
     if (years.size === 0) {
-      years.add(new Date().getFullYear());
+      years.add(currentYear);
     }
     
-    const currentYear = new Date().getFullYear();
     for (let year = Math.max(1977, Math.min(...Array.from(years))); year <= currentYear; year++) {
       years.add(year);
     }
     
     return Array.from(years).sort((a, b) => b - a);
-  }, [allCompletedBooks]);
+  }, [allCompletedBooks, currentYear]);
+
+  useEffect(() => {
+    if (selectedYear === currentYear) {
+      const booksForCurrentYear = allCompletedBooks.some(book => {
+        if (!book.completionDate) return false;
+        return getYear(new Date(book.completionDate)) === currentYear;
+      });
+      
+      if (!booksForCurrentYear && allCompletedBooks.length > 0) {
+        const years = allCompletedBooks
+          .filter(book => book.completionDate)
+          .map(book => getYear(new Date(book.completionDate!)))
+          .sort((a, b) => b - a);
+        
+        if (years.length > 0) {
+          setSelectedYear(years[0]);
+        }
+      }
+    }
+  }, [allCompletedBooks, currentYear, selectedYear]);
 
   const stats = useMemo(() => {
     const totalBooks = completedBooks.length;
@@ -198,9 +220,7 @@ export default function Statistics() {
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
-    // Nouveau comptage pour les genres (catégories)
     const genreCounts = completedBooks.reduce((acc, book) => {
-      // On récupère les sujets (subjects) pour compter comme genres
       const subjects = book.subjects || [];
       
       subjects.forEach(subject => {
