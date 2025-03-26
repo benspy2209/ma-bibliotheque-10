@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from 'react';
 import { Book } from '@/types/book';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -448,9 +447,9 @@ export default function Statistics() {
                       <div className="flex items-center justify-between">
                         <div className="space-y-1">
                           <p className="text-sm font-medium text-muted-foreground">
-                            Jours par livre
+                            Un livre est lu en moyenne en
                           </p>
-                          <p className="text-2xl font-bold">{stats.avgReadingTime}</p>
+                          <p className="text-2xl font-bold">{stats.avgReadingTime} jours</p>
                         </div>
                         <Clock className="h-8 w-8 text-muted-foreground" />
                       </div>
