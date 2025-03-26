@@ -1,15 +1,13 @@
 
-"use client";
-
-import * as React from "react";
-import { cn } from "@/lib/utils";
-import { useCarousel } from "./carousel-context";
+import * as React from "react"
+import { cn } from "@/lib/utils"
+import { useCarousel } from "./carousel-context"
 
 const CarouselContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => {
-  const { carouselRef, orientation } = useCarousel();
+  const { carouselRef, orientation } = useCarousel()
 
   return (
     <div ref={carouselRef} className="overflow-hidden">
@@ -23,8 +21,8 @@ const CarouselContent = React.forwardRef<
         {...props}
       />
     </div>
-  );
-});
-CarouselContent.displayName = "CarouselContent";
+  )
+})
+CarouselContent.displayName = "CarouselContent"
 
-export { CarouselContent };
+export { CarouselContent }

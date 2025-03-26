@@ -56,7 +56,6 @@ export function useBookSearch() {
         setSearchLimitReached(!data.can_search);
         setRemainingSearches(data.remaining);
         
-        // Fix: Changed comparison to handle -1 (unlimited) differently
         if (!data.can_search) {
           toast({
             title: "Limite de recherche atteinte",
@@ -95,14 +94,10 @@ export function useBookSearch() {
             description: "Vous avez atteint votre limite de 3 recherches par jour.",
             variant: "destructive"
           });
-        } else {
-          // Fix: Handle -1 (unlimited) separately from other positive numbers
-          const isUnlimited = data.remaining === -1;
-          if (!isUnlimited) {
-            toast({
-              description: `Il vous reste ${data.remaining} recherche(s) aujourd'hui.`
-            });
-          }
+        } else if (data.remaining !== -1) {
+          toast({
+            description: `Il vous reste ${data.remaining} recherche(s) aujourd'hui.`
+          });
         }
       }
     } catch (error) {

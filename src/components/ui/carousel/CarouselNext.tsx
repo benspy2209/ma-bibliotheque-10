@@ -1,17 +1,15 @@
 
-"use client";
-
-import * as React from "react";
-import { ArrowRight } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { useCarousel } from "./carousel-context";
+import * as React from "react"
+import { ArrowRight } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { useCarousel } from "./carousel-context"
 
 const CarouselNext = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<typeof Button>
 >(({ className, variant = "outline", size = "icon", ...props }, ref) => {
-  const { orientation, scrollNext, canScrollNext } = useCarousel();
+  const { orientation, scrollNext, canScrollNext } = useCarousel()
 
   return (
     <Button
@@ -32,8 +30,8 @@ const CarouselNext = React.forwardRef<
       <ArrowRight className="h-4 w-4" />
       <span className="sr-only">Next slide</span>
     </Button>
-  );
-});
-CarouselNext.displayName = "CarouselNext";
+  )
+})
+CarouselNext.displayName = "CarouselNext"
 
-export { CarouselNext };
+export { CarouselNext }
