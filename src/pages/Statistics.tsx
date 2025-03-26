@@ -1,5 +1,4 @@
-
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Book } from '@/types/book';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { 
@@ -44,6 +43,8 @@ import {
 } from "@/components/ui/table";
 import { ReadingGoalsForm } from "@/components/statistics/ReadingGoalsForm";
 import { useReadingGoals } from "@/hooks/use-reading-goals";
+import { YearFilter } from "@/components/statistics/YearFilter";
+import { YearlyBooksList } from "@/components/statistics/YearlyBooksList";
 
 const COLORS = [
   '#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE', '#00C49F',
@@ -51,6 +52,8 @@ const COLORS = [
 ];
 
 export default function Statistics() {
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  
   const { data: books = [], refetch: refetchBooks } = useQuery({
     queryKey: ['books'],
     queryFn: loadBooks,
@@ -67,9 +70,20 @@ export default function Statistics() {
   console.log('Book statuses:', books.map(book => ({ id: book.id, title: book.title, status: book.status })));
 
   // Use a more explicit and safer filter for completed books
-  const completedBooks = books.filter((book): book is Book => 
+  const allCompletedBooks = books.filter((book): book is Book => 
     book !== null && book.status === 'completed'
   );
+  
+  // Filtrer les livres par année sélectionnée
+  const completedBooks = useMemo(() => {
+    if (!selectedYear) return allCompletedBooks;
+    
+    return allCompletedBooks.filter(book => {
+      if (!book.completionDate) return false;
+      const completionYear = getYear(new Date(book.completionDate));
+      return completionYear === selectedYear;
+    });
+  }, [allCompletedBooks, selectedYear]);
   
   // Log completed books for debugging
   console.log('Completed books:', completedBooks.length, 'books');
@@ -81,6 +95,31 @@ export default function Statistics() {
   const toReadBooks = books.filter((book): book is Book =>
     book !== null && (!book.status || book.status === 'to-read')
   );
+
+  // Extraire toutes les années pour lesquelles nous avons des livres complétés
+  const availableYears = useMemo(() => {
+    const years = new Set<number>();
+    
+    allCompletedBooks.forEach(book => {
+      if (book.completionDate) {
+        const year = getYear(new Date(book.completionDate));
+        years.add(year);
+      }
+    });
+    
+    // Si nous n'avons pas d'années, ajoutons l'année en cours
+    if (years.size === 0) {
+      years.add(new Date().getFullYear());
+    }
+    
+    // S'assurer que nous avons des années jusqu'à 1977
+    const currentYear = new Date().getFullYear();
+    for (let year = Math.max(1977, Math.min(...Array.from(years))); year <= currentYear; year++) {
+      years.add(year);
+    }
+    
+    return Array.from(years).sort((a, b) => b - a);
+  }, [allCompletedBooks]);
 
   const stats = useMemo(() => {
     const totalBooks = completedBooks.length;
@@ -272,10 +311,24 @@ export default function Statistics() {
         <div className="px-4 py-8 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto space-y-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <h1 className="text-3xl font-bold">Statistiques de lecture</h1>
-              <p className="text-muted-foreground">
-                Analyse de vos habitudes de lecture
-              </p>
+              <div>
+                <h1 className="text-3xl font-bold">Statistiques de lecture</h1>
+                <p className="text-muted-foreground">
+                  Analyse de vos habitudes de lecture
+                </p>
+              </div>
+              <div className="mt-4 md:mt-0 flex items-center gap-2">
+                <YearFilter
+                  years={availableYears}
+                  selectedYear={selectedYear}
+                  onYearSelect={setSelectedYear}
+                />
+                {selectedYear && (
+                  <div className="text-xs font-semibold px-2 py-1 bg-primary/10 text-primary rounded-md">
+                    {completedBooks.length} livres en {selectedYear}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-5">
@@ -749,6 +802,15 @@ export default function Statistics() {
                 </Card>
               </TabsContent>
             </Tabs>
+              {selectedYear && (
+                <div className="mt-8">
+                  <YearlyBooksList 
+                    books={allCompletedBooks} 
+                    selectedYear={selectedYear} 
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
