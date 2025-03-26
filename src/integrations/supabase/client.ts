@@ -16,7 +16,6 @@ export const supabase = createClient<Database>(
       persistSession: true,
       autoRefreshToken: true,
       storage: localStorage,
-      flowType: 'pkce',
     },
     global: {
       headers: {
@@ -25,8 +24,3 @@ export const supabase = createClient<Database>(
     },
   }
 );
-
-// Manually set the redirect URL
-// This doesn't go in the client config but is used when calling signInWithOAuth
-// See use-supabase-auth.ts for usage
-export const REDIRECT_URL = 'https://bibliopulse.com/auth/callback';

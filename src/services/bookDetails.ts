@@ -1,3 +1,4 @@
+
 import { Book } from '@/types/book';
 import { LanguageFilter } from '@/services/bookSearch';
 import axios from 'axios';
@@ -19,16 +20,6 @@ const getHeaders = () => {
 const api = axios.create({
   headers: getHeaders()
 });
-
-// Add the missing function that was imported in use-book-search.ts
-export function updateBookData(book: Partial<Book>): Partial<Book> {
-  // This is a placeholder implementation since the original function wasn't provided
-  // Return the book with any updates needed
-  return {
-    ...book,
-    // Add any fields that need to be updated
-  };
-}
 
 // Fonction pour récupérer les détails d'un livre par son ISBN
 export async function getBookDetails(bookId: string, language: LanguageFilter = 'fr'): Promise<Partial<Book>> {

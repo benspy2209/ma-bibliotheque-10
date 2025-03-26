@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { loadBooks } from '@/services/supabaseBooks';
 import { getAmazonAffiliateUrl } from '@/lib/amazon-utils';
 import { useToast } from '@/hooks/use-toast';
-import { castQueryResult } from '@/lib/supabase-helpers';
 
 export async function updateAmazonLinksInLibrary() {
   try {
@@ -34,13 +33,11 @@ export async function updateAmazonLinksInLibrary() {
     
     // Sauvegarder les livres mis à jour dans la base de données
     const updatePromises = updatedBooks.map(async (book) => {
-      const updateData = {
-        book_data: book
-      };
-      
       const { error } = await supabase
         .from('books')
-        .update(updateData as any)
+        .update({
+          book_data: book
+        })
         .eq('id', book.id)
         .eq('user_id', user.id);
       

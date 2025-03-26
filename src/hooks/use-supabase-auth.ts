@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase, REDIRECT_URL } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from './use-toast';
 
@@ -84,17 +84,10 @@ export function useSupabaseAuth() {
 
   const signInWithGoogle = async () => {
     try {
-      // Use the constant from client.ts
-      console.log(`Redirection vers Google avec l'URL: ${REDIRECT_URL}`);
-      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: REDIRECT_URL,
-          queryParams: {
-            prompt: 'select_account',
-            access_type: 'offline'
-          }
+          redirectTo: `${window.location.origin}`
         }
       });
       

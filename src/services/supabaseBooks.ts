@@ -3,7 +3,6 @@ import { isDuplicateBook } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { BookRow } from '@/types/supabase';
 import { v4 as uuidv4 } from 'uuid';
-import { castQueryResult, castSingleResult, processBookRow, isDefined } from '@/lib/supabase-helpers';
 
 export async function saveBook(book: Book) {
   try {
@@ -16,14 +15,13 @@ export async function saveBook(book: Book) {
     
     console.log('Saving book for user:', user.id);
 
-    const result = await supabase
+    const { data: existingBookData } = await supabase
       .from('books')
       .select('id')
       .eq('id', book.id)
       .eq('user_id', user.id)  // Ensure we're only looking at the user's own books
       .maybeSingle();
 
-    const existingBookData = castSingleResult<{ id: string }>(result);
     const isEditing = !!existingBookData;
 
     if (!isEditing) {
@@ -61,46 +59,23 @@ export async function saveBook(book: Book) {
     console.log('Book data to save:', updatedBook);
     console.log('User ID for book save:', user.id);
 
-    const bookData = {
-      book_data: updatedBook,
-      status: book.status,
-      completion_date: book.completionDate,
-      user_id: user.id
-    };
+    const { error } = await supabase
+      .from('books')
+      .upsert({
+        id: bookToSave.id,
+        book_data: updatedBook,
+        status: book.status,
+        completion_date: book.completionDate,
+        user_id: user.id
+      });
 
-    // If editing, we need to update an existing record
-    if (isEditing) {
-      const { error } = await supabase
-        .from('books')
-        .update(bookData as any)
-        .eq('id', bookToSave.id)
-        .eq('user_id', user.id);
-
-      if (error) {
-        console.error('Erreur Supabase lors de la sauvegarde:', error);
-        return {
-          success: false,
-          error: 'database',
-          message: `Erreur lors de la sauvegarde : ${error.message}`
-        };
-      }
-    } else {
-      // Otherwise insert a new record
-      const { error } = await supabase
-        .from('books')
-        .insert({
-          ...bookData,
-          id: bookToSave.id
-        } as any);
-
-      if (error) {
-        console.error('Erreur Supabase lors de la sauvegarde:', error);
-        return {
-          success: false,
-          error: 'database',
-          message: `Erreur lors de la sauvegarde : ${error.message}`
-        };
-      }
+    if (error) {
+      console.error('Erreur Supabase lors de la sauvegarde:', error);
+      return {
+        success: false,
+        error: 'database',
+        message: `Erreur lors de la sauvegarde : ${error.message}`
+      };
     }
     
     console.log('Book saved successfully with ID:', bookToSave.id, 'and status:', book.status);
@@ -141,22 +116,21 @@ export async function loadBooks() {
     // Add a timestamp parameter to force a fresh fetch every time and never use cached results
     const timestamp = new Date().getTime();
     
-    const result = await supabase
+    const { data, error } = await supabase
       .from('books')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
-    const data = castQueryResult<BookRow>(result);
     console.log("Données reçues:", data?.length, "livres");
     
-    if (!data) {
-      console.error('Erreur lors du chargement des livres');
-      return [];
+    if (error) {
+      console.error('Erreur lors du chargement des livres:', error);
+      throw error;
     }
 
     // Log status distribution for debugging
-    const booksByStatus = data.reduce((acc: Record<string, number>, row) => {
+    const booksByStatus = data?.reduce((acc, row: BookRow) => {
       const status = row.status || 'undefined';
       acc[status] = (acc[status] || 0) + 1;
       return acc;
@@ -165,14 +139,14 @@ export async function loadBooks() {
     console.log("Distribution des statuts:", booksByStatus);
     console.log("Livres récupérés pour l'utilisateur:", user.id);
 
-    return data.map(row => {
+    return data?.map((row: BookRow) => {
       const bookData = row.book_data || row;
       // Ensure the status from the database row is used
       return {
         ...bookData,
         status: row.status || bookData.status
       };
-    });
+    }) ?? [];
   } catch (error) {
     console.error('Erreur lors du chargement des livres:', error);
     return [];
@@ -188,20 +162,19 @@ export async function getBookById(id: string) {
       throw new Error('Vous devez être connecté pour effectuer cette action');
     }
     
-    const result = await supabase
+    const { data, error } = await supabase
       .from('books')
       .select('book_data')
       .eq('id', id)
       .eq('user_id', user.id) // Ensure we only get books belonging to the current user
       .maybeSingle();
 
-    const data = castSingleResult<{ book_data: Book }>(result);
-    if (!data) {
-      console.error('Erreur lors du chargement du livre');
-      return null;
+    if (error) {
+      console.error('Erreur lors du chargement du livre:', error);
+      throw error;
     }
 
-    return data.book_data as Book || null;
+    return data?.book_data as Book || null;
   } catch (error) {
     console.error('Erreur lors du chargement du livre par ID:', error);
     return null;
@@ -261,27 +234,26 @@ export async function searchBooksByTitle(title: string): Promise<Book[]> {
     
     // Use Postgres ILIKE for case-insensitive search
     // We need to search inside the jsonb book_data -> title field
-    const result = await supabase
+    const { data, error } = await supabase
       .from('books')
       .select('*')
       .eq('user_id', user.id)
       .filter('book_data->title', 'ilike', `%${title}%`);
     
-    const data = castQueryResult<BookRow>(result);
-    if (!data) {
-      console.error('Error searching books by title');
+    if (error) {
+      console.error('Error searching books by title:', error);
       return [];
     }
     
-    console.log(`Found ${data.length} books matching the search`);
+    console.log(`Found ${data?.length} books matching the search`);
     
-    return data.map(row => {
+    return data?.map((row: BookRow) => {
       const bookData = row.book_data || row;
       return {
         ...bookData,
         status: row.status || bookData.status
       };
-    });
+    }) ?? [];
   } catch (error) {
     console.error('Error during book search:', error);
     return [];
