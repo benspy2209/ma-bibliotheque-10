@@ -5,6 +5,7 @@ import { Book } from '@/types/book';
 import { searchAllBooks, SearchType, LanguageFilter } from '@/services/bookSearch';
 import { supabase } from '@/integrations/supabase/client';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
+import { SearchLimitResponse, isSearchLimitResponse } from '@/types/searchLimits';
 
 export function useBookSearch() {
   const [books, setBooks] = useState<Book[]>([]);
@@ -40,19 +41,23 @@ export function useBookSearch() {
       }
 
       // Cast to the appropriate type and handle the response
-      const result = data as unknown as { can_search: boolean; remaining: number; message: string };
-      
-      console.log('Search limits check result:', result);
-      
-      if (result.remaining !== undefined) {
-        setRemainingSearches(result.remaining);
+      if (isSearchLimitResponse(data)) {
+        const result = data;
+        
+        console.log('Search limits check result:', result);
+        
+        if (result.remaining !== undefined) {
+          setRemainingSearches(result.remaining);
+        }
+        
+        // Fix comparison: Check if remaining is 0, and separately check if it's not unlimited (-1)
+        // This avoids the TypeScript error when comparing 0 and -1 directly
+        setSearchLimitReached(result.remaining === 0 && result.remaining !== -1);
+        
+        return result.can_search;
       }
       
-      // Fix comparison: Check if remaining is 0 and NOT negative 1 
-      // (unlimited) using !== instead of equality check with different types
-      setSearchLimitReached(result.remaining === 0 && result.remaining !== -1);
-      
-      return result.can_search;
+      return true;
     } catch (error) {
       console.error('Error in checkSearchLimits:', error);
       return true; // En cas d'erreur, on autorise la recherche
@@ -74,18 +79,22 @@ export function useBookSearch() {
       }
 
       // Cast to appropriate type and handle the response
-      const result = data as unknown as { success: boolean; remaining: number; message: string };
-      
-      if (result.remaining !== undefined) {
-        setRemainingSearches(result.remaining);
-      }
-      
-      // Fix the comparison logic with proper type checks
-      if (result.remaining === 0) {
-        // Only set to true if not unlimited (-1)
-        setSearchLimitReached(result.remaining !== -1);
-      } else {
-        setSearchLimitReached(false);
+      if (isSearchLimitResponse(data)) {
+        const result = data;
+        
+        if (result.remaining !== undefined) {
+          setRemainingSearches(result.remaining);
+        }
+        
+        // Fix the comparison logic to avoid type errors
+        if (result.remaining === 0) {
+          // Only set to true if not unlimited (-1)
+          // Check separately to avoid TypeScript errors
+          const isUnlimited = result.remaining === -1;
+          setSearchLimitReached(!isUnlimited);
+        } else {
+          setSearchLimitReached(false);
+        }
       }
       
     } catch (error) {
