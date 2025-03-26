@@ -316,19 +316,21 @@ export default function Statistics() {
                 </p>
               </div>
               
-              <YearFilter
-                years={availableYears}
-                selectedYear={selectedYear}
-                onYearSelect={setSelectedYear}
-              />
+              <div className="flex items-center gap-2">
+                <YearFilter
+                  years={availableYears}
+                  selectedYear={selectedYear}
+                  onYearSelect={setSelectedYear}
+                />
+              </div>
             </div>
             
             {selectedYear && (
-              <div className="bg-muted/50 border rounded-lg p-4 flex items-center justify-between">
+              <div className="bg-muted/30 border rounded-lg p-4 flex items-center justify-between">
                 <div className="flex items-center">
                   <Calendar className="h-5 w-5 mr-2 text-primary" />
                   <span className="font-medium">Filtré par année: {selectedYear}</span>
-                  <Badge className="ml-2 bg-primary">{completedBooks.length} livres</Badge>
+                  <Badge className="ml-2 bg-primary text-primary-foreground">{completedBooks.length} livres</Badge>
                 </div>
                 <Button 
                   variant="ghost" 

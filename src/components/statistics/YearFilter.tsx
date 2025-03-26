@@ -13,12 +13,12 @@ interface YearFilterProps {
 }
 
 export function YearFilter({ years, selectedYear, onYearSelect }: YearFilterProps) {
-  // Organizez les années en grille
+  // Organize years in grid
   const yearGrid = useMemo(() => {
-    // Triez les années par ordre décroissant
+    // Sort years in descending order
     const sortedYears = [...years].sort((a, b) => b - a);
     
-    // Organisez-les en rangées de 4 pour une présentation en grille
+    // Organize them in rows of 4 for a grid presentation
     const grid: number[][] = [];
     for (let i = 0; i < sortedYears.length; i += 4) {
       grid.push(sortedYears.slice(i, i + 4));
