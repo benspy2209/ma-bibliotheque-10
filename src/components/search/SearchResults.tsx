@@ -3,6 +3,7 @@ import { Book } from '@/types/book';
 import { BookGrid } from '@/components/search/BookGrid';
 import { BookDetails } from '@/components/BookDetails';
 import { useSelectedBook } from '@/hooks/use-selected-book';
+import { AddAllBooks } from '@/components/search/AddAllBooks';
 
 interface SearchResultsProps {
   books: Book[];
@@ -35,6 +36,15 @@ export function SearchResults({
 
   return (
     <>
+      {books.length > 0 && searchQuery && (
+        <div className="flex justify-end mb-4">
+          <AddAllBooks 
+            books={books} 
+            onComplete={onUpdate} 
+          />
+        </div>
+      )}
+
       <BookGrid 
         books={!searchQuery ? [] : books}
         onBookClick={(book) => {
