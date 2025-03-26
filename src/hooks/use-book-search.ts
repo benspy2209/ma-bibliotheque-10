@@ -1,193 +1,154 @@
-
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { searchAllBooks, SearchType, LanguageFilter } from '@/services/bookSearch';
+import { useState, useEffect, useCallback } from 'react';
+import { Book } from '@/types/book';
+import { updateBookData } from '@/services/bookDetails';
+import { searchAuthor, SearchType, LanguageFilter } from '@/services/bookSearch';
 import { supabase } from '@/integrations/supabase/client';
-import { SearchLimitResponse, isSearchLimitResponse } from '@/types/searchLimits';
-import { useToast } from "@/hooks/use-toast";
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
-const MAX_SEARCH_RESULTS = 100;
-
 export function useBookSearch() {
-  const [searchParams, setSearchParams] = useState<{ 
-    query: string; 
-    type: SearchType;
-    language: LanguageFilter;
-  }>({ 
-    query: '', 
-    type: 'author',
-    language: 'fr'
-  });
-  const [displayedBooks, setDisplayedBooks] = useState(12);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [searchLimitReached, setSearchLimitReached] = useState(false);
-  const [remainingSearches, setRemainingSearches] = useState<number | null>(null);
+  const [books, setBooks] = useState<Book[]>([]);
+  const [visibleBooks, setVisibleBooks] = useState<Book[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [searchError, setSearchError] = useState<string | undefined>();
+  const [displayedBooks, setDisplayedBooks] = useState(10);
   const [showAllResults, setShowAllResults] = useState(false);
-  const [searchError, setSearchError] = useState<string | undefined>(undefined);
-  const { toast } = useToast();
+  const [searchParams, setSearchParams] = useState('');
+  const [totalBooks, setTotalBooks] = useState(0);
+  const [remainingSearches, setRemainingSearches] = useState<number | null>(null);
+  const [searchLimitReached, setSearchLimitReached] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { user } = useSupabaseAuth();
 
-  const getUserIp = async (): Promise<string> => {
-    try {
-      return '127.0.0.1';
-    } catch (error) {
-      console.error("Erreur lors de la récupération de l'IP:", error);
-      return '127.0.0.1';
+  const checkSearchLimits = useCallback(async () => {
+    if (!user) {
+      setRemainingSearches(null);
+      setSearchLimitReached(false);
+      return true;
     }
-  };
 
-  const checkSearchLimits = async () => {
+    try {
+      const { data, error } = await supabase.rpc('can_perform_search', {
+        p_user_id: user.id,
+        p_ip_address: '127.0.0.1' // On utilise une IP par défaut car l'IP réelle n'est pas accessible côté client
+      });
+
+      if (error) {
+        console.error('Error checking search limits:', error);
+        return true; // En cas d'erreur, on autorise la recherche
+      }
+
+      // Cast to the appropriate type and handle the response
+      const result = data as unknown as { can_search: boolean; remaining: number; message: string };
+      
+      console.log('Search limits check result:', result);
+      
+      if (result.remaining !== undefined) {
+        setRemainingSearches(result.remaining);
+      }
+      
+      // -1 signifie que l'utilisateur a des recherches illimitées (admin)
+      setSearchLimitReached(result.remaining === 0 && result.remaining !== -1);
+      
+      return result.can_search;
+    } catch (error) {
+      console.error('Error in checkSearchLimits:', error);
+      return true; // En cas d'erreur, on autorise la recherche
+    }
+  }, [user]);
+
+  const incrementSearchCount = useCallback(async () => {
     if (!user) return;
 
     try {
-      const ip = await getUserIp();
-      const { data, error } = await supabase.rpc('can_perform_search', {
-        p_user_id: user.id,
-        p_ip_address: ip
-      });
-
-      if (error) {
-        console.error("Erreur lors de la vérification des limites de recherche:", error);
-        return;
-      }
-
-      if (data && isSearchLimitResponse(data)) {
-        setSearchLimitReached(!data.can_search);
-        setRemainingSearches(data.remaining);
-        
-        if (!data.can_search) {
-          toast({
-            title: "Limite de recherche atteinte",
-            description: "Vous avez atteint votre limite de 3 recherches par jour.",
-            variant: "destructive"
-          });
-        }
-      }
-    } catch (error) {
-      console.error("Erreur lors de la vérification des limites:", error);
-    }
-  };
-
-  const incrementSearchCount = async () => {
-    if (!searchParams.query || !user) return;
-
-    try {
-      const ip = await getUserIp();
       const { data, error } = await supabase.rpc('increment_search_count', {
         p_user_id: user.id,
-        p_ip_address: ip
+        p_ip_address: '127.0.0.1'
       });
 
       if (error) {
-        console.error("Erreur lors de l'incrémentation du compteur:", error);
+        console.error('Error incrementing search count:', error);
         return;
       }
 
-      if (data && isSearchLimitResponse(data)) {
-        setRemainingSearches(data.remaining);
-        
-        if (!data.success) {
-          setSearchLimitReached(true);
-          toast({
-            title: "Limite de recherche atteinte",
-            description: "Vous avez atteint votre limite de 3 recherches par jour.",
-            variant: "destructive"
-          });
-        } else if (data.remaining !== -1) {
-          toast({
-            description: `Il vous reste ${data.remaining} recherche(s) aujourd'hui.`
-          });
-        }
+      // Cast to appropriate type and handle the response
+      const result = data as unknown as { success: boolean; remaining: number; message: string };
+      
+      if (result.remaining !== undefined) {
+        setRemainingSearches(result.remaining);
       }
+      
+      setSearchLimitReached(result.remaining === 0 && result.remaining !== -1);
+      
     } catch (error) {
-      console.error("Erreur lors de l'incrémentation du compteur:", error);
+      console.error('Error in incrementSearchCount:', error);
     }
-  };
+  }, [user]);
 
-  const handleSearch = async (query: string, searchType: SearchType, language: LanguageFilter): Promise<void> => {
+  const handleSearch = async (
+    searchParams: string,
+    searchType: SearchType,
+    language: LanguageFilter
+  ) => {
+    setIsLoading(true);
+    setIsError(false);
     setSearchError(undefined);
-    
-    if (!query.trim()) {
-      setSearchParams({ query: '', type: searchType, language });
-      setShowAllResults(false);
-      return;
-    }
-    
-    if (!user) {
-      toast({
-        title: "Connexion requise",
-        description: "Vous devez vous connecter ou créer un compte pour faire une recherche.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (searchLimitReached) {
-      toast({
-        title: "Limite de recherche atteinte",
-        description: "Vous avez atteint votre limite de 3 recherches par jour.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
+    setDisplayedBooks(10);
     setShowAllResults(false);
-    setDisplayedBooks(12);
-    
-    await incrementSearchCount();
-    
-    setSearchParams({ query, type: searchType, language });
-  };
+    setSearchQuery(searchParams);
 
-  const { 
-    data: books = [], 
-    isLoading,
-    refetch,
-    error: queryError 
-  } = useQuery({
-    queryKey: ['allBooks', searchParams.query, searchParams.type, searchParams.language, refreshKey],
-    queryFn: () => searchAllBooks(searchParams.query, searchParams.type, searchParams.language, MAX_SEARCH_RESULTS),
-    enabled: searchParams.query.length > 0 && !searchLimitReached && !!user,
-    retry: 1,
-    meta: {
-      onError: (error: Error) => {
-        console.error("Erreur lors de la recherche:", error);
-        setSearchError("Une erreur est survenue lors de la recherche. Veuillez réessayer plus tard.");
-      }
+    const canSearch = await checkSearchLimits();
+    if (!canSearch) {
+      setIsLoading(false);
+      setSearchLimitReached(true);
+      setBooks([]);
+      setVisibleBooks([]);
+      setTotalBooks(0);
+      return;
     }
-  });
+
+    try {
+      await incrementSearchCount();
+      const { results, total } = await searchAuthor(searchParams, searchType, language);
+      setBooks(results);
+      setVisibleBooks(results.slice(0, displayedBooks));
+      setTotalBooks(total);
+    } catch (error: any) {
+      setIsError(true);
+      setSearchError(error.message || 'Une erreur est survenue lors de la recherche.');
+      setBooks([]);
+      setVisibleBooks([]);
+      setTotalBooks(0);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLoadMore = () => {
-    if (displayedBooks >= books.length) {
-      toast({
-        description: "Il n'y a plus de livres à afficher.",
-      });
-      return;
-    }
-    setDisplayedBooks(prev => prev + 12);
+    const newDisplayedBooks = displayedBooks + 10;
+    setVisibleBooks(books.slice(0, newDisplayedBooks));
+    setDisplayedBooks(newDisplayedBooks);
   };
 
   const handleShowAllBooks = () => {
+    setVisibleBooks(books);
     setShowAllResults(true);
-    setDisplayedBooks(books.length);
-    toast({
-      description: `Affichage de tous les ${books.length} livres de l'auteur.`,
-    });
   };
 
   const handleRefresh = () => {
-    setRefreshKey(prev => prev + 1);
-    refetch();
+    // Force a refresh of the data
+    setVisibleBooks(books.slice(0, displayedBooks));
   };
 
-  const visibleBooks = showAllResults ? books : books.slice(0, displayedBooks);
+  useEffect(() => {
+    setVisibleBooks(books.slice(0, displayedBooks));
+  }, [books, displayedBooks]);
 
   return {
     searchParams,
-    books,
     visibleBooks,
-    isLoading,
+    books,
+    isLoading, 
     showAllResults,
     displayedBooks,
     remainingSearches,
@@ -198,7 +159,7 @@ export function useBookSearch() {
     handleShowAllBooks,
     handleRefresh,
     checkSearchLimits,
-    searchQuery: searchParams.query,
-    totalBooks: books.length
+    searchQuery,
+    totalBooks
   };
 }

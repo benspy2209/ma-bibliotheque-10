@@ -5,9 +5,10 @@ import { CarouselContent } from "./CarouselContent";
 import { CarouselItem } from "./CarouselItem";
 import { CarouselPrevious } from "./CarouselPrevious";
 import { CarouselNext } from "./CarouselNext";
+import { CarouselApi } from "./carousel-context";
 
 export {
-  type CarouselApi,
+  CarouselApi,
   Carousel,
   CarouselContent,
   CarouselItem,

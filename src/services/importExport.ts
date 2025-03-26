@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Book } from "@/types/book";
+import { Book } from '@/types/book';
+import { castQueryResult, castSingleResult } from "@/lib/supabase-helpers";
 
 // Type for export data
 interface ExportData {
@@ -34,20 +35,17 @@ export const exportLibrary = async (): Promise<ImportExportResult> => {
     }
     
     // Retrieve all user's books
-    const { data, error } = await supabase
+    const result = await supabase
       .from('books')
       .select('book_data, status, completion_date')
       .eq('user_id', user.id);
     
-    if (error) {
-      console.error('Erreur lors de la récupération des livres:', error);
-      return {
-        success: false,
-        error: error.message
-      };
-    }
+    const data = castQueryResult<{
+      book_data: any;
+      status: string | null;
+      completion_date: string | null;
+    }>(result);
     
-    // Check if any books were retrieved
     if (!data || data.length === 0) {
       console.log('Aucun livre trouvé pour l\'exportation');
       return {
@@ -121,13 +119,15 @@ export const importLibrary = async (data: any): Promise<ImportExportResult> => {
     // Process all books to import
     for (const book of data.books) {
       // Check if the book already exists for this user
-      const { data: existingBook } = await supabase
+      const result = await supabase
         .from('books')
         .select('id')
         .eq('user_id', user.id)
         .eq('id', book.id)
         .maybeSingle();
         
+      const existingBook = castSingleResult<{ id: string }>(result);
+      
       // Prepare book data for insertion/update
       const bookData = {
         user_id: user.id,
@@ -141,7 +141,7 @@ export const importLibrary = async (data: any): Promise<ImportExportResult> => {
         // Update existing book
         const { error: updateError } = await supabase
           .from('books')
-          .update(bookData)
+          .update(bookData as any)
           .eq('user_id', user.id)
           .eq('id', book.id);
           
@@ -153,7 +153,7 @@ export const importLibrary = async (data: any): Promise<ImportExportResult> => {
         // Insert a new book
         const { error: insertError } = await supabase
           .from('books')
-          .insert(bookData);
+          .insert(bookData as any);
           
         if (insertError) {
           console.error('Erreur lors de l\'insertion du livre:', insertError);
