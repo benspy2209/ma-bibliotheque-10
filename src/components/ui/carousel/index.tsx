@@ -7,7 +7,6 @@ import { CarouselPrevious } from "./CarouselPrevious";
 import { CarouselNext } from "./CarouselNext";
 
 export {
-  type CarouselApi,
   Carousel,
   CarouselContent,
   CarouselItem,
@@ -15,5 +14,5 @@ export {
   CarouselNext,
 };
 
-// Re-export the type for better DX
-export type { CarouselProps } from "./Carousel";
+// Re-export the types for better DX
+export type { CarouselApi, CarouselProps } from "./carousel-context";
