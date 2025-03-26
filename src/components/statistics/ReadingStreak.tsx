@@ -1,6 +1,8 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import { 
   Card, 
   CardHeader, 
@@ -12,18 +14,41 @@ import {
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Flame, Award, Calendar, Check } from 'lucide-react';
-import { hasReadToday, markTodayAsRead, getReadingStreak } from '@/services/readingStreakService';
+import { Flame, Award, Calendar, Check, X, Calendar as CalendarIcon } from 'lucide-react';
+import { 
+  hasReadToday, 
+  markTodayAsRead, 
+  getReadingStreak, 
+  getStreakStartDate,
+  setStartDate,
+  fillDatesUntilToday
+} from '@/services/readingStreakService';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 export function ReadingStreak() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showCongrats, setShowCongrats] = useState(false);
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
   // Récupérer le streak de lecture actuel
   const { data: streak = 0, isLoading: isLoadingStreak } = useQuery({
     queryKey: ['readingStreak'],
     queryFn: getReadingStreak,
+    staleTime: 60 * 1000, // 1 minute
+  });
+
+  // Récupérer la date de début de la série
+  const { data: startDate, isLoading: isLoadingStartDate } = useQuery({
+    queryKey: ['streakStartDate'],
+    queryFn: getStreakStartDate,
     staleTime: 60 * 1000, // 1 minute
   });
 
@@ -35,7 +60,7 @@ export function ReadingStreak() {
   });
 
   // Mutation pour marquer comme lu
-  const { mutate, isPending } = useMutation({
+  const { mutate: markAsRead, isPending: isMarkingAsRead } = useMutation({
     mutationFn: markTodayAsRead,
     onSuccess: (data) => {
       if (data.success) {
@@ -69,11 +94,65 @@ export function ReadingStreak() {
     }
   });
 
+  // Mutation pour définir une date de début
+  const { mutate: setStartDateMutation, isPending: isSettingStartDate } = useMutation({
+    mutationFn: (date: Date) => fillDatesUntilToday(date),
+    onSuccess: (data) => {
+      if (data.success) {
+        queryClient.invalidateQueries({ queryKey: ['readingStreak'] });
+        queryClient.invalidateQueries({ queryKey: ['readToday'] });
+        queryClient.invalidateQueries({ queryKey: ['streakStartDate'] });
+        
+        toast({
+          title: "Date de début définie ! 📆",
+          description: "Votre série de lecture a été mise à jour avec succès !",
+        });
+        
+        setShowStartDatePicker(false);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: data.message,
+        });
+      }
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de définir la date de début. Veuillez réessayer.",
+      });
+    }
+  });
+
   const handleMarkAsRead = () => {
-    mutate();
+    markAsRead();
   };
 
-  const isLoading = isLoadingStreak || isCheckingToday || isPending;
+  const handleMarkAsNotRead = () => {
+    toast({
+      variant: "default",
+      title: "Pas de lecture aujourd'hui",
+      description: "Pas de problème ! Vous pouvez toujours revenir demain pour maintenir votre série.",
+    });
+  };
+
+  const handleSetStartDate = () => {
+    if (selectedDate) {
+      setStartDateMutation(selectedDate);
+    }
+  };
+
+  const isLoading = isLoadingStreak || isCheckingToday || isMarkingAsRead || isLoadingStartDate || isSettingStartDate;
+
+  // Formater la date de début pour l'affichage
+  const formattedStartDate = startDate 
+    ? format(new Date(startDate), 'dd MMMM yyyy', { locale: fr }) 
+    : 'Non définie';
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   return (
     <Card className="relative overflow-hidden">
@@ -118,6 +197,75 @@ export function ReadingStreak() {
             ? "Commencez votre série aujourd'hui !" 
             : `Encore ${30 - (streak % 30)} jours pour atteindre votre prochain jalon de 30 jours`}
         </div>
+
+        <div className="flex items-center justify-between pt-2 border-t">
+          <span className="text-xs text-muted-foreground">Date de début:</span>
+          <span className="text-xs font-medium">{formattedStartDate}</span>
+        </div>
+
+        <div className="flex justify-end">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-xs" 
+            onClick={() => setShowStartDatePicker(true)}
+          >
+            Modifier la date de début
+          </Button>
+        </div>
+
+        {showStartDatePicker && (
+          <div className="border rounded-md p-3 space-y-3">
+            <div className="flex justify-between items-center">
+              <h4 className="text-sm font-medium">Définir une date de début</h4>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setShowStartDatePicker(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="flex flex-col space-y-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !selectedDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {selectedDate ? (
+                      format(selectedDate, "dd MMMM yyyy", { locale: fr })
+                    ) : (
+                      <span>Sélectionnez une date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    disabled={(date) => date > today}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+
+              <Button 
+                onClick={handleSetStartDate} 
+                disabled={!selectedDate || isSettingStartDate}
+              >
+                Confirmer la date
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
       
       <CardFooter className="pt-0">
@@ -130,13 +278,29 @@ export function ReadingStreak() {
             <Calendar className="h-4 w-4" />
           </div>
         ) : (
-          <Button 
-            onClick={handleMarkAsRead} 
-            disabled={isLoading} 
-            className="w-full"
-          >
-            Avez-vous lu aujourd'hui ?
-          </Button>
+          <div className="w-full space-y-2">
+            <p className="text-sm text-center">Avez-vous lu aujourd'hui ?</p>
+            <div className="flex gap-2 justify-center">
+              <Button 
+                onClick={handleMarkAsRead} 
+                disabled={isLoading} 
+                className="flex-1"
+                variant="default"
+              >
+                <Check className="mr-1 h-4 w-4" />
+                Oui
+              </Button>
+              <Button 
+                onClick={handleMarkAsNotRead} 
+                disabled={isLoading} 
+                className="flex-1"
+                variant="outline"
+              >
+                <X className="mr-1 h-4 w-4" />
+                Non
+              </Button>
+            </div>
+          </div>
         )}
       </CardFooter>
     </Card>
