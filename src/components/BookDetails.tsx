@@ -7,6 +7,7 @@ import { saveBook } from '@/services/supabaseBooks';
 import { BookDetailsDialog } from './book-details/BookDetailsDialog';
 import { useQueryClient } from '@tanstack/react-query';
 import { getAmazonAffiliateUrl } from '@/lib/amazon-utils';
+import { differenceInDays } from 'date-fns';
 
 export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProps) {
   const [currentBook, setCurrentBook] = useState(book);
@@ -27,6 +28,32 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
       }));
     }
   }, [queryClient, isOpen, book]); // S'exécute uniquement lorsque le modal s'ouvre
+
+  // Mettre à jour automatiquement le nombre de jours de lecture si les dates sont disponibles
+  useEffect(() => {
+    if (currentBook.startReadingDate && currentBook.completionDate && currentBook.status === 'completed') {
+      try {
+        const startDate = new Date(currentBook.startReadingDate);
+        const endDate = new Date(currentBook.completionDate);
+        
+        // Vérifier que les dates sont valides
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return;
+        
+        // Calculer la différence en jours (+1 pour inclure le jour de fin)
+        const daysDiff = differenceInDays(endDate, startDate) + 1;
+        
+        // Mettre à jour seulement si la valeur est différente
+        if (daysDiff > 0 && daysDiff !== currentBook.readingTimeDays) {
+          setCurrentBook(prev => ({
+            ...prev,
+            readingTimeDays: daysDiff
+          }));
+        }
+      } catch (error) {
+        console.error('Erreur lors du calcul des jours de lecture:', error);
+      }
+    }
+  }, [currentBook.startReadingDate, currentBook.completionDate, currentBook.status]);
 
   const handleStatusChange = async (status: ReadingStatus) => {
     const updatedBook = { ...currentBook, status };

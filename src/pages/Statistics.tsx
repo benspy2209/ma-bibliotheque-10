@@ -167,6 +167,11 @@ export default function Statistics() {
       totalReadingDays = completedBooks.reduce((sum, book) => {
         if (book.readingTimeDays) {
           return sum + book.readingTimeDays;
+        } else if (book.startReadingDate && book.completionDate) {
+          const startDate = new Date(book.startReadingDate);
+          const endDate = new Date(book.completionDate);
+          const daysDiff = Math.max(1, differenceInDays(endDate, startDate) + 1);
+          return sum + daysDiff;
         } else if (book.completionDate) {
           return sum + 14;
         }
@@ -255,7 +260,20 @@ export default function Statistics() {
     const monthlyGoal = readingGoals.monthly_goal;
     const monthlyProgressPercentage = Math.min(100, (booksThisMonth / monthlyGoal) * 100);
 
-    const avgReadingTime = totalReadingDays / Math.max(1, completedBooks.length);
+    const booksWithReadingTime = completedBooks.filter(book => 
+      (book.readingTimeDays !== undefined) || 
+      (book.startReadingDate && book.completionDate)
+    );
+    
+    const avgReadingTime = booksWithReadingTime.length > 0 
+      ? booksWithReadingTime.reduce((sum, book) => {
+          let days = book.readingTimeDays;
+          if (!days && book.startReadingDate && book.completionDate) {
+            days = differenceInDays(new Date(book.completionDate), new Date(book.startReadingDate)) + 1;
+          }
+          return sum + (days || 0);
+        }, 0) / booksWithReadingTime.length
+      : 0;
     
     const readingTimeDistribution = [
       { name: '1-7 jours', value: 0, color: '#8884d8' },
@@ -265,7 +283,12 @@ export default function Statistics() {
     ];
     
     completedBooks.forEach(book => {
-      const days = book.readingTimeDays;
+      let days = book.readingTimeDays;
+      
+      if (days === undefined && book.startReadingDate && book.completionDate) {
+        days = differenceInDays(new Date(book.completionDate), new Date(book.startReadingDate)) + 1;
+      }
+      
       if (days !== undefined) {
         if (days <= 7) {
           readingTimeDistribution[0].value++;
