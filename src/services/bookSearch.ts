@@ -190,33 +190,38 @@ function mapIsbndbBookToBook(isbndbBook: any, defaultAuthor?: string): Book {
   };
 }
 
-export async function searchAllBooks(query: string, searchType: SearchType = 'author', language: LanguageFilter = 'fr', maxResults: number = 100): Promise<Book[]> {
-  if (!query.trim()) return [];
+export async function searchAllBooks(query: string, searchType: SearchType = 'author', language: LanguageFilter = 'fr', maxResults: number = 100): Promise<{results: Book[], total: number}> {
+  if (!query.trim()) return { results: [], total: 0 };
 
   try {
     console.log(`Démarrage de la recherche: "${query}" (type: ${searchType}, langue: ${language})`);
     
     const books = await searchIsbndb(query, searchType, language, maxResults);
     
+    let finalBooks: Book[] = books;
+    
     if (books.length === 0) {
       console.log("Aucun résultat trouvé via ISBNDB, tentative avec la méthode alternative");
       if (searchType === 'author') {
         // Tenter avec la recherche alternative si aucun résultat n'est trouvé
-        return await fallbackAuthorSearch(query, language, maxResults);
+        finalBooks = await fallbackAuthorSearch(query, language, maxResults);
       }
     }
     
     // Appliquer un filtre supplémentaire pour éliminer les dictionnaires et autres ouvrages techniques
-    const filteredBooks = filterNonBookResults(books);
+    const filteredBooks = filterNonBookResults(finalBooks);
     
     // Suppression des doublons avec notre fonction améliorée
     const uniqueBooks = removeDuplicateBooks(filteredBooks);
     
-    console.log(`Total des résultats après filtrage: ${uniqueBooks.length} livres (avant filtrage: ${books.length})`);
+    console.log(`Total des résultats après filtrage: ${uniqueBooks.length} livres (avant filtrage: ${finalBooks.length})`);
     
-    return uniqueBooks;
+    return { 
+      results: uniqueBooks, 
+      total: uniqueBooks.length 
+    };
   } catch (error) {
     console.error('Erreur lors de la recherche:', error);
-    return [];
+    return { results: [], total: 0 };
   }
 }

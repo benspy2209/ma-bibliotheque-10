@@ -48,7 +48,8 @@ export function useBookSearch() {
         setRemainingSearches(result.remaining);
       }
       
-      // Fix comparison: Check if remaining is 0 and it's not unlimited (-1)
+      // Fix comparison: Check if remaining is 0 and NOT negative 1 
+      // (unlimited) using !== instead of equality check with different types
       setSearchLimitReached(result.remaining === 0 && result.remaining !== -1);
       
       return result.can_search;
@@ -79,7 +80,7 @@ export function useBookSearch() {
         setRemainingSearches(result.remaining);
       }
       
-      // Fix the comparison logic with strict type checks
+      // Fix the comparison logic with proper type checks
       if (result.remaining === 0) {
         // Only set to true if not unlimited (-1)
         setSearchLimitReached(result.remaining !== -1);
@@ -116,11 +117,11 @@ export function useBookSearch() {
 
     try {
       await incrementSearchCount();
-      // Use searchAllBooks instead of searchAuthor
-      const { results, total } = await searchAllBooks(searchParams, searchType, language);
-      setBooks(results);
-      setVisibleBooks(results.slice(0, displayedBooks));
-      setTotalBooks(total);
+      // Use searchAllBooks and properly handle the return type
+      const searchResult = await searchAllBooks(searchParams, searchType, language);
+      setBooks(searchResult.results);
+      setVisibleBooks(searchResult.results.slice(0, displayedBooks));
+      setTotalBooks(searchResult.total);
     } catch (error: any) {
       setIsError(true);
       setSearchError(error.message || 'Une erreur est survenue lors de la recherche.');
