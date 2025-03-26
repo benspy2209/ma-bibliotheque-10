@@ -1,12 +1,5 @@
 
 import React from 'react';
-import { 
-  Carousel, 
-  CarouselContent, 
-  CarouselItem, 
-  CarouselNext, 
-  CarouselPrevious 
-} from '@/components/ui/carousel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -39,7 +32,7 @@ const testimonials: TestimonialProps[] = [
 ];
 
 const TestimonialCard = ({ content, author, role, avatarSrc }: TestimonialProps) => (
-  <Card className="border-none shadow-md">
+  <Card className="border-none shadow-md h-full">
     <CardContent className="pt-6 pb-6">
       <Badge variant="secondary" className="mb-4">Témoignage</Badge>
       <blockquote className="text-lg italic mb-6">
@@ -72,19 +65,13 @@ export const TestimonialsSection = () => {
           </p>
         </div>
 
-        <Carousel className="mx-auto max-w-5xl">
-          <CarouselContent>
-            {testimonials.map((testimonial, index) => (
-              <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/2 px-4">
-                <TestimonialCard {...testimonial} />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <div className="hidden md:flex justify-end gap-2 mt-6">
-            <CarouselPrevious className="static transform-none" />
-            <CarouselNext className="static transform-none" />
-          </div>
-        </Carousel>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          {testimonials.map((testimonial, index) => (
+            <div key={index} className="flex">
+              <TestimonialCard {...testimonial} />
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
