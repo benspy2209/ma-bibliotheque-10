@@ -27,6 +27,7 @@ export function useReadingSpeed() {
     if (newSpeed > 0) {
       setReadingSpeed(newSpeed);
       localStorage.setItem(READING_SPEED_KEY, newSpeed.toString());
+      console.log('Vitesse de lecture mise à jour:', newSpeed);
     }
   };
 

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useReadingSpeed } from '@/hooks/use-reading-speed';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Sliders } from 'lucide-react';
+import { Sliders, Clock } from 'lucide-react';
 import {
   Popover,
   PopoverContent,
@@ -39,8 +39,8 @@ export function ReadingSpeedSetting() {
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline" size="sm" className="flex items-center gap-1">
-          <Sliders className="h-4 w-4" />
-          <span className="hidden sm:inline">Vitesse de lecture</span>
+          <Clock className="h-4 w-4" />
+          <span className="sm:inline">Vitesse de lecture</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80">

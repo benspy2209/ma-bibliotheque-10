@@ -184,7 +184,7 @@ export default function Statistics() {
       readingSpeed = totalPages / (totalReadingDays || 1);
     }
 
-    const totalReadingTimeHours = totalPages / readingSpeed;
+    const totalReadingTimeHours = (totalPages / readingSpeed).toFixed(1);
 
     const booksByMonth = completedBooks.reduce((acc, book) => {
       if (!book.completionDate) return acc;
