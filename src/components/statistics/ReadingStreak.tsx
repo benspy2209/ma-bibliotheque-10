@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Flame, Award, Calendar, Check, X, Calendar as CalendarIcon } from 'lucide-react';
+import { Flame, Award, Check, X, Calendar as CalendarIcon } from 'lucide-react';
 import { 
   hasReadToday, 
   markTodayAsRead, 
@@ -252,7 +252,7 @@ export function ReadingStreak() {
                     onSelect={setSelectedDate}
                     disabled={(date) => date > today}
                     initialFocus
-                    className={cn("p-3 pointer-events-auto")}
+                    className="p-3 pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>
@@ -275,7 +275,7 @@ export function ReadingStreak() {
               <Check className="h-5 w-5" />
               <span>Vous avez déjà lu aujourd'hui</span>
             </div>
-            <Calendar className="h-4 w-4" />
+            <CalendarIcon className="h-4 w-4" />
           </div>
         ) : (
           <div className="w-full space-y-2">
