@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { Book } from '@/types/book';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Calendar } from "lucide-react";
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -37,12 +37,17 @@ export function YearlyBooksList({ books, selectedYear }: YearlyBooksListProps) {
 
   return (
     <div className="bg-card rounded-lg border p-4">
-      <h3 className="font-semibold mb-3">Livres lus en {selectedYear}</h3>
-      <ScrollArea className="h-[300px] pr-4">
+      <div className="flex items-center mb-4">
+        <Calendar className="h-5 w-5 mr-2 text-primary" />
+        <h3 className="font-semibold text-lg">Livres lus en {selectedYear}</h3>
+        <span className="ml-2 text-sm text-muted-foreground">({filteredBooks.length} livres)</span>
+      </div>
+      
+      <ScrollArea className="h-[400px] pr-4">
         <div className="space-y-4">
           {filteredBooks.map(book => (
             <div key={book.id} className="flex items-start gap-3 pb-3 border-b">
-              <Avatar className="h-12 w-12 rounded-md">
+              <Avatar className="h-14 w-14 rounded-md">
                 {book.thumbnail ? (
                   <AvatarImage src={book.thumbnail} alt={book.title} />
                 ) : (
@@ -59,6 +64,11 @@ export function YearlyBooksList({ books, selectedYear }: YearlyBooksListProps) {
                 {book.completionDate && (
                   <p className="text-xs text-muted-foreground">
                     Terminé le {format(new Date(book.completionDate), 'dd MMMM yyyy', { locale: fr })}
+                  </p>
+                )}
+                {book.numberOfPages && (
+                  <p className="text-xs text-muted-foreground">
+                    {book.numberOfPages} pages
                   </p>
                 )}
               </div>

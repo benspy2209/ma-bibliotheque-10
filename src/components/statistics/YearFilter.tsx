@@ -1,9 +1,10 @@
 
 import { useState, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
-import { Calendar } from "lucide-react";
+import { Calendar, FilterIcon, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 interface YearFilterProps {
   years: number[];
@@ -26,51 +27,60 @@ export function YearFilter({ years, selectedYear, onYearSelect }: YearFilterProp
   }, [years]);
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="h-8 gap-1 border-dashed"
-        >
-          <Calendar className="h-3.5 w-3.5" />
-          <span>{selectedYear ? `Année: ${selectedYear}` : "Toutes les années"}</span>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-4" align="start">
-        <div className="space-y-2">
-          <div className="font-medium">Filtrer par année</div>
-          <div className="grid grid-cols-4 gap-2 pt-1">
-            {yearGrid.map((row, rowIndex) => (
-              <div key={`row-${rowIndex}`} className="contents">
-                {row.map((year) => (
-                  <Button
-                    key={year}
-                    variant={year === selectedYear ? "default" : "outline"}
-                    className={cn(
-                      "h-8 w-16",
-                      year === selectedYear ? "bg-primary text-primary-foreground" : "text-muted-foreground"
-                    )}
-                    onClick={() => onYearSelect(year === selectedYear ? null : year)}
-                  >
-                    {year}
-                  </Button>
-                ))}
-              </div>
-            ))}
+    <div className="flex items-center space-x-2">
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="h-9 gap-1 border-dashed flex items-center font-medium"
+          >
+            <FilterIcon className="h-4 w-4 mr-1" />
+            <span>{selectedYear ? `Année: ${selectedYear}` : "Filtrer par année"}</span>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-4" align="start">
+          <div className="space-y-2">
+            <div className="font-medium">Filtrer par année</div>
+            <div className="grid grid-cols-4 gap-2 pt-1">
+              {yearGrid.map((row, rowIndex) => (
+                <div key={`row-${rowIndex}`} className="contents">
+                  {row.map((year) => (
+                    <Button
+                      key={year}
+                      variant={year === selectedYear ? "default" : "outline"}
+                      className={cn(
+                        "h-8 w-16",
+                        year === selectedYear ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+                      )}
+                      onClick={() => onYearSelect(year === selectedYear ? null : year)}
+                    >
+                      {year}
+                    </Button>
+                  ))}
+                </div>
+              ))}
+            </div>
+            {selectedYear && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="w-full mt-2 flex items-center justify-center" 
+                onClick={() => onYearSelect(null)}
+              >
+                <X className="h-4 w-4 mr-1" />
+                Voir toutes les années
+              </Button>
+            )}
           </div>
-          {selectedYear && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="w-full mt-2" 
-              onClick={() => onYearSelect(null)}
-            >
-              Voir toutes les années
-            </Button>
-          )}
-        </div>
-      </PopoverContent>
-    </Popover>
+        </PopoverContent>
+      </Popover>
+      
+      {selectedYear && (
+        <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20 text-primary">
+          {selectedYear}
+        </Badge>
+      )}
+    </div>
   );
 }

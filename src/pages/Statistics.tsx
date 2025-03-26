@@ -1,3 +1,4 @@
+
 import { useMemo, useState } from 'react';
 import { Book } from '@/types/book';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -23,7 +24,8 @@ import {
   TrendingUp,
   BookMarked,
   Languages,
-  Award
+  Award,
+  FilterIcon
 } from 'lucide-react';
 import { format, differenceInDays, parseISO, getYear, differenceInMonths } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -45,6 +47,7 @@ import { ReadingGoalsForm } from "@/components/statistics/ReadingGoalsForm";
 import { useReadingGoals } from "@/hooks/use-reading-goals";
 import { YearFilter } from "@/components/statistics/YearFilter";
 import { YearlyBooksList } from "@/components/statistics/YearlyBooksList";
+import { Badge } from "@/components/ui/badge";
 
 const COLORS = [
   '#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE', '#00C49F',
@@ -310,26 +313,40 @@ export default function Statistics() {
         <NavBar />
         <div className="px-4 py-8 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto space-y-8">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h1 className="text-3xl font-bold">Statistiques de lecture</h1>
                 <p className="text-muted-foreground">
                   Analyse de vos habitudes de lecture
                 </p>
               </div>
-              <div className="mt-4 md:mt-0 flex items-center gap-2">
-                <YearFilter
-                  years={availableYears}
-                  selectedYear={selectedYear}
-                  onYearSelect={setSelectedYear}
-                />
-                {selectedYear && (
-                  <div className="text-xs font-semibold px-2 py-1 bg-primary/10 text-primary rounded-md">
-                    {completedBooks.length} livres en {selectedYear}
-                  </div>
-                )}
-              </div>
+              
+              {/* Filtre d'année plus visible ici */}
+              <YearFilter
+                years={availableYears}
+                selectedYear={selectedYear}
+                onYearSelect={setSelectedYear}
+              />
             </div>
+            
+            {selectedYear && (
+              <div className="bg-muted/50 border rounded-lg p-4 flex items-center justify-between">
+                <div className="flex items-center">
+                  <Calendar className="h-5 w-5 mr-2 text-primary" />
+                  <span className="font-medium">Filtré par année: {selectedYear}</span>
+                  <Badge className="ml-2 bg-primary">{completedBooks.length} livres</Badge>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setSelectedYear(null)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Effacer le filtre
+                </Button>
+              </div>
+            )}
 
             <div className="grid gap-4 md:grid-cols-5">
               <Card>
@@ -802,15 +819,15 @@ export default function Statistics() {
                 </Card>
               </TabsContent>
             </Tabs>
-              {selectedYear && (
-                <div className="mt-8">
-                  <YearlyBooksList 
-                    books={allCompletedBooks} 
-                    selectedYear={selectedYear} 
-                  />
-                </div>
-              )}
-            </div>
+            
+            {selectedYear && (
+              <div className="mt-8">
+                <YearlyBooksList 
+                  books={allCompletedBooks} 
+                  selectedYear={selectedYear} 
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
