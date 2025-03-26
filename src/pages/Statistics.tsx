@@ -1,3 +1,4 @@
+
 import { useMemo, useState } from 'react';
 import { Book } from '@/types/book';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -25,7 +26,8 @@ import {
   Languages,
   Award,
   FilterIcon,
-  X
+  X,
+  Bookmark
 } from 'lucide-react';
 import { format, differenceInDays, parseISO, getYear, differenceInMonths } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -197,20 +199,25 @@ export default function Statistics() {
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
-    const languageCounts = completedBooks.reduce((acc, book) => {
-      const languages = book.language || [];
+    // Nouveau comptage pour les genres (catégories)
+    const genreCounts = completedBooks.reduce((acc, book) => {
+      // On récupère les sujets (subjects) pour compter comme genres
+      const subjects = book.subjects || [];
       
-      languages.forEach(lang => {
-        if (!acc[lang]) {
-          acc[lang] = { name: lang, count: 0 };
+      subjects.forEach(subject => {
+        if (!subject) return;
+        if (!acc[subject]) {
+          acc[subject] = { name: subject, count: 0 };
         }
-        acc[lang].count += 1;
+        acc[subject].count += 1;
       });
       
       return acc;
     }, {} as Record<string, { name: string; count: number }>);
     
-    const languageData = Object.values(languageCounts).sort((a, b) => b.count - a.count);
+    const topGenres = Object.values(genreCounts)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
 
     const currentYear = getYear(new Date());
     const booksThisYear = completedBooks.filter(book => 
@@ -263,7 +270,7 @@ export default function Statistics() {
       readingSpeed: readingSpeed.toFixed(1),
       totalReadingTime: totalReadingTime.toFixed(1),
       topAuthors,
-      languageData,
+      topGenres,
       booksThisYear,
       yearlyGoal,
       yearlyProgressPercentage,
@@ -405,7 +412,7 @@ export default function Statistics() {
               <TabsList className="mb-4">
                 <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
                 <TabsTrigger value="monthly">Données mensuelles</TabsTrigger>
-                <TabsTrigger value="authors">Auteurs & Langues</TabsTrigger>
+                <TabsTrigger value="authors">Auteurs & Genres</TabsTrigger>
                 <TabsTrigger value="reading-time">Temps de lecture</TabsTrigger>
               </TabsList>
 
@@ -641,29 +648,39 @@ export default function Statistics() {
 
                   <Card>
                     <CardHeader>
-                      <CardTitle>Langues de lecture</CardTitle>
+                      <CardTitle>Genres les plus lus</CardTitle>
                     </CardHeader>
                     <CardContent className="h-[300px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={stats.languageData}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            label={renderCustomizedLabel}
-                            outerRadius={80}
-                            fill="#8884d8"
-                            dataKey="count"
-                          >
-                            {stats.languageData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[(index + 4) % COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Legend />
-                          <Tooltip formatter={(value, name, props) => [`${value} livre(s)`, props.payload.name]} />
-                        </PieChart>
-                      </ResponsiveContainer>
+                      {stats.topGenres && stats.topGenres.length > 0 ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={stats.topGenres}
+                              cx="50%"
+                              cy="50%"
+                              labelLine={false}
+                              label={renderCustomizedLabel}
+                              outerRadius={80}
+                              fill="#8884d8"
+                              dataKey="count"
+                            >
+                              {stats.topGenres.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={COLORS[(index + 4) % COLORS.length]} />
+                              ))}
+                            </Pie>
+                            <Legend />
+                            <Tooltip formatter={(value, name, props) => [`${value} livre(s)`, props.payload.name]} />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <div className="flex items-center justify-center h-full">
+                          <div className="text-center text-muted-foreground">
+                            <Bookmark className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                            <p>Aucun genre de livre trouvé</p>
+                            <p className="text-sm mt-1">Ajoutez des catégories à vos livres pour voir les statistiques</p>
+                          </div>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </div>
@@ -693,6 +710,34 @@ export default function Statistics() {
                     </Table>
                   </CardContent>
                 </Card>
+                
+                {stats.topGenres && stats.topGenres.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Top 5 des genres</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Rang</TableHead>
+                            <TableHead>Genre</TableHead>
+                            <TableHead className="text-right">Livres</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {stats.topGenres.map((genre, index) => (
+                            <TableRow key={genre.name}>
+                              <TableCell>{index + 1}</TableCell>
+                              <TableCell>{genre.name}</TableCell>
+                              <TableCell className="text-right">{genre.count}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </CardContent>
+                  </Card>
+                )}
               </TabsContent>
 
               <TabsContent value="reading-time" className="space-y-4">
