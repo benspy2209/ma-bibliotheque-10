@@ -49,6 +49,7 @@ import { YearFilter } from "@/components/statistics/YearFilter";
 import { YearlyBooksList } from "@/components/statistics/YearlyBooksList";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ReadingStreak } from "@/components/statistics/ReadingStreak";
 
 const COLORS = [
   '#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE', '#00C49F',
@@ -64,21 +65,18 @@ export default function Statistics() {
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     staleTime: 0,
-    gcTime: 0, // This replaces the old cacheTime property
+    gcTime: 0,
   });
 
   const { data: readingGoals } = useReadingGoals();
 
-  // Log books for debugging
   console.log('All books loaded:', books.length, 'books');
   console.log('Book statuses:', books.map(book => ({ id: book.id, title: book.title, status: book.status })));
 
-  // Use a more explicit and safer filter for completed books
   const allCompletedBooks = books.filter((book): book is Book => 
     book !== null && book.status === 'completed'
   );
   
-  // Filtrer les livres par année sélectionnée
   const completedBooks = useMemo(() => {
     if (!selectedYear) return allCompletedBooks;
     
@@ -89,7 +87,6 @@ export default function Statistics() {
     });
   }, [allCompletedBooks, selectedYear]);
   
-  // Log completed books for debugging
   console.log('Completed books:', completedBooks.length, 'books');
   
   const readingBooks = books.filter((book): book is Book =>
@@ -100,7 +97,6 @@ export default function Statistics() {
     book !== null && (!book.status || book.status === 'to-read')
   );
 
-  // Extraire toutes les années pour lesquelles nous avons des livres complétés
   const availableYears = useMemo(() => {
     const years = new Set<number>();
     
@@ -111,12 +107,10 @@ export default function Statistics() {
       }
     });
     
-    // Si nous n'avons pas d'années, ajoutons l'année en cours
     if (years.size === 0) {
       years.add(new Date().getFullYear());
     }
     
-    // S'assurer que nous avons des années jusqu'à 1977
     const currentYear = new Date().getFullYear();
     for (let year = Math.max(1977, Math.min(...Array.from(years))); year <= currentYear; year++) {
       years.add(year);
@@ -322,7 +316,6 @@ export default function Statistics() {
                 </p>
               </div>
               
-              {/* Filtre d'année plus visible ici */}
               <YearFilter
                 years={availableYears}
                 selectedYear={selectedYear}
@@ -455,39 +448,43 @@ export default function Statistics() {
                     </CardContent>
                   </Card>
                   
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                      <div>
-                        <CardTitle className="text-lg">Objectifs de lecture</CardTitle>
-                        <CardDescription>Progression vers vos objectifs</CardDescription>
-                      </div>
-                      <ReadingGoalsForm 
-                        yearlyGoal={readingGoals.yearly_goal}
-                        monthlyGoal={readingGoals.monthly_goal}
-                      />
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium">Objectif annuel</p>
-                          <p className="text-sm font-medium">
-                            {stats.booksThisYear} / {stats.yearlyGoal} livres
-                          </p>
+                  <div className="space-y-4">
+                    <ReadingStreak />
+                    
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                        <div>
+                          <CardTitle className="text-lg">Objectifs de lecture</CardTitle>
+                          <CardDescription>Progression vers vos objectifs</CardDescription>
                         </div>
-                        <Progress value={stats.yearlyProgressPercentage} />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium">Objectif mensuel</p>
-                          <p className="text-sm font-medium">
-                            {stats.booksThisMonth} / {stats.monthlyGoal} livres
-                          </p>
+                        <ReadingGoalsForm 
+                          yearlyGoal={readingGoals.yearly_goal}
+                          monthlyGoal={readingGoals.monthly_goal}
+                        />
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-medium">Objectif annuel</p>
+                            <p className="text-sm font-medium">
+                              {stats.booksThisYear} / {stats.yearlyGoal} livres
+                            </p>
+                          </div>
+                          <Progress value={stats.yearlyProgressPercentage} />
                         </div>
-                        <Progress value={stats.monthlyProgressPercentage} />
-                      </div>
-                    </CardContent>
-                  </Card>
+                        
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-medium">Objectif mensuel</p>
+                            <p className="text-sm font-medium">
+                              {stats.booksThisMonth} / {stats.monthlyGoal} livres
+                            </p>
+                          </div>
+                          <Progress value={stats.monthlyProgressPercentage} />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
                   
                   <Card>
                     <CardHeader>

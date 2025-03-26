@@ -63,6 +63,33 @@ export type Database = {
         }
         Relationships: []
       }
+      reading_streaks: {
+        Row: {
+          created_at: string
+          date: string
+          has_read: boolean
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          has_read?: boolean
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          has_read?: boolean
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       user_books_view: {
@@ -112,6 +139,12 @@ export type Database = {
           p_user_id: string
         }
         Returns: Json
+      }
+      get_reading_streak: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: number
       }
       increment_search_count: {
         Args: {
