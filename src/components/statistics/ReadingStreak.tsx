@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -177,9 +176,6 @@ export function ReadingStreak() {
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-sm font-medium text-muted-foreground">
-              Jours consécutifs
-            </p>
             <div className="flex items-baseline gap-1">
               <span className="text-3xl font-bold">{streak}</span>
               <span className="text-sm text-muted-foreground">jour{streak !== 1 ? 's' : ''}</span>
