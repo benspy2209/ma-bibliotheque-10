@@ -184,7 +184,8 @@ export default function Statistics() {
       readingSpeed = totalPages / (totalReadingDays || 1);
     }
 
-    const totalReadingTimeHours = (totalPages / readingSpeed).toFixed(1);
+    const totalReadingTimeHoursNum = totalPages / readingSpeed;
+    const totalReadingTimeHoursFormatted = totalReadingTimeHoursNum.toFixed(1);
 
     const booksByMonth = completedBooks.reduce((acc, book) => {
       if (!book.completionDate) return acc;
@@ -313,7 +314,7 @@ export default function Statistics() {
       avgPagesPerBook,
       monthlyData,
       readingSpeed: readingSpeed.toFixed(1),
-      totalReadingTimeHours: totalReadingTimeHours.toFixed(1),
+      totalReadingTimeHours: totalReadingTimeHoursFormatted,
       userReadingSpeed: readingSpeed,
       topAuthors,
       topGenres,
@@ -553,7 +554,7 @@ export default function Statistics() {
                           <p className="text-sm font-medium text-muted-foreground">
                             Temps total estimé
                           </p>
-                          <p className="text-2xl font-bold">{stats.totalReadingTimeHours} h</p>
+                          <p className="text-2xl font-bold">{stats.totalReadingTimeHours}</p>
                         </div>
                         <Clock className="h-8 w-8 text-muted-foreground" />
                       </div>
