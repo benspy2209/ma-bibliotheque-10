@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Flame, Award, Check, X, Calendar as CalendarIcon } from 'lucide-react';
+import { Flame, Award, Check, X, CalendarIcon } from 'lucide-react';
 import { 
   hasReadToday, 
   markTodayAsRead, 
@@ -195,7 +195,7 @@ export function ReadingStreak() {
         <div className="text-xs text-muted-foreground">
           {streak === 0 
             ? "Commencez votre série aujourd'hui !" 
-            : `Encore ${30 - (streak % 30)} jours pour atteindre votre prochain jalon de 30 jours`}
+            : "Continuez votre série, BRAVO !"}
         </div>
 
         <div className="flex items-center justify-between pt-2 border-t">
