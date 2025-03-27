@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UsersTable } from "./UsersTable";
 import { BookSummaryTable } from "./BookSummaryTable";
 import { BookDetailsTable } from "./BookDetailsTable";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface UserStatistics {
   user_id: string;
@@ -41,9 +42,11 @@ export function AdminTabsContent({
   userStats,
   bookDetails
 }: AdminTabsContentProps) {
+  const isMobile = useIsMobile();
+  
   return (
     <Tabs defaultValue="users">
-      <TabsList className="mb-4">
+      <TabsList className={`mb-4 ${isMobile ? 'flex-wrap h-auto py-2' : ''}`}>
         <TabsTrigger value="users">Utilisateurs</TabsTrigger>
         <TabsTrigger value="summary">Résumé livres</TabsTrigger>
         <TabsTrigger value="details">Détails des livres</TabsTrigger>

@@ -58,3 +58,18 @@
 .tabs-list-scroll::-webkit-scrollbar {
   display: none;
 }
+
+/* Mobile Tabs */
+@media (max-width: 640px) {
+  [role="tablist"] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  
+  [role="tab"] {
+    flex: 1 0 auto;
+    min-width: calc(50% - 0.25rem);
+    white-space: nowrap;
+  }
+}

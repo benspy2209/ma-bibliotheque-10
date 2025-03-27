@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Book } from '@/types/book';
 import { useReadingSpeed } from '@/hooks/use-reading-speed';
@@ -12,6 +13,7 @@ import { YearlyBooksList } from "@/components/statistics/YearlyBooksList";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, X } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 import { StatsCalculator } from '@/components/statistics/StatsCalculator';
 import { StatsOverview } from '@/components/statistics/StatsOverview';
@@ -25,6 +27,7 @@ import { AdminUsersStats } from '@/components/statistics/AdminUsersStats';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
 export default function Statistics() {
+  const isMobile = useIsMobile();
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState<number | null>(currentYear);
 
@@ -172,7 +175,7 @@ export default function Statistics() {
                   />
 
                   <Tabs defaultValue="overview" className="w-full">
-                    <TabsList className="mb-4">
+                    <TabsList className={`mb-4 ${isMobile ? 'flex-wrap h-auto py-2' : ''}`}>
                       <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
                       <TabsTrigger value="monthly">Données mensuelles</TabsTrigger>
                       <TabsTrigger value="authors">Auteurs & Genres</TabsTrigger>
