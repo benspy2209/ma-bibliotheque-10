@@ -166,13 +166,15 @@ export const SearchBar = ({
       {!user && (
         <div className="mt-2 text-center">
           <p className="text-destructive mb-4">Vous devez vous connecter ou créer un compte pour faire une recherche.</p>
-          <Button 
-            onClick={handleJoinAdventure}
-            className="relative z-10 font-semibold text-base transition-all duration-300 shadow-md hover:shadow-lg pulse-effect flex items-center gap-2 bg-[#CC4153] text-white hover:bg-[#b33646]"
-            variant="pulse"
-          >
-            <BookOpen className="h-5 w-5" /> Rejoindre l'aventure
-          </Button>
+          <div className="flex justify-center">
+            <Button 
+              onClick={handleJoinAdventure}
+              className="relative z-10 font-semibold text-base transition-all duration-300 shadow-md hover:shadow-lg pulse-effect flex items-center gap-2 bg-[#CC4153] text-white hover:bg-[#b33646]"
+              variant="pulse"
+            >
+              <BookOpen className="h-5 w-5" /> Rejoindre l'aventure
+            </Button>
+          </div>
         </div>
       )}
     </div>
