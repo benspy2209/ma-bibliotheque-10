@@ -2,3 +2,21 @@
 @import './styles/theme.css';
 @import './styles/animations.css';
 @import './styles/layout.css';
+
+/* Supprime les backgrounds des cards quand la classe card-transparent est utilisée */
+.card-transparent {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Augmente la taille des textes à l'échelle globale */
+html {
+  font-size: 16px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 17px;
+  }
+}

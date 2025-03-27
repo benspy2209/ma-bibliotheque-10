@@ -9,12 +9,12 @@ interface HeaderSectionProps {
 
 export function HeaderSection({ onBookAdded }: HeaderSectionProps) {
   return (
-    <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-      <div className="w-full md:w-auto flex flex-col space-y-2">
-        <h1 className="text-2xl sm:text-3xl font-bold">
+    <div className="flex flex-col md:flex-row justify-between items-center mb-10">
+      <div className="w-full md:w-auto flex flex-col space-y-3">
+        <h1 className="text-3xl sm:text-4xl font-bold">
           Rechercher des livres
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-lg text-muted-foreground">
           Trouvez des livres par auteur ou titre
         </p>
       </div>

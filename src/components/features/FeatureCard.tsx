@@ -12,15 +12,15 @@ export interface FeatureCardProps {
 
 // Component for a feature card
 export const FeatureCard = ({ icon, title, description, bgColor = "bg-primary/5" }: FeatureCardProps) => (
-  <Card className="h-full transition-all duration-300 hover:shadow-md">
+  <Card className="h-full transition-all duration-300 hover:shadow-md card-transparent">
     <CardHeader>
-      <div className={`w-12 h-12 rounded-full ${bgColor} flex items-center justify-center mb-4`}>
+      <div className={`w-14 h-14 rounded-full ${bgColor} flex items-center justify-center mb-4`}>
         {icon}
       </div>
-      <CardTitle>{title}</CardTitle>
+      <CardTitle className="text-xl">{title}</CardTitle>
     </CardHeader>
     <CardContent>
-      <CardDescription className="text-sm">{description}</CardDescription>
+      <CardDescription className="text-base">{description}</CardDescription>
     </CardContent>
   </Card>
 );
