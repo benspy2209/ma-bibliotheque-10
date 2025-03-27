@@ -14,6 +14,12 @@ export const HeroSection = () => {
     setShowLoginDialog(true);
   };
 
+  const handleSignIn = () => {
+    console.log("Opening sign in dialog from HeroSection");
+    setAuthMode('login');
+    setShowLoginDialog(true);
+  };
+
   return (
     <section className="relative py-20 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 -z-10" />
@@ -40,8 +46,13 @@ export const HeroSection = () => {
                   >
                     <LogIn className="h-5 w-5" /> Commencer l'aventure
                   </Button>
-                  <Button variant="outline" size="lg" asChild>
-                    <Link to="/features">Explorer</Link>
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    onClick={handleSignIn}
+                    className="bg-black text-white hover:bg-gray-800 border-none"
+                  >
+                    <LogIn className="h-5 w-5 mr-2" /> Se connecter
                   </Button>
                 </>
               )}
