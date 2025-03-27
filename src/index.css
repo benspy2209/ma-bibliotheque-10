@@ -32,6 +32,17 @@ html {
 }
 
 .light .text-muted-foreground {
-  color: rgba(0, 0, 0, 0.7) !important;
+  color: rgba(0, 0, 0, 0.8) !important; 
 }
 
+.light p, .light h1, .light h2, .light h3, .light span, .light div {
+  color: rgba(0, 0, 0, 0.85) !important;
+}
+
+.light .nav-link, .light button {
+  color: rgba(0, 0, 0, 0.9) !important;
+}
+
+.light a {
+  color: #222 !important;
+}

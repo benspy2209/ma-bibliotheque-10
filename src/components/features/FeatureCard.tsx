@@ -17,10 +17,10 @@ export const FeatureCard = ({ icon, title, description, bgColor = "bg-primary/5"
       <div className={`w-14 h-14 rounded-full ${bgColor} flex items-center justify-center mb-4`}>
         {icon}
       </div>
-      <CardTitle className="text-xl">{title}</CardTitle>
+      <CardTitle className="text-xl font-bold">{title}</CardTitle>
     </CardHeader>
     <CardContent>
-      <CardDescription className="text-base">{description}</CardDescription>
+      <CardDescription className="text-base font-medium">{description}</CardDescription>
     </CardContent>
   </Card>
 );
