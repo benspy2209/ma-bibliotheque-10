@@ -25,3 +25,13 @@ html {
     font-size: 17px;
   }
 }
+
+/* S'assurer que les textes sont bien lisibles en mode clair */
+.light {
+  color-scheme: light;
+}
+
+.light .text-muted-foreground {
+  color: rgba(0, 0, 0, 0.7) !important;
+}
+
