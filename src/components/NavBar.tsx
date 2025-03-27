@@ -70,11 +70,11 @@ const NavBar = () => {
     <nav className="w-full border-b py-5 px-6 transition-colors duration-300">
       <div className="max-w-7xl mx-auto flex flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-6">
-          <NavLink to="/" className="flex items-center">
+          <NavLink to="/" className="flex items-center navbar-logo-container">
             <img 
               src={theme === 'light' ? "/pulse.png" : "/pulse dark.png"}
               alt="BiblioPulse Logo" 
-              className="h-auto w-auto max-h-16 md:max-h-40" 
+              className="h-auto w-auto max-h-[32px] md:max-h-40" 
             />
           </NavLink>
           

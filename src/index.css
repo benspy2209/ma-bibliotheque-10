@@ -32,6 +32,18 @@ img[alt="BiblioPulse Logo"] {
   height: auto;
 }
 
+/* Make logo larger on mobile */
+@media (max-width: 767px) {
+  img[alt="BiblioPulse Logo"] {
+    max-width: 200%; /* Make twice as large on mobile */
+    transform-origin: left center; /* Ensure it scales from the left side */
+  }
+  
+  .navbar-logo-container {
+    overflow: visible; /* Allow overflow to prevent clipping */
+  }
+}
+
 /* S'assurer que les textes sont bien lisibles en mode clair */
 .light {
   color-scheme: light;
