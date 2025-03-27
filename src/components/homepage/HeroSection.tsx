@@ -1,17 +1,18 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Star, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
 export const HeroSection = () => {
   const { user, signIn } = useSupabaseAuth();
+  const navigate = useNavigate();
 
-  // Implemented exactly as requested
+  // Modified to redirect to library page
   const handleLoginClick = () => {
     console.log("Commencer l'aventure clicked");
-    signIn('signup');
+    navigate('/library');
   };
 
   // Wrapper function for login
