@@ -30,7 +30,7 @@ export function useSupabaseAuth() {
       // Only show toast notifications for actual auth state changes, not initial loading
       if (initialAuthCheckDone) {
         if (event === 'SIGNED_IN') {
-          setShowLoginDialog(false); // Close dialog on successful sign in
+          setShowLoginDialog(false); // Ferme automatiquement le dialogue de connexion
           toast({
             description: "Connexion réussie"
           });
