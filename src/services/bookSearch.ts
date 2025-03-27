@@ -184,7 +184,7 @@ function mapIsbndbBookToBook(isbndbBook: any, defaultAuthor?: string): Book {
   };
 }
 
-export async function searchAllBooks(query: string, searchType: SearchType = 'author', language: LanguageFilter = 'fr', maxResults: number = 100): Promise<Book[]> {
+export async function searchAllBooks(query: string, searchType: SearchType = 'title', language: LanguageFilter = 'fr', maxResults: number = 100): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
@@ -196,12 +196,29 @@ export async function searchAllBooks(query: string, searchType: SearchType = 'au
       console.log("Aucun résultat trouvé via ISBNDB, tentative avec la méthode alternative");
       if (searchType === 'author') {
         // Tenter avec la recherche alternative si aucun résultat n'est trouvé
-        return await fallbackAuthorSearch(query, language, maxResults);
+        const fallbackResults = await fallbackAuthorSearch(query, language, maxResults);
+        
+        // Si nous n'avons toujours pas de résultats, retournons un tableau vide
+        if (fallbackResults.length === 0) {
+          console.log("Aucun résultat trouvé après tentative alternative");
+          return [];
+        }
+        
+        return fallbackResults;
       }
+      
+      // Si c'est une recherche par titre et qu'aucun résultat n'est trouvé, retourner un tableau vide
+      return [];
     }
     
     // Appliquer un filtre supplémentaire pour éliminer les dictionnaires et autres ouvrages techniques
     const filteredBooks = filterNonBookResults(books);
+    
+    // Si après filtrage nous n'avons plus de résultats, retourner un tableau vide
+    if (filteredBooks.length === 0) {
+      console.log("Aucun résultat après filtrage");
+      return [];
+    }
     
     // Suppression des doublons avec notre fonction améliorée
     const uniqueBooks = removeDuplicateBooks(filteredBooks);

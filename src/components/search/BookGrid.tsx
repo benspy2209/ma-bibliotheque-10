@@ -2,7 +2,7 @@
 import { Book } from '@/types/book';
 import { Button } from "@/components/ui/button";
 import { BookCard } from './BookCard';
-import { BookOpen, AlertCircle } from 'lucide-react';
+import { BookOpen, AlertCircle, Search } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface BookGridProps {
@@ -57,9 +57,24 @@ export const BookGrid = ({
   if (searchQuery && books.length === 0) {
     return (
       <div className="flex flex-col items-center space-y-4 mt-8">
+        <div className="bg-muted/30 rounded-full p-6 mb-2">
+          <Search className="h-12 w-12 text-muted-foreground/60" />
+        </div>
         <div className="text-center text-gray-600 mb-4">
-          <p className="text-lg">Aucun livre trouvé pour "{searchQuery}"</p>
-          <p className="text-sm mt-2">Essayez avec un nom d'auteur différent ou vérifiez l'orthographe.</p>
+          <p className="text-lg font-medium">Aucun livre trouvé pour "{searchQuery}"</p>
+          <p className="text-sm mt-2">
+            Nous n'avons trouvé aucun résultat correspondant à votre recherche.
+            {searchQuery.length < 4 ? " Essayez avec plus de caractères." : ""}
+          </p>
+          <div className="mt-4 text-sm">
+            Suggestions :
+            <ul className="list-disc list-inside mt-2 text-left max-w-md mx-auto">
+              <li>Vérifiez l'orthographe du nom de l'auteur ou du titre</li>
+              <li>Essayez avec un nom plus complet (prénom et nom)</li>
+              <li>Utilisez des termes de recherche différents</li>
+              <li>Essayez de changer le filtre de langue</li>
+            </ul>
+          </div>
         </div>
       </div>
     );
