@@ -31,16 +31,16 @@ export const SearchTypeSelector = ({
         </div>
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="author">
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4" />
-            <span>Auteur</span>
-          </div>
-        </SelectItem>
         <SelectItem value="title">
           <div className="flex items-center gap-2">
             <BookText className="h-4 w-4" />
             <span>Titre</span>
+          </div>
+        </SelectItem>
+        <SelectItem value="author">
+          <div className="flex items-center gap-2">
+            <User className="h-4 w-4" />
+            <span>Auteur</span>
           </div>
         </SelectItem>
       </SelectContent>

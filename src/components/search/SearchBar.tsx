@@ -1,3 +1,4 @@
+
 import { useState, useRef } from 'react';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { useToast } from '@/hooks/use-toast';
@@ -26,7 +27,7 @@ export const SearchBar = ({
   totalBooks = 0
 }: SearchBarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchType, setSearchType] = useState<SearchType>('author');
+  const [searchType, setSearchType] = useState<SearchType>('title');
   const [language, setLanguage] = useState<LanguageFilter>('fr');
   const [isSearching, setIsSearching] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);

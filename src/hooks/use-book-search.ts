@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { searchAllBooks, SearchType, LanguageFilter } from '@/services/bookSearch';
@@ -16,7 +15,7 @@ export function useBookSearch() {
     language: LanguageFilter;
   }>({ 
     query: '', 
-    type: 'author',
+    type: 'title',
     language: 'fr'
   });
   const [displayedBooks, setDisplayedBooks] = useState(12);
