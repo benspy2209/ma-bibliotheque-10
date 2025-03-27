@@ -6,7 +6,8 @@ export { cn, normalizeString } from './core-utils';
 export { AMAZON_AFFILIATE_ID, getAmazonAffiliateUrl } from './amazon-utils';
 export { 
   filterNonBookResults, 
-  isAuthorMatch 
+  isAuthorMatch,
+  isTitleExplicitMatch  // Added missing export
 } from './book-filters';
 export { 
   removeDuplicateBooks, 
