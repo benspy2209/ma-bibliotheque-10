@@ -10,6 +10,17 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useState, useMemo } from 'react';
+import { Input } from "@/components/ui/input";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { ArrowDown, ArrowUp, Filter, Search } from "lucide-react";
 
 interface UserStatistics {
   user_id: string;
@@ -24,7 +35,16 @@ interface UsersTableProps {
   userStatistics: UserStatistics[];
 }
 
+type SortField = 'user_email' | 'name' | 'book_count' | 'created_at' | 'last_sign_in_at';
+type SortDirection = 'asc' | 'desc';
+type FilterType = 'all' | 'new' | 'active' | 'inactive';
+
 export function UsersTable({ userStatistics }: UsersTableProps) {
+  const [sortField, setSortField] = useState<SortField>('created_at');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [filterType, setFilterType] = useState<FilterType>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'N/A';
     try {
@@ -34,32 +54,215 @@ export function UsersTable({ userStatistics }: UsersTableProps) {
     }
   };
 
+  const toggleSort = (field: SortField) => {
+    if (field === sortField) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  };
+
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) return null;
+    return sortDirection === 'asc' ? 
+      <ArrowUp className="h-4 w-4 ml-1" /> : 
+      <ArrowDown className="h-4 w-4 ml-1" />;
+  };
+
+  // Calculate "new" users (created within last 30 days)
+  const thirtyDaysAgo = useMemo(() => {
+    const date = new Date();
+    date.setDate(date.getDate() - 30);
+    return date;
+  }, []);
+
+  // Apply filters and sorting
+  const filteredSortedUsers = useMemo(() => {
+    let filtered = [...userStatistics];
+    
+    // First apply filter by type
+    switch (filterType) {
+      case 'new':
+        filtered = filtered.filter(user => 
+          user.created_at && new Date(user.created_at) >= thirtyDaysAgo
+        );
+        break;
+      case 'active':
+        filtered = filtered.filter(user => 
+          user.last_sign_in_at && 
+          new Date(user.last_sign_in_at) >= thirtyDaysAgo
+        );
+        break;
+      case 'inactive':
+        filtered = filtered.filter(user => 
+          !user.last_sign_in_at || 
+          new Date(user.last_sign_in_at) < thirtyDaysAgo
+        );
+        break;
+    }
+    
+    // Then apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(user => 
+        user.user_email.toLowerCase().includes(query) || 
+        (user.name && user.name.toLowerCase().includes(query))
+      );
+    }
+    
+    // Finally sort
+    return filtered.sort((a, b) => {
+      let valA, valB;
+      
+      switch (sortField) {
+        case 'user_email':
+          valA = a.user_email.toLowerCase();
+          valB = b.user_email.toLowerCase();
+          break;
+        case 'name':
+          valA = (a.name || '').toLowerCase();
+          valB = (b.name || '').toLowerCase();
+          break;
+        case 'book_count':
+          valA = a.book_count;
+          valB = b.book_count;
+          break;
+        case 'created_at':
+          valA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          valB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          break;
+        case 'last_sign_in_at':
+          valA = a.last_sign_in_at ? new Date(a.last_sign_in_at).getTime() : 0;
+          valB = b.last_sign_in_at ? new Date(b.last_sign_in_at).getTime() : 0;
+          break;
+        default:
+          return 0;
+      }
+      
+      const comparison = typeof valA === 'string' 
+        ? valA.localeCompare(valB as string)
+        : (valA as number) - (valB as number);
+        
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+  }, [userStatistics, sortField, sortDirection, filterType, searchQuery, thirtyDaysAgo]);
+
   return (
-    <div className="overflow-auto max-h-[500px]">
-      <Table>
-        <TableHeader className="sticky top-0 bg-background">
-          <TableRow>
-            <TableHead>Utilisateur</TableHead>
-            <TableHead>Nom</TableHead>
-            <TableHead className="text-right">Livres</TableHead>
-            <TableHead>Inscription</TableHead>
-            <TableHead>Dernière connexion</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {userStatistics.map((stat) => (
-            <TableRow key={stat.user_id}>
-              <TableCell className="font-medium">{stat.user_email}</TableCell>
-              <TableCell>{stat.name || 'Non renseigné'}</TableCell>
-              <TableCell className="text-right">
-                <Badge variant="secondary">{stat.book_count}</Badge>
-              </TableCell>
-              <TableCell>{formatDate(stat.created_at)}</TableCell>
-              <TableCell>{formatDate(stat.last_sign_in_at)}</TableCell>
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Rechercher un utilisateur..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+
+        <div className="flex items-center">
+          <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
+          <Select 
+            value={filterType} 
+            onValueChange={(value) => setFilterType(value as FilterType)}
+          >
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Filtrer par" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les utilisateurs</SelectItem>
+              <SelectItem value="new">Nouveaux (30j)</SelectItem>
+              <SelectItem value="active">Actifs (30j)</SelectItem>
+              <SelectItem value="inactive">Inactifs (30j)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="overflow-auto max-h-[500px]">
+        <Table>
+          <TableHeader className="sticky top-0 bg-background">
+            <TableRow>
+              <TableHead 
+                className="cursor-pointer hover:text-foreground"
+                onClick={() => toggleSort('user_email')}
+              >
+                <div className="flex items-center">
+                  Utilisateur
+                  {getSortIcon('user_email')}
+                </div>
+              </TableHead>
+              <TableHead 
+                className="cursor-pointer hover:text-foreground"
+                onClick={() => toggleSort('name')}
+              >
+                <div className="flex items-center">
+                  Nom
+                  {getSortIcon('name')}
+                </div>
+              </TableHead>
+              <TableHead 
+                className="text-right cursor-pointer hover:text-foreground"
+                onClick={() => toggleSort('book_count')}
+              >
+                <div className="flex items-center justify-end">
+                  Livres
+                  {getSortIcon('book_count')}
+                </div>
+              </TableHead>
+              <TableHead 
+                className="cursor-pointer hover:text-foreground"
+                onClick={() => toggleSort('created_at')}
+              >
+                <div className="flex items-center">
+                  Inscription
+                  {getSortIcon('created_at')}
+                </div>
+              </TableHead>
+              <TableHead 
+                className="cursor-pointer hover:text-foreground"
+                onClick={() => toggleSort('last_sign_in_at')}
+              >
+                <div className="flex items-center">
+                  Dernière connexion
+                  {getSortIcon('last_sign_in_at')}
+                </div>
+              </TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {filteredSortedUsers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  Aucun utilisateur ne correspond à ces critères
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredSortedUsers.map((stat) => (
+                <TableRow key={stat.user_id}>
+                  <TableCell className="font-medium">{stat.user_email}</TableCell>
+                  <TableCell>{stat.name || 'Non renseigné'}</TableCell>
+                  <TableCell className="text-right">
+                    <Badge variant="secondary">{stat.book_count}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    {stat.created_at && new Date(stat.created_at) >= thirtyDaysAgo ? (
+                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                        {formatDate(stat.created_at)} (Nouveau)
+                      </Badge>
+                    ) : (
+                      formatDate(stat.created_at)
+                    )}
+                  </TableCell>
+                  <TableCell>{formatDate(stat.last_sign_in_at)}</TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
