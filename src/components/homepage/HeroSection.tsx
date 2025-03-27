@@ -64,14 +64,14 @@ export const HeroSection = () => {
               <img 
                 src="/photo 1.jpg" 
                 alt="Personne lisant et organisant sa bibliothèque" 
-                className="rounded-lg shadow-2xl object-cover"
+                className="rounded-lg shadow-2xl object-cover w-full"
                 onError={(e) => {
                   console.error("Image failed to load:", e);
                   const target = e.target as HTMLImageElement;
                   target.src = '/placeholder.svg';
                 }}
               />
-              <div className="absolute -bottom-6 -left-6 bg-background rounded-lg shadow-lg p-4 w-64">
+              <div className="absolute -bottom-6 -left-6 bg-background rounded-lg shadow-lg p-4 w-64 max-w-[80%] sm:max-w-full">
                 <div className="flex items-center gap-2">
                   <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
                   <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />

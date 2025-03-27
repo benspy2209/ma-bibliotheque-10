@@ -26,6 +26,12 @@ html {
   }
 }
 
+/* Logo responsive adjustments */
+img[alt="BiblioPulse Logo"] {
+  max-width: 100%;
+  height: auto;
+}
+
 /* S'assurer que les textes sont bien lisibles en mode clair */
 .light {
   color-scheme: light;

@@ -24,7 +24,7 @@ const Footer = () => {
             <img 
               src={theme === 'light' ? "/pulse.png" : "/pulse dark.png"}
               alt="BiblioPulse Logo" 
-              className="h-16 w-auto mr-4" 
+              className="h-auto max-h-12 w-auto mr-4" 
             />
             <div className="text-left">
               <h3 className="text-lg font-medium">BiblioPulse</h3>

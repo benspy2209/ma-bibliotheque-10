@@ -25,7 +25,7 @@ const Contact = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             <Card className="border-none shadow-md hover:shadow-lg transition-all bg-zinc-900">
               <CardContent className="pt-6 text-center">
                 <div className="bg-primary/10 p-3 rounded-full w-fit mx-auto mb-4">
@@ -50,7 +50,7 @@ const Contact = () => {
               </CardContent>
             </Card>
             
-            <Card className="border-none shadow-md hover:shadow-lg transition-all bg-zinc-900">
+            <Card className="border-none shadow-md hover:shadow-lg transition-all bg-zinc-900 md:col-span-2 lg:col-span-1">
               <CardContent className="pt-6 text-center">
                 <div className="bg-primary/10 p-3 rounded-full w-fit mx-auto mb-4">
                   <MapPin className="h-6 w-6 text-primary" />
