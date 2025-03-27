@@ -8,13 +8,13 @@ import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 export const HeroSection = () => {
   const { user, signIn } = useSupabaseAuth();
 
-  // Wrapper function to handle the signup button click
-  const handleLogin = () => {
-    console.log("Opening signup dialog from HeroSection");
+  // Implemented exactly as requested
+  const handleLoginClick = () => {
+    console.log("Commencer l'aventure clicked");
     signIn('signup');
   };
 
-  // Wrapper function to handle the sign in button click using signIn function
+  // Wrapper function for login
   const handleSignIn = () => {
     console.log("Opening login dialog from HeroSection");
     signIn('login');
@@ -41,7 +41,7 @@ export const HeroSection = () => {
                 <>
                   <Button 
                     size="lg" 
-                    onClick={handleLogin}
+                    onClick={handleLoginClick}
                     className="pulse-effect bg-[#ea384c] text-white hover:bg-[#d11a2e] flex items-center gap-2"
                   >
                     <LogIn className="h-5 w-5" /> Commencer l'aventure

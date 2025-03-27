@@ -8,8 +8,9 @@ import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 export const CallToAction = () => {
   const { user, signIn } = useSupabaseAuth();
 
+  // Implemented with exact same pattern
   const handleSignUp = () => {
-    console.log("Opening signup dialog from CallToAction");
+    console.log("Commencer l'aventure clicked");
     signIn('signup');
   };
 
