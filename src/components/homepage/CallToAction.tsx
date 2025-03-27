@@ -33,7 +33,7 @@ export const CallToAction = () => {
             </Button>
           ) : (
             <Button size="lg" asChild>
-              <Link to="/search">Accéder à ma bibliothèque</Link>
+              <Link to="/library">Accéder à ma bibliothèque</Link>
             </Button>
           )}
           <Button variant="outline" size="lg" asChild>
