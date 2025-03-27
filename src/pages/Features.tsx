@@ -25,7 +25,7 @@ import {
   PieChart,
   Target,
   Import,
-  Export,
+  ExternalLink, // Changed from Export to ExternalLink
   Sparkles
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -161,7 +161,7 @@ const featureSections = [
         description: "Importez vos livres depuis d'autres plateformes ou fichiers CSV pour une transition sans effort vers BiblioPulse."
       },
       {
-        icon: <Export className="h-6 w-6 text-primary" />,
+        icon: <ExternalLink className="h-6 w-6 text-primary" />, // Changed from Export to ExternalLink
         title: "Exportation",
         description: "Exportez votre bibliothèque complète dans différents formats pour la sauvegarder ou l'utiliser dans d'autres applications."
       },
