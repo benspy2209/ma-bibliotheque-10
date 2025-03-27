@@ -12,7 +12,7 @@ export interface FeatureCardProps {
 
 // Component for a feature card
 export const FeatureCard = ({ icon, title, description, bgColor = "bg-primary/5" }: FeatureCardProps) => (
-  <Card className="h-full transition-all duration-300 hover:shadow-md card-transparent">
+  <Card className="h-full transition-all duration-300 hover:shadow-md card-transparent border-none shadow-none">
     <CardHeader>
       <div className={`w-14 h-14 rounded-full ${bgColor} flex items-center justify-center mb-4`}>
         {icon}

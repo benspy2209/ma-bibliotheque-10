@@ -10,8 +10,8 @@ interface FeatureSectionCardProps {
 
 export const FeatureSectionCard = ({ section }: FeatureSectionCardProps) => {
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-md">
-      <CardHeader className="bg-primary/5 pb-2">
+    <Card className="overflow-hidden transition-all hover:shadow-md border-none shadow-none bg-transparent">
+      <CardHeader className="bg-transparent pb-2">
         <CardTitle className="text-xl">{section.title}</CardTitle>
         <CardDescription>{section.description}</CardDescription>
       </CardHeader>
