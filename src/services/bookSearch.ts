@@ -1,3 +1,4 @@
+
 import { Book } from '@/types/book';
 import { removeDuplicateBooks, filterNonBookResults, isAuthorMatch } from '@/lib/utils';
 import axios from 'axios';
@@ -37,13 +38,14 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
       const books = response.data.books.map((book: any) => mapIsbndbBookToBook(book, authorName));
       
       // Application des filtres améliorés - vérification stricte de l'auteur
-      const filteredBooks = books.filter(book => {
-        // S'assurer que le livre est bien de l'auteur recherché - vérification stricte
-        return isAuthorMatch(book, authorName);
-      });
+      const filteredByAuthor = books.filter(book => isAuthorMatch(book, authorName));
+      console.log(`Livres filtrés par correspondance stricte d'auteur: ${filteredByAuthor.length} sur ${books.length}`);
       
-      console.log(`Livres filtrés pour l'auteur ${authorName}: ${filteredBooks.length} sur ${books.length}`);
-      return filterNonBookResults(filteredBooks);
+      // Application du filtre pour éliminer les livres non désirés
+      const finalFilteredBooks = filterNonBookResults(filteredByAuthor);
+      console.log(`Livres après filtre complet pour l'auteur ${authorName}: ${finalFilteredBooks.length} sur ${books.length}`);
+      
+      return finalFilteredBooks;
     }
     
     return [];
@@ -76,9 +78,14 @@ async function fallbackAuthorSearch(authorName: string, language: LanguageFilter
       const books = response.data.books.map((book: any) => mapIsbndbBookToBook(book));
       
       // Filtrer pour ne garder que les livres qui correspondent vraiment à l'auteur - vérification stricte
-      const filteredBooks = books.filter(book => isAuthorMatch(book, authorName));
+      const filteredByAuthor = books.filter(book => isAuthorMatch(book, authorName));
+      console.log(`Livres filtrés par correspondance stricte d'auteur (fallback): ${filteredByAuthor.length} sur ${books.length}`);
       
-      return filterNonBookResults(filteredBooks);
+      // Application du filtre pour éliminer les livres non désirés
+      const finalFilteredBooks = filterNonBookResults(filteredByAuthor);
+      console.log(`Livres après filtre complet (fallback): ${finalFilteredBooks.length} sur ${books.length}`);
+      
+      return finalFilteredBooks;
     }
     
     return [];
@@ -103,7 +110,22 @@ export async function searchBooksByTitle(title: string, language: LanguageFilter
     
     if (response.data && response.data.books && Array.isArray(response.data.books)) {
       const books = response.data.books.map((book: any) => mapIsbndbBookToBook(book));
-      return filterNonBookResults(books);
+      
+      // Vérifier si le titre de recherche correspond réellement aux titres
+      const filteredByTitle = books.filter(book => {
+        if (!book.title) return false;
+        
+        // Normaliser titre du livre et terme de recherche
+        const bookTitleLower = book.title.toLowerCase();
+        const searchTitleLower = title.toLowerCase();
+        
+        // Le titre du livre doit contenir le terme de recherche
+        return bookTitleLower.includes(searchTitleLower);
+      });
+      
+      console.log(`Livres filtrés par correspondance de titre: ${filteredByTitle.length} sur ${books.length}`);
+      
+      return filterNonBookResults(filteredByTitle);
     }
     
     return [];
@@ -195,53 +217,14 @@ export async function searchAllBooks(query: string, searchType: SearchType = 'ti
     const books = await searchIsbndb(query, searchType, language, maxResults);
     
     if (books.length === 0) {
-      console.log("Aucun résultat trouvé via ISBNDB, tentative avec la méthode alternative");
-      if (searchType === 'author') {
-        // Tenter avec la recherche alternative si aucun résultat n'est trouvé
-        const fallbackResults = await fallbackAuthorSearch(query, language, maxResults);
-        
-        // Si nous n'avons toujours pas de résultats, retournons un tableau vide
-        if (fallbackResults.length === 0) {
-          console.log("Aucun résultat trouvé après tentative alternative");
-          return [];
-        }
-        
-        return fallbackResults;
-      }
-      
-      // Si c'est une recherche par titre et qu'aucun résultat n'est trouvé, retourner un tableau vide
+      console.log("Aucun résultat trouvé via ISBNDB");
       return [];
-    }
-    
-    // Appliquer un filtre supplémentaire pour éliminer les dictionnaires et autres ouvrages techniques
-    const filteredBooks = filterNonBookResults(books);
-    
-    // Si après filtrage nous n'avons plus de résultats, retourner un tableau vide
-    if (filteredBooks.length === 0) {
-      console.log("Aucun résultat après filtrage");
-      return [];
-    }
-    
-    // Pour les recherches par auteur, vérifions à nouveau que les auteurs correspondent vraiment
-    if (searchType === 'author') {
-      const authorFilteredBooks = filteredBooks.filter(book => isAuthorMatch(book, query));
-      
-      if (authorFilteredBooks.length === 0) {
-        console.log(`Aucun livre ne correspond vraiment à l'auteur "${query}" après filtrage strict`);
-        return [];
-      }
-      
-      // Suppression des doublons avec notre fonction améliorée
-      const uniqueBooks = removeDuplicateBooks(authorFilteredBooks);
-      
-      console.log(`Total des résultats après filtrage strict d'auteur: ${uniqueBooks.length} livres`);
-      return uniqueBooks;
     }
     
     // Suppression des doublons avec notre fonction améliorée
-    const uniqueBooks = removeDuplicateBooks(filteredBooks);
+    const uniqueBooks = removeDuplicateBooks(books);
     
-    console.log(`Total des résultats après filtrage: ${uniqueBooks.length} livres (avant filtrage: ${books.length})`);
+    console.log(`Total des résultats après suppression des doublons: ${uniqueBooks.length} livres (avant: ${books.length})`);
     
     return uniqueBooks;
   } catch (error) {

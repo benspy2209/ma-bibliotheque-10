@@ -67,6 +67,14 @@ const UNWANTED_TYPES = [
   'publication', 'périodique', 'revue', 'magazine', 'bulletin'
 ];
 
+// Liste de séries/personnages de BD/livres jeunesse qui peuvent apparaître dans les recherches
+// et pourraient être attribués par erreur à un auteur recherché
+const SERIES_CHARACTERS = [
+  'schtroumpf', 'schtroumpfs', 'asterix', 'astérix', 'obelix', 'obélix', 'tintin',
+  'pokemon', 'pokémon', 'naruto', 'dragon ball', 'disney', 'marvel', 'harry potter',
+  'batman', 'superman', 'spider-man', 'winnie', 'mickey', 'minnie', 'dora', 'barbie'
+];
+
 export function filterNonBookResults(books: Book[]): Book[] {
   return books.filter(book => {
     if (!book.title) return false;
@@ -142,6 +150,17 @@ export function filterNonBookResults(books: Book[]): Book[] {
       return !isAudioBook; // Exclure uniquement si c'est un livre audio
     }
     
+    // Vérification supplémentaire si le titre contient des personnages de BD/séries
+    const containsSeriesCharacters = SERIES_CHARACTERS.some(character =>
+      titleLower.includes(character.toLowerCase())
+    );
+    
+    // Si le titre contient des personnages de séries, le livre est probablement 
+    // attribué par erreur à l'auteur recherché
+    if (containsSeriesCharacters) {
+      return false;
+    }
+    
     return !containsTechnicalKeywords && 
            !containsUnwantedTypes && 
            !isSuspiciousTitle && 
@@ -156,50 +175,87 @@ export function isAuthorMatch(book: Book, searchQuery: string): boolean {
     return false;
   }
   
-  const searchTerms = searchQuery.toLowerCase().split(' ');
+  const searchTerms = searchQuery.toLowerCase().split(' ').filter(term => term.length > 1);
+  
+  // Si aucun terme significatif, considérer qu'il n'y a pas de correspondance
+  if (searchTerms.length === 0) {
+    return false;
+  }
+  
+  // Normaliser les termes de recherche
+  const normalizedSearchTerms = searchTerms.map(term => normalizeString(term));
+  
   const authors = Array.isArray(book.author) ? book.author : [book.author];
   
   // Pour chaque auteur dans le livre
   return authors.some(author => {
     if (!author) return false;
+    
+    // Ignorer les auteurs génériques
     const authorLower = author.toLowerCase();
+    if (authorLower.includes('collectif') || 
+        authorLower.includes('divers') ||
+        authorLower.includes('various') ||
+        authorLower === 'auteurs' ||
+        authorLower === 'authors' ||
+        authorLower.length < 3) {
+      return false;
+    }
+    
+    // Normaliser l'auteur pour comparaison
+    const normalizedAuthor = normalizeString(authorLower);
     
     // 1. Vérification exacte (match parfait)
-    if (authorLower === searchQuery.toLowerCase()) {
+    if (normalizedAuthor === normalizeString(searchQuery.toLowerCase())) {
       return true;
     }
     
-    // 2. Vérification plus stricte: les termes doivent correspondre exactement au début ou à la fin des mots
-    const allTermsMatch = searchTerms.every(term => {
-      // Vérifier si le terme est un prénom ou un nom complet
-      const termRegex = new RegExp(`(^|\\s)${term}(\\s|$)`, 'i');
-      return termRegex.test(authorLower);
-    });
+    // 2. Vérification de l'ordre des termes dans le nom de l'auteur
+    // Les termes doivent apparaître dans le bon ordre
+    let remainingAuthorText = normalizedAuthor;
+    let allTermsFoundInOrder = true;
     
-    // 3. Vérification de l'ordre des termes dans le nom de l'auteur
-    // Les termes doivent être dans le même ordre que dans la recherche
-    const termsInOrder = searchTerms.length > 1 ? 
-      new RegExp(searchTerms.join('.*?\\b'), 'i').test(authorLower) : 
-      true;
-    
-    // 4. Vérifier que le nom de l'auteur n'est pas trop générique
-    const isGenericAuthor = authorLower.includes('collectif') || 
-                            authorLower.includes('divers') ||
-                            authorLower.includes('various') ||
-                            authorLower.includes('auteurs') ||
-                            authorLower.includes('authors');
-    
-    // 5. Vérification supplémentaire: pour les recherches avec prénom et nom,
-    // s'assurer que le prénom et le nom correspondent
-    let fullNameMatch = true;
-    if (searchTerms.length >= 2) {
-      // Si la recherche contient au moins 2 termes (prénom et nom)
-      // On vérifie que tous les termes sont présents dans l'auteur
-      fullNameMatch = searchTerms.every(term => authorLower.includes(term));
+    for (const term of normalizedSearchTerms) {
+      const termIndex = remainingAuthorText.indexOf(term);
+      if (termIndex === -1) {
+        allTermsFoundInOrder = false;
+        break;
+      }
+      remainingAuthorText = remainingAuthorText.substring(termIndex + term.length);
     }
     
-    // L'auteur correspond si tous les critères sont satisfaits
-    return allTermsMatch && termsInOrder && !isGenericAuthor && fullNameMatch;
+    if (allTermsFoundInOrder) {
+      return true;
+    }
+    
+    // 3. Vérification plus stricte: chaque terme doit correspondre à un mot complet
+    // ou au début/fin d'un mot dans le nom d'auteur
+    const authorWords = normalizedAuthor.split(/\s+/);
+    
+    // Tous les termes de recherche doivent correspondre à au moins un mot de l'auteur
+    const allTermsMatch = normalizedSearchTerms.every(searchTerm => {
+      return authorWords.some(word => 
+        word === searchTerm || 
+        word.startsWith(searchTerm) || 
+        word.endsWith(searchTerm)
+      );
+    });
+    
+    // 4. Vérification supplémentaire: pour les recherches avec prénom et nom
+    if (normalizedSearchTerms.length >= 2 && allTermsMatch) {
+      // Au moins le prénom et le nom doivent être présents
+      const firstNameMatch = authorWords.some(word => 
+        word.startsWith(normalizedSearchTerms[0]) || word === normalizedSearchTerms[0]
+      );
+      
+      const lastNameMatch = authorWords.some(word => 
+        word.startsWith(normalizedSearchTerms[normalizedSearchTerms.length - 1]) || 
+        word === normalizedSearchTerms[normalizedSearchTerms.length - 1]
+      );
+      
+      return firstNameMatch && lastNameMatch;
+    }
+    
+    return allTermsMatch;
   });
 }
-
