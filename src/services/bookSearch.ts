@@ -110,7 +110,7 @@ export async function searchBooksByTitle(title: string, language: LanguageFilter
     if (response.data && response.data.books && Array.isArray(response.data.books)) {
       const books = response.data.books.map((book: any) => mapIsbndbBookToBook(book));
       
-      // Vérifier si le titre de recherche correspond réellement aux titres - filtre plus strict
+      // Appliquer un filtre plus strict pour les correspondances de titre
       const filteredByTitle = books.filter(book => isTitleExplicitMatch(book, title));
       
       console.log(`Livres filtrés par correspondance explicite de titre: ${filteredByTitle.length} sur ${books.length}`);
@@ -120,7 +120,27 @@ export async function searchBooksByTitle(title: string, language: LanguageFilter
       
       console.log(`Livres après filtrage complet: ${finalFilteredBooks.length} sur ${filteredByTitle.length}`);
       
-      return finalFilteredBooks;
+      // Encore plus de filtrage pour éliminer les faux positifs
+      const trueTitleMatches = finalFilteredBooks.filter(book => {
+        // Éviter les livres pour enfants, BD, albums illustrés, etc.
+        const lowerTitle = book.title.toLowerCase();
+        return !(
+          lowerTitle.includes('tom-tom') ||
+          lowerTitle.includes('album') ||
+          lowerTitle.includes('matisse') ||
+          lowerTitle.includes('exposition') ||
+          (book.subjects && book.subjects.some(s => 
+            s.toLowerCase().includes('juvenile') || 
+            s.toLowerCase().includes('children') ||
+            s.toLowerCase().includes('enfant') ||
+            s.toLowerCase().includes('jeunesse')
+          ))
+        );
+      });
+      
+      console.log(`Résultats après filtrage supplémentaire: ${trueTitleMatches.length} sur ${finalFilteredBooks.length}`);
+      
+      return trueTitleMatches;
     }
     
     return [];

@@ -41,8 +41,8 @@ export function SearchResults({
     if (books.length === 0 && searchQuery && !isLoading && !searchError) {
       toast({
         title: "Aucun résultat explicite",
-        description: "La recherche n'a trouvé aucun résultat correspondant explicitement à votre requête.",
-        duration: 4000,
+        description: "La recherche n'a trouvé aucun résultat correspondant explicitement à votre requête. Essayez d'utiliser un nom complet ou un titre exact.",
+        duration: 5000,
       });
     }
   }, [books.length, searchQuery, isLoading, searchError, toast]);

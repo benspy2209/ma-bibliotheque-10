@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 import { normalizeString } from './core-utils';
 
@@ -275,34 +274,66 @@ export function isAuthorMatch(book: Book, searchQuery: string): boolean {
   });
 }
 
-// Nouvelle fonction pour filtrer les livres par correspondance avec le titre
+// Enhanced version of isTitleExplicitMatch with stricter matching
 export function isTitleExplicitMatch(book: Book, searchQuery: string): boolean {
   if (!book.title || !searchQuery) return false;
   
   const titleLower = book.title.toLowerCase();
   const searchLower = searchQuery.toLowerCase();
   
-  // Normaliser le titre et la recherche
+  // Normalize the title and the search
   const normalizedTitle = normalizeString(titleLower);
   const normalizedSearch = normalizeString(searchLower);
   
-  // Le titre contient exactement la requête de recherche
+  // Check for children's book patterns like "Tom-Tom et Nana"
+  if (titleLower.includes('tom-tom') || 
+      titleLower.includes('album') || 
+      titleLower.includes('comics') || 
+      titleLower.includes('bd') ||
+      titleLower.includes('bande dessinée') ||
+      titleLower.includes('exposition')) {
+    return false;
+  }
+  
+  // Filter out art books, exhibition catalogs, etc.
+  if (titleLower.includes('exposition') || 
+      titleLower.includes('catalogue') || 
+      titleLower.includes('matisse') ||
+      titleLower.includes('centre pompidou') ||
+      titleLower.includes('musée')) {
+    return false;
+  }
+  
+  // The title contains exactly the query string
   if (normalizedTitle.includes(normalizedSearch)) {
+    // Even if the title includes the search query, we should ensure it's not a partial match
+    // that could lead to false positives
+    const titleWords = normalizedTitle.split(/\s+/);
+    const searchWords = normalizedSearch.split(/\s+/);
+    
+    // If search is just one word, make sure it's a complete word in the title
+    if (searchWords.length === 1 && searchWords[0].length < 5) {
+      return titleWords.includes(searchWords[0]);
+    }
+    
     return true;
   }
   
   // Vérifier si tous les mots significatifs de la requête sont dans le titre
   const searchWords = normalizedSearch.split(/\s+/).filter(word => word.length > 2);
   
-  // Si la recherche est trop courte, on est plus strict
+  // Pour les recherches trop courtes, on est plus strict
   if (searchWords.length <= 1) {
     // Pour une recherche d'un seul mot, on vérifie s'il apparaît comme un mot complet
     const titleWords = normalizedTitle.split(/\s+/);
-    return titleWords.some(word => word === searchWords[0] || word.startsWith(searchWords[0]));
+    return titleWords.some(word => word === searchWords[0]);
   }
   
   // Pour les recherches plus longues, on vérifie si la plupart des mots sont présents
+  // et dans le bon ordre pour éviter les faux positifs
   const matchingWords = searchWords.filter(word => normalizedTitle.includes(word));
-  return matchingWords.length >= Math.ceil(searchWords.length * 0.7); // 70% des mots doivent correspondre
+  
+  // Au moins 80% des mots doivent correspondre (augmenté de 70% à 80%)
+  const percentageThreshold = 0.8;
+  return matchingWords.length >= Math.ceil(searchWords.length * percentageThreshold);
 }
-
