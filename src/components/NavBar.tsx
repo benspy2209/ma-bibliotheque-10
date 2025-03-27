@@ -15,12 +15,13 @@ import {
 
 const NavBar = () => {
   const { theme, toggleTheme } = useTheme();
-  const { signIn, signOut, user, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
+  const { signIn, signOut, user, showLoginDialog, setShowLoginDialog, setAuthMode } = useSupabaseAuth();
   const isMobile = useIsMobile();
 
   // Fonction wrapper pour gérer le clic du bouton de connexion
   const handleSignIn = () => {
     console.log("Opening login dialog from NavBar");
+    setAuthMode('login');
     setShowLoginDialog(true);
   };
 

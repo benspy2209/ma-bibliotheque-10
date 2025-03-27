@@ -18,6 +18,7 @@ export const HeroSection = () => {
   // Wrapper function to handle the sign in button click - identical to handleSignIn in NavBar
   const handleSignIn = () => {
     console.log("Opening login dialog from NavBar in HeroSection");
+    setAuthMode('login');
     setShowLoginDialog(true);
   };
 
