@@ -1,18 +1,12 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
 export const HeroSection = () => {
-  const { user, setShowLoginDialog, setAuthMode } = useSupabaseAuth();
-
-  const handleSignUp = () => {
-    console.log("Opening login dialog from HeroSection");
-    setAuthMode('signup');
-    setShowLoginDialog(true);
-  };
+  const { user } = useSupabaseAuth();
 
   return (
     <section className="relative py-20 overflow-hidden">
@@ -27,22 +21,15 @@ export const HeroSection = () => {
               Organisez, découvrez et partagez vos lectures préférées. BiblioPulse vous accompagne dans votre parcours littéraire.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              {!user ? (
-                <Button 
-                  size="lg" 
-                  onClick={handleSignUp} 
-                  className="pulse-effect flex items-center gap-2"
-                >
-                  <Heart className="h-5 w-5 fill-white" /> Commencer gratuitement
-                </Button>
-              ) : (
+              {user ? (
                 <Button size="lg" asChild>
                   <Link to="/library">Découvrir des livres</Link>
                 </Button>
+              ) : (
+                <Button variant="outline" size="lg" asChild>
+                  <Link to="/features">Explorer</Link>
+                </Button>
               )}
-              <Button variant="outline" size="lg" asChild>
-                <Link to="/features">Explorer</Link>
-              </Button>
             </div>
           </div>
           <div className="lg:w-1/2">
