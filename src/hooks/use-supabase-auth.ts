@@ -25,6 +25,7 @@ export function useSupabaseAuth() {
         newUser ? `User ID: ${newUser.id}` : 'No user');
       
       if (event === 'SIGNED_IN') {
+        setShowLoginDialog(false); // Close dialog on successful sign in
         toast({
           description: "Connexion réussie"
         });

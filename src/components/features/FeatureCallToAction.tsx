@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Heart } from "lucide-react";
+import { LogIn } from "lucide-react";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 
 export const FeatureCallToAction = () => {
@@ -30,7 +30,7 @@ export const FeatureCallToAction = () => {
               onClick={handleSignInClick}
               className="relative z-10 font-semibold text-base transition-all duration-300 shadow-md hover:shadow-lg pulse-effect flex items-center gap-2"
             >
-              <Heart className="h-5 w-5 fill-white" /> Commencez à créer votre bibliothèque !
+              <LogIn className="h-5 w-5" /> Commencez à créer votre bibliothèque !
             </Button>
           </div>
         </div>

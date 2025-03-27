@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import { Heart, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
@@ -28,7 +28,7 @@ export const CallToAction = () => {
               onClick={handleSignUp}
               className="pulse-effect flex items-center gap-2"
             >
-              <Heart className="h-5 w-5 fill-white" /> Créer un compte gratuitement
+              <LogIn className="h-5 w-5" /> Créer un compte gratuitement
             </Button>
           ) : (
             <Button size="lg" asChild>

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Star } from 'lucide-react';
+import { Star, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
@@ -36,9 +36,9 @@ export const HeroSection = () => {
                   <Button 
                     size="lg" 
                     onClick={handleLogin}
-                    className="pulse-effect bg-[#ea384c] text-white hover:bg-[#d11a2e]"
+                    className="pulse-effect bg-[#ea384c] text-white hover:bg-[#d11a2e] flex items-center gap-2"
                   >
-                    Commencer l'aventure
+                    <LogIn className="h-5 w-5" /> Commencer l'aventure
                   </Button>
                   <Button variant="outline" size="lg" asChild>
                     <Link to="/features">Explorer</Link>
