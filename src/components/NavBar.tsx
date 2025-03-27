@@ -72,7 +72,7 @@ const NavBar = () => {
             <img 
               src="/logo_bibliopulse.png" 
               alt="BiblioPulse Logo" 
-              className="h-14 w-auto" 
+              className="h-20 w-auto" 
               style={{
                 filter: theme === 'dark' ? 'drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))' : 'none'
               }}
