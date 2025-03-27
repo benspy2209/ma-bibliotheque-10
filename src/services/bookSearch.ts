@@ -36,9 +36,9 @@ export async function searchAuthorBooks(authorName: string, language: LanguageFi
     if (response.data && response.data.books && Array.isArray(response.data.books)) {
       const books = response.data.books.map((book: any) => mapIsbndbBookToBook(book, authorName));
       
-      // Application des filtres améliorés
+      // Application des filtres améliorés - vérification stricte de l'auteur
       const filteredBooks = books.filter(book => {
-        // S'assurer que le livre est bien de l'auteur recherché
+        // S'assurer que le livre est bien de l'auteur recherché - vérification stricte
         return isAuthorMatch(book, authorName);
       });
       
@@ -75,7 +75,7 @@ async function fallbackAuthorSearch(authorName: string, language: LanguageFilter
     if (response.data && response.data.books && Array.isArray(response.data.books)) {
       const books = response.data.books.map((book: any) => mapIsbndbBookToBook(book));
       
-      // Filtrer pour ne garder que les livres qui correspondent vraiment à l'auteur
+      // Filtrer pour ne garder que les livres qui correspondent vraiment à l'auteur - vérification stricte
       const filteredBooks = books.filter(book => isAuthorMatch(book, authorName));
       
       return filterNonBookResults(filteredBooks);
@@ -167,11 +167,13 @@ export async function getBulkBookDetails(isbns: string[], language: LanguageFilt
 
 function mapIsbndbBookToBook(isbndbBook: any, defaultAuthor?: string): Book {
   // Extraire les informations pertinentes et les adapter au format Book
+  const bookAuthor = isbndbBook.author || isbndbBook.authors?.[0] || defaultAuthor || 'Auteur inconnu';
+  
   return {
     id: isbndbBook.isbn13 || isbndbBook.isbn || `isbndb-${Math.random().toString(36).substring(2, 9)}`,
     sourceId: isbndbBook.isbn13 || isbndbBook.isbn,
     title: isbndbBook.title || isbndbBook.title_long || 'Titre inconnu',
-    author: isbndbBook.author || isbndbBook.authors?.[0] || defaultAuthor || 'Auteur inconnu',
+    author: bookAuthor,
     cover: isbndbBook.image || '',
     language: isbndbBook.language ? [isbndbBook.language] : ['fr'],
     isbn: isbndbBook.isbn13 || isbndbBook.isbn,
@@ -218,6 +220,22 @@ export async function searchAllBooks(query: string, searchType: SearchType = 'ti
     if (filteredBooks.length === 0) {
       console.log("Aucun résultat après filtrage");
       return [];
+    }
+    
+    // Pour les recherches par auteur, vérifions à nouveau que les auteurs correspondent vraiment
+    if (searchType === 'author') {
+      const authorFilteredBooks = filteredBooks.filter(book => isAuthorMatch(book, query));
+      
+      if (authorFilteredBooks.length === 0) {
+        console.log(`Aucun livre ne correspond vraiment à l'auteur "${query}" après filtrage strict`);
+        return [];
+      }
+      
+      // Suppression des doublons avec notre fonction améliorée
+      const uniqueBooks = removeDuplicateBooks(authorFilteredBooks);
+      
+      console.log(`Total des résultats après filtrage strict d'auteur: ${uniqueBooks.length} livres`);
+      return uniqueBooks;
     }
     
     // Suppression des doublons avec notre fonction améliorée

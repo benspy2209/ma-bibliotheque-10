@@ -169,23 +169,37 @@ export function isAuthorMatch(book: Book, searchQuery: string): boolean {
       return true;
     }
     
-    // 2. Vérification que tous les termes de recherche sont présents dans l'auteur
-    const allTermsPresent = searchTerms.every(term => authorLower.includes(term));
+    // 2. Vérification plus stricte: les termes doivent correspondre exactement au début ou à la fin des mots
+    const allTermsMatch = searchTerms.every(term => {
+      // Vérifier si le terme est un prénom ou un nom complet
+      const termRegex = new RegExp(`(^|\\s)${term}(\\s|$)`, 'i');
+      return termRegex.test(authorLower);
+    });
     
-    // 3. Vérification plus stricte: les termes doivent être dans l'ordre
-    // (pour éviter que "King Stephen" corresponde à "Stephen King")
-    const searchPattern = searchTerms.join('.*');
-    const regexOrder = new RegExp(searchPattern, 'i');
-    const termsInOrder = regexOrder.test(authorLower);
+    // 3. Vérification de l'ordre des termes dans le nom de l'auteur
+    // Les termes doivent être dans le même ordre que dans la recherche
+    const termsInOrder = searchTerms.length > 1 ? 
+      new RegExp(searchTerms.join('.*?\\b'), 'i').test(authorLower) : 
+      true;
     
-    // Vérification que l'auteur n'est pas trop générique
+    // 4. Vérifier que le nom de l'auteur n'est pas trop générique
     const isGenericAuthor = authorLower.includes('collectif') || 
                             authorLower.includes('divers') ||
                             authorLower.includes('various') ||
                             authorLower.includes('auteurs') ||
                             authorLower.includes('authors');
     
-    // L'auteur correspond si tous les termes sont présents, dans le bon ordre, et que ce n'est pas un auteur générique
-    return allTermsPresent && termsInOrder && !isGenericAuthor;
+    // 5. Vérification supplémentaire: pour les recherches avec prénom et nom,
+    // s'assurer que le prénom et le nom correspondent
+    let fullNameMatch = true;
+    if (searchTerms.length >= 2) {
+      // Si la recherche contient au moins 2 termes (prénom et nom)
+      // On vérifie que tous les termes sont présents dans l'auteur
+      fullNameMatch = searchTerms.every(term => authorLower.includes(term));
+    }
+    
+    // L'auteur correspond si tous les critères sont satisfaits
+    return allTermsMatch && termsInOrder && !isGenericAuthor && fullNameMatch;
   });
 }
+
