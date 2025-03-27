@@ -17,7 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
-import { AlertCircle, Users, BookOpen, UserCircle } from 'lucide-react';
+import { AlertCircle, Users, BookOpen, UserCircle, BookmarkIcon } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -95,6 +95,9 @@ export function AdminUsersStats() {
     }
   };
 
+  // Calcul du nombre total d'utilisateurs
+  const totalUsers = userStatistics.length;
+
   if (isLoading) {
     return (
       <Card>
@@ -129,6 +132,32 @@ export function AdminUsersStats() {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {/* Carte sommaire montrant le nombre total d'utilisateurs */}
+        <div className="mb-6 p-4 bg-muted/30 rounded-lg border">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="bg-primary/10 p-2 rounded-full">
+                <Users className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Nombre total d'utilisateurs</p>
+                <h3 className="text-2xl font-bold">{totalUsers}</h3>
+              </div>
+            </div>
+            
+            <div className="flex gap-2">
+              <Badge variant="outline" className="font-normal">
+                <BookmarkIcon className="h-3 w-3 mr-1" /> 
+                {bookDetails.length} livres au total
+              </Badge>
+              <Badge variant="outline" className="font-normal">
+                <UserCircle className="h-3 w-3 mr-1" /> 
+                {userStats.reduce((acc, stat) => acc + stat.book_count, 0)} livres lus
+              </Badge>
+            </div>
+          </div>
+        </div>
+        
         <Tabs defaultValue="users">
           <TabsList className="mb-4">
             <TabsTrigger value="users">Utilisateurs</TabsTrigger>
