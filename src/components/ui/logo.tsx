@@ -28,17 +28,17 @@ export const Logo = ({ className, showTagline = true, size = "md" }: LogoProps) 
   return (
     <div className={cn("flex items-center", className)}>
       <div className="relative">
-        {/* Logo "B" stylisé avec viewport amélioré pour montrer tout le logo */}
+        {/* Nouveau logo "B" stylisé basé sur l'image fournie */}
         <svg 
           className={cn(sizes[size], "w-auto")} 
-          viewBox="15 10 75 80" 
+          viewBox="0 0 150 150" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg"
         >
           <path 
-            d="M26.4,90c0,0,18.4-77.3,40.8-77.3c13.4,0,20.2,15.3,7.4,22.6C63,41.1,44.6,42,39.9,56.5 c-2.8,8.5,1.7,17,11.2,17c8.1,0,13.9-5.8,13.9-13.4" 
+            d="M30,150 C30,150 40,30 90,30 C115,30 125,60 90,75 C60,88 30,90 20,120 C15,135 30,145 50,145 C65,145 80,135 80,120" 
             stroke={logoColor} 
-            strokeWidth="6" 
+            strokeWidth="12" 
             fill="none"
             strokeLinecap="round"
           />
