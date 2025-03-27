@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { BookOpen, Mail, Heart, Shield, BookText, ExternalLink, Facebook } from "lucide-react";
+import { BookOpen, Mail, Heart, Shield, BookText, Facebook } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 import { toast } from "sonner";
 
@@ -11,7 +11,7 @@ const Footer = () => {
   const handleHeartClick = () => {
     toast.success("Merci pour votre soutien !", {
       description: "Votre appréciation nous fait chaud au cœur !",
-      duration: 3000,
+      duration: 2000,
     });
   };
   
