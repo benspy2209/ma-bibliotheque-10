@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { useToast } from '@/hooks/use-toast';
@@ -8,6 +7,8 @@ import { SearchInput } from './SearchInput';
 import { SearchTypeSelector } from './SearchTypeSelector';
 import { LanguageSelector } from './LanguageSelector';
 import { ShowAllResultsButton } from './ShowAllResultsButton';
+import { BookOpen } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface SearchBarProps {
   onSearch: (query: string, searchType: SearchType, language: LanguageFilter) => Promise<void>;
@@ -31,6 +32,7 @@ export const SearchBar = ({
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { user } = useSupabaseAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSearch = (value: string) => {
     setSearchQuery(value);
@@ -90,6 +92,10 @@ export const SearchBar = ({
     if (showAllResults) {
       showAllResults();
     }
+  };
+
+  const handleJoinAdventure = () => {
+    navigate('/library');
   };
 
   const handleSubmitSearch = (e: React.FormEvent) => {
@@ -160,6 +166,13 @@ export const SearchBar = ({
       {!user && (
         <div className="mt-2 text-center">
           <p className="text-destructive mb-4">Vous devez vous connecter ou créer un compte pour faire une recherche.</p>
+          <Button 
+            onClick={handleJoinAdventure}
+            className="relative z-10 font-semibold text-base transition-all duration-300 shadow-md hover:shadow-lg pulse-effect flex items-center gap-2 bg-[#CC4153] text-white hover:bg-[#b33646]"
+            variant="pulse"
+          >
+            <BookOpen className="h-5 w-5" /> Rejoindre l'aventure
+          </Button>
         </div>
       )}
     </div>
