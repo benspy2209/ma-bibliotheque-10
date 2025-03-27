@@ -6,7 +6,6 @@ import { useTheme } from "@/hooks/use-theme";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { LoginDialog } from "./auth/LoginDialog";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { HelpButton } from "./onboarding/HelpButton";
 import { 
   Drawer,
   DrawerContent,
@@ -39,7 +38,6 @@ const NavBar = () => {
       <NavLink 
         to="/library" 
         className={({ isActive }) => `flex items-center gap-2 text-base font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
-        data-tour="library-link"
       >
         <BookOpen className="h-5 w-5 text-[#CC4153]" />
         Ma Bibliothèque
@@ -47,7 +45,6 @@ const NavBar = () => {
       <NavLink 
         to="/search" 
         className={({ isActive }) => `flex items-center gap-2 text-base font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
-        data-tour="search-link"
       >
         <Search className="h-5 w-5 text-[#CC4153]" />
         Recherche
@@ -55,7 +52,6 @@ const NavBar = () => {
       <NavLink 
         to="/statistics" 
         className={({ isActive }) => `flex items-center gap-2 text-base font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
-        data-tour="stats-link"
       >
         <BarChart2 className="h-5 w-5 text-[#CC4153]" />
         Statistiques
@@ -110,17 +106,14 @@ const NavBar = () => {
         
         <div className="flex items-center gap-4">
           {user ? (
-            <>
-              <HelpButton />
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={signOut}
-                className="transition-colors duration-300 text-base"
-              >
-                Se déconnecter
-              </Button>
-            </>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={signOut}
+              className="transition-colors duration-300 text-base"
+            >
+              Se déconnecter
+            </Button>
           ) : (
             <Button 
               variant="outline" 
@@ -137,7 +130,6 @@ const NavBar = () => {
             size="icon"
             onClick={toggleTheme}
             className="transition-colors duration-300"
-            data-tour="theme-toggle"
           >
             {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
           </Button>
