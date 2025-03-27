@@ -17,7 +17,7 @@ interface LoginDialogProps {
 export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const { authMode } = useSupabaseAuth();
   
-  console.log("LoginDialog rendering with authMode:", authMode);
+  console.log("LoginDialog rendering with authMode:", authMode, "open:", open);
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
