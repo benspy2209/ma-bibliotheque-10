@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ResetPasswordForm } from '../ResetPasswordForm';
+import { useNavigate } from 'react-router-dom';
 
 interface LoginTabProps {
   isLoading: boolean;
@@ -20,6 +21,7 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
   const [showResetDialog, setShowResetDialog] = useState(false);
   const { toast } = useToast();
   const { setAuthMode } = useSupabaseAuth();
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +38,9 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
       toast({
         description: "Connexion réussie"
       });
+      
+      // Redirect to search page after successful login
+      navigate('/search');
     } catch (error: any) {
       console.error("Erreur d'authentification:", error);
       toast({

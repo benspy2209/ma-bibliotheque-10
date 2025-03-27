@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from './use-toast';
+import { useNavigate } from 'react-router-dom';
 
 export function useSupabaseAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -13,6 +13,7 @@ export function useSupabaseAuth() {
   const [isLoading, setIsLoading] = useState(true);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
@@ -29,6 +30,7 @@ export function useSupabaseAuth() {
         toast({
           description: "Connexion réussie"
         });
+        navigate('/search');
       } else if (event === 'SIGNED_OUT') {
         toast({
           description: "Déconnexion réussie"
@@ -64,7 +66,7 @@ export function useSupabaseAuth() {
     });
 
     return () => subscription.unsubscribe();
-  }, [queryClient, toast]);
+  }, [queryClient, toast, navigate]);
 
   const signIn = (mode: 'login' | 'signup' | 'reset' = 'signup') => {
     console.log(`signIn called with mode: ${mode}`);
