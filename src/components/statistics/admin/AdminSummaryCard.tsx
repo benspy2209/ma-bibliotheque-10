@@ -22,7 +22,7 @@ export function AdminSummaryCard({
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className="bg-primary/10 p-2 rounded-full">
-            <Users className="h-6 w-6 text-[#CC4153]" />
+            <Users className="h-6 w-6 text-[#e4364a]" />
           </div>
           <div>
             <p className="text-sm font-medium text-muted-foreground">Nombre total d'utilisateurs</p>
@@ -32,19 +32,19 @@ export function AdminSummaryCard({
         
         <div className="flex flex-wrap gap-2">
           <Badge variant="outline" className="font-normal">
-            <BookmarkIcon className="h-3 w-3 mr-1 text-[#CC4153]" /> 
+            <BookmarkIcon className="h-3 w-3 mr-1 text-[#e4364a]" /> 
             {totalBooks} livres au total
           </Badge>
           <Badge variant="outline" className="font-normal">
-            <CheckCircleIcon className="h-3 w-3 mr-1 text-[#CC4153]" /> 
+            <CheckCircleIcon className="h-3 w-3 mr-1 text-[#e4364a]" /> 
             {completedBooks} livres lus
           </Badge>
           <Badge variant="outline" className="font-normal">
-            <BookOpen className="h-3 w-3 mr-1 text-[#CC4153]" /> 
+            <BookOpen className="h-3 w-3 mr-1 text-[#e4364a]" /> 
             {readingBooks} livres en cours
           </Badge>
           <Badge variant="outline" className="font-normal">
-            <UserCircle className="h-3 w-3 mr-1 text-[#CC4153]" /> 
+            <UserCircle className="h-3 w-3 mr-1 text-[#e4364a]" /> 
             {toReadBooks} livres à lire
           </Badge>
         </div>

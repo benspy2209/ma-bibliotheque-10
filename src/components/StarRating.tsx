@@ -17,9 +17,9 @@ export function StarRating({ rating = 0, onRate, readonly = false }: StarRatingP
           key={star}
           className={`h-5 w-5 ${
             star <= rating
-              ? "fill-[#CC4153] text-[#CC4153]"
+              ? "fill-[#e4364a] text-[#e4364a]"
               : "fill-gray-200 text-gray-200"
-          } ${!readonly && "cursor-pointer hover:text-[#CC4153]"}`}
+          } ${!readonly && "cursor-pointer hover:text-[#e4364a]"}`}
           onClick={() => !readonly && onRate?.(star)}
         />
       ))}

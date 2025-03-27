@@ -43,7 +43,7 @@ export const HeroSection = () => {
                   <Button 
                     size="lg" 
                     onClick={handleLoginClick}
-                    className="pulse-effect bg-[#ea384c] text-white hover:bg-[#d11a2e] flex items-center gap-2"
+                    className="pulse-effect bg-[#e4364a] text-white hover:bg-[#d11a2e] flex items-center gap-2"
                   >
                     <LogIn className="h-5 w-5" /> Commencer l'aventure
                   </Button>

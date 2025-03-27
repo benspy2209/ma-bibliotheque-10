@@ -29,7 +29,7 @@ export const FeatureCallToAction = () => {
             <Button 
               size="lg" 
               onClick={handleSignInClick}
-              className="relative z-10 font-semibold text-base transition-all duration-300 shadow-md hover:shadow-lg pulse-effect flex items-center gap-2 bg-[#CC4153] text-white hover:bg-[#b33646]"
+              className="relative z-10 font-semibold text-base transition-all duration-300 shadow-md hover:shadow-lg pulse-effect flex items-center gap-2 bg-[#e4364a] text-white hover:bg-[#b33646]"
             >
               <LogIn className="h-5 w-5" /> Commencer l'aventure
             </Button>

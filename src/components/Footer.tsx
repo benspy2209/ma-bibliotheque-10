@@ -37,7 +37,7 @@ const Footer = () => {
           <div className="flex flex-col sm:flex-row gap-6">
             <div>
               <h4 className="font-medium text-base mb-3 flex items-center">
-                <BookOpen className="h-4 w-4 mr-2 text-[#CC4153]" />
+                <BookOpen className="h-4 w-4 mr-2 text-[#e4364a]" />
                 Navigation
               </h4>
               <ul className="space-y-2">
@@ -66,7 +66,7 @@ const Footer = () => {
             
             <div>
               <h4 className="font-medium text-base mb-3 flex items-center">
-                <BookText className="h-4 w-4 mr-2 text-[#CC4153]" />
+                <BookText className="h-4 w-4 mr-2 text-[#e4364a]" />
                 Informations
               </h4>
               <ul className="space-y-2">
