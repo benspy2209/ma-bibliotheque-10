@@ -67,12 +67,15 @@ const NavBar = () => {
   return (
     <nav className="w-full bg-background border-b py-5 px-6 transition-colors duration-300">
       <div className="max-w-7xl mx-auto flex flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
           <NavLink to="/" className="flex items-center">
             <img 
               src="/logo bibliopulse.png" 
               alt="BiblioPulse Logo" 
-              className="h-10 w-auto mr-2"
+              className="h-14 w-auto" 
+              style={{
+                filter: theme === 'dark' ? 'drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))' : 'none'
+              }}
             />
           </NavLink>
           
