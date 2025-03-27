@@ -3,15 +3,16 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
+import { useNavigate } from "react-router-dom";
 
 export const FeatureCallToAction = () => {
   const { user, setShowLoginDialog, setAuthMode } = useSupabaseAuth();
+  const navigate = useNavigate();
 
   // Function to handle click on the login button
   const handleSignInClick = () => {
-    console.log("Opening login dialog from Features page");
-    setAuthMode('signup');
-    setShowLoginDialog(true);
+    console.log("Redirecting to library page from Features page");
+    navigate('/library');
   };
 
   return (

@@ -9,10 +9,10 @@ export const HeroSection = () => {
   const { user, signIn } = useSupabaseAuth();
   const navigate = useNavigate();
 
-  // Modified to redirect to library page
+  // Modified to redirect to search page instead of library
   const handleLoginClick = () => {
     console.log("Commencer l'aventure clicked");
-    navigate('/library');
+    navigate('/search');
   };
 
   // Wrapper function for login
@@ -36,7 +36,7 @@ export const HeroSection = () => {
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               {user ? (
                 <Button size="lg" asChild>
-                  <Link to="/library">Découvrir des livres</Link>
+                  <Link to="/search">Découvrir des livres</Link>
                 </Button>
               ) : (
                 <>

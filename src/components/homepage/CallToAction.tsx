@@ -9,10 +9,10 @@ export const CallToAction = () => {
   const { user } = useSupabaseAuth();
   const navigate = useNavigate();
 
-  // Modified to redirect to library page
+  // Modified to redirect to search page
   const handleSignUp = () => {
     console.log("Commencer l'aventure clicked");
-    navigate('/library');
+    navigate('/search');
   };
 
   return (
@@ -33,7 +33,7 @@ export const CallToAction = () => {
             </Button>
           ) : (
             <Button size="lg" asChild>
-              <Link to="/library">Accéder à ma bibliothèque</Link>
+              <Link to="/search">Accéder à ma bibliothèque</Link>
             </Button>
           )}
           <Button variant="outline" size="lg" asChild>
