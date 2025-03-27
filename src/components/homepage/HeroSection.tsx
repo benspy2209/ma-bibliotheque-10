@@ -8,15 +8,16 @@ import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 export const HeroSection = () => {
   const { user, setShowLoginDialog, setAuthMode } = useSupabaseAuth();
 
+  // Wrapper function to handle the signup button click
   const handleLogin = () => {
     console.log("Opening login dialog from HeroSection");
     setAuthMode('signup');
     setShowLoginDialog(true);
   };
 
+  // Wrapper function to handle the sign in button click - identical to handleSignIn in NavBar
   const handleSignIn = () => {
-    console.log("Opening sign in dialog from HeroSection");
-    setAuthMode('login');
+    console.log("Opening login dialog from NavBar in HeroSection");
     setShowLoginDialog(true);
   };
 
