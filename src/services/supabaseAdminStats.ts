@@ -99,15 +99,16 @@ export async function fetchBooksCompleteView() {
  */
 export async function fetchAllUsersStatistics(): Promise<UserStatistics[]> {
   try {
-    // Combine données utilisateurs (auth.users) et comptage de livres (books)
-    const { data, error } = await supabase.rpc('get_all_users_statistics');
+    // Utiliser la fonction RPC créée dans Supabase
+    const { data, error } = await supabase
+      .rpc('get_all_users_statistics');
 
     if (error) {
       console.error('Erreur lors de la récupération des statistiques globales:', error);
       return [];
     }
 
-    return data || [];
+    return data as UserStatistics[] || [];
   } catch (error) {
     console.error('Erreur lors de l\'appel aux statistiques globales:', error);
     return [];

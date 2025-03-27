@@ -180,6 +180,17 @@ export type Database = {
         }
         Returns: Json
       }
+      get_all_users_statistics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          user_id: string
+          user_email: string
+          name: string
+          book_count: number
+          created_at: string
+          last_sign_in_at: string
+        }[]
+      }
       get_reading_streak: {
         Args: {
           p_user_id: string
