@@ -111,6 +111,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_books_detailed: {
+        Row: {
+          book_author: string | null
+          book_id: string | null
+          book_title: string | null
+          status: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
+      user_books_stats: {
+        Row: {
+          book_authors: string[] | null
+          book_count: number | null
+          book_titles: string[] | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
       user_books_view: {
         Row: {
           author: string | null

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Book } from '@/types/book';
 import { useReadingSpeed } from '@/hooks/use-reading-speed';
@@ -22,6 +21,8 @@ import { ReadingTimeStats } from '@/components/statistics/ReadingTimeStats';
 import { GoalsAndStreak } from '@/components/statistics/GoalsAndStreak';
 import { AuthorsGenresStats } from '@/components/statistics/AuthorsGenresStats';
 import { ReadingTimeDistribution } from '@/components/statistics/ReadingTimeDistribution';
+import { AdminUsersStats } from '@/components/statistics/AdminUsersStats';
+import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
 export default function Statistics() {
   const currentYear = new Date().getFullYear();
@@ -104,6 +105,9 @@ export default function Statistics() {
     }
   }, [allCompletedBooks, currentYear, selectedYear]);
 
+  const { user } = useSupabaseAuth();
+  const isAdmin = user?.email === 'debruijneb@gmail.com';
+
   return (
     <>
       <div className="min-h-screen">
@@ -145,6 +149,10 @@ export default function Statistics() {
                   Effacer le filtre
                 </Button>
               </div>
+            )}
+
+            {isAdmin && (
+              <AdminUsersStats />
             )}
 
             <StatsCalculator
