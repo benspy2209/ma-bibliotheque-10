@@ -20,7 +20,7 @@ export const ShowAllResultsButton = ({
       onClick={onShowAllResults}
       className="flex items-center gap-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground"
     >
-      <BookOpen className="h-4 w-4" />
+      <BookOpen className="h-4 w-4 text-[#CC4153]" />
       Afficher tous les {totalBooks} livres {searchType === 'author' ? 'de l\'auteur' : 'trouvés'}
     </Button>
   );

@@ -85,19 +85,19 @@ export function AddToLibrary({
   // Icônes et labels pour chaque statut
   const statusConfig: Record<ReadingStatus, { icon: React.ReactNode, label: string, bgColor: string, textColor: string }> = {
     'to-read': { 
-      icon: <BookmarkPlus className="h-4 w-4" />, 
+      icon: <BookmarkPlus className="h-4 w-4 text-[#CC4153]" />, 
       label: 'À lire',
       bgColor: theme === 'dark' ? 'bg-blue-500' : 'bg-blue-100', 
       textColor: theme === 'dark' ? 'text-white' : 'text-blue-800' 
     },
     'reading': { 
-      icon: <BookOpen className="h-4 w-4" />, 
+      icon: <BookOpen className="h-4 w-4 text-[#CC4153]" />, 
       label: 'En cours',
       bgColor: theme === 'dark' ? 'bg-amber-500' : 'bg-amber-100', 
       textColor: theme === 'dark' ? 'text-white' : 'text-amber-800'
     },
     'completed': { 
-      icon: <CheckCircle className="h-4 w-4" />, 
+      icon: <CheckCircle className="h-4 w-4 text-[#CC4153]" />, 
       label: 'Lu',
       bgColor: theme === 'dark' ? 'bg-green-500' : 'bg-green-100', 
       textColor: theme === 'dark' ? 'text-white' : 'text-green-800'

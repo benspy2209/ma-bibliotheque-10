@@ -32,35 +32,35 @@ const NavBar = () => {
         className={({ isActive }) => `flex items-center gap-2 text-base font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
         end
       >
-        <BookOpen className="h-5 w-5" />
+        <BookOpen className="h-5 w-5 text-[#CC4153]" />
         Accueil
       </NavLink>
       <NavLink 
         to="/library" 
         className={({ isActive }) => `flex items-center gap-2 text-base font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
       >
-        <BookOpen className="h-5 w-5" />
+        <BookOpen className="h-5 w-5 text-[#CC4153]" />
         Ma Bibliothèque
       </NavLink>
       <NavLink 
         to="/search" 
         className={({ isActive }) => `flex items-center gap-2 text-base font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
       >
-        <Search className="h-5 w-5" />
+        <Search className="h-5 w-5 text-[#CC4153]" />
         Recherche
       </NavLink>
       <NavLink 
         to="/statistics" 
         className={({ isActive }) => `flex items-center gap-2 text-base font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
       >
-        <BarChart2 className="h-5 w-5" />
+        <BarChart2 className="h-5 w-5 text-[#CC4153]" />
         Statistiques
       </NavLink>
       <NavLink 
         to="/features" 
         className={({ isActive }) => `flex items-center gap-2 text-base font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
       >
-        <Lightbulb className="h-5 w-5" />
+        <Lightbulb className="h-5 w-5 text-[#CC4153]" />
         Fonctionnalités
       </NavLink>
     </>

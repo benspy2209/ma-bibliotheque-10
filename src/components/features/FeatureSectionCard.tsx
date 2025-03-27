@@ -19,7 +19,7 @@ export const FeatureSectionCard = ({ section }: FeatureSectionCardProps) => {
         <ul className="space-y-2">
           {section.features.slice(0, 3).map((feature, idx) => (
             <li key={idx} className="flex items-center gap-2">
-              <CircleCheck className="h-4 w-4 text-primary flex-shrink-0" />
+              <CircleCheck className="h-4 w-4 text-[#CC4153] flex-shrink-0" />
               <span className="text-sm">{feature.title}</span>
             </li>
           ))}
