@@ -72,7 +72,7 @@ const NavBar = () => {
         <div className="flex items-center gap-6">
           <NavLink to="/" className="flex items-center">
             <img 
-              src={theme === 'light' ? "/pulse.png" : "/logo_bibliopulse.png"}
+              src={theme === 'light' ? "/pulse.png" : "/pulse dark.png"}
               alt="BiblioPulse Logo" 
               className="h-40 w-auto" 
             />
