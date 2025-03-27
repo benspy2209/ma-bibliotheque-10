@@ -12,6 +12,7 @@ import {
   DrawerTrigger,
   DrawerClose
 } from "./ui/drawer";
+import { Logo } from "./ui/logo";
 
 const NavBar = () => {
   const { theme, toggleTheme } = useTheme();
@@ -67,32 +68,40 @@ const NavBar = () => {
   return (
     <nav className="w-full bg-background border-b py-4 px-6 transition-colors duration-300">
       <div className="max-w-7xl mx-auto flex flex-row items-center justify-between gap-4">
-        {isMobile ? (
-          <div className="flex items-center">
-            <Drawer>
-              <DrawerTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Menu</span>
-                </Button>
-              </DrawerTrigger>
-              <DrawerContent className="px-4 py-6">
-                <div className="flex flex-col gap-6">
-                  <div className="flex flex-col gap-4">
-                    <NavLinks />
+        <div className="flex items-center gap-4">
+          {isMobile ? (
+            <>
+              <Logo size="sm" showTagline={false} />
+              <Drawer>
+                <DrawerTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-5 w-5" />
+                    <span className="sr-only">Menu</span>
+                  </Button>
+                </DrawerTrigger>
+                <DrawerContent className="px-4 py-6">
+                  <div className="flex flex-col gap-6">
+                    <div className="flex flex-col gap-4">
+                      <NavLinks />
+                    </div>
+                    <DrawerClose asChild>
+                      <Button variant="outline" size="sm">Fermer</Button>
+                    </DrawerClose>
                   </div>
-                  <DrawerClose asChild>
-                    <Button variant="outline" size="sm">Fermer</Button>
-                  </DrawerClose>
-                </div>
-              </DrawerContent>
-            </Drawer>
-          </div>
-        ) : (
-          <div className="flex items-center gap-8">
-            <NavLinks />
-          </div>
-        )}
+                </DrawerContent>
+              </Drawer>
+            </>
+          ) : (
+            <>
+              <NavLink to="/" className="mr-6">
+                <Logo />
+              </NavLink>
+              <div className="flex items-center gap-8">
+                <NavLinks />
+              </div>
+            </>
+          )}
+        </div>
         
         <div className="flex items-center gap-4">
           {user ? (
