@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
 export const HeroSection = () => {
-  const { user, setShowLoginDialog } = useSupabaseAuth();
+  const { user, setShowLoginDialog, setAuthMode } = useSupabaseAuth();
 
   const handleSignUp = () => {
     console.log("Opening login dialog from HeroSection");
+    setAuthMode('signup');
     setShowLoginDialog(true);
   };
 
