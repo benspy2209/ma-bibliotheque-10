@@ -18,6 +18,12 @@ import {
   TableRow
 } from "@/components/ui/table";
 import { Book } from '@/types/book';
+import { useState } from 'react';
+import { 
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown
+} from 'lucide-react';
 
 type DistributionItem = {
   name: string;
@@ -31,11 +37,35 @@ interface ReadingTimeDistributionProps {
   completedBooks: Book[];
 }
 
+type SortField = 'title' | 'pages' | 'readingTime' | 'pagesPerDay';
+type SortDirection = 'asc' | 'desc';
+
 export function ReadingTimeDistribution({ 
   readingTimeDistribution, 
   hasReadingTimeData,
   completedBooks 
 }: ReadingTimeDistributionProps) {
+  const [sortField, setSortField] = useState<SortField>('readingTime');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+
+  // Fonction pour gérer le tri
+  const handleSort = (field: SortField) => {
+    if (field === sortField) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  };
+
+  // Fonction pour afficher l'icône de tri appropriée
+  const getSortIcon = (field: SortField) => {
+    if (field === sortField) {
+      return sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />;
+    }
+    return <ArrowUpDown className="h-4 w-4" />;
+  };
+
   // Function to render custom label in pie chart
   const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name, value }: any) => {
     if (value === 0) return null;
@@ -63,7 +93,32 @@ export function ReadingTimeDistribution({
   // Filter books with reading time data and sort by reading time (descending)
   const booksWithReadingTime = completedBooks
     .filter(book => book.readingTimeDays !== undefined)
-    .sort((a, b) => (b.readingTimeDays || 0) - (a.readingTimeDays || 0));
+    .sort((a, b) => {
+      if (sortField === 'title') {
+        const titleA = a.title.toLowerCase();
+        const titleB = b.title.toLowerCase();
+        return sortDirection === 'asc' 
+          ? titleA.localeCompare(titleB) 
+          : titleB.localeCompare(titleA);
+      } else if (sortField === 'pages') {
+        const pagesA = a.numberOfPages || 0;
+        const pagesB = b.numberOfPages || 0;
+        return sortDirection === 'asc' ? pagesA - pagesB : pagesB - pagesA;
+      } else if (sortField === 'pagesPerDay') {
+        const pagesPerDayA = a.numberOfPages && a.readingTimeDays
+          ? Math.round(a.numberOfPages / a.readingTimeDays)
+          : 0;
+        const pagesPerDayB = b.numberOfPages && b.readingTimeDays
+          ? Math.round(b.numberOfPages / b.readingTimeDays)
+          : 0;
+        return sortDirection === 'asc' ? pagesPerDayA - pagesPerDayB : pagesPerDayB - pagesPerDayA;
+      } else {
+        // Par défaut, tri par temps de lecture
+        return sortDirection === 'asc' 
+          ? (a.readingTimeDays || 0) - (b.readingTimeDays || 0) 
+          : (b.readingTimeDays || 0) - (a.readingTimeDays || 0);
+      }
+    });
 
   return (
     <>
@@ -149,19 +204,50 @@ export function ReadingTimeDistribution({
         </Card>
       </div>
 
-      <Card>
+      <Card className="mt-4">
         <CardHeader>
           <CardTitle>Livres par temps de lecture</CardTitle>
+          <CardDescription>
+            Cliquez sur les en-têtes pour trier par différentes colonnes
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Titre</TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-slate-100 transition-colors"
+                  onClick={() => handleSort('title')}
+                >
+                  <div className="flex items-center">
+                    Titre {getSortIcon('title')}
+                  </div>
+                </TableHead>
                 <TableHead>Auteur</TableHead>
-                <TableHead className="text-right">Pages</TableHead>
-                <TableHead className="text-right">Temps (jours)</TableHead>
-                <TableHead className="text-right">Pages/jour</TableHead>
+                <TableHead 
+                  className="text-right cursor-pointer hover:bg-slate-100 transition-colors"
+                  onClick={() => handleSort('pages')}
+                >
+                  <div className="flex items-center justify-end">
+                    Pages {getSortIcon('pages')}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="text-right cursor-pointer hover:bg-slate-100 transition-colors"
+                  onClick={() => handleSort('readingTime')}
+                >
+                  <div className="flex items-center justify-end">
+                    Temps (jours) {getSortIcon('readingTime')}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="text-right cursor-pointer hover:bg-slate-100 transition-colors"
+                  onClick={() => handleSort('pagesPerDay')}
+                >
+                  <div className="flex items-center justify-end">
+                    Pages/jour {getSortIcon('pagesPerDay')}
+                  </div>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

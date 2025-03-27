@@ -92,6 +92,25 @@ export type Database = {
       }
     }
     Views: {
+      books_complete_view: {
+        Row: {
+          author: string | null
+          book_id: string | null
+          completion_date: string | null
+          cover: string | null
+          created_at: string | null
+          pages: number | null
+          purchased: boolean | null
+          rating: number | null
+          reading_time_days: number | null
+          start_reading_date: string | null
+          status: string | null
+          title: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
       user_books_view: {
         Row: {
           author: string | null
