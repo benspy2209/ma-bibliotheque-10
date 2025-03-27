@@ -1,4 +1,3 @@
-
 import { NavLink } from "react-router-dom";
 import { Search, BookOpen, BarChart2, Sun, Moon, LogIn, Menu, Lightbulb } from "lucide-react";
 import { Button } from "./ui/button";
@@ -19,7 +18,6 @@ const NavBar = () => {
   const { signIn, signOut, user, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
   const isMobile = useIsMobile();
 
-  // Fonction wrapper pour gérer le clic du bouton de connexion
   const handleSignIn = () => {
     signIn('signup');
   };
@@ -66,12 +64,12 @@ const NavBar = () => {
   );
 
   return (
-    <nav className="w-full bg-background border-b py-4 px-6 transition-colors duration-300">
+    <nav className="w-full bg-background border-b py-6 px-6 transition-colors duration-300">
       <div className="max-w-7xl mx-auto flex flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           {isMobile ? (
             <>
-              <Logo size="sm" showTagline={false} />
+              <Logo size="md" showTagline={false} />
               <Drawer>
                 <DrawerTrigger asChild>
                   <Button variant="ghost" size="icon">
@@ -94,7 +92,7 @@ const NavBar = () => {
           ) : (
             <>
               <NavLink to="/" className="mr-6">
-                <Logo />
+                <Logo size="lg" />
               </NavLink>
               <div className="flex items-center gap-8">
                 <NavLinks />

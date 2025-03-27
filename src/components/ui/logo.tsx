@@ -6,30 +6,32 @@ import { cn } from "@/lib/utils";
 interface LogoProps {
   className?: string;
   showTagline?: boolean;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
 export const Logo = ({ className, showTagline = true, size = "md" }: LogoProps) => {
   const { theme } = useTheme();
   
-  // Définir les tailles pour les différentes variantes
+  // Enhanced size variants with taller heights
   const sizes = {
-    sm: "h-8",
-    md: "h-10",
-    lg: "h-12",
+    sm: "h-10",
+    md: "h-14",
+    lg: "h-16",
+    xl: "h-20",
   };
   
   // Déterminer les couleurs en fonction du thème
   const logoColor = "#FF1A75"; // Rose/magenta du logo
   const textColor = theme === "dark" ? "#FFFFFF" : "#221F26";
+  const taglineColor = theme === "dark" ? "#FFFFFF" : "#000000"; // Tagline in black for light mode
   
   return (
     <div className={cn("flex items-center", className)}>
       <div className="relative">
-        {/* Logo "B" stylisé */}
+        {/* Logo "B" stylisé avec viewport amélioré pour montrer tout le logo */}
         <svg 
           className={cn(sizes[size], "w-auto")} 
-          viewBox="0 0 100 100" 
+          viewBox="15 10 75 80" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -43,11 +45,13 @@ export const Logo = ({ className, showTagline = true, size = "md" }: LogoProps) 
         </svg>
       </div>
       
-      <div className="flex flex-col ml-2">
+      <div className="flex flex-col ml-3">
         <h1 
           className={cn(
             "font-bold tracking-wider", 
-            size === "sm" ? "text-lg" : size === "md" ? "text-xl" : "text-2xl"
+            size === "sm" ? "text-lg" : 
+            size === "md" ? "text-xl" : 
+            size === "lg" ? "text-2xl" : "text-3xl"
           )}
           style={{ color: textColor }}
         >
@@ -58,9 +62,11 @@ export const Logo = ({ className, showTagline = true, size = "md" }: LogoProps) 
           <p 
             className={cn(
               "tracking-widest uppercase", 
-              size === "sm" ? "text-xs" : size === "md" ? "text-sm" : "text-base"
+              size === "sm" ? "text-xs" : 
+              size === "md" ? "text-sm" : 
+              size === "lg" ? "text-base" : "text-lg"
             )}
-            style={{ color: textColor }}
+            style={{ color: taglineColor }}
           >
             Lire, mieux.
           </p>
