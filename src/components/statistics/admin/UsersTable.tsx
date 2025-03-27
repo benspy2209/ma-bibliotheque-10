@@ -1,4 +1,3 @@
-
 import { 
   Table,
   TableBody,
@@ -20,7 +19,13 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { ArrowDown, ArrowUp, Filter, Search } from "lucide-react";
+import { ArrowDown, ArrowUp, Calendar, Filter, Search, X } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 
 interface UserStatistics {
   user_id: string;
@@ -44,6 +49,7 @@ export function UsersTable({ userStatistics }: UsersTableProps) {
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'N/A';
@@ -70,12 +76,28 @@ export function UsersTable({ userStatistics }: UsersTableProps) {
       <ArrowDown className="h-4 w-4 ml-1" />;
   };
 
-  // Calculate "new" users (created within last 30 days)
-  const thirtyDaysAgo = useMemo(() => {
+  // Calculate "new" users based on selected date or default to last 30 days
+  const newUsersDate = useMemo(() => {
+    if (selectedDate) {
+      return selectedDate;
+    }
     const date = new Date();
     date.setDate(date.getDate() - 30);
     return date;
-  }, []);
+  }, [selectedDate]);
+
+  // For checking users created on the exact same day as selectedDate
+  const isSameDay = (dateStr: string | null, compareDate: Date): boolean => {
+    if (!dateStr) return false;
+    try {
+      const date = new Date(dateStr);
+      return date.getFullYear() === compareDate.getFullYear() && 
+             date.getMonth() === compareDate.getMonth() && 
+             date.getDate() === compareDate.getDate();
+    } catch (error) {
+      return false;
+    }
+  };
 
   // Apply filters and sorting
   const filteredSortedUsers = useMemo(() => {
@@ -84,20 +106,28 @@ export function UsersTable({ userStatistics }: UsersTableProps) {
     // First apply filter by type
     switch (filterType) {
       case 'new':
-        filtered = filtered.filter(user => 
-          user.created_at && new Date(user.created_at) >= thirtyDaysAgo
-        );
+        if (selectedDate) {
+          // If a date is selected, show only users created on that exact day
+          filtered = filtered.filter(user => 
+            user.created_at && isSameDay(user.created_at, selectedDate)
+          );
+        } else {
+          // Otherwise use the standard 30-day window
+          filtered = filtered.filter(user => 
+            user.created_at && new Date(user.created_at) >= newUsersDate
+          );
+        }
         break;
       case 'active':
         filtered = filtered.filter(user => 
           user.last_sign_in_at && 
-          new Date(user.last_sign_in_at) >= thirtyDaysAgo
+          new Date(user.last_sign_in_at) >= newUsersDate
         );
         break;
       case 'inactive':
         filtered = filtered.filter(user => 
           !user.last_sign_in_at || 
-          new Date(user.last_sign_in_at) < thirtyDaysAgo
+          new Date(user.last_sign_in_at) < newUsersDate
         );
         break;
     }
@@ -146,7 +176,12 @@ export function UsersTable({ userStatistics }: UsersTableProps) {
         
       return sortDirection === 'asc' ? comparison : -comparison;
     });
-  }, [userStatistics, sortField, sortDirection, filterType, searchQuery, thirtyDaysAgo]);
+  }, [userStatistics, sortField, sortDirection, filterType, searchQuery, newUsersDate, selectedDate]);
+
+  // Clear date filter
+  const clearDateFilter = () => {
+    setSelectedDate(undefined);
+  };
 
   return (
     <div className="space-y-4">
@@ -162,8 +197,8 @@ export function UsersTable({ userStatistics }: UsersTableProps) {
           />
         </div>
 
-        <div className="flex items-center">
-          <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 mr-1 text-muted-foreground" />
           <Select 
             value={filterType} 
             onValueChange={(value) => setFilterType(value as FilterType)}
@@ -173,13 +208,53 @@ export function UsersTable({ userStatistics }: UsersTableProps) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tous les utilisateurs</SelectItem>
-              <SelectItem value="new">Nouveaux (30j)</SelectItem>
+              <SelectItem value="new">Nouveaux</SelectItem>
               <SelectItem value="active">Actifs (30j)</SelectItem>
               <SelectItem value="inactive">Inactifs (30j)</SelectItem>
             </SelectContent>
           </Select>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="ml-2">
+                <Calendar className="h-4 w-4 mr-2" /> 
+                {selectedDate ? format(selectedDate, 'dd/MM/yyyy') : 'Choisir une date'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <CalendarComponent
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                initialFocus
+                className="pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+
+          {selectedDate && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={clearDateFilter} 
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-4 w-4 mr-1" />
+              Effacer la date
+            </Button>
+          )}
         </div>
       </div>
+
+      {selectedDate && filterType === 'new' && (
+        <div className="bg-muted/30 border rounded-lg p-2 flex items-center justify-between">
+          <div className="flex items-center">
+            <Calendar className="h-4 w-4 mr-2 text-primary" />
+            <span className="font-medium">Nouveaux utilisateurs inscrits le {format(selectedDate, 'dd MMMM yyyy', { locale: fr })}</span>
+          </div>
+          <Badge>{filteredSortedUsers.length} utilisateur(s)</Badge>
+        </div>
+      )}
 
       <div className="overflow-auto max-h-[500px]">
         <Table>
@@ -248,7 +323,7 @@ export function UsersTable({ userStatistics }: UsersTableProps) {
                     <Badge variant="secondary">{stat.book_count}</Badge>
                   </TableCell>
                   <TableCell>
-                    {stat.created_at && new Date(stat.created_at) >= thirtyDaysAgo ? (
+                    {stat.created_at && (selectedDate && isSameDay(stat.created_at, selectedDate)) ? (
                       <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                         {formatDate(stat.created_at)} (Nouveau)
                       </Badge>
