@@ -97,6 +97,12 @@ export function AdminUsersStats() {
 
   // Calcul du nombre total d'utilisateurs
   const totalUsers = userStatistics.length;
+  
+  // Calcul du nombre total de livres
+  const totalBooks = bookDetails.length;
+  
+  // Calcul du nombre de livres lus (status = "completed")
+  const completedBooks = bookDetails.filter(book => book.status === 'completed').length;
 
   if (isLoading) {
     return (
@@ -148,11 +154,11 @@ export function AdminUsersStats() {
             <div className="flex gap-2">
               <Badge variant="outline" className="font-normal">
                 <BookmarkIcon className="h-3 w-3 mr-1" /> 
-                {bookDetails.length} livres au total
+                {totalBooks} livres au total
               </Badge>
               <Badge variant="outline" className="font-normal">
                 <UserCircle className="h-3 w-3 mr-1" /> 
-                {userStats.reduce((acc, stat) => acc + stat.book_count, 0)} livres lus
+                {completedBooks} livres lus
               </Badge>
             </div>
           </div>
