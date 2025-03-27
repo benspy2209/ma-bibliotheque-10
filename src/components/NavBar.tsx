@@ -70,12 +70,9 @@ const NavBar = () => {
         <div className="flex items-center gap-6">
           <NavLink to="/" className="flex items-center">
             <img 
-              src="/logo_bibliopulse.png" 
+              src={theme === 'light' ? "/logo_bibliopulse bl.png" : "/logo_bibliopulse.png"}
               alt="BiblioPulse Logo" 
               className="h-20 w-auto" 
-              style={{
-                filter: theme === 'light' ? 'brightness(0)' : 'drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))'
-              }}
             />
           </NavLink>
           
