@@ -21,7 +21,7 @@ const Contact = () => {
           <div className="mb-10 text-center">
             <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Have a question, suggestion, or issue? Don't hesitate to contact us, we're happy to help.
+              Vous avez une question, une suggestion ou un problème ? N'hésitez pas à nous contacter, nous sommes heureux de vous aider.
             </p>
           </div>
           
