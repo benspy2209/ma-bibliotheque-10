@@ -9,10 +9,10 @@ export const HeroSection = () => {
   const { user, signIn } = useSupabaseAuth();
   const navigate = useNavigate();
 
-  // Modified to redirect to search page instead of library
+  // Modified to redirect to library page instead of search
   const handleLoginClick = () => {
     console.log("Commencer l'aventure clicked");
-    navigate('/search');
+    navigate('/library');
   };
 
   // Wrapper function for login

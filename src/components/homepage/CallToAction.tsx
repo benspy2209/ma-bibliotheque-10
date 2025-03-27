@@ -9,10 +9,10 @@ export const CallToAction = () => {
   const { user } = useSupabaseAuth();
   const navigate = useNavigate();
 
-  // Modified to redirect to search page
+  // Modified to redirect to library page
   const handleSignUp = () => {
     console.log("Commencer l'aventure clicked");
-    navigate('/search');
+    navigate('/library');
   };
 
   return (
