@@ -1,11 +1,19 @@
 
 import { Link } from "react-router-dom";
-import { BookOpen, Mail, Heart, Shield, BookText, ExternalLink } from "lucide-react";
+import { BookOpen, Mail, Heart, Shield, BookText, ExternalLink, Facebook } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
+import { toast } from "sonner";
 
 const Footer = () => {
   const { theme } = useTheme();
   const currentYear = new Date().getFullYear();
+  
+  const handleHeartClick = () => {
+    toast.success("Merci pour votre soutien !", {
+      description: "Votre appréciation nous fait chaud au cœur !",
+      duration: 3000,
+    });
+  };
   
   return (
     <footer className="w-full border-t py-6 px-6 mt-auto">
@@ -105,17 +113,18 @@ const Footer = () => {
               <Mail className="h-4 w-4" />
             </a>
             <a 
-              href="https://github.com/beneloo/bibliopulse" 
-              target="_blank" 
+              href="https://www.facebook.com/BiblioPulse/"
+              target="_blank"
               rel="noopener noreferrer"
-              aria-label="GitHub"
+              aria-label="Facebook"
               className="hover:text-primary transition-colors"
             >
-              <ExternalLink className="h-4 w-4" />
+              <Facebook className="h-4 w-4" />
             </a>
             <button 
               className="hover:text-primary transition-colors"
               aria-label="J'aime"
+              onClick={handleHeartClick}
             >
               <Heart className="h-4 w-4" />
             </button>
