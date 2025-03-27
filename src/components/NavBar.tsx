@@ -74,7 +74,7 @@ const NavBar = () => {
             <img 
               src={theme === 'light' ? "/pulse.png" : "/logo_bibliopulse.png"}
               alt="BiblioPulse Logo" 
-              className="h-20 w-auto" 
+              className="h-40 w-auto" 
             />
           </NavLink>
           
