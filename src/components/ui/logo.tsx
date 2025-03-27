@@ -12,66 +12,45 @@ interface LogoProps {
 export const Logo = ({ className, showTagline = true, size = "md" }: LogoProps) => {
   const { theme } = useTheme();
   
-  // Définir les tailles pour les différentes variantes
+  // Define sizes for different variants
   const sizes = {
     sm: "h-8",
     md: "h-10",
-    lg: "h-12",
+    lg: "h-14",
   };
   
-  // Déterminer les couleurs en fonction du thème
-  const logoColor = "#FF1A75"; // Rose/magenta du logo
-  const textColor = theme === "dark" ? "#FFFFFF" : "#221F26"; // Noir plus foncé en mode clair
-  const strokeWidth = 8; // Épaisseur du trait pour une meilleure visibilité
+  // Logo color - magenta pink
+  const logoColor = "#FF1A75";
   
   return (
     <div className={cn("flex items-center gap-3", className)}>
-      {/* Logo "B" stylisé avec une taille ajustée */}
+      {/* Stylized "B" logo */}
       <div className="relative">
         <svg 
           className={cn(sizes[size], "w-auto")} 
-          viewBox="0 0 100 100" 
+          viewBox="0 0 110 110" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg"
           preserveAspectRatio="xMidYMid meet"
         >
+          {/* Updated path for the "B" to match the reference image */}
           <path 
-            d="M26.4,90c0,0,18.4-77.3,40.8-77.3c13.4,0,20.2,15.3,7.4,22.6C63,41.1,44.6,42,39.9,56.5 c-2.8,8.5,1.7,17,11.2,17c8.1,0,13.9-5.8,13.9-13.4" 
+            d="M28,95 C28,95 35,35 60,35 C85,35 70,60 55,60 C45,60 35,70 40,80 C45,90 55,85 60,75"
             stroke={logoColor} 
-            strokeWidth={strokeWidth} 
+            strokeWidth={6} 
             fill="none"
             strokeLinecap="round"
           />
         </svg>
-        
-        {/* Ajout d'un effet pour améliorer la visibilité en mode clair */}
-        {theme === "light" && (
-          <svg 
-            className={cn(sizes[size], "w-auto absolute top-0 left-0")} 
-            viewBox="0 0 100 100" 
-            fill="none" 
-            xmlns="http://www.w3.org/2000/svg"
-            preserveAspectRatio="xMidYMid meet"
-            style={{ filter: "drop-shadow(0px 0px 2px rgba(0,0,0,0.5))" }}
-          >
-            <path 
-              d="M26.4,90c0,0,18.4-77.3,40.8-77.3c13.4,0,20.2,15.3,7.4,22.6C63,41.1,44.6,42,39.9,56.5 c-2.8,8.5,1.7,17,11.2,17c8.1,0,13.9-5.8,13.9-13.4" 
-              stroke={logoColor} 
-              strokeWidth={strokeWidth} 
-              fill="none"
-              strokeLinecap="round"
-            />
-          </svg>
-        )}
       </div>
       
       <div className="flex flex-col">
         <h1 
           className={cn(
-            "font-bold tracking-wider", 
+            "font-bold tracking-widest", 
             size === "sm" ? "text-lg" : size === "md" ? "text-xl" : "text-2xl",
-            theme === "light" ? "text-brand" : ""
           )}
+          style={{ color: theme === "dark" ? "#FFFFFF" : logoColor }}
         >
           BIBLIOPULSE
         </h1>
@@ -79,13 +58,12 @@ export const Logo = ({ className, showTagline = true, size = "md" }: LogoProps) 
         {showTagline && (
           <p 
             className={cn(
-              "tracking-widest uppercase", 
-              size === "sm" ? "text-xs" : size === "md" ? "text-sm" : "text-base",
-              theme === "light" ? "text-brand font-medium" : ""
+              "tracking-widest uppercase text-xs mt-0.5 letter-spacing-wide", 
+              size === "sm" ? "text-[0.6rem]" : size === "md" ? "text-xs" : "text-sm",
             )}
-            style={{ color: theme === "light" ? undefined : textColor }}
+            style={{ color: theme === "dark" ? "#FFFFFF" : logoColor }}
           >
-            Lire, mieux.
+            LIRE, MIEUX.
           </p>
         )}
       </div>
