@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,7 +31,7 @@ export function useSupabaseAuth() {
         toast({
           description: "Connexion réussie"
         });
-        navigate('/search');
+        navigate('/library');
       } else if (event === 'SIGNED_OUT') {
         toast({
           description: "Déconnexion réussie"
