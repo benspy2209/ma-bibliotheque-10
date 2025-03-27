@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { loadBooks } from '@/services/supabaseBooks';
 import { getYear } from 'date-fns';
 import NavBar from '@/components/NavBar';
+import Footer from '@/components/Footer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { YearFilter } from "@/components/statistics/YearFilter";
 import { YearlyBooksList } from "@/components/statistics/YearlyBooksList";
@@ -113,9 +114,9 @@ export default function Statistics() {
 
   return (
     <>
-      <div className="min-h-screen">
+      <div className="min-h-screen flex flex-col">
         <NavBar />
-        <div className="px-4 py-8 sm:px-6 lg:px-8">
+        <div className="px-4 py-8 sm:px-6 lg:px-8 flex-grow">
           <div className="max-w-7xl mx-auto space-y-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
@@ -239,6 +240,7 @@ export default function Statistics() {
             </StatsCalculator>
           </div>
         </div>
+        <Footer />
       </div>
     </>
   );
