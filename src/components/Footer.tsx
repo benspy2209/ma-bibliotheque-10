@@ -21,11 +21,13 @@ const Footer = () => {
         {/* Logo et description */}
         <div className="flex flex-col sm:flex-row items-center justify-between mb-8">
           <div className="flex items-center mb-4 sm:mb-0">
-            <img 
-              src={theme === 'light' ? "/pulse.png" : "/pulse dark.png"}
-              alt="BiblioPulse Logo" 
-              className="h-auto max-h-12 w-auto mr-4" 
-            />
+            <div className="footer-logo-container">
+              <img 
+                src={theme === 'light' ? "/pulse.png" : "/pulse dark.png"}
+                alt="BiblioPulse Logo" 
+                className="h-auto max-h-12 w-auto mr-4" 
+              />
+            </div>
             <div className="text-left">
               <h3 className="text-lg font-medium">BiblioPulse</h3>
               <p className="text-sm text-muted-foreground max-w-xs">

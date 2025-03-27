@@ -39,7 +39,7 @@ img[alt="BiblioPulse Logo"] {
     transform-origin: left center; /* Ensure it scales from the left side */
   }
   
-  .navbar-logo-container {
+  .navbar-logo-container, .footer-logo-container {
     overflow: visible; /* Allow overflow to prevent clipping */
   }
 }
