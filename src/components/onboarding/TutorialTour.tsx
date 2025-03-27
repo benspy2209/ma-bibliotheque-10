@@ -100,7 +100,7 @@ export function TutorialTour() {
   const handleJoyrideCallback = (data: CallBackProps) => {
     const { action, index, status, type } = data;
     
-    if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
+    if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
       // Tutoriel terminé ou ignoré
       setRun(false);
       completeTutorial();
