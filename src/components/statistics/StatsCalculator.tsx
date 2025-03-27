@@ -1,9 +1,8 @@
-
 import { useMemo } from 'react';
 import { Book } from '@/types/book';
 import { useReadingSpeed } from '@/hooks/use-reading-speed';
 import { useReadingGoals } from '@/hooks/use-reading-goals';
-import { format, differenceInDays, getYear, differenceInMonths } from 'date-fns';
+import { format, differenceInDays, getYear, differenceInMonths, isThisMonth, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 export interface CalculatedStats {
@@ -38,7 +37,6 @@ interface StatsCalculatorProps {
   children: (stats: CalculatedStats) => React.ReactNode;
 }
 
-// Array of colors for charts
 const COLORS = [
   '#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE', '#00C49F',
   '#FFBB28', '#FF8042', '#a4de6c', '#d0ed57', '#83a6ed', '#8dd1e1'
@@ -93,37 +91,55 @@ export function StatsCalculator({
       calculatedReadingSpeed = totalPages / (totalReadingDays || 1);
     }
 
-    // Calculate reading time in hours based on user's reading speed setting
     const pagesPerHour = readingSpeed;
     const totalReadingTimeHoursNum = totalPages / pagesPerHour;
     const totalReadingTimeHoursFormatted = totalReadingTimeHoursNum.toFixed(1);
 
-    // Monthly data calculation
     const booksByMonth = completedBooks.reduce((acc, book) => {
       if (!book.completionDate) return acc;
       
-      const monthKey = format(new Date(book.completionDate), 'MMMM yyyy', { locale: fr });
-      if (!acc[monthKey]) {
-        acc[monthKey] = {
-          name: monthKey,
-          books: 0,
-          pages: 0,
-          date: new Date(book.completionDate) 
-        };
+      try {
+        const completionDate = parseISO(book.completionDate);
+        const monthKey = format(completionDate, 'MMMM yyyy', { locale: fr });
+        
+        if (!acc[monthKey]) {
+          acc[monthKey] = {
+            name: monthKey,
+            books: 0,
+            pages: 0,
+            date: completionDate
+          };
+        }
+        acc[monthKey].books += 1;
+        
+        const pages = Number(book.numberOfPages || 0);
+        acc[monthKey].pages += !isNaN(pages) ? pages : 0;
+        
+        if (isThisMonth(completionDate)) {
+          console.log('Livre du mois courant:', book.title, '- Date:', book.completionDate);
+        }
+      } catch (error) {
+        console.error('Erreur de date pour le livre:', book.title, '- Date:', book.completionDate, error);
       }
-      acc[monthKey].books += 1;
-      
-      const pages = Number(book.numberOfPages || 0);
-      acc[monthKey].pages += !isNaN(pages) ? pages : 0;
       
       return acc;
     }, {} as Record<string, { name: string; books: number; pages: number; date: Date }>);
+
+    const booksThisMonth = completedBooks.filter(book => {
+      if (!book.completionDate) return false;
+      try {
+        const completionDate = parseISO(book.completionDate);
+        return isThisMonth(completionDate);
+      } catch (error) {
+        console.error('Erreur lors du filtrage par mois:', error);
+        return false;
+      }
+    }).length;
 
     const monthlyData = Object.values(booksByMonth)
       .sort((a, b) => a.date.getTime() - b.date.getTime())
       .slice(-6);
 
-    // Authors stats
     const authorCounts = completedBooks.reduce((acc, book) => {
       const authors = Array.isArray(book.author) ? book.author : [book.author];
       
@@ -142,7 +158,6 @@ export function StatsCalculator({
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
-    // Genres stats
     const genreCounts = completedBooks.reduce((acc, book) => {
       const subjects = book.subjects || [];
       
@@ -161,25 +176,17 @@ export function StatsCalculator({
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
-    // Goals stats
     const currentYear = getYear(new Date());
     const booksThisYear = completedBooks.filter(book => 
-      book.completionDate && getYear(new Date(book.completionDate)) === currentYear
+      book.completionDate && getYear(parseISO(book.completionDate)) === currentYear
     ).length;
 
     const yearlyGoal = readingGoals.yearly_goal;
     const yearlyProgressPercentage = Math.min(100, (booksThisYear / yearlyGoal) * 100);
 
-    const currentMonth = new Date();
-    const booksThisMonth = completedBooks.filter(book => 
-      book.completionDate && 
-      differenceInMonths(currentMonth, new Date(book.completionDate)) === 0
-    ).length;
-
     const monthlyGoal = readingGoals.monthly_goal;
     const monthlyProgressPercentage = Math.min(100, (booksThisMonth / monthlyGoal) * 100);
 
-    // Reading time stats
     const booksWithReadingTime = completedBooks.filter(book => 
       (book.readingTimeDays !== undefined) || 
       (book.startReadingDate && book.completionDate)
@@ -195,7 +202,6 @@ export function StatsCalculator({
         }, 0) / booksWithReadingTime.length
       : 0;
     
-    // Reading time distribution
     const readingTimeDistribution = [
       { name: '1-7 jours', value: 0, color: '#8884d8' },
       { name: '8-14 jours', value: 0, color: '#82ca9d' },
@@ -203,7 +209,6 @@ export function StatsCalculator({
       { name: '31+ jours', value: 0, color: '#ff8042' }
     ];
     
-    // Count books by reading time duration
     completedBooks.forEach(book => {
       let days = book.readingTimeDays;
       
@@ -224,7 +229,6 @@ export function StatsCalculator({
       }
     });
 
-    // Filter out empty categories for display
     const filteredReadingTimeDistribution = readingTimeDistribution.filter(item => item.value > 0);
     const hasReadingTimeData = filteredReadingTimeDistribution.length > 0;
 

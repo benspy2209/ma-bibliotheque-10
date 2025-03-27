@@ -17,7 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
-import { AlertCircle, Users, BookOpen, UserCircle, BookmarkIcon } from 'lucide-react';
+import { AlertCircle, Users, BookOpen, UserCircle, BookmarkIcon, CheckCircleIcon } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -80,6 +80,15 @@ export function AdminUsersStats() {
     const details = await fetchAllUserBookDetails();
     const statistics = await fetchAllUsersStatistics();
     
+    // Tri des détails pour voir le problème potentiel
+    const sortedDetails = [...details].sort((a, b) => {
+      if (a.user_email < b.user_email) return -1;
+      if (a.user_email > b.user_email) return 1;
+      return 0;
+    });
+    
+    console.log('Détails des livres triés par utilisateur:', sortedDetails);
+    
     setUserStats(stats);
     setBookDetails(details);
     setUserStatistics(statistics);
@@ -101,8 +110,10 @@ export function AdminUsersStats() {
   // Calcul du nombre total de livres
   const totalBooks = bookDetails.length;
   
-  // Calcul du nombre de livres lus (status = "completed")
+  // Calcul du nombre de livres par statut
   const completedBooks = bookDetails.filter(book => book.status === 'completed').length;
+  const readingBooks = bookDetails.filter(book => book.status === 'reading').length;
+  const toReadBooks = bookDetails.filter(book => !book.status || book.status === 'to-read').length;
 
   if (isLoading) {
     return (
@@ -151,14 +162,22 @@ export function AdminUsersStats() {
               </div>
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Badge variant="outline" className="font-normal">
                 <BookmarkIcon className="h-3 w-3 mr-1" /> 
                 {totalBooks} livres au total
               </Badge>
               <Badge variant="outline" className="font-normal">
-                <UserCircle className="h-3 w-3 mr-1" /> 
+                <CheckCircleIcon className="h-3 w-3 mr-1" /> 
                 {completedBooks} livres lus
+              </Badge>
+              <Badge variant="outline" className="font-normal">
+                <BookOpen className="h-3 w-3 mr-1" /> 
+                {readingBooks} livres en cours
+              </Badge>
+              <Badge variant="outline" className="font-normal">
+                <UserCircle className="h-3 w-3 mr-1" /> 
+                {toReadBooks} livres à lire
               </Badge>
             </div>
           </div>
