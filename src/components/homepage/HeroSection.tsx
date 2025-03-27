@@ -6,7 +6,13 @@ import { Button } from '@/components/ui/button';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
 export const HeroSection = () => {
-  const { user } = useSupabaseAuth();
+  const { user, setShowLoginDialog, setAuthMode } = useSupabaseAuth();
+
+  const handleLogin = () => {
+    console.log("Opening login dialog from HeroSection");
+    setAuthMode('signup');
+    setShowLoginDialog(true);
+  };
 
   return (
     <section className="relative py-20 overflow-hidden">
@@ -26,9 +32,18 @@ export const HeroSection = () => {
                   <Link to="/library">Découvrir des livres</Link>
                 </Button>
               ) : (
-                <Button variant="outline" size="lg" asChild>
-                  <Link to="/features">Explorer</Link>
-                </Button>
+                <>
+                  <Button 
+                    size="lg" 
+                    onClick={handleLogin}
+                    className="pulse-effect bg-[#ea384c] text-white hover:bg-[#d11a2e]"
+                  >
+                    Commencer l'aventure
+                  </Button>
+                  <Button variant="outline" size="lg" asChild>
+                    <Link to="/features">Explorer</Link>
+                  </Button>
+                </>
               )}
             </div>
           </div>
