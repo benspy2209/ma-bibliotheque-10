@@ -50,10 +50,10 @@ export const HeroSection = () => {
                   <Button 
                     variant="outline" 
                     size="lg" 
-                    onClick={handleSignIn}
+                    asChild
                     className="bg-black text-white hover:bg-gray-800 border-none"
                   >
-                    <LogIn className="h-5 w-5 mr-2" /> Se connecter
+                    <Link to="/features">Découvrir les fonctionnalités</Link>
                   </Button>
                 </>
               )}
