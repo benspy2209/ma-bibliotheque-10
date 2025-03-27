@@ -1,6 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { fetchAllUserStats, fetchAllUserBookDetails } from '@/services/supabaseAdminStats';
+import { 
+  fetchAllUserStats, 
+  fetchAllUserBookDetails, 
+  fetchAllUsersStatistics 
+} from '@/services/supabaseAdminStats';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { 
   Table,
@@ -13,8 +17,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
-import { AlertCircle, Users, BookOpen } from 'lucide-react';
+import { AlertCircle, Users, BookOpen, UserCircle } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface UserBookStats {
   user_email: string;
@@ -33,9 +39,19 @@ interface UserBookDetail {
   status: string | null;
 }
 
+interface UserStatistics {
+  user_id: string;
+  user_email: string;
+  name: string | null;
+  book_count: number;
+  created_at: string | null;
+  last_sign_in_at: string | null;
+}
+
 export function AdminUsersStats() {
   const [userStats, setUserStats] = useState<UserBookStats[]>([]);
   const [bookDetails, setBookDetails] = useState<UserBookDetail[]>([]);
+  const [userStatistics, setUserStatistics] = useState<UserStatistics[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const { user } = useSupabaseAuth();
@@ -62,10 +78,21 @@ export function AdminUsersStats() {
     
     const stats = await fetchAllUserStats();
     const details = await fetchAllUserBookDetails();
+    const statistics = await fetchAllUsersStatistics();
     
     setUserStats(stats);
     setBookDetails(details);
+    setUserStatistics(statistics);
     setIsLoading(false);
+  };
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'N/A';
+    try {
+      return format(new Date(dateString), 'dd MMM yyyy', { locale: fr });
+    } catch (error) {
+      return 'Date invalide';
+    }
   };
 
   if (isLoading) {
@@ -102,11 +129,41 @@ export function AdminUsersStats() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="summary">
+        <Tabs defaultValue="users">
           <TabsList className="mb-4">
-            <TabsTrigger value="summary">Résumé</TabsTrigger>
+            <TabsTrigger value="users">Utilisateurs</TabsTrigger>
+            <TabsTrigger value="summary">Résumé livres</TabsTrigger>
             <TabsTrigger value="details">Détails des livres</TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="users">
+            <div className="overflow-auto max-h-[500px]">
+              <Table>
+                <TableHeader className="sticky top-0 bg-background">
+                  <TableRow>
+                    <TableHead>Utilisateur</TableHead>
+                    <TableHead>Nom</TableHead>
+                    <TableHead className="text-right">Livres</TableHead>
+                    <TableHead>Inscription</TableHead>
+                    <TableHead>Dernière connexion</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {userStatistics.map((stat) => (
+                    <TableRow key={stat.user_id}>
+                      <TableCell className="font-medium">{stat.user_email}</TableCell>
+                      <TableCell>{stat.name || 'Non renseigné'}</TableCell>
+                      <TableCell className="text-right">
+                        <Badge variant="secondary">{stat.book_count}</Badge>
+                      </TableCell>
+                      <TableCell>{formatDate(stat.created_at)}</TableCell>
+                      <TableCell>{formatDate(stat.last_sign_in_at)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
           
           <TabsContent value="summary">
             <Table>

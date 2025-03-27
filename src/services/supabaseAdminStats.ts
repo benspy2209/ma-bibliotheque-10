@@ -18,6 +18,15 @@ interface UserBookDetail {
   status: string | null;
 }
 
+interface UserStatistics {
+  user_id: string;
+  user_email: string;
+  name: string | null;
+  book_count: number;
+  created_at: string | null;
+  last_sign_in_at: string | null;
+}
+
 /**
  * Récupère les statistiques de tous les utilisateurs avec leurs livres
  * Cette fonction devrait être utilisée uniquement par les administrateurs
@@ -79,6 +88,28 @@ export async function fetchBooksCompleteView() {
     return data || [];
   } catch (error) {
     console.error('Erreur lors de l\'appel aux détails complets des livres:', error);
+    return [];
+  }
+}
+
+/**
+ * Récupère les statistiques de tous les utilisateurs incluant leurs informations
+ * et le nombre de livres dans leur bibliothèque
+ * Cette fonction devrait être utilisée uniquement par les administrateurs
+ */
+export async function fetchAllUsersStatistics(): Promise<UserStatistics[]> {
+  try {
+    // Combine données utilisateurs (auth.users) et comptage de livres (books)
+    const { data, error } = await supabase.rpc('get_all_users_statistics');
+
+    if (error) {
+      console.error('Erreur lors de la récupération des statistiques globales:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Erreur lors de l\'appel aux statistiques globales:', error);
     return [];
   }
 }
