@@ -31,7 +31,7 @@ const Contact = () => {
                 <div className="bg-primary/10 p-3 rounded-full w-fit mx-auto mb-4">
                   <Mail className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2 text-white">Email</h3>
+                <h3 className="text-xl font-semibold mb-2 text-white">E-mail</h3>
                 <a href="mailto:contact@bibliopulse.be" className="text-primary hover:underline">
                   contact@bibliopulse.be
                 </a>
@@ -43,7 +43,7 @@ const Contact = () => {
                 <div className="bg-primary/10 p-3 rounded-full w-fit mx-auto mb-4">
                   <Phone className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2 text-white">Phone</h3>
+                <h3 className="text-xl font-semibold mb-2 text-white">GSM</h3>
                 <a href="tel:+32497363065" className="text-primary hover:underline">
                   +32 497 36 30 65
                 </a>
@@ -55,9 +55,9 @@ const Contact = () => {
                 <div className="bg-primary/10 p-3 rounded-full w-fit mx-auto mb-4">
                   <MapPin className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2 text-white">Address</h3>
-                <p className="text-white">
-                  Rhode-Saint-Genèse<br />
+                <h3 className="text-xl font-semibold mb-2 text-white">Adresse</h3>
+                <p className="text-primary">
+                  1640 Rhode-Saint-Genèse<br />
                   Belgium
                 </p>
               </CardContent>
