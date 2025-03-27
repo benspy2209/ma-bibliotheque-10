@@ -20,7 +20,8 @@ const NavBar = () => {
 
   // Fonction wrapper pour gérer le clic du bouton de connexion
   const handleSignIn = () => {
-    signIn('signup');
+    console.log("Opening login dialog from NavBar");
+    setShowLoginDialog(true);
   };
 
   const NavLinks = () => (

@@ -6,12 +6,11 @@ import { Button } from '@/components/ui/button';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
 export const CallToAction = () => {
-  const { user, signIn, setShowLoginDialog } = useSupabaseAuth();
+  const { user, setShowLoginDialog } = useSupabaseAuth();
 
   const handleSignUp = () => {
     console.log("Opening login dialog from CallToAction");
     setShowLoginDialog(true);
-    signIn('signup');
   };
 
   return (
