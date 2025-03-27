@@ -12,46 +12,44 @@ interface LogoProps {
 export const Logo = ({ className, showTagline = true, size = "md" }: LogoProps) => {
   const { theme } = useTheme();
   
-  // Define sizes for different variants
+  // Définir les tailles pour les différentes variantes
   const sizes = {
-    sm: "h-9",
-    md: "h-14",
-    lg: "h-20",
+    sm: "h-8",
+    md: "h-10",
+    lg: "h-12",
   };
   
-  // Logo color - magenta pink
-  const logoColor = "#FF1A75";
+  // Déterminer les couleurs en fonction du thème
+  const logoColor = "#FF1A75"; // Rose/magenta du logo
+  const textColor = theme === "dark" ? "#FFFFFF" : "#221F26";
   
   return (
-    <div className={cn("flex items-center gap-2", className)}>
-      {/* Stylized "B" logo */}
+    <div className={cn("flex items-center", className)}>
       <div className="relative">
+        {/* Logo "B" stylisé */}
         <svg 
           className={cn(sizes[size], "w-auto")} 
-          viewBox="0 0 60 100" 
+          viewBox="0 0 100 100" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="xMidYMid meet"
         >
-          {/* Completely redesigned "B" path based on reference image */}
           <path 
-            d="M20,20 C40,20 50,30 50,40 C50,50 40,60 20,60 C40,60 50,70 50,80 C50,90 40,100 20,100 L20,20 Z"
+            d="M26.4,90c0,0,18.4-77.3,40.8-77.3c13.4,0,20.2,15.3,7.4,22.6C63,41.1,44.6,42,39.9,56.5 c-2.8,8.5,1.7,17,11.2,17c8.1,0,13.9-5.8,13.9-13.4" 
             stroke={logoColor} 
-            strokeWidth={10} 
+            strokeWidth="6" 
             fill="none"
             strokeLinecap="round"
-            strokeLinejoin="round"
           />
         </svg>
       </div>
       
-      <div className="flex flex-col justify-center">
+      <div className="flex flex-col ml-2">
         <h1 
           className={cn(
-            "font-bold tracking-widest", 
-            size === "sm" ? "text-lg" : size === "md" ? "text-xl" : "text-3xl",
+            "font-bold tracking-wider", 
+            size === "sm" ? "text-lg" : size === "md" ? "text-xl" : "text-2xl"
           )}
-          style={{ color: logoColor }}
+          style={{ color: textColor }}
         >
           BIBLIOPULSE
         </h1>
@@ -59,12 +57,12 @@ export const Logo = ({ className, showTagline = true, size = "md" }: LogoProps) 
         {showTagline && (
           <p 
             className={cn(
-              "tracking-widest uppercase mt-0.5 letter-spacing-wide", 
-              size === "sm" ? "text-[0.6rem]" : size === "md" ? "text-xs" : "text-sm",
+              "tracking-widest uppercase", 
+              size === "sm" ? "text-xs" : size === "md" ? "text-sm" : "text-base"
             )}
-            style={{ color: theme === "dark" ? "#FFFFFF" : "#000000" }}
+            style={{ color: textColor }}
           >
-            LIRE, MIEUX.
+            Lire, mieux.
           </p>
         )}
       </div>
