@@ -83,6 +83,14 @@ const NON_LITERARY_SUBJECTS = [
   'couture', 'tricot', 'crochet', 'peinture', 'dessin', 'sculpture'
 ];
 
+// Add new exhibit/museum/art related keywords
+const ART_EXHIBITION_KEYWORDS = [
+  'exposition', 'exhibition', 'catalogue', 'catalog', 'museum', 'musée', 
+  'gallery', 'galerie', 'matisse', 'picasso', 'centre pompidou', 'palais',
+  'fondation', 'retrospective', 'rétrospective', 'oeuvres', 'œuvres',
+  'peinture', 'peintures', 'painting', 'paintings', 'art', 'artist', 'artiste'
+];
+
 export function filterNonBookResults(books: Book[]): Book[] {
   return books.filter(book => {
     if (!book.title) return false;
@@ -94,9 +102,17 @@ export function filterNonBookResults(books: Book[]): Book[] {
     const subjectsString = (book.subjects || []).join(' ').toLowerCase();
     const descriptionLower = (book.description || '').toLowerCase();
     const formatLower = (book.format || '').toLowerCase();
+    const publisherString = (book.publishers || []).join(' ').toLowerCase();
     
-    const allText = `${titleLower} ${authorString} ${subjectsString} ${descriptionLower} ${formatLower}`;
+    const allText = `${titleLower} ${authorString} ${subjectsString} ${descriptionLower} ${formatLower} ${publisherString}`;
     
+    // Exclude exhibition catalogs and art books more aggressively
+    const isArtExhibition = ART_EXHIBITION_KEYWORDS.some(keyword => 
+      titleLower.includes(keyword.toLowerCase()) || 
+      publisherString.includes(keyword.toLowerCase()) ||
+      (book.description && descriptionLower.includes(keyword.toLowerCase()))
+    );
+
     // Exclure les formats non désirés (audio, coffrets, etc.)
     const isUnwantedFormat = UNWANTED_FORMATS.some(format => 
       allText.includes(format.toLowerCase())
@@ -153,9 +169,18 @@ export function filterNonBookResults(books: Book[]): Book[] {
                               subjectsString.includes('roman') ||
                               subjectsString.includes('littérature');
     
+    // Probably a museum or exhibition publication if publisher is a museum or art center
+    const isMuseumPublication = publisherString.includes('musée') || 
+                               publisherString.includes('museum') || 
+                               publisherString.includes('centre') ||
+                               publisherString.includes('galerie') ||
+                               publisherString.includes('gallery') ||
+                               publisherString.includes('foundation') ||
+                               publisherString.includes('fondation');
+    
     // Si c'est probablement un livre de fiction, nous voulons le garder quelles que soient les autres règles
     if (likelyFictionBook) {
-      return !isAudioBook; // Exclure uniquement si c'est un livre audio
+      return !isAudioBook && !isArtExhibition && !isMuseumPublication; // Keep fiction but still exclude audio books and art exhibitions
     }
     
     // Vérification supplémentaire si le titre contient des personnages de BD/séries
@@ -168,9 +193,11 @@ export function filterNonBookResults(books: Book[]): Book[] {
       allText.includes(subject.toLowerCase())
     );
     
-    // Si le titre contient des personnages de séries, le livre est probablement 
-    // attribué par erreur à l'auteur recherché
-    if (containsSeriesCharacters) {
+    // If the title contains "exposition" or "exhibition" or the word "album", it's likely an art book
+    if (titleLower.includes('exposition') || 
+        titleLower.includes('exhibition') || 
+        titleLower.includes('album') || 
+        titleLower.includes('catalogue')) {
       return false;
     }
     
@@ -180,7 +207,10 @@ export function filterNonBookResults(books: Book[]): Book[] {
            !isUnwantedFormat && 
            !isAudioBook &&
            !isTitleTooLong &&
-           !containsNonLiterarySubjects;
+           !containsNonLiterarySubjects &&
+           !isArtExhibition &&
+           !isMuseumPublication &&
+           !containsSeriesCharacters;
   });
 }
 
@@ -285,31 +315,51 @@ export function isTitleExplicitMatch(book: Book, searchQuery: string): boolean {
   const normalizedTitle = normalizeString(titleLower);
   const normalizedSearch = normalizeString(searchLower);
   
-  // Check for children's book patterns like "Tom-Tom et Nana"
-  if (titleLower.includes('tom-tom') || 
-      titleLower.includes('album') || 
-      titleLower.includes('comics') || 
-      titleLower.includes('bd') ||
-      titleLower.includes('bande dessinée') ||
-      titleLower.includes('exposition')) {
-    return false;
-  }
-  
-  // Filter out art books, exhibition catalogs, etc.
+  // Stronger filtering for exhibition catalogs and art books
   if (titleLower.includes('exposition') || 
+      titleLower.includes('exhibition') || 
       titleLower.includes('catalogue') || 
       titleLower.includes('matisse') ||
       titleLower.includes('centre pompidou') ||
-      titleLower.includes('musée')) {
+      titleLower.includes('musée') || 
+      titleLower.includes('album') ||
+      titleLower.includes('/album')) {
     return false;
+  }
+  
+  // Check for children's book patterns
+  if (titleLower.includes('tom-tom') || 
+      titleLower.includes('comics') || 
+      titleLower.includes('bd') ||
+      titleLower.includes('bande dessinée')) {
+    return false;
+  }
+  
+  // Check if the title contains exact words from the search query
+  const titleWords = normalizedTitle.split(/\s+/);
+  const searchWords = normalizedSearch.split(/\s+/).filter(word => word.length > 2);
+  
+  // For short search queries, be extremely strict
+  if (searchWords.length <= 2) {
+    // For a short search, we require that at least one word is exactly matched
+    const hasExactMatch = searchWords.some(searchWord => 
+      titleWords.includes(searchWord)
+    );
+    
+    // And that the title doesn't look like an exhibition catalog
+    const looksLikeExhibition = ART_EXHIBITION_KEYWORDS.some(keyword =>
+      titleLower.includes(keyword.toLowerCase())
+    );
+    
+    if (!hasExactMatch || looksLikeExhibition) {
+      return false;
+    }
   }
   
   // The title contains exactly the query string
   if (normalizedTitle.includes(normalizedSearch)) {
     // Even if the title includes the search query, we should ensure it's not a partial match
     // that could lead to false positives
-    const titleWords = normalizedTitle.split(/\s+/);
-    const searchWords = normalizedSearch.split(/\s+/);
     
     // If search is just one word, make sure it's a complete word in the title
     if (searchWords.length === 1 && searchWords[0].length < 5) {
@@ -319,21 +369,13 @@ export function isTitleExplicitMatch(book: Book, searchQuery: string): boolean {
     return true;
   }
   
-  // Vérifier si tous les mots significatifs de la requête sont dans le titre
-  const searchWords = normalizedSearch.split(/\s+/).filter(word => word.length > 2);
-  
-  // Pour les recherches trop courtes, on est plus strict
-  if (searchWords.length <= 1) {
-    // Pour une recherche d'un seul mot, on vérifie s'il apparaît comme un mot complet
-    const titleWords = normalizedTitle.split(/\s+/);
-    return titleWords.some(word => word === searchWords[0]);
+  // For longer searches, we check if most words match and are in order
+  if (searchWords.length > 2) {
+    // We want at least 80% of the search words to be in the title
+    const matchingWords = searchWords.filter(word => normalizedTitle.includes(word));
+    const percentageThreshold = 0.9; // Increased from 0.8 to 0.9
+    return matchingWords.length >= Math.ceil(searchWords.length * percentageThreshold);
   }
   
-  // Pour les recherches plus longues, on vérifie si la plupart des mots sont présents
-  // et dans le bon ordre pour éviter les faux positifs
-  const matchingWords = searchWords.filter(word => normalizedTitle.includes(word));
-  
-  // Au moins 80% des mots doivent correspondre (augmenté de 70% à 80%)
-  const percentageThreshold = 0.8;
-  return matchingWords.length >= Math.ceil(searchWords.length * percentageThreshold);
+  return false;
 }

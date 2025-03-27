@@ -94,7 +94,7 @@ async function fallbackAuthorSearch(authorName: string, language: LanguageFilter
   }
 }
 
-// Fonction pour la recherche par titre
+// Fonction pour la recherche par titre with enhanced filtering
 export async function searchBooksByTitle(title: string, language: LanguageFilter = 'fr', maxResults: number = 100): Promise<Book[]> {
   if (!title.trim()) return [];
   
@@ -120,27 +120,30 @@ export async function searchBooksByTitle(title: string, language: LanguageFilter
       
       console.log(`Livres après filtrage complet: ${finalFilteredBooks.length} sur ${filteredByTitle.length}`);
       
-      // Encore plus de filtrage pour éliminer les faux positifs
-      const trueTitleMatches = finalFilteredBooks.filter(book => {
-        // Éviter les livres pour enfants, BD, albums illustrés, etc.
-        const lowerTitle = book.title.toLowerCase();
+      // Further filter to eliminate exhibition catalogs and art books
+      const nonExhibitionBooks = finalFilteredBooks.filter(book => {
+        // Exclude books with "exposition", "exhibition", "catalogue", etc. in the title
+        const titleLower = book.title.toLowerCase();
+        
+        // Check for explicit art exhibition indicators in the title
         return !(
-          lowerTitle.includes('tom-tom') ||
-          lowerTitle.includes('album') ||
-          lowerTitle.includes('matisse') ||
-          lowerTitle.includes('exposition') ||
-          (book.subjects && book.subjects.some(s => 
-            s.toLowerCase().includes('juvenile') || 
-            s.toLowerCase().includes('children') ||
-            s.toLowerCase().includes('enfant') ||
-            s.toLowerCase().includes('jeunesse')
-          ))
+          titleLower.includes('exposition') ||
+          titleLower.includes('exhibition') ||
+          titleLower.includes('catalogue') ||
+          titleLower.includes('catalog') ||
+          titleLower.includes('matisse') ||
+          titleLower.includes('picasso') ||
+          titleLower.includes('centre pompidou') ||
+          titleLower.includes('musée') ||
+          titleLower.includes('museum') ||
+          titleLower.includes('/album') ||
+          titleLower.includes('comme un roman')
         );
       });
       
-      console.log(`Résultats après filtrage supplémentaire: ${trueTitleMatches.length} sur ${finalFilteredBooks.length}`);
+      console.log(`Résultats après filtrage des catalogues d'exposition: ${nonExhibitionBooks.length} sur ${finalFilteredBooks.length}`);
       
-      return trueTitleMatches;
+      return nonExhibitionBooks;
     }
     
     return [];

@@ -41,11 +41,26 @@ export function SearchResults({
     if (books.length === 0 && searchQuery && !isLoading && !searchError) {
       toast({
         title: "Aucun résultat explicite",
-        description: "La recherche n'a trouvé aucun résultat correspondant explicitement à votre requête. Essayez d'utiliser un nom complet ou un titre exact.",
+        description: "La recherche n'a trouvé aucun résultat correspondant explicitement à votre requête. Si vous cherchez un livre, essayez avec un titre exact.",
         duration: 5000,
       });
     }
   }, [books.length, searchQuery, isLoading, searchError, toast]);
+
+  // Show different message for exhibition catalogs or art books
+  useEffect(() => {
+    if (searchQuery && (
+      searchQuery.toLowerCase().includes('exposition') ||
+      searchQuery.toLowerCase().includes('matisse') ||
+      searchQuery.toLowerCase().includes('catalogue')
+    )) {
+      toast({
+        title: "Types de résultats filtrés",
+        description: "Les catalogues d'exposition, livres d'art et publications de musées sont automatiquement filtrés des résultats de recherche.",
+        duration: 5000,
+      });
+    }
+  }, [searchQuery, toast]);
 
   return (
     <>
