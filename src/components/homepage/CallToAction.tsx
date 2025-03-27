@@ -23,7 +23,11 @@ export const CallToAction = () => {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           {!user ? (
-            <Button size="lg" onClick={handleSignUp} className="pulse-effect flex items-center gap-2">
+            <Button 
+              size="lg" 
+              onClick={handleSignUp}
+              className="pulse-effect flex items-center gap-2"
+            >
               <Heart className="h-5 w-5 fill-white" /> Créer un compte gratuitement
             </Button>
           ) : (
