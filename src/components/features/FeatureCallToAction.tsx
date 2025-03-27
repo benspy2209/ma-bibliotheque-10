@@ -5,7 +5,7 @@ import { Heart } from "lucide-react";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 
 export const FeatureCallToAction = () => {
-  const { signIn, user, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
+  const { signIn, user, setShowLoginDialog } = useSupabaseAuth();
 
   // Function to handle click on the login button
   const handleSignInClick = () => {
