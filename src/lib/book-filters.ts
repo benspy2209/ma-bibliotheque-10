@@ -75,6 +75,15 @@ const SERIES_CHARACTERS = [
   'batman', 'superman', 'spider-man', 'winnie', 'mickey', 'minnie', 'dora', 'barbie'
 ];
 
+// Thèmes et sujets non littéraires à filtrer
+const NON_LITERARY_SUBJECTS = [
+  'graphologie', 'cuisine', 'comptines', 'guidebook', 'travel guide',
+  'self-help', 'développement personnel', 'diététique', 'nutrition',
+  'santé', 'médecine', 'yoga', 'méditation', 'jardinage', 'bricolage',
+  'décoration', 'architecture', 'photographie', 'art', 'artisanat',
+  'couture', 'tricot', 'crochet', 'peinture', 'dessin', 'sculpture'
+];
+
 export function filterNonBookResults(books: Book[]): Book[] {
   return books.filter(book => {
     if (!book.title) return false;
@@ -155,6 +164,11 @@ export function filterNonBookResults(books: Book[]): Book[] {
       titleLower.includes(character.toLowerCase())
     );
     
+    // Vérification si le livre contient des sujets non littéraires
+    const containsNonLiterarySubjects = NON_LITERARY_SUBJECTS.some(subject =>
+      allText.includes(subject.toLowerCase())
+    );
+    
     // Si le titre contient des personnages de séries, le livre est probablement 
     // attribué par erreur à l'auteur recherché
     if (containsSeriesCharacters) {
@@ -166,7 +180,8 @@ export function filterNonBookResults(books: Book[]): Book[] {
            !isSuspiciousTitle && 
            !isUnwantedFormat && 
            !isAudioBook &&
-           !isTitleTooLong;
+           !isTitleTooLong &&
+           !containsNonLiterarySubjects;
   });
 }
 
@@ -259,3 +274,35 @@ export function isAuthorMatch(book: Book, searchQuery: string): boolean {
     return allTermsMatch;
   });
 }
+
+// Nouvelle fonction pour filtrer les livres par correspondance avec le titre
+export function isTitleExplicitMatch(book: Book, searchQuery: string): boolean {
+  if (!book.title || !searchQuery) return false;
+  
+  const titleLower = book.title.toLowerCase();
+  const searchLower = searchQuery.toLowerCase();
+  
+  // Normaliser le titre et la recherche
+  const normalizedTitle = normalizeString(titleLower);
+  const normalizedSearch = normalizeString(searchLower);
+  
+  // Le titre contient exactement la requête de recherche
+  if (normalizedTitle.includes(normalizedSearch)) {
+    return true;
+  }
+  
+  // Vérifier si tous les mots significatifs de la requête sont dans le titre
+  const searchWords = normalizedSearch.split(/\s+/).filter(word => word.length > 2);
+  
+  // Si la recherche est trop courte, on est plus strict
+  if (searchWords.length <= 1) {
+    // Pour une recherche d'un seul mot, on vérifie s'il apparaît comme un mot complet
+    const titleWords = normalizedTitle.split(/\s+/);
+    return titleWords.some(word => word === searchWords[0] || word.startsWith(searchWords[0]));
+  }
+  
+  // Pour les recherches plus longues, on vérifie si la plupart des mots sont présents
+  const matchingWords = searchWords.filter(word => normalizedTitle.includes(word));
+  return matchingWords.length >= Math.ceil(searchWords.length * 0.7); // 70% des mots doivent correspondre
+}
+

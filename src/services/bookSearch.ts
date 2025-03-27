@@ -1,6 +1,5 @@
-
 import { Book } from '@/types/book';
-import { removeDuplicateBooks, filterNonBookResults, isAuthorMatch } from '@/lib/utils';
+import { removeDuplicateBooks, filterNonBookResults, isAuthorMatch, isTitleExplicitMatch } from '@/lib/utils';
 import axios from 'axios';
 
 export type SearchType = 'author' | 'title';
@@ -111,21 +110,17 @@ export async function searchBooksByTitle(title: string, language: LanguageFilter
     if (response.data && response.data.books && Array.isArray(response.data.books)) {
       const books = response.data.books.map((book: any) => mapIsbndbBookToBook(book));
       
-      // Vérifier si le titre de recherche correspond réellement aux titres
-      const filteredByTitle = books.filter(book => {
-        if (!book.title) return false;
-        
-        // Normaliser titre du livre et terme de recherche
-        const bookTitleLower = book.title.toLowerCase();
-        const searchTitleLower = title.toLowerCase();
-        
-        // Le titre du livre doit contenir le terme de recherche
-        return bookTitleLower.includes(searchTitleLower);
-      });
+      // Vérifier si le titre de recherche correspond réellement aux titres - filtre plus strict
+      const filteredByTitle = books.filter(book => isTitleExplicitMatch(book, title));
       
-      console.log(`Livres filtrés par correspondance de titre: ${filteredByTitle.length} sur ${books.length}`);
+      console.log(`Livres filtrés par correspondance explicite de titre: ${filteredByTitle.length} sur ${books.length}`);
       
-      return filterNonBookResults(filteredByTitle);
+      // Appliquer le filtrage des livres non désirés
+      const finalFilteredBooks = filterNonBookResults(filteredByTitle);
+      
+      console.log(`Livres après filtrage complet: ${finalFilteredBooks.length} sur ${filteredByTitle.length}`);
+      
+      return finalFilteredBooks;
     }
     
     return [];
