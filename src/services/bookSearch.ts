@@ -3,7 +3,7 @@ import { removeDuplicateBooks, filterNonBookResults, isAuthorMatch } from '@/lib
 import axios from 'axios';
 
 export type SearchType = 'author' | 'title';
-export type LanguageFilter = 'fr' | 'en';
+export type LanguageFilter = 'fr' | 'en' | 'nl' | 'es' | 'de' | 'pt' | 'it';
 
 // Clé API ISBNDB
 const ISBNDB_API_KEY = '60264_3de7f2f024bc350bfa823cbbd9e64315';
