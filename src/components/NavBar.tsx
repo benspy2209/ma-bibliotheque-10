@@ -74,7 +74,7 @@ const NavBar = () => {
               alt="BiblioPulse Logo" 
               className="h-20 w-auto" 
               style={{
-                filter: theme === 'dark' ? 'drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))' : 'none'
+                filter: theme === 'light' ? 'invert(1) brightness(0)' : 'drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))'
               }}
             />
           </NavLink>
