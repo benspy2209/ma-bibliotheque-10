@@ -11,6 +11,7 @@ export function useOnboarding() {
   // Charger l'état du tutoriel depuis localStorage
   useEffect(() => {
     const savedState = localStorage.getItem('bibliopulse_tutorial_seen');
+    console.log("Loaded tutorial state from localStorage:", savedState);
     if (savedState !== null) {
       setHasSeenTutorial(savedState === 'true');
     } else {
@@ -21,6 +22,7 @@ export function useOnboarding() {
 
   // Sauvegarder l'état du tutoriel quand il change
   const saveTutorialState = (seen: boolean) => {
+    console.log("Saving tutorial state:", seen);
     setHasSeenTutorial(seen);
     localStorage.setItem('bibliopulse_tutorial_seen', seen.toString());
     
@@ -34,11 +36,12 @@ export function useOnboarding() {
   };
 
   const startTutorial = () => {
+    console.log('Starting tutorial explicitly from startTutorial()');
     setShowTutorial(true);
-    console.log('Starting tutorial...');
   };
 
   const skipTutorial = () => {
+    console.log('Skipping tutorial');
     setShowTutorial(false);
     saveTutorialState(true);
     toast({
@@ -47,6 +50,7 @@ export function useOnboarding() {
   };
 
   const completeTutorial = () => {
+    console.log('Completing tutorial');
     setShowTutorial(false);
     saveTutorialState(true);
     toast({

@@ -15,11 +15,13 @@ export function WelcomeDialog({ open, onOpenChange }: { open: boolean; onOpenCha
   const { startTutorial, skipTutorial } = useOnboarding();
 
   const handleStart = () => {
+    console.log("Welcome dialog: Start tutorial clicked");
     onOpenChange(false);
     startTutorial();
   };
 
   const handleSkip = () => {
+    console.log("Welcome dialog: Skip tutorial clicked");
     onOpenChange(false);
     skipTutorial();
   };

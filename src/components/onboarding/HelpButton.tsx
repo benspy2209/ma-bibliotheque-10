@@ -10,10 +10,11 @@ import { Button } from "@/components/ui/button";
 import { useOnboarding } from "@/hooks/use-onboarding";
 
 export function HelpButton() {
-  const { setShowTutorial } = useOnboarding();
+  const { startTutorial } = useOnboarding();
 
   const handleClick = () => {
-    setShowTutorial(true);
+    console.log("Help button clicked, starting tutorial");
+    startTutorial();
   };
 
   return (
