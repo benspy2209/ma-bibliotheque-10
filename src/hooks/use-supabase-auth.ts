@@ -12,6 +12,7 @@ export function useSupabaseAuth() {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup' | 'reset'>('signup');
   const [isLoading, setIsLoading] = useState(true);
+  const [initialAuthCheckDone, setInitialAuthCheckDone] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -26,24 +27,27 @@ export function useSupabaseAuth() {
       console.log(`Auth state changed: ${event}`, 
         newUser ? `User ID: ${newUser.id}` : 'No user');
       
-      if (event === 'SIGNED_IN') {
-        setShowLoginDialog(false); // Close dialog on successful sign in
-        toast({
-          description: "Connexion réussie"
-        });
-        navigate('/library');
-      } else if (event === 'SIGNED_OUT') {
-        toast({
-          description: "Déconnexion réussie"
-        });
-      } else if (event === 'USER_UPDATED') {
-        toast({
-          description: "Profil mis à jour"
-        });
-      } else if (event === 'PASSWORD_RECOVERY') {
-        toast({
-          description: "Récupération de mot de passe initiée"
-        });
+      // Only show toast notifications for actual auth state changes, not initial loading
+      if (initialAuthCheckDone) {
+        if (event === 'SIGNED_IN') {
+          setShowLoginDialog(false); // Close dialog on successful sign in
+          toast({
+            description: "Connexion réussie"
+          });
+          navigate('/library');
+        } else if (event === 'SIGNED_OUT') {
+          toast({
+            description: "Déconnexion réussie"
+          });
+        } else if (event === 'USER_UPDATED') {
+          toast({
+            description: "Profil mis à jour"
+          });
+        } else if (event === 'PASSWORD_RECOVERY') {
+          toast({
+            description: "Récupération de mot de passe initiée"
+          });
+        }
       }
       
       if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
@@ -58,6 +62,7 @@ export function useSupabaseAuth() {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       setIsLoading(false);
+      setInitialAuthCheckDone(true);
       
       if (currentSession?.user) {
         console.log(`Initial session retrieved, user ID: ${currentSession.user.id}`);
