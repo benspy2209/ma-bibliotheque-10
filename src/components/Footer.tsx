@@ -1,34 +1,132 @@
 
 import { Link } from "react-router-dom";
+import { BookOpen, Mail, Heart, Shield, BookText, ExternalLink } from "lucide-react";
+import { useTheme } from "@/hooks/use-theme";
 
 const Footer = () => {
+  const { theme } = useTheme();
   const currentYear = new Date().getFullYear();
   
   return (
     <footer className="w-full border-t py-6 px-6 mt-auto">
-      <div className="container mx-auto max-w-7xl flex flex-col sm:flex-row justify-between items-center text-base text-muted-foreground">
-        <div>
-          © {currentYear} BiblioPulse, réalisé par <a href="https://www.beneloo.com/" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Beneloo.com</a>
+      <div className="container mx-auto max-w-7xl">
+        {/* Logo et description */}
+        <div className="flex flex-col sm:flex-row items-center justify-between mb-8">
+          <div className="flex items-center mb-4 sm:mb-0">
+            <img 
+              src={theme === 'light' ? "/pulse.png" : "/pulse dark.png"}
+              alt="BiblioPulse Logo" 
+              className="h-16 w-auto mr-4" 
+            />
+            <div className="text-left">
+              <h3 className="text-lg font-medium">BiblioPulse</h3>
+              <p className="text-sm text-muted-foreground max-w-xs">
+                Votre compagnon de lecture personnel pour organiser, suivre et découvrir vos livres.
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-6">
+            <div>
+              <h4 className="font-medium text-base mb-3 flex items-center">
+                <BookOpen className="h-4 w-4 mr-2 text-[#CC4153]" />
+                Navigation
+              </h4>
+              <ul className="space-y-2">
+                <li>
+                  <Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Accueil
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/library" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Ma Bibliothèque
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/search" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Recherche
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/statistics" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Statistiques
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-medium text-base mb-3 flex items-center">
+                <BookText className="h-4 w-4 mr-2 text-[#CC4153]" />
+                Informations
+              </h4>
+              <ul className="space-y-2">
+                <li>
+                  <Link to="/features" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Fonctionnalités
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/privacy-policy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Politique de confidentialité
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/legal-notice" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Mentions légales
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Contact
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col sm:flex-row gap-4 mt-3 sm:mt-0 items-center">
-          <Link 
-            to="/contact" 
-            className="hover:text-primary transition-colors"
-          >
-            Contact
-          </Link>
-          <Link 
-            to="/privacy-policy" 
-            className="hover:text-primary transition-colors"
-          >
-            Politique de confidentialité
-          </Link>
-          <Link 
-            to="/legal-notice" 
-            className="hover:text-primary transition-colors"
-          >
-            Mentions légales
-          </Link>
+        
+        {/* Séparateur */}
+        <div className="border-t border-muted/40 my-4"></div>
+        
+        {/* Copyright et liens sociaux */}
+        <div className="flex flex-col sm:flex-row justify-between items-center text-sm text-muted-foreground pt-2">
+          <div className="mb-3 sm:mb-0">
+            © {currentYear} BiblioPulse, réalisé par <a href="https://www.beneloo.com/" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Beneloo.com</a>
+          </div>
+          
+          <div className="flex gap-4">
+            <a 
+              href="mailto:debruijneb@gmail.com"
+              aria-label="Envoyer un email"
+              className="hover:text-primary transition-colors"
+            >
+              <Mail className="h-4 w-4" />
+            </a>
+            <a 
+              href="https://github.com/beneloo/bibliopulse" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              aria-label="GitHub"
+              className="hover:text-primary transition-colors"
+            >
+              <ExternalLink className="h-4 w-4" />
+            </a>
+            <button 
+              className="hover:text-primary transition-colors"
+              aria-label="J'aime"
+            >
+              <Heart className="h-4 w-4" />
+            </button>
+            <a 
+              href="/privacy-policy"
+              aria-label="Politique de confidentialité" 
+              className="hover:text-primary transition-colors"
+            >
+              <Shield className="h-4 w-4" />
+            </a>
+          </div>
         </div>
       </div>
     </footer>
