@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Star, LogIn } from 'lucide-react';
+import { LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
@@ -86,17 +86,7 @@ export const HeroSection = () => {
                 }}
               />
               
-              {/* Témoignage */}
-              <div className="absolute -bottom-12 -left-6 bg-background rounded-lg shadow-lg p-4 w-64 max-w-[80%] sm:max-w-full">
-                <div className="flex items-center gap-2">
-                  <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-                  <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-                  <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-                  <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-                  <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-                </div>
-                <p className="mt-2 text-sm">"Cette application a complètement transformé ma façon d'organiser mes lectures !"</p>
-              </div>
+              {/* Testimonial has been removed */}
             </div>
           </div>
         </div>
