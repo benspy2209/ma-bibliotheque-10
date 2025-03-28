@@ -6,14 +6,31 @@ import { supabase } from '@/integrations/supabase/client';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, AlertCircle } from "lucide-react";
+import { ShoppingCart, AlertCircle, Trash2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { deleteBook } from '@/services/supabaseBooks';
+import { useToast } from '@/hooks/use-toast';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export function BooksToBuyList() {
   const { user } = useSupabaseAuth();
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [bookToDelete, setBookToDelete] = useState<Book | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (user) {
@@ -55,6 +72,33 @@ export function BooksToBuyList() {
       setError(`Erreur lors du chargement des livres: ${err.message || 'Erreur inconnue'}`);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDeleteBook = async () => {
+    if (!bookToDelete) return;
+    
+    try {
+      setIsDeleting(true);
+      await deleteBook(bookToDelete.id);
+      
+      // Update local state
+      setBooks(books.filter(book => book.id !== bookToDelete.id));
+      
+      toast({
+        title: "Livre supprimé",
+        description: `"${bookToDelete.title}" a été retiré de votre liste d'achats`,
+      });
+    } catch (err: any) {
+      console.error('Error deleting book:', err);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: `Impossible de supprimer le livre: ${err.message || 'Erreur inconnue'}`,
+      });
+    } finally {
+      setIsDeleting(false);
+      setBookToDelete(null);
     }
   };
 
@@ -122,7 +166,7 @@ export function BooksToBuyList() {
                       {Array.isArray(book.author) ? book.author.join(', ') : book.author}
                     </p>
                   </div>
-                  <div className="mt-auto">
+                  <div className="mt-auto flex flex-wrap gap-2">
                     <a 
                       href={getAmazonAffiliateUrl(book)}
                       target="_blank"
@@ -132,6 +176,40 @@ export function BooksToBuyList() {
                       <ShoppingCart className="h-4 w-4" />
                       Acheter sur Amazon
                     </a>
+                    
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          variant="destructive" 
+                          size="sm" 
+                          className="px-3 py-1.5"
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Supprimer
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Vous êtes sur le point de supprimer "{book.title}" de votre liste d'achats.
+                            Cette action est irréversible.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Annuler</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={() => {
+                              setBookToDelete(book);
+                              handleDeleteBook();
+                            }}
+                            disabled={isDeleting}
+                          >
+                            {isDeleting ? 'Suppression...' : 'Supprimer'}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
               </div>
