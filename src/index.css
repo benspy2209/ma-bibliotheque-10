@@ -1,5 +1,6 @@
 
 
+
 @import './styles/theme.css';
 @import './styles/animations.css';
 @import './styles/layout.css';
@@ -50,21 +51,23 @@ img[alt="BiblioPulse Logo"] {
   
   nav .max-w-5xl {
     max-width: 95%; /* Utiliser plus d'espace horizontal */
-    display: flex;
-    justify-content: space-between;
   }
   
   /* Espace entre les liens de navigation */
   nav .nav-links-container {
     gap: 1.5rem !important;
-    margin: 0 auto; /* Centre le menu */
   }
   
   /* Logo plus grand sur desktop */
   nav .navbar-logo-container img {
-    max-width: 100%; 
-    max-height: 40px; /* Logo plus grand sur desktop */
+    max-width: 280px; /* Logo beaucoup plus grand sur desktop */
+    max-height: 60px; /* Logo plus grand sur desktop */
     min-width: auto;
+  }
+  
+  /* Ajustements pour la nouvelle mise en page avec logo centré */
+  nav .navbar-logo-container {
+    margin-bottom: 1rem;
   }
 }
 

@@ -246,53 +246,57 @@ const NavBar = () => {
           </>
         ) : (
           <>
-            <div className="flex items-center justify-between">
-              {/* Logo à gauche */}
-              <div className="navbar-logo-container">
+            {/* Nouvelle structure de navigation desktop avec logo centré */}
+            <div className="flex flex-col items-center">
+              {/* Logo centré */}
+              <div className="navbar-logo-container mb-4 flex justify-center">
                 <NavLink to="/" className="flex items-center">
                   <img 
                     src={theme === 'light' ? "/pulse.png" : "/pulse dark.png"}
                     alt="BiblioPulse Logo" 
-                    className="h-auto w-auto max-h-[40px]" 
+                    className="h-auto w-auto max-h-[60px]" 
                   />
                 </NavLink>
               </div>
               
-              {/* Menu centré */}
-              <div className="desktop-menu-container">
-                <div className="nav-links-container flex items-center space-x-6">
-                  <NavLinks />
-                </div>
-              </div>
-              
-              {/* Actions utilisateur à droite */}
-              <div className="flex items-center gap-2">
-                {user ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs mr-1 hidden lg:inline-block">
-                      Bonjour, <span className="font-medium text-primary">{getUserDisplayName()}</span>
-                    </span>
-                    <UserMenu />
+              {/* Conteneur flex avec les liens à gauche et les actions à droite */}
+              <div className="w-full flex justify-between items-center">
+                {/* Menu centré */}
+                <div className="desktop-menu-container flex-grow">
+                  <div className="nav-links-container flex items-center justify-center space-x-6">
+                    <NavLinks />
                   </div>
-                ) : (
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={handleSignIn}
-                    className="transition-colors duration-300 text-sm h-8"
+                </div>
+                
+                {/* Actions utilisateur à droite */}
+                <div className="flex items-center gap-2">
+                  {user ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs mr-1 hidden lg:inline-block">
+                        Bonjour, <span className="font-medium text-primary">{getUserDisplayName()}</span>
+                      </span>
+                      <UserMenu />
+                    </div>
+                  ) : (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleSignIn}
+                      className="transition-colors duration-300 text-sm h-8"
+                    >
+                      <LogIn className="h-4 w-4 mr-1" />
+                      Se connecter
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={toggleTheme}
+                    className="transition-colors duration-300 h-8 w-8"
                   >
-                    <LogIn className="h-4 w-4 mr-1" />
-                    Se connecter
+                    {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
                   </Button>
-                )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={toggleTheme}
-                  className="transition-colors duration-300 h-8 w-8"
-                >
-                  {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-                </Button>
+                </div>
               </div>
             </div>
           </>
