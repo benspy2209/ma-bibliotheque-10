@@ -77,7 +77,7 @@ export const HeroSection = () => {
           <div className="lg:w-1/2">
             <div className="relative">
               <img 
-                src="/bibliopulse-a.webp" 
+                src="/bibliopulsea.webp" 
                 alt="Personne lisant et organisant sa bibliothèque" 
                 className="rounded-lg shadow-2xl object-cover w-full"
               />
