@@ -52,7 +52,7 @@ export function useLogin() {
     setSuggestedEmail(null);
     
     try {
-      console.log(`Attempting login with email: ${email}`);
+      console.log(`Tentative de connexion avec l'email: ${email}`);
       
       // Basic email validation
       if (!email.includes('@') || !email.includes('.')) {
@@ -63,19 +63,19 @@ export function useLogin() {
         return;
       }
       
-      // We'll directly attempt to sign in and handle errors appropriately
-      // This is the recommended approach rather than trying to check if a user exists first
+      // Utilisation directe de l'API d'authentification de Supabase
+      // C'est l'approche recommandée plutôt que de vérifier si un utilisateur existe d'abord
       const { data: authData, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
       if (error) {
-        console.log("Login error:", error.message);
+        console.log("Erreur de connexion:", error.message);
         
         if (error.message === "Invalid login credentials") {
-          // This could be either wrong password or non-existent account
-          // Let's try to suggest a similar email in case it's a typo
+          // Cela peut être soit un mauvais mot de passe ou un compte inexistant
+          // Suggérer un email similaire en cas de faute de frappe
           const similar = await findSimilarEmail(email);
           if (similar) {
             setSuggestedEmail(similar);
@@ -95,7 +95,7 @@ export function useLogin() {
       
       navigate('/search');
     } catch (error: any) {
-      console.error("Authentication error:", error);
+      console.error("Erreur d'authentification:", error);
       setLoginError(`Erreur inattendue: ${error.message}`);
     } finally {
       setIsLoading(false);
