@@ -20,7 +20,7 @@ interface UserBookDetail {
   book_title: string;
   book_author: string;
   status: string | null;
-  purchased?: boolean; // Added purchased property
+  purchased?: boolean;
 }
 
 interface BookDetailsTableProps {

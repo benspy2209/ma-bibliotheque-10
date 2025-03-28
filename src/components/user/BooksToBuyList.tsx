@@ -53,7 +53,7 @@ export function BooksToBuyList() {
         throw error;
       }
       
-      // Transformer les données pour extraire les livres à acheter
+      // Transform the data to extract books that are not purchased
       const bookList: Book[] = data
         .map(item => {
           // Handle the Json type safely by using a type guard
