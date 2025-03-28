@@ -24,43 +24,22 @@ export function useLogin() {
       
       // Formats courants d'erreurs
       if (email.includes('@')) {
-        // Si l'email contient déjà @, essayons avec sans @ pour voir si un tel utilisateur existe
-        const noAtEmail = email.replace('@', '');
-        const { error } = await supabase.auth.signInWithPassword({
-          email: noAtEmail,
-          password: "dummy_for_check_only"
-        });
+        const domain = email.split('@')[1];
         
-        // Si l'erreur est différente de "Invalid login credentials", cela peut signifier que l'email existe
-        if (error && error.message !== "Invalid login credentials") {
-          return noAtEmail;
+        // Vérifier si l'email est mal tapé (avec un espace par exemple)
+        const cleanedEmail = email.trim().replace(/\s+/g, '');
+        if (cleanedEmail !== email) {
+          return cleanedEmail;
         }
-      } else {
-        // Si l'email ne contient pas @, essayons d'ajouter @ à différents endroits
-        // Exemple: si email = "benbeneloo.com", essayons "ben@beneloo.com"
-        if (email.includes('.')) {
-          const parts = email.split('.');
-          if (parts.length > 1) {
-            const domainPart = parts.pop();
-            const userPart = parts.join('.');
-            
-            // Diviser la partie utilisateur en deux pour ajouter @ au milieu
-            if (userPart.length > 2) {
-              const midPoint = Math.floor(userPart.length / 2);
-              const suggestedEmail = `${userPart.substring(0, midPoint)}@${userPart.substring(midPoint)}.${domainPart}`;
-              
-              // Vérifier si cet email existe
-              const { error } = await supabase.auth.signInWithPassword({
-                email: suggestedEmail,
-                password: "dummy_for_check_only"
-              });
-              
-              if (error && error.message !== "Invalid login credentials") {
-                return suggestedEmail;
-              }
-            }
-          }
+        
+        // Vérifier si le domaine courant est correct
+        if (domain && !domain.includes('.')) {
+          // Domaine sans point, suggérer une correction
+          return `${email.split('@')[0]}@${domain}.com`;
         }
+      } else if (!email.includes('@')) {
+        // Si l'email ne contient pas @, suggérer d'ajouter @
+        return `${email}@gmail.com`;
       }
       
       return null;
@@ -79,6 +58,15 @@ export function useLogin() {
     try {
       console.log(`Tentative de connexion avec: ${email}`);
       
+      // Validation basique de l'email
+      if (!email.includes('@') || !email.includes('.')) {
+        const suggestion = await findSimilarEmail(email);
+        setSuggestedEmail(suggestion);
+        setLoginError("Format d'email invalide. Veuillez entrer un email valide.");
+        setIsLoading(false);
+        return;
+      }
+      
       // Tenter la connexion directement avec l'API d'authentification Supabase
       console.log("Tentative de connexion avec l'API auth de Supabase");
       
@@ -94,15 +82,26 @@ export function useLogin() {
       if (error) {
         // Personnaliser le message d'erreur
         if (error.message === "Invalid login credentials") {
-          // Chercher un email similaire
-          const similar = await findSimilarEmail(email);
-          console.log("Email similaire trouvé:", similar);
+          // Vérifier si l'utilisateur existe mais que le mot de passe est incorrect
+          const { data: userExists } = await supabase.auth.signUp({
+            email,
+            password: `temp_password_${Date.now()}` // Mot de passe temporaire unique
+          });
           
-          if (similar) {
-            setSuggestedEmail(similar);
-            setLoginError(`Identifiants invalides. Avez-vous voulu dire "${similar}" ?`);
+          // Si l'API renvoie une erreur de type "User already registered", cela signifie que l'email existe déjà
+          if (userExists?.user === null) {
+            setLoginError("Le mot de passe est incorrect. Veuillez réessayer ou utiliser la récupération de mot de passe.");
           } else {
-            setLoginError("Ce compte n'existe pas ou le mot de passe est incorrect. Veuillez réessayer ou créer un compte.");
+            // Chercher un email similaire
+            const similar = await findSimilarEmail(email);
+            console.log("Email similaire trouvé:", similar);
+            
+            if (similar) {
+              setSuggestedEmail(similar);
+              setLoginError(`Compte non trouvé. Avez-vous voulu dire "${similar}" ?`);
+            } else {
+              setLoginError("Ce compte n'existe pas. Veuillez créer un compte ou vérifier votre email.");
+            }
           }
         } else {
           setLoginError(`Erreur : ${error.message}`);
