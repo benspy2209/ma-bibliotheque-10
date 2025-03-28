@@ -27,6 +27,7 @@ export function PasswordInput({
         required
         placeholder="••••••••"
         disabled={isLoading}
+        autoComplete="current-password"
       />
       <div className="text-right">
         <Button 

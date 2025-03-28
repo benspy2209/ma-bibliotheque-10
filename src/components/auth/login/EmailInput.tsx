@@ -20,6 +20,7 @@ export function EmailInput({ email, onChange, isLoading }: EmailInputProps) {
         required
         placeholder="votre@email.com"
         disabled={isLoading}
+        autoComplete="email"
       />
     </div>
   );
