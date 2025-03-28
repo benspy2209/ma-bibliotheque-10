@@ -17,64 +17,19 @@ export function useSupabaseAuth() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Fonction pour s'assurer qu'un profil existe pour l'utilisateur
-  const ensureUserProfile = async (userId: string) => {
-    try {
-      // Vérifier si un profil existe
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', userId)
-        .maybeSingle();
-      
-      if (profileError && profileError.code !== 'PGRST116') {
-        console.error('Erreur lors de la vérification du profil:', profileError);
-        return;
-      }
-      
-      // Si aucun profil n'existe, en créer un
-      if (!profile) {
-        console.log('Aucun profil trouvé pour l\'utilisateur, création d\'un nouveau profil:', userId);
-        const { error: insertError } = await supabase
-          .from('profiles')
-          .insert({ id: userId });
-          
-        if (insertError) {
-          console.error('Erreur lors de la création du profil:', insertError);
-        } else {
-          console.log('Profil créé avec succès pour:', userId);
-        }
-      } else {
-        console.log('Profil existant trouvé pour:', userId);
-      }
-    } catch (err) {
-      console.error('Erreur dans ensureUserProfile:', err);
-    }
-  };
-
   useEffect(() => {
-    // Définir la fonction de gestion des changements d'état d'authentification
-    const handleAuthStateChange = (event: string, currentSession: Session | null) => {
-      const currentUser = currentSession?.user ?? null;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+      const newUser = newSession?.user ?? null;
+      setSession(newSession);
+      setUser(newUser);
+      setIsLoading(false);
       
       console.log(`Auth state changed: ${event}`, 
-        currentUser ? `User ID: ${currentUser.id}` : 'No user');
-      
-      setSession(currentSession);
-      setUser(currentUser);
-      setIsLoading(false);
+        newUser ? `User ID: ${newUser.id}` : 'No user');
       
       // Only show toast notifications for actual auth state changes, not initial loading
       if (initialAuthCheckDone) {
         if (event === 'SIGNED_IN') {
-          // Créer un profil utilisateur si nécessaire
-          if (currentUser) {
-            // Utiliser setTimeout pour éviter les problèmes de mutex avec Supabase
-            setTimeout(() => {
-              ensureUserProfile(currentUser.id);
-            }, 0);
-          }
-          
           setShowLoginDialog(false); // Ferme automatiquement le dialogue de connexion
           toast({
             description: "Connexion réussie"
@@ -101,42 +56,23 @@ export function useSupabaseAuth() {
         queryClient.resetQueries({ queryKey: ['books'] });
         queryClient.resetQueries({ queryKey: ['readingGoals'] });
       }
-    };
+    });
 
-    // S'abonner aux changements d'état d'authentification
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthStateChange);
-
-    // Vérifier la session existante au chargement
-    const checkExistingSession = async () => {
-      try {
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
-        
-        // Appeler manuellement handleAuthStateChange pour gérer la session initiale
-        handleAuthStateChange(
-          currentSession ? 'INITIAL_SESSION' : 'NO_SESSION', 
-          currentSession
-        );
-        
-        // Si l'utilisateur est connecté, vérifier/créer son profil
-        if (currentSession?.user) {
-          console.log(`Initial session retrieved, user ID: ${currentSession.user.id}`);
-          await ensureUserProfile(currentSession.user.id);
-        } else {
-          console.log('No initial session found');
-        }
-        
-        setInitialAuthCheckDone(true);
-      } catch (error) {
-        console.error('Error checking existing session:', error);
-        setIsLoading(false);
-        setInitialAuthCheckDone(true);
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+      setIsLoading(false);
+      setInitialAuthCheckDone(true);
+      
+      if (currentSession?.user) {
+        console.log(`Initial session retrieved, user ID: ${currentSession.user.id}`);
+      } else {
+        console.log('No initial session found');
       }
-    };
-    
-    checkExistingSession();
+    });
 
     return () => subscription.unsubscribe();
-  }, [queryClient, toast, navigate, initialAuthCheckDone]);
+  }, [queryClient, toast, navigate]);
 
   const signIn = (mode: 'login' | 'signup' | 'reset' = 'signup') => {
     console.log(`signIn called with mode: ${mode}`);
@@ -215,7 +151,6 @@ export function useSupabaseAuth() {
     setShowLoginDialog, 
     authMode, 
     setAuthMode,
-    isLoading,
-    ensureUserProfile  // Exposer cette fonction pour l'utiliser ailleurs si nécessaire
+    isLoading 
   };
 }

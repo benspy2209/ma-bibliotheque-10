@@ -1,10 +1,8 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { CheckCircle } from 'lucide-react';
 
 export const BenefitsSection = () => {
-  const [imageError, setImageError] = useState(false);
-  
   const benefits = [
     'Catalographie complète de votre collection',
     'Analyse de vos habitudes de lecture',
@@ -19,23 +17,16 @@ export const BenefitsSection = () => {
       <div className="container px-4 mx-auto">
         <div className="flex flex-col lg:flex-row items-center gap-12">
           <div className="lg:w-1/2 order-2 lg:order-1">
-            {imageError ? (
-              <img 
-                src="/placeholder.svg" 
-                alt="Placeholder" 
-                className="rounded-lg shadow-xl w-full"
-              />
-            ) : (
-              <img 
-                src="/bibliopulse-2 .webp" 
-                alt="BiblioPulse interface 2" 
-                className="rounded-lg shadow-xl w-full"
-                onError={(e) => {
-                  console.error("Image failed to load:", e);
-                  setImageError(true);
-                }}
-              />
-            )}
+            <img 
+              src="/bibliopulse-accueil-2.webp" 
+              alt="Tableau de statistiques et analyse de lecture" 
+              className="rounded-lg shadow-xl w-full"
+              onError={(e) => {
+                console.error("Image failed to load:", e);
+                const target = e.target as HTMLImageElement;
+                target.src = '/placeholder.svg';
+              }}
+            />
           </div>
           
           <div className="lg:w-1/2 space-y-6 order-1 lg:order-2">

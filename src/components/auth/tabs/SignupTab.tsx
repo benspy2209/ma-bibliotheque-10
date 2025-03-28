@@ -19,7 +19,6 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
   const [password, setPassword] = useState('');
   const [emailSentMessage, setEmailSentMessage] = useState('');
   const [isRateLimited, setIsRateLimited] = useState(false);
-  const [signupError, setSignupError] = useState('');
   const { toast } = useToast();
   const { setAuthMode } = useSupabaseAuth();
 
@@ -28,30 +27,10 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
     setIsLoading(true);
     setEmailSentMessage('');
     setIsRateLimited(false);
-    setSignupError('');
     
     try {
       console.log("Tentative d'inscription avec:", email);
       
-      // Vérifier d'abord si l'utilisateur existe déjà
-      const { data: existingUser, error: checkError } = await supabase.auth.signInWithPassword({
-        email,
-        password: 'dummy-password-for-check' // Mot de passe fictif pour vérifier l'existence
-      });
-      
-      // Si la connexion réussit, cela signifie que l'utilisateur existe déjà
-      if (existingUser && existingUser.session) {
-        setSignupError("Un compte avec cette adresse email existe déjà. Veuillez vous connecter ou réinitialiser votre mot de passe.");
-        setIsLoading(false);
-        return;
-      }
-      
-      // Si l'erreur n'est pas "Invalid login credentials", c'est une autre erreur qu'il faut gérer
-      if (checkError && checkError.message !== "Invalid login credentials") {
-        console.error("Erreur lors de la vérification de l'existence de l'email:", checkError);
-      }
-      
-      // Continuer avec l'inscription si l'utilisateur n'existe pas
       const signUpOptions = {
         email,
         password,
@@ -63,10 +42,7 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
       const { data, error } = await supabase.auth.signUp(signUpOptions);
 
       if (error) {
-        if (error.message.includes('User already registered')) {
-          setSignupError("Un compte avec cette adresse email existe déjà. Veuillez vous connecter ou réinitialiser votre mot de passe.");
-          return;
-        } else if (error.message.includes('email rate limit exceeded')) {
+        if (error.message.includes('email rate limit exceeded')) {
           console.error("Erreur d'envoi d'email:", error.message);
           setIsRateLimited(true);
           
@@ -95,16 +71,14 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
           });
           return;
         }
-        
-        setSignupError(`Erreur: ${error.message}`);
-        return;
+        throw error;
       }
 
       console.log("Résultat de l'inscription:", data);
       
       // Vérifier si l'utilisateur est créé mais en attente de confirmation
       if (data?.user?.identities?.length === 0) {
-        setSignupError("Un compte avec cette adresse email existe déjà. Veuillez vous connecter ou réinitialiser votre mot de passe.");
+        setEmailSentMessage("Un compte avec cette adresse email existe déjà. Veuillez vous connecter ou réinitialiser votre mot de passe.");
       } else if (data?.user) {
         if (data.session) {
           // L'utilisateur est déjà connecté
@@ -121,7 +95,6 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
       }
     } catch (error: any) {
       console.error("Erreur d'authentification:", error);
-      setSignupError(`Erreur : ${error.message}`);
       toast({
         variant: "destructive",
         description: `Erreur : ${error.message}`
@@ -148,13 +121,6 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
               <strong className="block mt-2">N'oubliez pas de vérifier votre dossier SPAM.</strong>
             )}
           </AlertDescription>
-        </Alert>
-      )}
-      
-      {signupError && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{signupError}</AlertDescription>
         </Alert>
       )}
       

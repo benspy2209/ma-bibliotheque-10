@@ -9,7 +9,6 @@ import {
   TabsContent, 
   TabsTrigger
 } from "@/components/ui/tabs";
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface BookSectionsProps {
   books: Book[];
@@ -27,7 +26,6 @@ export const BookSections = ({
   onToBuyFilterChange 
 }: BookSectionsProps) => {
   const [purchaseFilter, setPurchaseFilter] = useState<'all' | 'purchased' | 'not-purchased'>('all');
-  const isMobile = useIsMobile();
   
   const completedBooks = books.filter(book => book.status === 'completed');
   const readingBooks = books.filter(book => book.status === 'reading');
@@ -45,46 +43,46 @@ export const BookSections = ({
 
   return (
     <Tabs defaultValue="all" className="w-full">
-      <TabsList className={`mb-8 h-auto ${isMobile ? 'flex-col w-full' : 'justify-start overflow-x-auto scrollbar-hide tabs-list-scroll'}`}>
+      <TabsList className="mb-8 flex-wrap h-auto justify-start overflow-x-auto">
         <TabsTrigger 
           value="all" 
           onClick={() => onToBuyFilterChange(null)}
-          className="text-xs sm:text-sm whitespace-nowrap"
+          className="text-xs sm:text-sm"
         >
           Tous ({books.length})
         </TabsTrigger>
         <TabsTrigger 
           value="reading" 
           onClick={() => onToBuyFilterChange(null)}
-          className="text-xs sm:text-sm whitespace-nowrap"
+          className="text-xs sm:text-sm"
         >
           En cours ({readingBooks.length})
         </TabsTrigger>
         <TabsTrigger 
           value="completed" 
           onClick={() => onToBuyFilterChange(null)}
-          className="text-xs sm:text-sm whitespace-nowrap"
+          className="text-xs sm:text-sm"
         >
           Lu ({completedBooks.length})
         </TabsTrigger>
         <TabsTrigger 
           value="to-read" 
           onClick={() => onToBuyFilterChange(null)}
-          className="text-xs sm:text-sm whitespace-nowrap"
+          className="text-xs sm:text-sm"
         >
           À lire ({toReadBooks.length})
         </TabsTrigger>
         <TabsTrigger 
           value="purchased" 
           onClick={() => onToBuyFilterChange(null)}
-          className="text-xs sm:text-sm whitespace-nowrap"
+          className="text-xs sm:text-sm"
         >
           Achetés ({purchasedBooks.length})
         </TabsTrigger>
         <TabsTrigger 
           value="to-buy" 
           onClick={() => onToBuyFilterChange(true)}
-          className="bg-destructive/10 hover:bg-destructive/20 data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground text-xs sm:text-sm whitespace-nowrap"
+          className="bg-destructive/10 hover:bg-destructive/20 data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground text-xs sm:text-sm"
         >
           À acheter ({toBuyBooks.length})
         </TabsTrigger>
@@ -132,11 +130,11 @@ export const BookSections = ({
 
       <TabsContent value="to-read">
         <div className="mb-6">
-          <Tabs defaultValue="all" className="w-fit">
-            <TabsList className={`${isMobile ? 'flex-col w-full' : 'tabs-list-scroll'}`}>
-              <TabsTrigger value="all" className="whitespace-nowrap" onClick={() => setPurchaseFilter('all')}>Tous</TabsTrigger>
-              <TabsTrigger value="purchased" className="whitespace-nowrap" onClick={() => setPurchaseFilter('purchased')}>Achetés</TabsTrigger>
-              <TabsTrigger value="not-purchased" className="whitespace-nowrap" onClick={() => setPurchaseFilter('not-purchased')}>À acheter</TabsTrigger>
+          <Tabs defaultValue="all" className="w-fit" onValueChange={(value) => setPurchaseFilter(value as 'all' | 'purchased' | 'not-purchased')}>
+            <TabsList>
+              <TabsTrigger value="all">Tous</TabsTrigger>
+              <TabsTrigger value="purchased">Achetés</TabsTrigger>
+              <TabsTrigger value="not-purchased">À acheter</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>

@@ -12,7 +12,7 @@ import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function UserProfileForm() {
-  const { user, ensureUserProfile } = useSupabaseAuth();
+  const { user } = useSupabaseAuth();
   const { toast } = useToast();
   const [fullName, setFullName] = useState("");
   const [bio, setBio] = useState("");
@@ -33,7 +33,7 @@ export function UserProfileForm() {
     try {
       setIsLoading(true);
       // First make sure the profile exists
-      await ensureUserProfile(user.id);
+      await ensureProfileExists();
       
       const { data, error } = await supabase
         .from('profiles')
@@ -57,6 +57,43 @@ export function UserProfileForm() {
       setIsLoading(false);
     }
   };
+  
+  // Function to make sure the profile exists before updating
+  const ensureProfileExists = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .maybeSingle();
+        
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error checking profile:', error);
+        throw error;
+      }
+      
+      // If profile doesn't exist, create it with defaults
+      if (!data) {
+        console.log('Profile does not exist, creating one for user:', user.id);
+        const { error: insertError } = await supabase.auth.admin.createUser({
+          email: user.email || '',
+          user_metadata: { full_name: user.user_metadata?.full_name || '' },
+          email_confirm: true
+        });
+        
+        if (insertError) {
+          console.error('Error creating profile:', insertError);
+          throw insertError;
+        }
+      }
+      
+    } catch (error) {
+      console.error('Error in ensureProfileExists:', error);
+      throw error;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +104,7 @@ export function UserProfileForm() {
 
     try {
       // Make sure profile exists before updating
-      await ensureUserProfile(user.id);
+      await ensureProfileExists();
       
       // Now update the profile
       const { error } = await supabase
@@ -86,8 +123,7 @@ export function UserProfileForm() {
       }
 
       toast({
-        description: "Profil mis à jour avec succès!",
-        duration: 2000 // Set to 2 seconds (2000ms)
+        description: "Profil mis à jour avec succès!"
       });
     } catch (error) {
       console.error('Error in handleSubmit:', error);
