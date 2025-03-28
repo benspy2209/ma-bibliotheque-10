@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,78 +12,9 @@ export function useSupabaseAuth() {
   const [authMode, setAuthMode] = useState<'login' | 'signup' | 'reset'>('signup');
   const [isLoading, setIsLoading] = useState(true);
   const [initialAuthCheckDone, setInitialAuthCheckDone] = useState(false);
-  const [resetEmailError, setResetEmailError] = useState<string | null>(null);
-  const [hasRecoveryToken, setHasRecoveryToken] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  // Parse hash parameters from URL
-  const parseHashParameters = useCallback((hash: string) => {
-    if (!hash || hash === '') return {};
-    
-    const hashParams: Record<string, string> = {};
-    const hashParts = hash.substring(1).split('&');
-    
-    hashParts.forEach(part => {
-      const [key, value] = part.split('=');
-      if (key && value) {
-        hashParams[key] = decodeURIComponent(value);
-      }
-    });
-    
-    return hashParams;
-  }, []);
-
-  // Check for recovery token in URL hash
-  const checkForRecoveryToken = useCallback(() => {
-    const hash = window.location.hash;
-    const hashParams = parseHashParameters(hash);
-    
-    // Check if we have recovery type or access_token in hash
-    const hasValidRecoveryToken = 
-      (hash.includes('type=recovery') && !hash.includes('error=')) || 
-      !!hashParams.access_token;
-    
-    // Check for error in token
-    const hasTokenError = hash.includes('error=') && hash.includes('error_code=');
-    
-    console.log("Recovery token check:", { 
-      hasValidRecoveryToken, 
-      hasTokenError, 
-      hash 
-    });
-    
-    setHasRecoveryToken(hasValidRecoveryToken);
-    
-    if (hasTokenError) {
-      // Extract error details
-      const errorCode = hashParams.error_code;
-      const errorDescription = hashParams.error_description;
-      
-      console.log("Recovery token error:", { errorCode, errorDescription });
-      
-      if (errorCode === 'otp_expired' || hash.includes('expired')) {
-        setResetEmailError('Le lien de réinitialisation a expiré. Veuillez demander un nouveau lien.');
-      } else {
-        setResetEmailError(`Erreur: ${errorDescription || 'Lien de réinitialisation invalide'}`);
-      }
-      
-      setAuthMode('reset');
-      setShowLoginDialog(true);
-      navigate('/reset-password');
-      return false;
-    }
-    
-    if (hasValidRecoveryToken) {
-      setAuthMode('reset');
-      setShowLoginDialog(true);
-      navigate('/reset-password');
-      return true;
-    }
-    
-    return false;
-  }, [parseHashParameters, navigate]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
@@ -115,18 +45,10 @@ export function useSupabaseAuth() {
           toast({
             description: "Profil mis à jour"
           });
-          
-          // Close the dialog and redirect after successful password update
-          setTimeout(() => {
-            setShowLoginDialog(false);
-            window.location.href = '/';
-          }, 1500);
         } else if (event === 'PASSWORD_RECOVERY') {
           toast({
             description: "Récupération de mot de passe initiée"
           });
-          // Redirect to reset-password page
-          navigate('/reset-password');
         }
       }
       
@@ -138,7 +60,6 @@ export function useSupabaseAuth() {
       }
     });
 
-    // Initial session check
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
@@ -149,28 +70,11 @@ export function useSupabaseAuth() {
         console.log(`Initial session retrieved, user ID: ${currentSession.user.id}`);
       } else {
         console.log('No initial session found');
-        
-        // Only check for recovery token if no active session
-        checkForRecoveryToken();
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [queryClient, toast, navigate, initialAuthCheckDone, checkForRecoveryToken]);
-
-  // Re-check for recovery token when URL hash changes
-  useEffect(() => {
-    const handleHashChange = () => {
-      console.log("URL hash changed, checking for recovery token");
-      checkForRecoveryToken();
-    };
-    
-    window.addEventListener('hashchange', handleHashChange);
-    
-    return () => {
-      window.removeEventListener('hashchange', handleHashChange);
-    };
-  }, [checkForRecoveryToken]);
+  }, [queryClient, toast, navigate, initialAuthCheckDone]);
 
   const signIn = useCallback((mode: 'login' | 'signup' | 'reset' = 'signup') => {
     console.log(`signIn called with mode: ${mode}`);
@@ -240,11 +144,6 @@ export function useSupabaseAuth() {
     }
   };
 
-  // Clear error when changing auth mode
-  useEffect(() => {
-    setResetEmailError(null);
-  }, [authMode]);
-
   return { 
     user, 
     session, 
@@ -256,9 +155,6 @@ export function useSupabaseAuth() {
     setShowLoginDialog, 
     authMode, 
     setAuthMode,
-    isLoading,
-    resetEmailError,
-    hasRecoveryToken,
-    checkForRecoveryToken
+    isLoading 
   };
 }

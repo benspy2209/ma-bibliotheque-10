@@ -37,7 +37,7 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
   // If activeTab is 'reset', render the reset password form directly
   if (activeTab === 'reset') {
     return (
-      <div className="w-full auth-form-container pb-16">
+      <div className="w-full auth-form-container">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-medium">Réinitialisation de mot de passe</h3>
           <button 
@@ -53,14 +53,13 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
   }
 
   return (
-    <div className="w-full auth-form-container pb-16">
+    <div className="w-full auth-form-container">
       {/* Social login buttons section */}
       <div className="space-y-4 mb-6">
         <Button 
           onClick={signInWithGoogle}
           variant="outline" 
           className="w-full flex items-center justify-center gap-2 py-6 border-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
-          type="button"
         >
           <svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
             <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
@@ -77,7 +76,6 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
           onClick={signInWithFacebook}
           variant="outline" 
           className="w-full flex items-center justify-center gap-2 py-6 border-2 border-[#1877F2] hover:bg-[#e7f0ff] dark:hover:bg-[#1e3a5f] transition-all"
-          type="button"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M24 12C24 5.37258 18.6274 0 12 0C5.37258 0 0 5.37258 0 12C0 17.9895 4.3882 22.954 10.125 23.8542V15.4688H7.07812V12H10.125V9.35625C10.125 6.34875 11.9166 4.6875 14.6576 4.6875C15.9701 4.6875 17.3438 4.92188 17.3438 4.92188V7.875H15.8306C14.34 7.875 13.875 8.80008 13.875 9.75V12H17.2031L16.6711 15.4688H13.875V23.8542C19.6118 22.954 24 17.9895 24 12Z" fill="#1877F2"/>
@@ -120,14 +118,14 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="login" className="pb-8">
+        <TabsContent value="login">
           <LoginTab 
             isLoading={isLoading} 
             setIsLoading={setIsLoading} 
           />
         </TabsContent>
         
-        <TabsContent value="signup" className="pb-8">
+        <TabsContent value="signup">
           <SignupTab 
             isLoading={isLoading} 
             setIsLoading={setIsLoading} 
