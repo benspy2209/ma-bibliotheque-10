@@ -20,6 +20,11 @@ const FooterInfoLinks = ({ className = "" }: FooterInfoLinksProps) => {
           </Link>
         </li>
         <li>
+          <Link to="/roadmap" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+            Roadmap
+          </Link>
+        </li>
+        <li>
           <Link to="/faq" className="text-sm text-muted-foreground hover:text-primary transition-colors">
             FAQ
           </Link>
