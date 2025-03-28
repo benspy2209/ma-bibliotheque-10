@@ -92,6 +92,9 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
             required
             placeholder="votre@email.com"
             disabled={isLoading}
+            autoComplete="email"
+            inputMode="email"
+            autoCapitalize="none"
           />
         </div>
         <div className="space-y-2">
@@ -104,6 +107,7 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
             required
             placeholder="••••••••"
             disabled={isLoading}
+            autoComplete="current-password"
           />
           <div className="text-right">
             <Button 
