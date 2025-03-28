@@ -44,7 +44,7 @@ export const HeroSection = () => {
               <p className="mt-2 text-xl">Votre bibliothèque personnelle, amplifiée.</p>
             </div>
             <p className="text-xl text-muted-foreground">
-              Organisez, découvrez et partagez vos lectures préférées dans 7 langues différentes. Livres, bandes dessinées et romans graphiques - BiblioPulse vous accompagne dans votre parcours littéraire.
+              Transformez votre expérience de lecture avec BiblioPulse. Recherchez des livres et auteurs en 7 langues, construisez votre bibliothèque personnelle et analysez vos habitudes de lecture en toute simplicité.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
