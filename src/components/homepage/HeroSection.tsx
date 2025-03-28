@@ -34,18 +34,6 @@ export const HeroSection = () => {
               Organisez, découvrez et partagez vos lectures préférées. BiblioPulse vous accompagne dans votre parcours littéraire.
             </p>
             
-            {/* Nouvelles statistiques ajoutées */}
-            <div className="grid grid-cols-2 gap-4 py-4">
-              <div className="bg-primary/5 p-4 rounded-lg text-center">
-                <div className="font-bold text-2xl md:text-3xl text-primary">44 624 261</div>
-                <div className="text-sm text-muted-foreground">livres disponibles</div>
-              </div>
-              <div className="bg-primary/5 p-4 rounded-lg text-center">
-                <div className="font-bold text-2xl md:text-3xl text-primary">12 839 586</div>
-                <div className="text-sm text-muted-foreground">auteurs référencés</div>
-              </div>
-            </div>
-            
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               {user ? (
                 <Button size="lg" asChild>
@@ -84,6 +72,21 @@ export const HeroSection = () => {
                   target.src = '/placeholder.svg';
                 }}
               />
+              
+              {/* Statistiques déplacées et redessinées pour être moins proéminentes */}
+              <div className="absolute bottom-4 left-4 right-4 bg-black/70 rounded-md p-3 text-white text-sm backdrop-blur-sm">
+                <div className="flex justify-between items-center text-sm">
+                  <div>
+                    <span className="text-[#999] mr-1">Notre catalogue:</span> 
+                    <span className="font-semibold text-white">44 624 261 livres</span>
+                  </div>
+                  <div>
+                    <span className="text-[#999] mr-1">Avec</span> 
+                    <span className="font-semibold text-white">12 839 586 auteurs</span>
+                  </div>
+                </div>
+              </div>
+              
               <div className="absolute -bottom-6 -left-6 bg-background rounded-lg shadow-lg p-4 w-64 max-w-[80%] sm:max-w-full">
                 <div className="flex items-center gap-2">
                   <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
