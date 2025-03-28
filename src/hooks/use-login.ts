@@ -105,7 +105,7 @@ export function useLogin() {
         return;
       }
       
-      // Connexion à Supabase
+      // Tentative de connexion à Supabase
       console.log("Tentative d'authentification avec Supabase...");
       const { data: authData, error } = await supabase.auth.signInWithPassword({
         email,
@@ -116,11 +116,11 @@ export function useLogin() {
         console.log("Erreur de connexion:", error.message, "Code:", error.status);
         
         if (error.message === "Invalid login credentials") {
-          // Vérifier d'abord si l'email existe dans user_books_stats
+          // Vérifier si l'email existe dans user_books_stats
           const existsInStats = await checkEmailInUserStats(email);
           
           if (existsInStats) {
-            // L'utilisateur existe dans les statistiques mais n'a pas de compte
+            // L'utilisateur existe dans les statistiques mais n'a pas de compte d'authentification
             console.log(`L'email ${email} a des livres associés mais pas de compte d'authentification. Création automatique du compte...`);
             
             // Création automatique du compte
@@ -147,31 +147,14 @@ export function useLogin() {
               setLoginError(`Erreur lors de la création automatique du compte: ${signupError?.message || "Erreur inconnue"}`);
             }
           } else {
-            // Méthode améliorée pour vérifier l'existence du compte
-            try {
-              // Tenter une inscription temporaire pour vérifier si l'utilisateur existe
-              const { error: checkError } = await supabase.auth.signUp({
-                email,
-                password: `temp-pwd-${Date.now()}`, // Mot de passe temporaire unique
-                options: { emailRedirectTo: window.location.origin }
-              });
-              
-              // Si l'erreur contient "User already registered", c'est que l'email existe
-              // donc c'est le mot de passe qui est incorrect
-              if (checkError && checkError.message.includes('already registered')) {
-                setLoginError(`Le mot de passe est incorrect pour le compte ${email}. Veuillez réessayer ou utiliser "Mot de passe oublié" pour le réinitialiser.`);
-              } else {
-                // Si pas d'erreur "already registered", alors l'email n'existe pas
-                setLoginError(`Aucun compte n'existe avec l'adresse ${email}. Veuillez vérifier votre email ou créer un compte.`);
-              }
-            } catch (err) {
-              console.error("Erreur lors de la vérification de l'existence du compte:", err);
-              setLoginError(`Identifiants incorrects. Veuillez vérifier votre email et votre mot de passe.`);
-            }
+            // Identifiants incorrects normaux
+            setLoginError("Identifiants incorrects. Veuillez vérifier votre email et votre mot de passe.");
           }
         } else {
           setLoginError(`Erreur : ${error.message}`);
         }
+        
+        setIsLoading(false);
         return;
       }
       
@@ -183,6 +166,7 @@ export function useLogin() {
     } catch (error: any) {
       console.error("Erreur d'authentification:", error);
       setLoginError(`Erreur inattendue: ${error.message}`);
+      setIsLoading(false);
     } finally {
       setIsLoading(false);
     }

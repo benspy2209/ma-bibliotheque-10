@@ -2,7 +2,6 @@
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 
 interface LoginErrorProps {
   errorMessage: string | null;
@@ -15,8 +14,6 @@ export function LoginError({
   suggestedEmail, 
   onUseSuggestion 
 }: LoginErrorProps) {
-  const { setAuthMode } = useSupabaseAuth();
-  
   if (!errorMessage) return null;
   
   return (
