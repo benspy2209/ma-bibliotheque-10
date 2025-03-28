@@ -27,27 +27,27 @@ export const BookSections = ({
   onToBuyFilterChange 
 }: BookSectionsProps) => {
   const isMobile = useIsMobile();
-  const [activeTab, setActiveTab] = useState("all");
   
   // Filtres de base pour les différentes catégories
   const completedBooks = books.filter(book => book.status === 'completed');
   const readingBooks = books.filter(book => book.status === 'reading');
   const toReadBooks = books.filter(book => !book.status || book.status === 'to-read');
   
-  // Livres à acheter (tous les livres avec purchased === false)
-  const toBuyBooks = books.filter(book => book.purchased === false);
+  // Livres achetés (purchased === true)
   const purchasedBooks = books.filter(book => book.purchased === true);
+  
+  // Livres à acheter (purchased === false) - indépendant du statut de lecture
+  const toBuyBooks = books.filter(book => book.purchased === false);
 
   const BookComponent = viewMode === 'grid' ? BookGrid : BookList;
 
-  // Gestionnaire du changement d'onglet
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    // Si l'utilisateur clique sur "to-buy", activer le filtre toBuy
-    if (value === "to-buy") {
+  // Déterminer quels livres afficher en fonction de l'onglet sélectionné
+  const handleTabClick = (tabValue: string) => {
+    // Si l'utilisateur sélectionne l'onglet "to-buy", on applique le filtre
+    if (tabValue === "to-buy") {
       onToBuyFilterChange(true);
     } else {
-      // Sinon, réinitialiser le filtre
+      // Sinon, on réinitialise le filtre
       onToBuyFilterChange(null);
     }
   };
@@ -55,8 +55,7 @@ export const BookSections = ({
   return (
     <Tabs 
       defaultValue="all" 
-      value={activeTab} 
-      onValueChange={handleTabChange}
+      onValueChange={handleTabClick}
       className="w-full"
     >
       <TabsList className={`mb-8 ${isMobile ? 'flex-col' : 'flex-wrap h-auto justify-start overflow-x-auto'}`}>
@@ -128,16 +127,6 @@ export const BookSections = ({
         )}
       </TabsContent>
 
-      <TabsContent value="purchased" className="space-y-8">
-        {purchasedBooks.length === 0 ? (
-          <p className="text-center text-gray-600 mt-8">
-            Aucun livre acheté dans votre bibliothèque.
-          </p>
-        ) : (
-          <BookComponent books={purchasedBooks} onBookClick={onBookClick} />
-        )}
-      </TabsContent>
-
       <TabsContent value="to-read">
         {toReadBooks.length === 0 ? (
           <p className="text-center text-gray-600 mt-8">
@@ -145,6 +134,16 @@ export const BookSections = ({
           </p>
         ) : (
           <BookComponent books={toReadBooks} onBookClick={onBookClick} />
+        )}
+      </TabsContent>
+
+      <TabsContent value="purchased" className="space-y-8">
+        {purchasedBooks.length === 0 ? (
+          <p className="text-center text-gray-600 mt-8">
+            Aucun livre acheté dans votre bibliothèque.
+          </p>
+        ) : (
+          <BookComponent books={purchasedBooks} onBookClick={onBookClick} />
         )}
       </TabsContent>
 

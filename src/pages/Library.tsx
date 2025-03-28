@@ -74,7 +74,7 @@ export default function Library() {
     return titleMatch || authorMatch;
   };
 
-  const filteredBooks = books
+  let filteredBooks = books
     .filter(book => {
       if (selectedAuthor) {
         if (Array.isArray(book.author)) {
@@ -85,6 +85,10 @@ export default function Library() {
       return true;
     })
     .filter(searchFilter);
+  
+  if (toBuyFilter === true) {
+    filteredBooks = filteredBooks.filter(book => book.purchased === false);
+  }
 
   const sortedBooks = sortBooks(filteredBooks, sortBy);
 
