@@ -51,11 +51,20 @@ export function RoadmapFeatureForm({ onSuccess, feature }: RoadmapFeatureFormPro
   });
 
   const onSubmit = (values: FormValues) => {
+    // Create a proper RoadmapFeature object from the form values
+    const newFeature: RoadmapFeature = {
+      name: values.name,
+      description: values.description,
+      status: values.status,
+      quarter: values.quarter,
+      technical_details: values.technical_details,
+    };
+
     // If we're editing, find and update the existing feature
     if (feature) {
       const index = roadmapFeatures.findIndex((f) => f.name === feature.name);
       if (index !== -1) {
-        roadmapFeatures[index] = values;
+        roadmapFeatures[index] = newFeature;
         toast({
           title: "Fonctionnalité mise à jour",
           description: "La roadmap a été mise à jour avec succès.",
@@ -63,7 +72,7 @@ export function RoadmapFeatureForm({ onSuccess, feature }: RoadmapFeatureFormPro
       }
     } else {
       // Otherwise, add a new feature
-      roadmapFeatures.push(values);
+      roadmapFeatures.push(newFeature);
       toast({
         title: "Fonctionnalité ajoutée",
         description: "La nouvelle fonctionnalité a été ajoutée à la roadmap.",
