@@ -115,7 +115,7 @@ export function AddToLibrary({
     },
     'to-buy': {
       icon: <ShoppingBag className="h-4 w-4 text-[#CC4153]" />,
-      label: 'Acheter',
+      label: 'À acheter',
       bgColor: theme === 'dark' ? 'bg-orange-500' : 'bg-orange-100', 
       textColor: theme === 'dark' ? 'text-white' : 'text-orange-800',
       action: () => handleStatusChange('to-read', false)
@@ -146,19 +146,7 @@ export function AddToLibrary({
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent className={theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-white text-gray-800'}>
-        {/* Option to add to purchase list */}
-        <DropdownMenuItem
-          onClick={(e) => {
-            e.stopPropagation();
-            statusConfig['to-buy'].action?.();
-          }}
-          className={`flex items-center gap-2 ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
-        >
-          {statusConfig['to-buy'].icon}
-          {statusConfig['to-buy'].label}
-        </DropdownMenuItem>
-        
-        {/* Standard reading status options */}
+        {/* Standard reading status options - moved to-buy to the end */}
         {Object.entries(statusConfig)
           .filter(([key]) => key !== 'to-buy')
           .map(([statusKey, { icon, label }]) => (
@@ -174,6 +162,18 @@ export function AddToLibrary({
             {label}
           </DropdownMenuItem>
         ))}
+        
+        {/* À acheter option at the end */}
+        <DropdownMenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            statusConfig['to-buy'].action?.();
+          }}
+          className={`flex items-center gap-2 ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
+        >
+          {statusConfig['to-buy'].icon}
+          {statusConfig['to-buy'].label}
+        </DropdownMenuItem>
         
         {status && (
           <DropdownMenuItem
