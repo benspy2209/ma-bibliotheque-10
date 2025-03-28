@@ -11,14 +11,24 @@ import { useEffect, useState } from "react";
 const NavBar = () => {
   const { theme, toggleTheme } = useTheme();
   const { signIn, signOut, user, showLoginDialog, setShowLoginDialog, setAuthMode } = useSupabaseAuth();
-  const isInitialMobile = useIsMobile();
-  const [isMobile, setIsMobile] = useState(isInitialMobile);
+  const isMobileView = useIsMobile();
+  const [isMobile, setIsMobile] = useState(true); // Default to mobile to prevent flicker
   const { getUserDisplayName, getInitials } = useUserDisplay(user);
 
-  // Use effect to track mobile state changes to avoid hydration issues
+  // Use effect to track mobile state changes with a slight delay to avoid hydration issues
   useEffect(() => {
-    setIsMobile(isInitialMobile);
-  }, [isInitialMobile]);
+    // First render - check if we're definitely on desktop
+    if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+      setIsMobile(false);
+    }
+    
+    // Then set based on hook with short delay to avoid flicker
+    const timer = setTimeout(() => {
+      setIsMobile(isMobileView);
+    }, 10);
+    
+    return () => clearTimeout(timer);
+  }, [isMobileView]);
 
   // Fonction wrapper pour gérer le clic du bouton de connexion
   const handleSignIn = () => {

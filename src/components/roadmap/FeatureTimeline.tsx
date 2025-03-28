@@ -15,12 +15,12 @@ const FeatureTimeline = ({ features }: FeatureTimelineProps) => {
   const isMobile = useIsMobile();
   
   return (
-    <div className="relative w-full">
+    <div className="relative w-full max-w-full">
       {/* Timeline line */}
       <div className="absolute left-[1.65rem] top-10 bottom-10 w-[2px] bg-muted z-0"></div>
-      <div className="space-y-8 md:space-y-12 relative z-10 w-full">
+      <div className="space-y-8 md:space-y-12 relative z-10 w-full max-w-full">
         {features.map((feature, index) => (
-          <div key={index} className="flex gap-3 md:gap-6 w-full">
+          <div key={index} className="flex gap-3 md:gap-6 w-full max-w-full">
             {/* Icon */}
             <div className="mt-1 flex-shrink-0">
               <div className="bg-background p-1 rounded-full">
@@ -32,8 +32,8 @@ const FeatureTimeline = ({ features }: FeatureTimelineProps) => {
               <CardHeader className="p-2 sm:p-4 md:p-6">
                 <div className="flex flex-col gap-2">
                   <div>
-                    <CardTitle className="text-base sm:text-lg md:text-xl line-clamp-2 break-words">{feature.name}</CardTitle>
-                    <CardDescription className="text-sm break-words">{feature.description}</CardDescription>
+                    <CardTitle className="text-base sm:text-lg md:text-xl line-clamp-2 break-words max-w-full">{feature.name}</CardTitle>
+                    <CardDescription className="text-sm break-words max-w-full">{feature.description}</CardDescription>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
                     <FeatureStatusIcon status={feature.status} />
@@ -52,7 +52,7 @@ const FeatureTimeline = ({ features }: FeatureTimelineProps) => {
                 </div>
               </CardHeader>
               <CardContent className="p-2 sm:p-4 md:p-6 pt-0">
-                <div className="text-xs sm:text-sm text-muted-foreground break-words">
+                <div className="text-xs sm:text-sm text-muted-foreground break-words max-w-full">
                   <strong className="font-medium text-foreground">Détails techniques:</strong> {feature.technical_details}
                 </div>
               </CardContent>

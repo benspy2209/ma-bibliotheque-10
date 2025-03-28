@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
@@ -9,6 +9,7 @@ import RoadmapFooter from "@/components/roadmap/RoadmapFooter";
 import { roadmapFeatures } from "@/components/roadmap/RoadmapData";
 import { FeatureProposalsList } from "@/components/roadmap/FeatureProposalsList";
 import { AddFeatureDialog } from "@/components/roadmap/AddFeatureDialog";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Roadmap = () => {
   // Create a sorted copy of the roadmap features
@@ -32,6 +33,32 @@ const Roadmap = () => {
     return 0;
   });
   
+  const isMobile = useIsMobile();
+  
+  // Add meta viewport setting for mobile views
+  useEffect(() => {
+    // Force proper viewport settings for mobile
+    const metaViewport = document.querySelector('meta[name="viewport"]');
+    if (metaViewport) {
+      metaViewport.setAttribute('content', 
+        'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
+    }
+    
+    // Fix any overflows
+    document.body.style.overflow = 'auto';
+    document.body.style.overflowX = 'hidden';
+    document.body.style.width = '100%';
+    document.body.style.maxWidth = '100vw';
+    
+    // Cleanup
+    return () => {
+      if (metaViewport) {
+        metaViewport.setAttribute('content', 
+          'width=device-width, initial-scale=1.0');
+      }
+    };
+  }, []);
+  
   return (
     <>
       <Helmet>
@@ -40,16 +67,18 @@ const Roadmap = () => {
           name="description"
           content="Découvrez notre roadmap technique et les fonctionnalités à venir sur BiblioPulse"
         />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
       </Helmet>
       <NavBar />
-      <main className="container mx-auto px-2 md:px-4 py-6 md:py-10 max-w-5xl">
-        <RoadmapHeader />
-        <FeatureProposalsList />
-        <div className="w-full overflow-hidden">
-          <FeatureTimeline features={sortedFeatures} />
+      <main className={`container mx-auto pt-6 md:pt-10 pb-6 md:pb-10 ${isMobile ? 'px-2' : 'px-4'} max-w-full`}>
+        <div className="max-w-5xl mx-auto w-full">
+          <RoadmapHeader />
+          <FeatureProposalsList />
+          <div className="w-full max-w-full overflow-hidden">
+            <FeatureTimeline features={sortedFeatures} />
+          </div>
+          <RoadmapFooter />
         </div>
-        <RoadmapFooter />
         <AddFeatureDialog />
       </main>
       <Footer />
