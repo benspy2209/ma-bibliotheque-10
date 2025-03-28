@@ -69,16 +69,44 @@ const NavBar = () => {
   return (
     <nav className="w-full border-b py-5 px-6 transition-colors duration-300">
       <div className="max-w-7xl mx-auto flex flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-6">
-          <NavLink to="/" className="flex items-center navbar-logo-container">
-            <img 
-              src={theme === 'light' ? "/pulse.png" : "/pulse dark.png"}
-              alt="BiblioPulse Logo" 
-              className="h-auto w-auto max-h-[32px] md:max-h-40" 
-            />
-          </NavLink>
-          
-          {isMobile ? (
+        {isMobile ? (
+          <div className="flex flex-col items-center w-full">
+            {/* Logo en haut */}
+            <div className="navbar-logo-container mb-3">
+              <NavLink to="/" className="flex items-center">
+                <img 
+                  src={theme === 'light' ? "/pulse.png" : "/pulse dark.png"}
+                  alt="BiblioPulse Logo" 
+                  className="h-auto w-auto max-h-[32px] md:max-h-40" 
+                />
+              </NavLink>
+            </div>
+            
+            {/* Bouton Se Connecter au milieu */}
+            <div className="mb-3">
+              {user ? (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={signOut}
+                  className="transition-colors duration-300 text-base"
+                >
+                  Se déconnecter
+                </Button>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleSignIn}
+                  className="transition-colors duration-300 text-base"
+                >
+                  <LogIn className="h-5 w-5 mr-2" />
+                  Se connecter
+                </Button>
+              )}
+            </div>
+            
+            {/* Menu Hamburger en bas */}
             <Drawer>
               <DrawerTrigger asChild>
                 <Button variant="ghost" size="icon">
@@ -97,43 +125,55 @@ const NavBar = () => {
                 </div>
               </DrawerContent>
             </Drawer>
-          ) : (
-            <div className="flex items-center gap-8">
-              <NavLinks />
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center gap-6">
+              <NavLink to="/" className="flex items-center navbar-logo-container">
+                <img 
+                  src={theme === 'light' ? "/pulse.png" : "/pulse dark.png"}
+                  alt="BiblioPulse Logo" 
+                  className="h-auto w-auto max-h-[32px] md:max-h-40" 
+                />
+              </NavLink>
+              
+              <div className="flex items-center gap-8">
+                <NavLinks />
+              </div>
             </div>
-          )}
-        </div>
-        
-        <div className="flex items-center gap-4">
-          {user ? (
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={signOut}
-              className="transition-colors duration-300 text-base"
-            >
-              Se déconnecter
-            </Button>
-          ) : (
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleSignIn}
-              className="transition-colors duration-300 text-base"
-            >
-              <LogIn className="h-5 w-5 mr-2" />
-              Se connecter
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleTheme}
-            className="transition-colors duration-300"
-          >
-            {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-          </Button>
-        </div>
+            
+            <div className="flex items-center gap-4">
+              {user ? (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={signOut}
+                  className="transition-colors duration-300 text-base"
+                >
+                  Se déconnecter
+                </Button>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleSignIn}
+                  className="transition-colors duration-300 text-base"
+                >
+                  <LogIn className="h-5 w-5 mr-2" />
+                  Se connecter
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                className="transition-colors duration-300"
+              >
+                {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+              </Button>
+            </div>
+          </>
+        )}
       </div>
       <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
     </nav>
