@@ -1,6 +1,6 @@
 
 import { NavLink } from "react-router-dom";
-import { Search, BookOpen, BarChart2, Sun, Moon, LogIn, Menu, Lightbulb, HelpCircle } from "lucide-react";
+import { Search, BookOpen, BarChart2, Sun, Moon, LogIn, Menu, Lightbulb, HelpCircle, User, UserRound, LogOut } from "lucide-react";
 import { Button } from "./ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
@@ -12,6 +12,15 @@ import {
   DrawerTrigger,
   DrawerClose
 } from "./ui/drawer";
+import { 
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator
+} from "./ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "./ui/avatar";
 
 const NavBar = () => {
   const { theme, toggleTheme } = useTheme();
@@ -23,6 +32,26 @@ const NavBar = () => {
     console.log("Opening login dialog from NavBar");
     setAuthMode('login');
     setShowLoginDialog(true);
+  };
+
+  // Récupérer le prénom de l'utilisateur ou utiliser son email
+  const getUserDisplayName = () => {
+    if (!user) return "";
+    
+    // Si l'utilisateur a un prénom dans les métadonnées
+    const firstName = user.user_metadata?.first_name;
+    if (firstName) return firstName;
+    
+    // Sinon, utiliser l'email et extraire la partie avant @
+    return user.email ? user.email.split('@')[0] : "Utilisateur";
+  };
+
+  // Obtenir les initiales pour l'avatar
+  const getInitials = () => {
+    if (!user) return "";
+    
+    const displayName = getUserDisplayName();
+    return displayName.substring(0, 2).toUpperCase();
   };
 
   const NavLinks = () => (
@@ -73,6 +102,31 @@ const NavBar = () => {
     </>
   );
 
+  // Composant pour le menu utilisateur
+  const UserMenu = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+          <Avatar className="h-9 w-9 border border-primary/20">
+            <AvatarFallback className="bg-primary/10 text-primary">
+              {getInitials()}
+            </AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56 z-50">
+        <DropdownMenuLabel>
+          Connecté en tant que <span className="font-bold">{getUserDisplayName()}</span>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={signOut} className="text-red-500 cursor-pointer">
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Se déconnecter</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   // Afficher le bouton de connexion/déconnexion
   const AuthButton = () => (
     user ? (
@@ -114,45 +168,58 @@ const NavBar = () => {
                 </NavLink>
               </div>
               
-              <Drawer>
-                <DrawerTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Menu className="h-6 w-6" />
-                    <span className="sr-only">Menu</span>
-                  </Button>
-                </DrawerTrigger>
-                <DrawerContent className="px-4 py-6">
-                  <div className="flex flex-col gap-6">
-                    {/* Bouton Connexion en haut du drawer */}
-                    <div className="mb-4 px-2">
-                      <AuthButton />
-                    </div>
+              <div className="flex items-center gap-3">
+                {user && (
+                  <UserMenu />
+                )}
+                
+                <Drawer>
+                  <DrawerTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <Menu className="h-6 w-6" />
+                      <span className="sr-only">Menu</span>
+                    </Button>
+                  </DrawerTrigger>
+                  <DrawerContent className="px-4 py-6">
+                    <div className="flex flex-col gap-6">
+                      {/* Message de bienvenue en haut du drawer pour les utilisateurs connectés */}
+                      {user && (
+                        <div className="mb-2 px-2">
+                          <p className="text-sm text-muted-foreground">Bonjour, <span className="font-bold text-primary">{getUserDisplayName()}</span></p>
+                        </div>
+                      )}
                     
-                    <div className="border-t pt-4"></div>
-                    
-                    {/* Navigation links */}
-                    <div className="flex flex-col gap-4">
-                      <NavLinks />
-                    </div>
-                    
-                    {/* Thème et fermeture */}
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={toggleTheme}
-                        className="transition-colors duration-300"
-                      >
-                        {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-                      </Button>
+                      {/* Bouton Connexion en haut du drawer */}
+                      <div className="mb-4 px-2">
+                        <AuthButton />
+                      </div>
                       
-                      <DrawerClose asChild>
-                        <Button variant="outline" size="sm">Fermer</Button>
-                      </DrawerClose>
+                      <div className="border-t pt-4"></div>
+                      
+                      {/* Navigation links */}
+                      <div className="flex flex-col gap-4">
+                        <NavLinks />
+                      </div>
+                      
+                      {/* Thème et fermeture */}
+                      <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={toggleTheme}
+                          className="transition-colors duration-300"
+                        >
+                          {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+                        </Button>
+                        
+                        <DrawerClose asChild>
+                          <Button variant="outline" size="sm">Fermer</Button>
+                        </DrawerClose>
+                      </div>
                     </div>
-                  </div>
-                </DrawerContent>
-              </Drawer>
+                  </DrawerContent>
+                </Drawer>
+              </div>
             </div>
           </>
         ) : (
@@ -173,14 +240,12 @@ const NavBar = () => {
             
             <div className="flex items-center gap-4">
               {user ? (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={signOut}
-                  className="transition-colors duration-300 text-base"
-                >
-                  Se déconnecter
-                </Button>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm mr-2 hidden md:inline-block">
+                    Bonjour, <span className="font-bold text-primary">{getUserDisplayName()}</span>
+                  </span>
+                  <UserMenu />
+                </div>
               ) : (
                 <Button 
                   variant="outline" 
