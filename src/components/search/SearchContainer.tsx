@@ -30,13 +30,19 @@ export function SearchContainer({
         hasMoreResults={hasMoreResults}
         totalBooks={totalBooks}
       />
-      {user && remainingSearches !== null && remainingSearches !== -1 && (
-        <div className="text-sm text-muted-foreground mt-2">
-          {searchLimitReached 
-            ? "Vous avez atteint votre limite de 3 recherches par jour." 
-            : `Recherches restantes aujourd'hui : ${remainingSearches}`}
-        </div>
-      )}
+      
+      <div className="mt-3">
+        <p className="text-sm text-muted-foreground">
+          Recherchez dans 7 langues : français, anglais, néerlandais, espagnol, allemand, portugais et italien
+        </p>
+        {user && remainingSearches !== null && remainingSearches !== -1 && (
+          <div className="text-sm text-muted-foreground mt-1">
+            {searchLimitReached 
+              ? "Vous avez atteint votre limite de 3 recherches par jour." 
+              : `Recherches restantes aujourd'hui : ${remainingSearches}`}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

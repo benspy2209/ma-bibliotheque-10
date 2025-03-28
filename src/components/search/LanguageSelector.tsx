@@ -7,6 +7,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { LanguageFilter } from '@/services/bookSearch';
+import { Globe } from 'lucide-react';
 
 interface LanguageSelectorProps {
   language: LanguageFilter;
@@ -23,7 +24,10 @@ export const LanguageSelector = ({
       onValueChange={(value) => onLanguageChange(value as LanguageFilter)}
     >
       <SelectTrigger className="w-full sm:w-[120px] h-12">
-        <SelectValue placeholder="Langue" />
+        <div className="flex items-center">
+          <Globe className="mr-2 h-4 w-4 text-muted-foreground" />
+          <SelectValue placeholder="Langue" />
+        </div>
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="fr">Français</SelectItem>

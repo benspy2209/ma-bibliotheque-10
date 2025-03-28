@@ -31,7 +31,7 @@ export const HeroSection = () => {
               <span className="text-primary title-pulse">BiblioPulse</span>: Votre bibliothèque personnelle, amplifiée.
             </h1>
             <p className="text-xl text-muted-foreground">
-              Organisez, découvrez et partagez vos lectures préférées. BiblioPulse vous accompagne dans votre parcours littéraire.
+              Organisez, découvrez et partagez vos lectures préférées dans 7 langues différentes. BiblioPulse vous accompagne dans votre parcours littéraire.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -73,10 +73,10 @@ export const HeroSection = () => {
                 }}
               />
               
-              {/* Statistiques déplacées et redessinées pour être moins proéminentes */}
+              {/* Statistiques redessinées pour éviter la superposition */}
               <div className="absolute bottom-4 left-4 right-4 bg-black/70 rounded-md p-3 text-white text-sm backdrop-blur-sm">
                 <div className="flex justify-between items-center text-sm">
-                  <div>
+                  <div className="mr-2">
                     <span className="text-[#999] mr-1">Notre catalogue:</span> 
                     <span className="font-semibold text-white">44 624 261 livres</span>
                   </div>
@@ -87,7 +87,8 @@ export const HeroSection = () => {
                 </div>
               </div>
               
-              <div className="absolute -bottom-6 -left-6 bg-background rounded-lg shadow-lg p-4 w-64 max-w-[80%] sm:max-w-full">
+              {/* Témoignage déplacé pour éviter la superposition */}
+              <div className="absolute -bottom-12 -left-6 bg-background rounded-lg shadow-lg p-4 w-64 max-w-[80%] sm:max-w-full">
                 <div className="flex items-center gap-2">
                   <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
                   <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />

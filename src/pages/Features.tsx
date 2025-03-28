@@ -32,7 +32,7 @@ const Features = () => {
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto text-center mb-16">
               Découvrez tout ce que Bibliopulse peut faire pour transformer votre expérience de lecture et la gestion de votre bibliothèque personnelle.
               <span className="block mt-2 text-sm text-[#8E9196]">
-                Notre base compte <span className="font-medium text-primary/70">44 624 261 livres</span> et <span className="font-medium text-primary/70">12 839 586 auteurs</span> référencés
+                Recherchez dans notre base de <span className="font-medium text-primary/70">44 624 261 livres</span> et <span className="font-medium text-primary/70">12 839 586 auteurs</span> en français, anglais, néerlandais, espagnol, allemand, portugais et italien
               </span>
             </p>
 

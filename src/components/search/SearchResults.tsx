@@ -6,6 +6,7 @@ import { useSelectedBook } from '@/hooks/use-selected-book';
 import { AddAllBooks } from '@/components/search/AddAllBooks';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
+import { Globe } from 'lucide-react';
 
 interface SearchResultsProps {
   books: Book[];
@@ -65,11 +66,17 @@ export function SearchResults({
   return (
     <>
       {books.length > 0 && searchQuery && (
-        <div className="flex justify-end mb-4">
-          <AddAllBooks 
-            books={books} 
-            onComplete={onUpdate} 
-          />
+        <div className="flex flex-col mb-4 space-y-2">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center text-sm">
+              <Globe className="h-4 w-4 mr-1 text-muted-foreground" />
+              <span className="text-muted-foreground">Résultats dans 7 langues</span>
+            </div>
+            <AddAllBooks 
+              books={books} 
+              onComplete={onUpdate} 
+            />
+          </div>
         </div>
       )}
 
