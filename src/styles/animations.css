@@ -1,4 +1,3 @@
-
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -163,12 +162,10 @@
 }
 
 .animated-title .title-pulse {
-  animation: titlePulse 3s ease-in-out infinite, floatEffect 5s ease-in-out infinite;
   background: linear-gradient(90deg, #e4364a, #ff8a80, #e4364a);
   background-size: 200% 100%;
   background-clip: text;
   -webkit-background-clip: text;
   transition: all 0.5s ease;
-  animation: gradientShift 3s ease infinite, floatEffect 5s ease-in-out infinite;
+  animation: heartbeat 2s ease-in-out infinite, gradientShift 3s ease infinite;
 }
-

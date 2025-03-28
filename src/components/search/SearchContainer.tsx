@@ -33,7 +33,7 @@ export function SearchContainer({
       
       <div className="mt-3">
         <p className="text-sm text-muted-foreground">
-          Recherchez dans 7 langues : français, anglais, néerlandais, espagnol, allemand, portugais et italien
+          Recherchez par titre, auteur ou ISBN dans 7 langues : français, anglais, néerlandais, espagnol, allemand, portugais et italien
         </p>
         {user && remainingSearches !== null && remainingSearches !== -1 && (
           <div className="text-sm text-muted-foreground mt-1">
