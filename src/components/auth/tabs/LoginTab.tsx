@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { ResetPasswordForm } from '../ResetPasswordForm';
 import { useNavigate } from 'react-router-dom';
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Eye, EyeOff } from "lucide-react";
 
 interface LoginTabProps {
   isLoading: boolean;
@@ -20,6 +20,7 @@ interface LoginTabProps {
 export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -70,6 +71,10 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
     setAuthMode('signup');
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <>
       <form onSubmit={handleLogin} className="space-y-4 w-full max-w-sm">
@@ -99,16 +104,33 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
         </div>
         <div className="space-y-2">
           <Label htmlFor="password-login">Mot de passe</Label>
-          <Input
-            id="password-login"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            placeholder="••••••••"
-            disabled={isLoading}
-            autoComplete="current-password"
-          />
+          <div className="relative">
+            <Input
+              id="password-login"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="••••••••"
+              disabled={isLoading}
+              autoComplete="current-password"
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              onClick={togglePasswordVisibility}
+              tabIndex={-1}
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <Eye className="h-4 w-4" aria-hidden="true" />
+              )}
+              <span className="sr-only">
+                {showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+              </span>
+            </button>
+          </div>
           <div className="text-right">
             <Button 
               type="button" 

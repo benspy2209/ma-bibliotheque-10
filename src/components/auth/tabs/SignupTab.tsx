@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
-import { AlertCircle, Info } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, Info } from "lucide-react";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 
 interface SignupTabProps {
@@ -17,6 +17,7 @@ interface SignupTabProps {
 export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [emailSentMessage, setEmailSentMessage] = useState('');
   const [isRateLimited, setIsRateLimited] = useState(false);
   const { toast } = useToast();
@@ -108,6 +109,10 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
     setAuthMode('login');
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <form onSubmit={handleSignup} className="space-y-4 w-full max-w-sm">
       {emailSentMessage && (
@@ -138,15 +143,32 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
       </div>
       <div className="space-y-2">
         <Label htmlFor="password-signup">Mot de passe</Label>
-        <Input
-          id="password-signup"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          placeholder="Minimum 6 caractères"
-          disabled={isLoading}
-        />
+        <div className="relative">
+          <Input
+            id="password-signup"
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            placeholder="Minimum 6 caractères"
+            disabled={isLoading}
+          />
+          <button
+            type="button"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            onClick={togglePasswordVisibility}
+            tabIndex={-1}
+          >
+            {showPassword ? (
+              <EyeOff className="h-4 w-4" aria-hidden="true" />
+            ) : (
+              <Eye className="h-4 w-4" aria-hidden="true" />
+            )}
+            <span className="sr-only">
+              {showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+            </span>
+          </button>
+        </div>
       </div>
       
       <Button type="submit" className="w-full" variant="pulse" disabled={isLoading}>
