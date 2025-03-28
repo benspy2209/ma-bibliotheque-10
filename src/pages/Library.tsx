@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
@@ -74,7 +75,7 @@ export default function Library() {
     return titleMatch || authorMatch;
   };
 
-  let filteredBooks = books
+  const filteredBooks = books
     .filter(book => {
       if (selectedAuthor) {
         if (Array.isArray(book.author)) {
@@ -84,11 +85,15 @@ export default function Library() {
       }
       return true;
     })
-    .filter(searchFilter);
-  
-  if (toBuyFilter === true) {
-    filteredBooks = filteredBooks.filter(book => book.purchased === false);
-  }
+    .filter(searchFilter)
+    .filter(book => {
+      if (toBuyFilter === true) {
+        return !book.purchased && (!book.status || book.status === 'to-read');
+      } else if (toBuyFilter === false) {
+        return book.purchased || !((!book.status || book.status === 'to-read'));
+      }
+      return true;
+    });
 
   const sortedBooks = sortBooks(filteredBooks, sortBy);
 

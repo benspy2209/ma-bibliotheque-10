@@ -26,71 +26,64 @@ export const BookSections = ({
   toBuyFilter, 
   onToBuyFilterChange 
 }: BookSectionsProps) => {
+  const [purchaseFilter, setPurchaseFilter] = useState<'all' | 'purchased' | 'not-purchased'>('all');
   const isMobile = useIsMobile();
   
-  // Filtres de base pour les différentes catégories
   const completedBooks = books.filter(book => book.status === 'completed');
   const readingBooks = books.filter(book => book.status === 'reading');
   const toReadBooks = books.filter(book => !book.status || book.status === 'to-read');
-  
-  // Livres achetés (purchased === true)
+  const toBuyBooks = books.filter(book => !book.purchased && (!book.status || book.status === 'to-read'));
   const purchasedBooks = books.filter(book => book.purchased === true);
-  
-  // Livres à acheter (purchased === false) - indépendant du statut de lecture
-  const toBuyBooks = books.filter(book => book.purchased === false);
+
+  const filteredToReadBooks = toReadBooks.filter(book => {
+    if (purchaseFilter === 'purchased') return book.purchased;
+    if (purchaseFilter === 'not-purchased') return !book.purchased;
+    return true;
+  });
 
   const BookComponent = viewMode === 'grid' ? BookGrid : BookList;
 
-  // Déterminer quels livres afficher en fonction de l'onglet sélectionné
-  const handleTabClick = (tabValue: string) => {
-    // Si l'utilisateur sélectionne l'onglet "to-buy", on applique le filtre
-    if (tabValue === "to-buy") {
-      onToBuyFilterChange(true);
-    } else {
-      // Sinon, on réinitialise le filtre
-      onToBuyFilterChange(null);
-    }
-  };
-
   return (
-    <Tabs 
-      defaultValue="all" 
-      onValueChange={handleTabClick}
-      className="w-full"
-    >
+    <Tabs defaultValue="all" className="w-full">
       <TabsList className={`mb-8 ${isMobile ? 'flex-col' : 'flex-wrap h-auto justify-start overflow-x-auto'}`}>
         <TabsTrigger 
           value="all" 
+          onClick={() => onToBuyFilterChange(null)}
           className="text-xs sm:text-sm"
         >
           Tous ({books.length})
         </TabsTrigger>
         <TabsTrigger 
           value="reading" 
+          onClick={() => onToBuyFilterChange(null)}
           className="text-xs sm:text-sm"
         >
           En cours ({readingBooks.length})
         </TabsTrigger>
         <TabsTrigger 
           value="completed" 
+          onClick={() => onToBuyFilterChange(null)}
           className="text-xs sm:text-sm"
         >
           Lu ({completedBooks.length})
         </TabsTrigger>
         <TabsTrigger 
           value="to-read" 
+          onClick={() => onToBuyFilterChange(null)}
           className="text-xs sm:text-sm"
         >
           À lire ({toReadBooks.length})
         </TabsTrigger>
         <TabsTrigger 
           value="purchased" 
+          onClick={() => onToBuyFilterChange(null)}
           className="text-xs sm:text-sm"
         >
           Achetés ({purchasedBooks.length})
         </TabsTrigger>
         <TabsTrigger 
           value="to-buy" 
+          onClick={() => onToBuyFilterChange(true)}
           className="bg-destructive/10 hover:bg-destructive/20 data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground text-xs sm:text-sm"
         >
           À acheter ({toBuyBooks.length})
@@ -127,16 +120,6 @@ export const BookSections = ({
         )}
       </TabsContent>
 
-      <TabsContent value="to-read">
-        {toReadBooks.length === 0 ? (
-          <p className="text-center text-gray-600 mt-8">
-            Aucun livre dans votre liste de lecture.
-          </p>
-        ) : (
-          <BookComponent books={toReadBooks} onBookClick={onBookClick} />
-        )}
-      </TabsContent>
-
       <TabsContent value="purchased" className="space-y-8">
         {purchasedBooks.length === 0 ? (
           <p className="text-center text-gray-600 mt-8">
@@ -144,6 +127,28 @@ export const BookSections = ({
           </p>
         ) : (
           <BookComponent books={purchasedBooks} onBookClick={onBookClick} />
+        )}
+      </TabsContent>
+
+      <TabsContent value="to-read">
+        <div className="mb-6">
+          <Tabs defaultValue="all" className="w-fit" onValueChange={(value) => setPurchaseFilter(value as 'all' | 'purchased' | 'not-purchased')}>
+            <TabsList className={isMobile ? 'flex-col w-full' : ''}>
+              <TabsTrigger value="all">Tous</TabsTrigger>
+              <TabsTrigger value="purchased">Achetés</TabsTrigger>
+              <TabsTrigger value="not-purchased">À acheter</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+        
+        {filteredToReadBooks.length === 0 ? (
+          <p className="text-center text-gray-600 mt-8">
+            {purchaseFilter !== 'all' 
+              ? `Aucun livre ${purchaseFilter === 'purchased' ? 'acheté' : 'à acheter'} dans votre liste de lecture.`
+              : "Aucun livre dans votre liste de lecture."}
+          </p>
+        ) : (
+          <BookComponent books={filteredToReadBooks} onBookClick={onBookClick} />
         )}
       </TabsContent>
 
