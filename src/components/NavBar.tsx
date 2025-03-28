@@ -1,6 +1,5 @@
-
 import { NavLink } from "react-router-dom";
-import { Search, BookOpen, BarChart2, Sun, Moon, LogIn, Menu, Lightbulb, HelpCircle, User, UserRound, LogOut } from "lucide-react";
+import { Search, BookOpen, BarChart2, Sun, Moon, LogIn, Menu, Lightbulb, HelpCircle, User, UserRound, LogOut, Info } from "lucide-react";
 import { Button } from "./ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
@@ -98,6 +97,13 @@ const NavBar = () => {
       >
         <HelpCircle className="h-5 w-5 text-[#e4364a]" />
         FAQ
+      </NavLink>
+      <NavLink 
+        to="/about" 
+        className={({ isActive }) => `flex items-center gap-2 text-base font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
+      >
+        <Info className="h-5 w-5 text-[#e4364a]" />
+        À propos
       </NavLink>
     </>
   );

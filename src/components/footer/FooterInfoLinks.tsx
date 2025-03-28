@@ -30,6 +30,11 @@ const FooterInfoLinks = ({ className = "" }: FooterInfoLinksProps) => {
           </Link>
         </li>
         <li>
+          <Link to="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+            À propos
+          </Link>
+        </li>
+        <li>
           <Link to="/privacy-policy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
             Politique de confidentialité
           </Link>
