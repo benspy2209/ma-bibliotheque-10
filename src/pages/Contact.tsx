@@ -11,7 +11,7 @@ const Contact = () => {
     <div className="flex flex-col min-h-screen">
       <Helmet>
         <title>Contact | BiblioPulse</title>
-        <meta name="description" content="Contactez-nous pour toute question ou suggestion concernant BiblioPulse" />
+        <meta name="description" content="Contact us with any questions or suggestions about BiblioPulse" />
       </Helmet>
       
       <NavBar />
@@ -19,7 +19,7 @@ const Contact = () => {
       <main className="flex-grow py-12 bg-black text-white">
         <div className="container px-4 mx-auto">
           <div className="mb-10 text-center">
-            <h1 className="text-4xl font-bold mb-4">Contactez-nous</h1>
+            <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Vous avez une question, une suggestion ou un problème ? N'hésitez pas à nous contacter, nous sommes heureux de vous aider.
             </p>
@@ -43,7 +43,7 @@ const Contact = () => {
                 <div className="bg-primary/10 p-3 rounded-full w-fit mx-auto mb-4">
                   <Phone className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2 text-white">Téléphone</h3>
+                <h3 className="text-xl font-semibold mb-2 text-white">GSM</h3>
                 <a href="tel:+32497363065" className="text-primary hover:underline">
                   +32 497 36 30 65
                 </a>
@@ -58,7 +58,7 @@ const Contact = () => {
                 <h3 className="text-xl font-semibold mb-2 text-white">Adresse</h3>
                 <p className="text-primary">
                   1640 Rhode-Saint-Genèse<br />
-                  Belgique
+                  Belgium
                 </p>
               </CardContent>
             </Card>

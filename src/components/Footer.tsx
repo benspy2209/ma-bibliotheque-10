@@ -20,45 +20,45 @@ const Footer = () => {
       <div className="container mx-auto max-w-7xl">
         {/* Logo et description */}
         <div className="flex flex-col sm:flex-row items-center justify-between mb-8">
-          <div className="flex flex-col sm:flex-row items-center mb-6 sm:mb-0">
-            <div className="footer-logo-container mb-3 sm:mb-0">
+          <div className="flex items-center mb-4 sm:mb-0">
+            <div className="footer-logo-container">
               <img 
                 src={theme === 'light' ? "/pulse.png" : "/pulse dark.png"}
                 alt="BiblioPulse Logo" 
-                className="h-auto max-h-16 w-auto sm:mr-4" 
+                className="h-auto max-h-12 w-auto mr-4" 
               />
             </div>
-            <div className="text-center sm:text-left mt-2 sm:mt-0">
+            <div className="text-left">
               <h3 className="text-lg font-medium">BiblioPulse</h3>
-              <p className="text-sm text-muted-foreground max-w-xs mt-1">
+              <p className="text-sm text-muted-foreground max-w-xs">
                 Votre compagnon de lecture personnel pour organiser, suivre et découvrir vos livres.
               </p>
             </div>
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-8 sm:gap-12">
+          <div className="flex flex-col sm:flex-row gap-6">
             <div>
-              <h4 className="font-medium text-base mb-3 flex items-center justify-center sm:justify-start">
+              <h4 className="font-medium text-base mb-3 flex items-center">
                 <BookOpen className="h-4 w-4 mr-2 text-[#e4364a]" />
                 Navigation
               </h4>
               <ul className="space-y-2">
-                <li className="text-center sm:text-left">
+                <li>
                   <Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     Accueil
                   </Link>
                 </li>
-                <li className="text-center sm:text-left">
+                <li>
                   <Link to="/library" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     Ma Bibliothèque
                   </Link>
                 </li>
-                <li className="text-center sm:text-left">
+                <li>
                   <Link to="/search" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     Recherche
                   </Link>
                 </li>
-                <li className="text-center sm:text-left">
+                <li>
                   <Link to="/statistics" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     Statistiques
                   </Link>
@@ -67,27 +67,27 @@ const Footer = () => {
             </div>
             
             <div>
-              <h4 className="font-medium text-base mb-3 flex items-center justify-center sm:justify-start">
+              <h4 className="font-medium text-base mb-3 flex items-center">
                 <BookText className="h-4 w-4 mr-2 text-[#e4364a]" />
                 Informations
               </h4>
               <ul className="space-y-2">
-                <li className="text-center sm:text-left">
+                <li>
                   <Link to="/features" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     Fonctionnalités
                   </Link>
                 </li>
-                <li className="text-center sm:text-left">
+                <li>
                   <Link to="/privacy-policy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     Politique de confidentialité
                   </Link>
                 </li>
-                <li className="text-center sm:text-left">
+                <li>
                   <Link to="/legal-notice" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     Mentions légales
                   </Link>
                 </li>
-                <li className="text-center sm:text-left">
+                <li>
                   <Link to="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     Contact
                   </Link>
@@ -102,7 +102,7 @@ const Footer = () => {
         
         {/* Copyright et liens sociaux */}
         <div className="flex flex-col sm:flex-row justify-between items-center text-sm text-muted-foreground pt-2">
-          <div className="mb-4 sm:mb-0 text-center sm:text-left">
+          <div className="mb-3 sm:mb-0 text-center sm:text-left">
             © {currentYear} BiblioPulse, réalisé par <a href="https://www.beneloo.com/" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Beneloo.com</a>
           </div>
           

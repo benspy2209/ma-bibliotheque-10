@@ -46,17 +46,6 @@ img[alt="BiblioPulse Logo"] {
     justify-content: center; /* Center the logo in its container */
   }
 
-  /* Footer responsive adjustments */
-  .footer-logo-container {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 1rem;
-  }
-
-  footer .container {
-    padding: 0 1rem;
-  }
-
   /* Amélioration de l'agencement mobile pour le menu */
   .mobile-drawer-content {
     padding-top: 1.5rem;
