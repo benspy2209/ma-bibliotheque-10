@@ -10,7 +10,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Card, CardContent } from '@/components/ui/card';
-import { HelpCircle, BookOpen, Search, BookmarkIcon, BarChart2, Users, BookText } from 'lucide-react';
+import { HelpCircle, BookOpen, Search, BookmarkIcon, BarChart2, Users, BookText, Hash } from 'lucide-react';
 
 const FAQ = () => {
   return (
@@ -125,9 +125,26 @@ const FAQ = () => {
             {/* FAQ */}
             <TabsContent value="faq" className="mt-6">
               <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="item-0">
+                  <AccordionTrigger>
+                    Comment rechercher un livre avec son ISBN ?
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <p className="mb-2">Pour rechercher un livre avec son ISBN :</p>
+                    <ol className="list-decimal pl-5 space-y-1">
+                      <li>Accédez à la page de recherche depuis le menu principal</li>
+                      <li>Entrez le numéro ISBN dans le champ de recherche</li>
+                      <li>Sélectionnez "ISBN" dans le menu déroulant de type de recherche</li>
+                      <li>Cliquez sur "Rechercher"</li>
+                      <li>Le livre correspondant à cet ISBN s'affichera s'il est disponible dans la base de données</li>
+                    </ol>
+                    <p className="mt-2 text-sm text-muted-foreground">Note: La recherche par ISBN est particulièrement précise car chaque ISBN est unique à un livre spécifique.</p>
+                  </AccordionContent>
+                </AccordionItem>
+
                 <AccordionItem value="item-1">
                   <AccordionTrigger>
-                    Comment puis-je ajouter un livre manuellement à ma bibliothèque ?
+                    Comment ajouter un livre manuellement à ma bibliothèque ?
                   </AccordionTrigger>
                   <AccordionContent>
                     <p className="mb-2">Pour ajouter un livre manuellement :</p>

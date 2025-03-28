@@ -2,7 +2,7 @@ import { Book } from '@/types/book';
 import { removeDuplicateBooks, filterNonBookResults, isAuthorMatch, isTitleExplicitMatch } from '@/lib/utils';
 import axios from 'axios';
 
-export type SearchType = 'author' | 'title';
+export type SearchType = 'author' | 'title' | 'isbn';
 export type LanguageFilter = 'fr' | 'en' | 'nl' | 'es' | 'de' | 'pt' | 'it';
 
 // Clé API ISBNDB
@@ -17,6 +17,32 @@ const api = axios.create({
     'Accept': 'application/json'
   }
 });
+
+// Function to search books by ISBN
+export async function searchBooksByISBN(isbn: string, language: LanguageFilter = 'fr'): Promise<Book[]> {
+  if (!isbn.trim()) return [];
+  
+  try {
+    const cleanedISBN = isbn.replace(/[^0-9X]/g, ''); // Remove non-numeric characters except X
+    const url = `${ISBNDB_BASE_URL}/book/${cleanedISBN}`;
+    
+    console.log(`Recherche par ISBN: ${url}`);
+    
+    const response = await api.get(url);
+    
+    console.log('Statut de réponse (ISBN):', response.status);
+    
+    if (response.data && response.data.book) {
+      const book = mapIsbndbBookToBook(response.data.book);
+      return [book]; // Return as array with single book
+    }
+    
+    return [];
+  } catch (error) {
+    console.error('Erreur lors de la recherche par ISBN:', error);
+    return [];
+  }
+}
 
 // Fonction pour faire une recherche par auteur avec l'endpoint correct
 export async function searchAuthorBooks(authorName: string, language: LanguageFilter = 'fr', maxResults: number = 100): Promise<Book[]> {
@@ -164,6 +190,8 @@ export async function searchIsbndb(query: string, searchType: SearchType = 'auth
         return searchAuthorBooks(query, language, maxResults);
       case 'title':
         return searchBooksByTitle(query, language, maxResults);
+      case 'isbn':
+        return searchBooksByISBN(query, language);
       default:
         return searchBooksByTitle(query, language, maxResults);
     }

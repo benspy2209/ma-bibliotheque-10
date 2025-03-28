@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { User, BookText } from 'lucide-react';
+import { User, BookText, Hash } from 'lucide-react';
 import { SearchType } from '@/services/bookSearch';
 
 interface SearchTypeSelectorProps {
@@ -27,6 +27,7 @@ export const SearchTypeSelector = ({
         <div className="flex items-center gap-2">
           {searchType === 'author' && <User className="h-4 w-4" />}
           {searchType === 'title' && <BookText className="h-4 w-4" />}
+          {searchType === 'isbn' && <Hash className="h-4 w-4" />}
           <SelectValue placeholder="Type de recherche" />
         </div>
       </SelectTrigger>
@@ -41,6 +42,12 @@ export const SearchTypeSelector = ({
           <div className="flex items-center gap-2">
             <User className="h-4 w-4" />
             <span>Auteur</span>
+          </div>
+        </SelectItem>
+        <SelectItem value="isbn">
+          <div className="flex items-center gap-2">
+            <Hash className="h-4 w-4" />
+            <span>ISBN</span>
           </div>
         </SelectItem>
       </SelectContent>
