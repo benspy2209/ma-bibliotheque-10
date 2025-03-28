@@ -61,6 +61,35 @@ export const roadmapFeatures: RoadmapFeature[] = [
     completionDate: "28 mars 2025",
     technical_details: "Intégration des API OAuth de Google et Facebook avec Supabase Auth, gestion des redirections et des états d'authentification"
   },
+  // Ajout des nouvelles fonctionnalités implémentées aujourd'hui
+  {
+    name: "Optimisation mobile",
+    description: "Amélioration de l'expérience utilisateur sur appareils mobiles",
+    status: "completed",
+    completionDate: "13 juillet 2025",
+    technical_details: "Réorganisation des onglets en affichage vertical sur mobile, amélioration du défilement horizontal sur tablette/desktop"
+  },
+  {
+    name: "Amélioration des interactions tactiles",
+    description: "Optimisation pour une meilleure expérience sur écrans tactiles",
+    status: "completed",
+    completionDate: "13 juillet 2025",
+    technical_details: "Implémentation de touchAction: 'manipulation', retour visuel pour les appuis sur boutons, zones de toucher agrandies"
+  },
+  {
+    name: "Navigation utilisateur améliorée",
+    description: "Refonte de l'interface utilisateur pour une navigation plus intuitive",
+    status: "completed",
+    completionDate: "13 juillet 2025",
+    technical_details: "Ajout de menu déroulant pour l'avatar utilisateur sur mobile, correction des filtres dans la bibliothèque"
+  },
+  {
+    name: "Gestion flexible des noms d'utilisateur",
+    description: "Possibilité de changer son nom d'utilisateur à tout moment",
+    status: "completed",
+    completionDate: "13 juillet 2025",
+    technical_details: "Suppression de la restriction de changement de nom d'utilisateur mensuelle, refactorisation du système de gestion des profils"
+  },
   // In-progress and planned features in sequential order
   {
     name: "Mode hors-ligne",
