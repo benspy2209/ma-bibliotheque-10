@@ -96,9 +96,8 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
     try {
       console.log(`Tentative de connexion avec: ${email}`);
       
-      // Vérifier si l'utilisateur existe sans utiliser filters, qui n'est pas supporté
-      // Nous utilisons directement une requête de connexion pour vérifier si le compte existe
-      console.log("Vérification de l'existence de l'utilisateur en tentant une connexion test");
+      // Tenter la connexion directement
+      console.log("Tentative de connexion avec les identifiants fournis");
       
       // Tenter la connexion proprement dite
       const { data: authData, error } = await supabase.auth.signInWithPassword({
@@ -121,19 +120,7 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
             setSuggestedEmail(similar);
             setLoginError(`Identifiants invalides. Avez-vous voulu dire "${similar}" ?`);
           } else {
-            // Vérifier si le compte existe pour donner un message plus précis
-            const { count } = await supabase
-              .from('profiles')
-              .select('*', { count: 'exact', head: true })
-              .eq('id', email);
-              
-            console.log(`Recherche dans profiles pour ${email}: ${count} résultats`);
-            
-            if (count && count > 0) {
-              setLoginError("Le mot de passe est incorrect. Veuillez réessayer ou utiliser la fonction de réinitialisation.");
-            } else {
-              setLoginError("Ce compte n'existe pas ou le mot de passe est incorrect. Veuillez réessayer ou créer un compte.");
-            }
+            setLoginError("Ce compte n'existe pas ou le mot de passe est incorrect. Veuillez réessayer ou créer un compte.");
           }
         } else {
           setLoginError(`Erreur : ${error.message}`);
