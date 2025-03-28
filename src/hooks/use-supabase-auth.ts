@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -49,6 +50,8 @@ export function useSupabaseAuth() {
           toast({
             description: "Récupération de mot de passe initiée"
           });
+          // Redirect to reset-password page
+          navigate('/reset-password');
         }
       }
       
@@ -60,6 +63,18 @@ export function useSupabaseAuth() {
       }
     });
 
+    // Check for recovery hash in URL and handle it
+    const handleRecoveryHash = () => {
+      const hash = window.location.hash;
+      if (hash && hash.includes('type=recovery')) {
+        console.log('Recovery hash detected:', hash);
+        setAuthMode('reset');
+        setShowLoginDialog(true);
+        navigate('/reset-password');
+      }
+    };
+
+    // Initial session check
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
@@ -70,8 +85,14 @@ export function useSupabaseAuth() {
         console.log(`Initial session retrieved, user ID: ${currentSession.user.id}`);
       } else {
         console.log('No initial session found');
+        
+        // Check for recovery hash if no session
+        handleRecoveryHash();
       }
     });
+
+    // Run hash check on mount
+    handleRecoveryHash();
 
     return () => subscription.unsubscribe();
   }, [queryClient, toast, navigate, initialAuthCheckDone]);

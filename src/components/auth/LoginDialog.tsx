@@ -8,6 +8,8 @@ import {
 } from "@/components/ui/dialog";
 import { LoginForm } from "./LoginForm";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 interface LoginDialogProps {
   open: boolean;
@@ -15,12 +17,21 @@ interface LoginDialogProps {
 }
 
 export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
-  const { authMode } = useSupabaseAuth();
+  const { authMode, setAuthMode } = useSupabaseAuth();
+  const location = useLocation();
+  
+  // Check if we're on the reset-password page or if we have a hash with recovery token
+  useEffect(() => {
+    if (location.pathname === "/reset-password" || 
+        window.location.hash.includes('type=recovery')) {
+      setAuthMode('reset');
+    }
+  }, [location.pathname, setAuthMode]);
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="sm:max-w-md max-h-[90vh] overflow-y-auto" 
+        className="sm:max-w-md max-h-[90vh] overflow-y-auto auth-form-container" 
         onPointerDownOutside={(e) => e.preventDefault()} 
         onInteractOutside={(e) => e.preventDefault()} 
       >
