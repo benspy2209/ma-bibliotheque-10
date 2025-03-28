@@ -147,11 +147,11 @@ export function useUsername() {
         return false;
       }
       
-      // Vérifier si l'utilisateur est l'administrateur
+      // Check if user is admin
       const { data: userData } = await supabase.auth.getUser();
       const isAdminUser = userData?.user?.email === 'debruijneb@gmail.com';
       
-      // Vérifie si l'utilisateur peut changer son nom d'utilisateur
+      // Check if user can change username
       if (!isAdminUser && !canChangeUsername) {
         toast({
           variant: "destructive",
@@ -160,19 +160,38 @@ export function useUsername() {
         return false;
       }
       
-      // Si c'est un administrateur, utiliser une approche différente pour contourner la validation du trigger
+      // For admin users, we'll use a special approach
+      // Note: We're using a direct RPC call to bypass RLS
       if (isAdminUser) {
-        // Mise à jour sans déclencher le trigger de validation en définissant directement last_username_change
-        const { error } = await supabase
-          .from('profiles')
-          .update({ 
-            username: newUsername,
-            last_username_change: new Date().toISOString()
-          })
-          .eq('id', user.id);
+        try {
+          // Call an RPC function for admin username update
+          const { error } = await supabase.rpc('admin_update_username', {
+            user_id: user.id,
+            new_username: newUsername
+          });
           
-        if (error) {
-          console.error('Error updating admin username:', error);
+          if (error) {
+            console.error('Error updating admin username with RPC:', error);
+            
+            // Fallback to standard update if RPC fails
+            const { error: updateError } = await supabase
+              .from('profiles')
+              .update({ 
+                username: newUsername 
+              })
+              .eq('id', user.id);
+              
+            if (updateError) {
+              console.error('Error in fallback update for admin:', updateError);
+              toast({
+                variant: "destructive",
+                description: "Une erreur est survenue lors de la mise à jour du nom d'utilisateur administrateur."
+              });
+              return false;
+            }
+          }
+        } catch (error) {
+          console.error('Exception in admin username update:', error);
           toast({
             variant: "destructive",
             description: "Une erreur est survenue lors de la mise à jour du nom d'utilisateur administrateur."
@@ -180,7 +199,7 @@ export function useUsername() {
           return false;
         }
       } else {
-        // Pour les utilisateurs normaux, mise à jour standard
+        // For regular users, use standard update
         const { error } = await supabase
           .from('profiles')
           .update({ username: newUsername })
@@ -198,7 +217,7 @@ export function useUsername() {
       
       setUsername(newUsername);
       
-      // Seulement vérifier les limitations pour les non-admins
+      // Only check limitations for non-admins
       if (!isAdminUser) {
         await checkCanChangeUsername();
       }
