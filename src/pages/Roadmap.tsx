@@ -7,8 +7,6 @@ import RoadmapHeader from "@/components/roadmap/RoadmapHeader";
 import FeatureTimeline from "@/components/roadmap/FeatureTimeline";
 import RoadmapFooter from "@/components/roadmap/RoadmapFooter";
 import { roadmapFeatures } from "@/components/roadmap/RoadmapData";
-import { AddFeatureDialog } from "@/components/roadmap/AddFeatureDialog";
-import { ProposeFeatureDialog } from "@/components/roadmap/ProposeFeatureDialog";
 import { FeatureProposalsList } from "@/components/roadmap/FeatureProposalsList";
 
 const Roadmap = () => {
@@ -27,8 +25,6 @@ const Roadmap = () => {
         <FeatureProposalsList />
         <FeatureTimeline features={roadmapFeatures} />
         <RoadmapFooter />
-        <AddFeatureDialog />
-        <ProposeFeatureDialog />
       </main>
       <Footer />
     </>
