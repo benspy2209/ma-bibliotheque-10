@@ -45,6 +45,12 @@ img[alt="BiblioPulse Logo"] {
     align-items: center;
     justify-content: center; /* Center the logo in its container */
   }
+  
+  /* Amélioration du footer en mobile */
+  .footer-logo-container img {
+    max-height: 50px !important;
+    margin: 0 auto;
+  }
 }
 
 /* S'assurer que les textes sont bien lisibles en mode clair */
