@@ -80,11 +80,6 @@ export const HeroSection = () => {
                 src="/bibliopulse-a.webp" 
                 alt="Personne lisant et organisant sa bibliothèque" 
                 className="rounded-lg shadow-2xl object-cover w-full"
-                onError={(e) => {
-                  console.error("Image failed to load:", e);
-                  const target = e.target as HTMLImageElement;
-                  target.src = '/placeholder.svg';
-                }}
               />
             </div>
           </div>

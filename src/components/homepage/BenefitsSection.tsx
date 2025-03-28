@@ -21,11 +21,6 @@ export const BenefitsSection = () => {
               src="/bibliopulse-b.webp" 
               alt="Tableau de statistiques et analyse de lecture" 
               className="rounded-lg shadow-xl w-full"
-              onError={(e) => {
-                console.error("Image failed to load:", e);
-                const target = e.target as HTMLImageElement;
-                target.src = '/placeholder.svg';
-              }}
             />
           </div>
           
