@@ -12,13 +12,15 @@ import { ReadingPreferencesForm } from '@/components/user/ReadingPreferencesForm
 import { DisplaySettingsForm } from '@/components/user/DisplaySettingsForm';
 import { ReadingGoalsSettingsForm } from '@/components/user/ReadingGoalsSettingsForm';
 import { DeleteAccountForm } from '@/components/user/DeleteAccountForm';
+import { BooksToBuyList } from '@/components/user/BooksToBuyList';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
+import { ShoppingCart } from 'lucide-react';
 
 const ProfileSettings = () => {
   const { user, isLoading } = useSupabaseAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const activeTab = searchParams.get('tab') || 'profile';
+  const activeTab = searchParams.get('tab') || 'to-buy'; // Default to to-buy tab
 
   // Redirect to login page if not authenticated
   useEffect(() => {
@@ -45,6 +47,14 @@ const ProfileSettings = () => {
 
         <Tabs defaultValue={activeTab} className="w-full">
           <TabsList className="mb-8 flex flex-wrap h-auto">
+            {/* Nouvel onglet "À acheter" mis en évidence */}
+            <TabsTrigger 
+              value="to-buy"
+              className="bg-amber-100 text-amber-800 dark:bg-amber-800 dark:text-amber-100 hover:bg-amber-200 dark:hover:bg-amber-700 data-[state=active]:bg-amber-500 data-[state=active]:text-white"
+            >
+              <ShoppingCart className="h-4 w-4 mr-1" />
+              À acheter
+            </TabsTrigger>
             <TabsTrigger value="profile">Profil</TabsTrigger>
             <TabsTrigger value="username">Nom d'utilisateur</TabsTrigger>
             <TabsTrigger value="social">Réseaux sociaux</TabsTrigger>
@@ -53,6 +63,11 @@ const ProfileSettings = () => {
             <TabsTrigger value="goals">Objectifs</TabsTrigger>
             <TabsTrigger value="account">Compte</TabsTrigger>
           </TabsList>
+          
+          {/* Nouvel onglet "À acheter" */}
+          <TabsContent value="to-buy" className="space-y-8">
+            <BooksToBuyList />
+          </TabsContent>
           
           <TabsContent value="profile" className="space-y-8">
             <UserProfileForm />
