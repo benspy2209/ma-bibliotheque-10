@@ -13,7 +13,6 @@ import { NavLinks } from "./NavLinks";
 import { UserMenu } from "./UserMenu";
 import { AuthButton } from "./AuthButton";
 import { ThemeToggle } from "./ThemeToggle";
-import { useState } from "react";
 
 interface MobileNavbarProps {
   user: User | null;
@@ -34,13 +33,6 @@ export const MobileNavbar = ({
   signOut,
   handleSignIn
 }: MobileNavbarProps) => {
-  const [open, setOpen] = useState(false);
-  
-  // Function to close drawer when a link is clicked
-  const handleLinkClick = () => {
-    setOpen(false);
-  };
-
   return (
     <div className="flex justify-between items-center w-full">
       <div className="navbar-logo-container">
@@ -53,15 +45,24 @@ export const MobileNavbar = ({
         </NavLink>
       </div>
       
-      <div className="flex items-center gap-2">
-        <Drawer open={open} onOpenChange={setOpen}>
+      <div className="flex items-center gap-3">
+        {user && (
+          <UserMenu 
+            user={user}
+            signOut={signOut}
+            getUserDisplayName={getUserDisplayName}
+            getInitials={getInitials}
+          />
+        )}
+        
+        <Drawer>
           <DrawerTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative z-50">
+            <Button variant="ghost" size="icon">
               <Menu className="h-6 w-6" />
               <span className="sr-only">Menu</span>
             </Button>
           </DrawerTrigger>
-          <DrawerContent className="px-4 py-6 max-h-[85vh] overflow-y-auto">
+          <DrawerContent className="px-4 py-6">
             <div className="flex flex-col gap-6">
               {/* Message de bienvenue en haut du drawer pour les utilisateurs connectés */}
               {user && (
@@ -78,7 +79,7 @@ export const MobileNavbar = ({
               <div className="border-t pt-4"></div>
               
               {/* Navigation links */}
-              <div className="flex flex-col gap-4" onClick={handleLinkClick}>
+              <div className="flex flex-col gap-4">
                 <NavLinks />
               </div>
               
@@ -93,15 +94,6 @@ export const MobileNavbar = ({
             </div>
           </DrawerContent>
         </Drawer>
-        
-        {user && (
-          <UserMenu 
-            user={user}
-            signOut={signOut}
-            getUserDisplayName={getUserDisplayName}
-            getInitials={getInitials}
-          />
-        )}
       </div>
     </div>
   );

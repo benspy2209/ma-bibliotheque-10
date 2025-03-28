@@ -49,53 +49,53 @@ export function FeatureProposalsList() {
   };
   
   return (
-    <div className="mt-8 md:mt-16 mb-6 md:mb-8">
-      <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Propositions des utilisateurs</h2>
-      <div className="space-y-4 md:space-y-6">
+    <div className="mt-16 mb-8">
+      <h2 className="text-2xl font-bold mb-6">Propositions des utilisateurs</h2>
+      <div className="space-y-6">
         {featureProposals.map((proposal, index) => (
-          <Card key={index} className="border-amber-200 max-w-full overflow-hidden">
-            <CardHeader className="bg-amber-50/50 p-3 md:p-4">
-              <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-3">
-                <div className="overflow-hidden">
-                  <CardTitle className="text-base md:text-lg line-clamp-1">{proposal.name}</CardTitle>
-                  <CardDescription className="flex items-center gap-1 text-xs md:text-sm">
-                    <MessageSquare className="h-3 w-3 md:h-4 md:w-4 flex-shrink-0" />
-                    <span className="truncate">Proposé par {proposal.proposedBy} le {proposal.proposalDate}</span>
+          <Card key={index} className="border-amber-200">
+            <CardHeader className="bg-amber-50/50">
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle>{proposal.name}</CardTitle>
+                  <CardDescription className="flex items-center gap-1">
+                    <MessageSquare className="h-4 w-4" />
+                    Proposé par {proposal.proposedBy} le {proposal.proposalDate}
                   </CardDescription>
                 </div>
                 {isAdmin && (
-                  <div className="flex gap-2 flex-shrink-0">
+                  <div className="flex gap-2">
                     <Button 
                       size="sm" 
                       variant="outline" 
-                      className="border-green-500 hover:bg-green-100 h-8 px-2 text-xs"
+                      className="border-green-500 hover:bg-green-100"
                       onClick={() => approveProposal(index)}
                     >
-                      <Check className="h-3 w-3 md:h-4 md:w-4 mr-1 text-green-500" />
+                      <Check className="h-4 w-4 mr-1 text-green-500" />
                       Approuver
                     </Button>
                     <Button 
                       size="sm" 
                       variant="outline" 
-                      className="border-red-500 hover:bg-red-100 h-8 px-2 text-xs"
+                      className="border-red-500 hover:bg-red-100"
                       onClick={() => rejectProposal(index)}
                     >
-                      <X className="h-3 w-3 md:h-4 md:w-4 mr-1 text-red-500" />
+                      <X className="h-4 w-4 mr-1 text-red-500" />
                       Rejeter
                     </Button>
                   </div>
                 )}
               </div>
             </CardHeader>
-            <CardContent className="pt-3 p-3 md:p-4 md:pt-4">
-              <div className="mb-2 md:mb-3 text-sm">
-                <strong className="text-xs md:text-sm font-medium">Description:</strong>
-                <p className="text-xs md:text-sm break-words">{proposal.description}</p>
+            <CardContent className="pt-4">
+              <div className="mb-3">
+                <strong className="text-sm font-medium">Description:</strong>
+                <p className="text-sm">{proposal.description}</p>
               </div>
               {proposal.technical_details && (
                 <div>
-                  <strong className="text-xs md:text-sm font-medium">Détails techniques:</strong>
-                  <p className="text-xs md:text-sm break-words">{proposal.technical_details}</p>
+                  <strong className="text-sm font-medium">Détails techniques:</strong>
+                  <p className="text-sm">{proposal.technical_details}</p>
                 </div>
               )}
             </CardContent>
@@ -104,4 +104,4 @@ export function FeatureProposalsList() {
       </div>
     </div>
   );
-};
+}

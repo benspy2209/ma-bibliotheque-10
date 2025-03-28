@@ -48,19 +48,16 @@ export const BenefitsSection = () => {
           </div>
           
           <div className="lg:w-1/2">
-            <picture>
-              <source srcSet="/photo2.webp" type="image/webp" />
-              <img 
-                src="/photo 2.jpg" 
-                alt="Application BiblioPulse sur différents appareils" 
-                className="rounded-lg shadow-xl object-cover w-full h-auto"
-                onError={(e) => {
-                  console.error("Image failed to load:", e);
-                  const target = e.target as HTMLImageElement;
-                  target.src = '/placeholder.svg';
-                }}
-              />
-            </picture>
+            <img 
+              src="/photo 2.jpg" 
+              alt="Application BiblioPulse sur différents appareils" 
+              className="rounded-lg shadow-xl object-cover w-full h-auto"
+              onError={(e) => {
+                console.error("Image failed to load:", e);
+                const target = e.target as HTMLImageElement;
+                target.src = '/placeholder.svg';
+              }}
+            />
           </div>
         </div>
       </div>

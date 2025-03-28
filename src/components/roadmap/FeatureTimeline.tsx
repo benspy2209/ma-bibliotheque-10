@@ -15,27 +15,24 @@ const FeatureTimeline = ({ features }: FeatureTimelineProps) => {
   const isMobile = useIsMobile();
   
   return (
-    <div className="relative w-full max-w-full">
-      {/* Timeline line */}
+    <div className="relative">
       <div className="absolute left-[1.65rem] top-10 bottom-10 w-[2px] bg-muted z-0"></div>
-      <div className="space-y-8 md:space-y-12 relative z-10 w-full max-w-full">
+      <div className="space-y-12 relative z-10">
         {features.map((feature, index) => (
-          <div key={index} className="flex gap-3 md:gap-6 w-full max-w-full">
-            {/* Icon */}
+          <div key={index} className="flex gap-4 md:gap-6">
             <div className="mt-1 flex-shrink-0">
               <div className="bg-background p-1 rounded-full">
-                <GitMerge className="h-5 w-5 md:h-6 md:w-6 text-[#e4364a]" />
+                <GitMerge className="h-6 w-6 text-[#e4364a]" />
               </div>
             </div>
-            {/* Card */}
-            <Card className="flex-1 shadow-md w-full max-w-full overflow-hidden roadmap-card">
-              <CardHeader className="p-2 sm:p-4 md:p-6">
-                <div className="flex flex-col gap-2">
+            <Card className="flex-1 shadow-md">
+              <CardHeader className="p-3 sm:p-6">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-2">
                   <div>
-                    <CardTitle className="text-base sm:text-lg md:text-xl line-clamp-2 break-words max-w-full">{feature.name}</CardTitle>
-                    <CardDescription className="text-sm break-words max-w-full">{feature.description}</CardDescription>
+                    <CardTitle className="text-base sm:text-lg md:text-xl">{feature.name}</CardTitle>
+                    <CardDescription className="text-sm">{feature.description}</CardDescription>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+                  <div className={`flex ${isMobile ? "flex-wrap" : ""} items-center gap-2 text-xs sm:text-sm`}>
                     <FeatureStatusIcon status={feature.status} />
                     <span>{FeatureStatusLabel({ status: feature.status })}</span>
                     {feature.quarter && (
@@ -51,8 +48,8 @@ const FeatureTimeline = ({ features }: FeatureTimelineProps) => {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="p-2 sm:p-4 md:p-6 pt-0">
-                <div className="text-xs sm:text-sm text-muted-foreground break-words max-w-full">
+              <CardContent className="p-3 sm:p-6 pt-0">
+                <div className="text-xs sm:text-sm text-muted-foreground break-words">
                   <strong className="font-medium text-foreground">Détails techniques:</strong> {feature.technical_details}
                 </div>
               </CardContent>
