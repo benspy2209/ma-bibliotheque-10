@@ -15,7 +15,7 @@ import { useViewPreference } from "@/hooks/use-view-preference";
 export function DisplaySettingsForm() {
   const { user } = useSupabaseAuth();
   const { toast } = useToast();
-  const { theme, setTheme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const { viewMode, toggleView } = useViewPreference();
   const [selectedTheme, setSelectedTheme] = useState<Theme>(theme);
   const [selectedView, setSelectedView] = useState(viewMode);
@@ -28,6 +28,11 @@ export function DisplaySettingsForm() {
       fetchDisplaySettings();
     }
   }, [user]);
+
+  // When theme global state changes, update our local state
+  useEffect(() => {
+    setSelectedTheme(theme);
+  }, [theme]);
 
   const fetchDisplaySettings = async () => {
     if (!user) return;
@@ -66,8 +71,10 @@ export function DisplaySettingsForm() {
     setIsSubmitting(true);
 
     try {
-      // Mettre à jour le thème
-      setTheme(selectedTheme);
+      // Toggle theme if necessary to match selected theme
+      if (theme !== selectedTheme) {
+        toggleTheme(); // This will switch between light and dark
+      }
       
       // Mettre à jour le mode d'affichage de la bibliothèque
       if (viewMode !== selectedView) {
@@ -75,17 +82,41 @@ export function DisplaySettingsForm() {
       }
       
       // Sauvegarder les préférences dans la base de données
-      const { error } = await supabase
+      // First ensure profile exists
+      const { data: existingProfile } = await supabase
         .from('profiles')
-        .update({
-          theme_preference: selectedTheme
-        })
-        .eq('id', user.id);
+        .select('id')
+        .eq('id', user.id)
+        .maybeSingle();
 
-      if (error) {
-        console.error('Error updating display settings:', error);
-        setErrorMessage("Une erreur est survenue lors de la mise à jour des paramètres d'affichage.");
-        return;
+      if (!existingProfile) {
+        // Create profile if it doesn't exist
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            theme_preference: selectedTheme
+          });
+
+        if (insertError) {
+          console.error('Error creating profile:', insertError);
+          setErrorMessage("Une erreur est survenue lors de la création du profil.");
+          return;
+        }
+      } else {
+        // Update existing profile
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            theme_preference: selectedTheme
+          })
+          .eq('id', user.id);
+
+        if (error) {
+          console.error('Error updating display settings:', error);
+          setErrorMessage("Une erreur est survenue lors de la mise à jour des paramètres d'affichage.");
+          return;
+        }
       }
 
       toast({
