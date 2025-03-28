@@ -6,12 +6,13 @@ import { LoginDialog } from "./auth/LoginDialog";
 import { MobileNavbar } from "./navbar/MobileNavbar";
 import { DesktopNavbar } from "./navbar/DesktopNavbar";
 import { useUserDisplay } from "./navbar/UserUtils";
+import { useEffect } from "react";
 
 const NavBar = () => {
   const { theme, toggleTheme } = useTheme();
   const { signIn, signOut, user, showLoginDialog, setShowLoginDialog, setAuthMode } = useSupabaseAuth();
   const isMobile = useIsMobile();
-  const { getUserDisplayName, getInitials } = useUserDisplay(user);
+  const { getUserDisplayName, getInitials, username } = useUserDisplay(user);
 
   // Fonction wrapper pour gérer le clic du bouton de connexion
   const handleSignIn = () => {
@@ -19,6 +20,12 @@ const NavBar = () => {
     setAuthMode('login');
     setShowLoginDialog(true);
   };
+
+  // Force rerender when username changes
+  useEffect(() => {
+    // This effect will run whenever the username changes
+    console.log("Username updated in NavBar:", username);
+  }, [username]);
 
   return (
     <nav className="w-full border-b py-2 px-3 transition-colors duration-300">

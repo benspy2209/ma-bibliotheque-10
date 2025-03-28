@@ -56,7 +56,7 @@ export function UsernameForm() {
       </CardHeader>
       <CardContent>
         {!isFirstTimeSettingUsername && !canChangeUsername && nextChangeDate && (
-          <Alert className="mb-4" variant="warning">
+          <Alert className="mb-4" variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               Vous ne pouvez modifier votre nom d'utilisateur qu'une fois par mois. 

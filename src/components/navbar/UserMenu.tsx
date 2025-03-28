@@ -1,6 +1,6 @@
 
 import { Button } from "../ui/button";
-import { Avatar, AvatarFallback } from "../ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { 
   DropdownMenu,
   DropdownMenuTrigger,
@@ -9,7 +9,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator
 } from "../ui/dropdown-menu";
-import { LogOut, Settings } from "lucide-react";
+import { LogOut, Settings, User as UserIcon } from "lucide-react";
 import { User } from "@supabase/supabase-js";
 import { Link } from "react-router-dom";
 
@@ -21,6 +21,8 @@ interface UserMenuProps {
 }
 
 export const UserMenu = ({ user, signOut, getUserDisplayName, getInitials }: UserMenuProps) => {
+  const displayName = getUserDisplayName();
+  
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -34,7 +36,7 @@ export const UserMenu = ({ user, signOut, getUserDisplayName, getInitials }: Use
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 z-50">
         <DropdownMenuLabel>
-          Connecté en tant que <span className="font-bold">{getUserDisplayName()}</span>
+          Connecté en tant que <span className="font-bold">{displayName}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>

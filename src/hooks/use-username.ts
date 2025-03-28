@@ -4,6 +4,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from './use-toast';
 import { useSupabaseAuth } from './use-supabase-auth';
 
+interface UsernameChangeResponse {
+  can_change: boolean;
+  last_change: string | null;
+  next_allowed: string | null;
+}
+
 export function useUsername() {
   const [username, setUsername] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -51,10 +57,11 @@ export function useUsername() {
         return;
       }
       
-      setCanChangeUsername(data.can_change);
+      const response = data as UsernameChangeResponse;
+      setCanChangeUsername(response.can_change);
       
-      if (data.next_allowed) {
-        setNextChangeDate(new Date(data.next_allowed));
+      if (response.next_allowed) {
+        setNextChangeDate(new Date(response.next_allowed));
       }
     } catch (error) {
       console.error('Error in checkCanChangeUsername:', error);
