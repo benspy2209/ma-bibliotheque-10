@@ -8,6 +8,10 @@ import {
   TableRow
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface UserBookDetail {
   user_email: string;
@@ -23,8 +27,101 @@ interface BookDetailsTableProps {
 }
 
 export function BookDetailsTable({ bookDetails }: BookDetailsTableProps) {
+  const [isUpdating, setIsUpdating] = useState(false);
+  const { toast } = useToast();
+
+  // Filter Stephen King books for the admin user that are marked as "to-buy"
+  const stephenKingToBuyBooks = bookDetails.filter(book => 
+    book.user_email === 'debruijneb@gmail.com' && 
+    book.book_author.toLowerCase().includes('stephen king') &&
+    (!book.status || book.status === 'to-read') && 
+    !book.purchased
+  );
+
+  const updateStephenKingBooksStatus = async () => {
+    if (stephenKingToBuyBooks.length === 0) {
+      toast({
+        description: "Aucun livre de Stephen King à mettre à jour.",
+      });
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      // Get each book's complete data
+      const updatePromises = stephenKingToBuyBooks.map(async (bookDetail) => {
+        // First, get the complete book data
+        const { data: bookData, error: getError } = await supabase
+          .from('books')
+          .select('book_data')
+          .eq('id', bookDetail.book_id)
+          .single();
+
+        if (getError) {
+          console.error('Erreur lors de la récupération du livre:', getError);
+          return { success: false, error: getError };
+        }
+
+        // Update the status and purchased flag
+        const updatedBookData = {
+          ...bookData.book_data,
+          status: 'to-read',
+          purchased: true,
+          _lastUpdated: new Date().toISOString() // Force update detection
+        };
+
+        // Save back to database
+        const { error: updateError } = await supabase
+          .from('books')
+          .update({ 
+            status: 'to-read', 
+            book_data: updatedBookData 
+          })
+          .eq('id', bookDetail.book_id);
+
+        if (updateError) {
+          console.error('Erreur lors de la mise à jour du livre:', updateError);
+          return { success: false, error: updateError };
+        }
+
+        return { success: true };
+      });
+
+      const results = await Promise.all(updatePromises);
+      const successCount = results.filter(r => r.success).length;
+
+      toast({
+        description: `${successCount} livres de Stephen King ont été mis à jour avec succès.`,
+      });
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour des livres:', error);
+      toast({
+        variant: "destructive",
+        description: "Une erreur est survenue lors de la mise à jour des livres.",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
     <div className="overflow-auto max-h-[500px]">
+      {stephenKingToBuyBooks.length > 0 && (
+        <div className="mb-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md">
+          <p className="text-sm mb-2">
+            <strong>{stephenKingToBuyBooks.length} livres de Stephen King</strong> marqués comme "à acheter" dans le compte admin.
+          </p>
+          <Button 
+            onClick={updateStephenKingBooksStatus} 
+            disabled={isUpdating}
+            className="bg-amber-500 hover:bg-amber-600 text-white"
+            size="sm"
+          >
+            {isUpdating ? "Mise à jour en cours..." : "Marquer comme 'À lire' (achetés)"}
+          </Button>
+        </div>
+      )}
+
       <Table>
         <TableHeader className="sticky top-0 bg-background">
           <TableRow>
