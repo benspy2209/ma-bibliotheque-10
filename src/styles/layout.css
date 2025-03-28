@@ -60,7 +60,7 @@
 }
 
 /* Mobile Tabs */
-@media (max-width: 640px) {
+@media (max-width: 1024px) {
   [role="tablist"] {
     display: flex;
     flex-wrap: wrap;
@@ -88,7 +88,7 @@ body, html {
 }
 
 /* Mobile roadmap adjustment */
-@media (max-width: 640px) {
+@media (max-width: 1024px) {
   .roadmap-card {
     max-width: 100%;
     overflow-wrap: break-word;
@@ -99,6 +99,11 @@ body, html {
     word-wrap: break-word;
     overflow-wrap: break-word;
     hyphens: auto;
+  }
+  
+  /* Mobile navbar specific fixes */
+  .navbar-logo-container img {
+    max-height: 36px !important;
   }
 }
 
@@ -143,5 +148,38 @@ body, html {
     width: 100%;
     overflow-wrap: break-word;
     word-break: break-word;
+  }
+}
+
+/* Landscape mobile fix */
+@media (max-height: 500px) and (orientation: landscape) {
+  .drawer-content {
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+}
+
+/* Sticky navbar for consistent navigation */
+nav.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+/* Improved menu drawer for mobile */
+@media (max-width: 1024px) {
+  .drawer-content {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+  
+  /* Handle overflowing text in mobile menus */
+  .drawer-content a, 
+  .drawer-content button {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
   }
 }

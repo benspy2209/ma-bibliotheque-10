@@ -21,7 +21,7 @@ const NavBar = () => {
   };
 
   return (
-    <nav className="w-full border-b py-2 px-3 transition-colors duration-300">
+    <nav className="w-full border-b py-2 px-3 sticky top-0 z-50 bg-background/95 backdrop-blur transition-colors duration-300">
       <div className="max-w-5xl mx-auto">
         {isMobile ? (
           <MobileNavbar 

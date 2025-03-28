@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator";
 const RoadmapFooter = () => {
   return (
     <>
-      <Separator className="my-8 md:my-12" />
+      <Separator className="my-6 md:my-12" />
 
       <section className="max-w-3xl mx-auto px-4 w-full">
         <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 break-words">À propos de notre roadmap</h2>

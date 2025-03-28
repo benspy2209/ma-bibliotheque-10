@@ -45,19 +45,10 @@ export const MobileNavbar = ({
         </NavLink>
       </div>
       
-      <div className="flex items-center gap-3">
-        {user && (
-          <UserMenu 
-            user={user}
-            signOut={signOut}
-            getUserDisplayName={getUserDisplayName}
-            getInitials={getInitials}
-          />
-        )}
-        
+      <div className="flex items-center gap-2">
         <Drawer>
           <DrawerTrigger asChild>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="relative z-50">
               <Menu className="h-6 w-6" />
               <span className="sr-only">Menu</span>
             </Button>
@@ -94,6 +85,15 @@ export const MobileNavbar = ({
             </div>
           </DrawerContent>
         </Drawer>
+        
+        {user && (
+          <UserMenu 
+            user={user}
+            signOut={signOut}
+            getUserDisplayName={getUserDisplayName}
+            getInitials={getInitials}
+          />
+        )}
       </div>
     </div>
   );
