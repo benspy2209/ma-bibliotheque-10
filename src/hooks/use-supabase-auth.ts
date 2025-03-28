@@ -110,12 +110,32 @@ export function useSupabaseAuth() {
     }
   };
 
+  const signInWithFacebook = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo: `${window.location.origin}`
+        }
+      });
+      
+      if (error) throw error;
+    } catch (error: any) {
+      console.error("Erreur lors de la connexion avec Facebook:", error);
+      toast({
+        variant: "destructive",
+        description: `Erreur: ${error.message}`
+      });
+    }
+  };
+
   return { 
     user, 
     session, 
     signIn,
     signOut, 
     signInWithGoogle, 
+    signInWithFacebook, 
     showLoginDialog, 
     setShowLoginDialog, 
     authMode, 

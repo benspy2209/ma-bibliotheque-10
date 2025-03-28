@@ -15,7 +15,7 @@ interface LoginFormProps {
 
 export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const { authMode, setAuthMode, signInWithGoogle } = useSupabaseAuth();
+  const { authMode, setAuthMode, signInWithGoogle, signInWithFacebook } = useSupabaseAuth();
   const [activeTab, setActiveTab] = useState<'login' | 'signup' | 'reset'>(
     defaultTab === 'reset' ? 'reset' : authMode
   );
@@ -62,8 +62,8 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
 
   return (
     <div className="w-full">
-      {/* Google sign-in button - Now featured prominently at the top */}
-      <div className="mb-6">
+      {/* Social login buttons section */}
+      <div className="space-y-4 mb-6">
         <Button 
           onClick={signInWithGoogle}
           variant="outline" 
@@ -78,6 +78,18 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
             </g>
           </svg>
           <span className="text-lg font-medium">Continuer avec Google</span>
+        </Button>
+        
+        <Button 
+          onClick={signInWithFacebook}
+          variant="outline" 
+          className="w-full flex items-center justify-center gap-2 py-6 border-2 border-[#1877F2] hover:bg-[#e7f0ff] dark:hover:bg-[#1e3a5f] transition-all"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M24 12C24 5.37258 18.6274 0 12 0C5.37258 0 0 5.37258 0 12C0 17.9895 4.3882 22.954 10.125 23.8542V15.4688H7.07812V12H10.125V9.35625C10.125 6.34875 11.9166 4.6875 14.6576 4.6875C15.9701 4.6875 17.3438 4.92188 17.3438 4.92188V7.875H15.8306C14.34 7.875 13.875 8.80008 13.875 9.75V12H17.2031L16.6711 15.4688H13.875V23.8542C19.6118 22.954 24 17.9895 24 12Z" fill="#1877F2"/>
+            <path d="M16.6711 15.4688L17.2031 12H13.875V9.75C13.875 8.80102 14.34 7.875 15.8306 7.875H17.3438V4.92188C17.3438 4.92188 15.9705 4.6875 14.6576 4.6875C11.9166 4.6875 10.125 6.34875 10.125 9.35625V12H7.07812V15.4688H10.125V23.8542C11.3674 24.0486 12.6326 24.0486 13.875 23.8542V15.4688H16.6711Z" fill="white"/>
+          </svg>
+          <span className="text-lg font-medium text-[#1877F2]">Continuer avec Facebook</span>
         </Button>
       </div>
 
