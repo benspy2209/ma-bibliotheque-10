@@ -70,18 +70,18 @@ export const roadmapFeatures: RoadmapFeature[] = [
     technical_details: "Service Workers, IndexedDB, synchronisation différée des données"
   },
   {
+    name: "Machine Learning pour recommandations",
+    description: "Recommandations de livres personnalisées basées sur les habitudes de lecture",
+    status: "in-progress",
+    quarter: "Q2 2025",
+    technical_details: "Algorithmes de recommandation, clustering d'utilisateurs, modèles prédictifs"
+  },
+  {
     name: "Application mobile native",
     description: "Applications iOS et Android natives",
     status: "planned",
     quarter: "Q3 2025",
     technical_details: "React Native, partage de code avec la version web, optimisations spécifiques aux plateformes"
-  },
-  {
-    name: "Machine Learning pour recommandations",
-    description: "Recommandations de livres personnalisées basées sur les habitudes de lecture",
-    status: "planned",
-    quarter: "Q4 2025",
-    technical_details: "Algorithmes de recommandation, clustering d'utilisateurs, modèles prédictifs"
   }
 ];
 
