@@ -36,12 +36,14 @@ img[alt="BiblioPulse Logo"] {
 @media (max-width: 767px) {
   img[alt="BiblioPulse Logo"] {
     max-width: 100%; /* Reset to normal size */
-    max-height: 40px; /* Maintain reasonable height on mobile */
+    max-height: 60px; /* Increased from 40px to 60px for mobile */
+    min-width: 140px; /* Ensure minimum width for better visibility */
   }
   
   .navbar-logo-container {
     display: flex;
     align-items: center;
+    justify-content: center; /* Center the logo in its container */
   }
 }
 
