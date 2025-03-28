@@ -1,4 +1,5 @@
 
+
 @import './styles/theme.css';
 @import './styles/animations.css';
 @import './styles/layout.css';
@@ -34,18 +35,36 @@ img[alt="BiblioPulse Logo"] {
 
 /* Desktop navbar styles */
 @media (min-width: 768px) {
+  /* Styles pour centrer le menu de navigation */
+  .desktop-nav-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .desktop-menu-container {
+    display: flex;
+    justify-content: center;
+    flex-grow: 1;
+  }
+  
   nav .max-w-5xl {
-    max-width: 92%; /* Use less horizontal space */
+    max-width: 95%; /* Utiliser plus d'espace horizontal */
+    display: flex;
+    justify-content: space-between;
   }
   
-  /* Compact navigation links */
-  nav [class*="flex items-center space-x-3"] {
-    gap: 0.5rem !important;
+  /* Espace entre les liens de navigation */
+  nav .nav-links-container {
+    gap: 1.5rem !important;
+    margin: 0 auto; /* Centre le menu */
   }
   
+  /* Logo plus grand sur desktop */
   nav .navbar-logo-container img {
-    max-width: 100%; /* Reset to normal size */
-    max-height: 24px; /* Smaller logo on desktop */
+    max-width: 100%; 
+    max-height: 40px; /* Logo plus grand sur desktop */
+    min-width: auto;
   }
 }
 
@@ -117,3 +136,4 @@ img[alt="BiblioPulse Logo"] {
 .bg-black .text-muted-foreground, .bg-zinc-900 .text-muted-foreground {
   color: rgba(255, 255, 255, 0.7) !important;
 }
+

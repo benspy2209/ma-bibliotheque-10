@@ -80,11 +80,11 @@ const NavBar = () => {
         Accueil
       </NavLink>
       <NavLink 
-        to="/library" 
+        to="/about" 
         className={({ isActive }) => `flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
       >
-        <BookOpen className="h-4 w-4 text-[#e4364a]" />
-        Ma Bibliothèque
+        <Info className="h-4 w-4 text-[#e4364a]" />
+        À propos
       </NavLink>
       <NavLink 
         to="/search" 
@@ -92,6 +92,13 @@ const NavBar = () => {
       >
         <Search className="h-4 w-4 text-[#e4364a]" />
         Recherche
+      </NavLink>
+      <NavLink 
+        to="/library" 
+        className={({ isActive }) => `flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
+      >
+        <BookOpen className="h-4 w-4 text-[#e4364a]" />
+        Ma Bibliothèque
       </NavLink>
       <NavLink 
         to="/statistics" 
@@ -113,13 +120,6 @@ const NavBar = () => {
       >
         <HelpCircle className="h-4 w-4 text-[#e4364a]" />
         FAQ
-      </NavLink>
-      <NavLink 
-        to="/about" 
-        className={({ isActive }) => `flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
-      >
-        <Info className="h-4 w-4 text-[#e4364a]" />
-        À propos
       </NavLink>
     </>
   );
@@ -175,7 +175,7 @@ const NavBar = () => {
 
   return (
     <nav className="w-full border-b py-2 px-3 transition-colors duration-300">
-      <div className="max-w-5xl mx-auto flex flex-row items-center justify-between gap-1">
+      <div className="max-w-5xl mx-auto">
         {isMobile ? (
           <>
             {/* Layout mobile amélioré: logo à gauche et menu hamburger à droite */}
@@ -246,47 +246,54 @@ const NavBar = () => {
           </>
         ) : (
           <>
-            <div className="flex items-center">
-              <NavLink to="/" className="flex items-center navbar-logo-container mr-4">
-                <img 
-                  src={theme === 'light' ? "/pulse.png" : "/pulse dark.png"}
-                  alt="BiblioPulse Logo" 
-                  className="h-auto w-auto max-h-[24px]" 
-                />
-              </NavLink>
-              
-              <div className="flex items-center space-x-3">
-                <NavLinks />
+            <div className="flex items-center justify-between">
+              {/* Logo à gauche */}
+              <div className="navbar-logo-container">
+                <NavLink to="/" className="flex items-center">
+                  <img 
+                    src={theme === 'light' ? "/pulse.png" : "/pulse dark.png"}
+                    alt="BiblioPulse Logo" 
+                    className="h-auto w-auto max-h-[40px]" 
+                  />
+                </NavLink>
               </div>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              {user ? (
-                <div className="flex items-center gap-2">
-                  <span className="text-xs mr-1 hidden lg:inline-block">
-                    Bonjour, <span className="font-medium text-primary">{getUserDisplayName()}</span>
-                  </span>
-                  <UserMenu />
+              
+              {/* Menu centré */}
+              <div className="desktop-menu-container">
+                <div className="nav-links-container flex items-center space-x-6">
+                  <NavLinks />
                 </div>
-              ) : (
-                <Button 
-                  variant="outline" 
+              </div>
+              
+              {/* Actions utilisateur à droite */}
+              <div className="flex items-center gap-2">
+                {user ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs mr-1 hidden lg:inline-block">
+                      Bonjour, <span className="font-medium text-primary">{getUserDisplayName()}</span>
+                    </span>
+                    <UserMenu />
+                  </div>
+                ) : (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleSignIn}
+                    className="transition-colors duration-300 text-sm h-8"
+                  >
+                    <LogIn className="h-4 w-4 mr-1" />
+                    Se connecter
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
                   size="sm"
-                  onClick={handleSignIn}
-                  className="transition-colors duration-300 text-sm h-8"
+                  onClick={toggleTheme}
+                  className="transition-colors duration-300 h-8 w-8"
                 >
-                  <LogIn className="h-4 w-4 mr-1" />
-                  Se connecter
+                  {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
                 </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleTheme}
-                className="transition-colors duration-300 h-8 w-8"
-              >
-                {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-              </Button>
+              </div>
             </div>
           </>
         )}
