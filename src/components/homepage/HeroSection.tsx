@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Star, LogIn } from 'lucide-react';
@@ -39,7 +38,7 @@ export const HeroSection = () => {
           <div className="lg:w-1/2 space-y-6">
             <h1 className="text-4xl md:text-5xl font-bold leading-tight">
               <span className={`animated-title relative inline-block ${isVisible ? 'animate-in' : ''}`}>
-                <span className="text-primary title-pulse">BiblioPulse</span>
+                Biblio<span className="text-primary title-pulse">Pulse</span>
               </span>: Votre bibliothèque personnelle, amplifiée.
             </h1>
             <p className="text-xl text-muted-foreground">
