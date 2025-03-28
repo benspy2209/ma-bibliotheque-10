@@ -15,12 +15,14 @@ import { DeleteAccountForm } from '@/components/user/DeleteAccountForm';
 import { BooksToBuyList } from '@/components/user/BooksToBuyList';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { ShoppingCart } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const ProfileSettings = () => {
   const { user, isLoading } = useSupabaseAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'to-buy'; // Default to to-buy tab
+  const isMobile = useIsMobile();
 
   // Redirect to login page if not authenticated
   useEffect(() => {
@@ -46,7 +48,7 @@ const ProfileSettings = () => {
         </div>
 
         <Tabs defaultValue={activeTab} className="w-full">
-          <TabsList className="mb-8 flex flex-wrap h-auto">
+          <TabsList className={`mb-8 ${isMobile ? 'flex-col' : 'flex-wrap h-auto'}`}>
             <TabsTrigger 
               value="to-buy"
               className="bg-amber-100 text-amber-800 dark:bg-amber-800 dark:text-amber-100 hover:bg-amber-200 dark:hover:bg-amber-700 data-[state=active]:bg-amber-500 data-[state=active]:text-white"

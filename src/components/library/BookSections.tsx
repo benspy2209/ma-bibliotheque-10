@@ -9,6 +9,7 @@ import {
   TabsContent, 
   TabsTrigger
 } from "@/components/ui/tabs";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface BookSectionsProps {
   books: Book[];
@@ -26,6 +27,7 @@ export const BookSections = ({
   onToBuyFilterChange 
 }: BookSectionsProps) => {
   const [purchaseFilter, setPurchaseFilter] = useState<'all' | 'purchased' | 'not-purchased'>('all');
+  const isMobile = useIsMobile();
   
   const completedBooks = books.filter(book => book.status === 'completed');
   const readingBooks = books.filter(book => book.status === 'reading');
@@ -43,7 +45,7 @@ export const BookSections = ({
 
   return (
     <Tabs defaultValue="all" className="w-full">
-      <TabsList className="mb-8 flex-wrap h-auto justify-start overflow-x-auto">
+      <TabsList className={`mb-8 ${isMobile ? 'flex-col' : 'flex-wrap h-auto justify-start overflow-x-auto'}`}>
         <TabsTrigger 
           value="all" 
           onClick={() => onToBuyFilterChange(null)}
@@ -131,7 +133,7 @@ export const BookSections = ({
       <TabsContent value="to-read">
         <div className="mb-6">
           <Tabs defaultValue="all" className="w-fit" onValueChange={(value) => setPurchaseFilter(value as 'all' | 'purchased' | 'not-purchased')}>
-            <TabsList>
+            <TabsList className={isMobile ? 'flex-col w-full' : ''}>
               <TabsTrigger value="all">Tous</TabsTrigger>
               <TabsTrigger value="purchased">Achetés</TabsTrigger>
               <TabsTrigger value="not-purchased">À acheter</TabsTrigger>

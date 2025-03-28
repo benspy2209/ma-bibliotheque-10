@@ -1,9 +1,8 @@
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Book } from '@/types/book';
 import { Button } from "@/components/ui/button";
-import { X, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -11,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AuthorFilterProps {
   books: Book[];
@@ -19,6 +19,8 @@ interface AuthorFilterProps {
 }
 
 export const AuthorFilter = ({ books, selectedAuthor, onAuthorSelect }: AuthorFilterProps) => {
+  const isMobile = useIsMobile();
+  
   // Extract unique authors from books
   const authors = useMemo(() => {
     const authorsSet = new Set<string>();
@@ -41,7 +43,7 @@ export const AuthorFilter = ({ books, selectedAuthor, onAuthorSelect }: AuthorFi
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-2`}>
       <Select
         value={selectedAuthor || ""}
         onValueChange={(value) => onAuthorSelect(value || null)}
@@ -65,10 +67,11 @@ export const AuthorFilter = ({ books, selectedAuthor, onAuthorSelect }: AuthorFi
           variant="ghost" 
           size="sm" 
           onClick={clearFilter} 
-          className="h-8 px-2" 
+          className={`h-8 px-2 ${isMobile ? 'w-full' : ''}`} 
           title="Effacer le filtre"
         >
-          <X className="h-4 w-4" />
+          <X className="h-4 w-4 mr-2" />
+          Effacer le filtre
         </Button>
       )}
     </div>

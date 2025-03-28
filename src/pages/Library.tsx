@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
@@ -20,6 +21,7 @@ import { LoginDialog } from '@/components/auth/LoginDialog';
 import Footer from '@/components/Footer';
 import { ImportExportLibrary } from '@/components/library/ImportExportLibrary';
 import { useUpdateAmazonLinks } from '@/services/updateExistingBooks';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function Library() {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
@@ -32,6 +34,7 @@ export default function Library() {
   const { viewMode, toggleView } = useViewPreference();
   const { user, signIn, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
   const { updateLinks } = useUpdateAmazonLinks();
+  const isMobile = useIsMobile();
 
   const { data: books = [], refetch } = useQuery({
     queryKey: ['books'],
@@ -135,7 +138,7 @@ export default function Library() {
             <>
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <h1 className="text-2xl md:text-3xl font-bold">Ma Bibliothèque</h1>
-                <div className="flex items-center gap-2">
+                <div className={`flex ${isMobile ? 'flex-col w-full' : ''} items-center gap-2`}>
                   <SortMenu sortBy={sortBy} onSortChange={setSortBy} />
                   <ViewToggle viewMode={viewMode} onToggle={toggleView} />
                 </div>

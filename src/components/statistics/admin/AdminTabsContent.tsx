@@ -46,7 +46,7 @@ export function AdminTabsContent({
   
   return (
     <Tabs defaultValue="users">
-      <TabsList className={`mb-4 ${isMobile ? 'flex-wrap h-auto py-2' : ''}`}>
+      <TabsList className={`mb-4 ${isMobile ? 'flex-col w-full' : 'flex-wrap h-auto py-2'}`}>
         <TabsTrigger value="users">Utilisateurs</TabsTrigger>
         <TabsTrigger value="summary">Résumé livres</TabsTrigger>
         <TabsTrigger value="details">Détails des livres</TabsTrigger>
