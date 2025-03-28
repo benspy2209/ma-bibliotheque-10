@@ -32,6 +32,9 @@ export function UserProfileForm() {
 
     try {
       setIsLoading(true);
+      // First make sure the profile exists
+      await ensureProfileExists();
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('full_name, bio, location')
@@ -54,6 +57,43 @@ export function UserProfileForm() {
       setIsLoading(false);
     }
   };
+  
+  // Function to make sure the profile exists before updating
+  const ensureProfileExists = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .maybeSingle();
+        
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error checking profile:', error);
+        throw error;
+      }
+      
+      // If profile doesn't exist, create it with defaults
+      if (!data) {
+        console.log('Profile does not exist, creating one for user:', user.id);
+        const { error: insertError } = await supabase.auth.admin.createUser({
+          email: user.email || '',
+          user_metadata: { full_name: user.user_metadata?.full_name || '' },
+          email_confirm: true
+        });
+        
+        if (insertError) {
+          console.error('Error creating profile:', insertError);
+          throw insertError;
+        }
+      }
+      
+    } catch (error) {
+      console.error('Error in ensureProfileExists:', error);
+      throw error;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,52 +103,22 @@ export function UserProfileForm() {
     setIsSubmitting(true);
 
     try {
-      // Vérifier si un profil existe pour cet utilisateur
-      const { data: existingProfile, error: checkError } = await supabase
+      // Make sure profile exists before updating
+      await ensureProfileExists();
+      
+      // Now update the profile
+      const { error } = await supabase
         .from('profiles')
-        .select('id')
-        .eq('id', user.id)
-        .maybeSingle();
-      
-      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 est l'erreur "no rows returned"
-        console.error('Error checking profile:', checkError);
-        setErrorMessage("Une erreur est survenue lors de la vérification du profil.");
-        setIsSubmitting(false);
-        return;
-      }
-      
-      let updateError;
-      
-      // Si le profil n'existe pas, créer un nouveau profil
-      if (!existingProfile) {
-        console.log('Creating new profile for user:', user.id);
-        const { error } = await supabase
-          .from('profiles')
-          .insert({
-            id: user.id,
-            full_name: fullName,
-            bio,
-            location,
-          });
-        updateError = error;
-      } else {
-        // Si le profil existe, le mettre à jour
-        console.log('Updating existing profile for user:', user.id);
-        const { error } = await supabase
-          .from('profiles')
-          .update({
-            full_name: fullName,
-            bio,
-            location,
-          })
-          .eq('id', user.id);
-        updateError = error;
-      }
+        .update({
+          full_name: fullName,
+          bio,
+          location,
+        })
+        .eq('id', user.id);
 
-      if (updateError) {
-        console.error('Error updating profile:', updateError);
+      if (error) {
+        console.error('Error updating profile:', error);
         setErrorMessage("Une erreur est survenue lors de la mise à jour du profil.");
-        setIsSubmitting(false);
         return;
       }
 

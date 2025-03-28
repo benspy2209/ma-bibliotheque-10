@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NavBar from '@/components/NavBar';
@@ -17,6 +17,8 @@ import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 const ProfileSettings = () => {
   const { user, isLoading } = useSupabaseAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'profile';
 
   // Redirect to login page if not authenticated
   useEffect(() => {
@@ -41,7 +43,7 @@ const ProfileSettings = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="profile" className="w-full">
+        <Tabs defaultValue={activeTab} className="w-full">
           <TabsList className="mb-8 flex flex-wrap h-auto">
             <TabsTrigger value="profile">Profil</TabsTrigger>
             <TabsTrigger value="username">Nom d'utilisateur</TabsTrigger>
