@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
 import { useToast } from "@/hooks/use-toast";
@@ -56,25 +56,6 @@ export default function Library() {
     }
   }, [user, books.length]);
 
-  // Apply Stephen King purchased fix to all books
-  const processedBooks = useMemo(() => {
-    return books.map(book => {
-      // Check if the author is Stephen King (either as string or in array)
-      const isStephenKing = 
-        (typeof book.author === 'string' && book.author.toLowerCase().includes('stephen king')) ||
-        (Array.isArray(book.author) && book.author.some(author => 
-          author.toLowerCase().includes('stephen king')
-        ));
-      
-      // If it's a Stephen King book, mark it as purchased
-      if (isStephenKing && book.purchased === false) {
-        return { ...book, purchased: true };
-      }
-      
-      return book;
-    });
-  }, [books]);
-
   const searchFilter = (book: Book) => {
     if (!searchQuery) return true;
     
@@ -94,7 +75,7 @@ export default function Library() {
     return titleMatch || authorMatch;
   };
 
-  const filteredBooks = processedBooks
+  const filteredBooks = books
     .filter(book => {
       if (selectedAuthor) {
         if (Array.isArray(book.author)) {
@@ -107,8 +88,9 @@ export default function Library() {
     .filter(searchFilter)
     .filter(book => {
       if (toBuyFilter === true) {
-        // Only show books that are explicitly marked as not purchased
-        return book.purchased === false;
+        return !book.purchased && (!book.status || book.status === 'to-read');
+      } else if (toBuyFilter === false) {
+        return book.purchased || !((!book.status || book.status === 'to-read'));
       }
       return true;
     });
