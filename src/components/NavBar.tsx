@@ -10,7 +10,7 @@ import { useEffect } from "react";
 
 const NavBar = () => {
   const { theme, toggleTheme } = useTheme();
-  const { signIn, signOut, user, showLoginDialog, setShowLoginDialog, setAuthMode } = useSupabaseAuth();
+  const { signIn, signOut, user, showLoginDialog, setShowLoginDialog, setAuthMode, ensureUserProfile } = useSupabaseAuth();
   const isMobile = useIsMobile();
   const { getUserDisplayName, getInitials, username, refreshUsername } = useUserDisplay(user);
 
@@ -21,12 +21,15 @@ const NavBar = () => {
     setShowLoginDialog(true);
   };
 
-  // Force refresh username when component mounts or when user changes
+  // Ensure profile exists and force refresh username when component mounts or when user changes
   useEffect(() => {
     if (user) {
-      refreshUsername();
+      // S'assurer qu'un profil existe pour l'utilisateur actuel
+      ensureUserProfile(user.id).then(() => {
+        refreshUsername();
+      });
     }
-  }, [user, refreshUsername]);
+  }, [user]);
 
   // Force rerender when username changes
   useEffect(() => {

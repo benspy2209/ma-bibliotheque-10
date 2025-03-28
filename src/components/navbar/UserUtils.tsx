@@ -2,9 +2,11 @@
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
+import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 
 export const useUserDisplay = (user: User | null) => {
   const [username, setUsername] = useState<string | null>(null);
+  const { ensureUserProfile } = useSupabaseAuth();
 
   // Fetch the username when the user changes
   useEffect(() => {
@@ -15,43 +17,49 @@ export const useUserDisplay = (user: User | null) => {
       }
 
       try {
+        // S'assurer qu'un profil existe d'abord
+        await ensureUserProfile(user.id);
+        
         const { data, error } = await supabase
           .from('profiles')
           .select('username')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
         
         if (error) {
           console.error('Error fetching username:', error);
           return;
         }
         
-        setUsername(data.username);
+        setUsername(data?.username || null);
       } catch (error) {
         console.error('Error in fetchUsername:', error);
       }
     };
 
     fetchUsername();
-  }, [user]);
+  }, [user, ensureUserProfile]);
 
   // Force fetch the username
   const refreshUsername = async () => {
     if (!user) return;
     
     try {
+      // S'assurer qu'un profil existe d'abord
+      await ensureUserProfile(user.id);
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('username')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
       
       if (error) {
         console.error('Error refreshing username:', error);
         return;
       }
       
-      setUsername(data.username);
+      setUsername(data?.username || null);
     } catch (error) {
       console.error('Error in refreshUsername:', error);
     }
