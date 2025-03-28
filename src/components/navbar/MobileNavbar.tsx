@@ -13,10 +13,11 @@ import { NavLinks } from "./NavLinks";
 import { UserMenu } from "./UserMenu";
 import { AuthButton } from "./AuthButton";
 import { ThemeToggle } from "./ThemeToggle";
+import { Theme } from "@/hooks/use-theme";
 
 interface MobileNavbarProps {
   user: User | null;
-  theme: string;
+  theme: Theme;
   toggleTheme: () => void;
   getUserDisplayName: () => string;
   getInitials: () => string;

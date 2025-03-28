@@ -6,10 +6,11 @@ import { LogIn } from "lucide-react";
 import { NavLinks } from "./NavLinks";
 import { UserMenu } from "./UserMenu";
 import { ThemeToggle } from "./ThemeToggle";
+import { Theme } from "@/hooks/use-theme";
 
 interface DesktopNavbarProps {
   user: User | null;
-  theme: string;
+  theme: Theme;
   toggleTheme: () => void;
   getUserDisplayName: () => string;
   getInitials: () => string;
