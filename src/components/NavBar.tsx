@@ -50,6 +50,13 @@ const NavBar = () => {
     const firstName = user.user_metadata?.first_name;
     if (firstName) return firstName;
     
+    // Vérifier également le nom complet et extraire le prénom
+    const fullName = user.user_metadata?.full_name;
+    if (fullName && typeof fullName === 'string') {
+      const firstNameFromFull = fullName.split(' ')[0];
+      if (firstNameFromFull) return firstNameFromFull;
+    }
+    
     // Sinon, utiliser l'email et extraire la partie avant @
     return user.email ? user.email.split('@')[0] : "Utilisateur";
   };
@@ -167,8 +174,8 @@ const NavBar = () => {
   );
 
   return (
-    <nav className="w-full border-b py-2 px-4 transition-colors duration-300">
-      <div className="max-w-6xl mx-auto flex flex-row items-center justify-between gap-2">
+    <nav className="w-full border-b py-2 px-3 transition-colors duration-300">
+      <div className="max-w-5xl mx-auto flex flex-row items-center justify-between gap-1">
         {isMobile ? (
           <>
             {/* Layout mobile amélioré: logo à gauche et menu hamburger à droite */}
@@ -240,15 +247,15 @@ const NavBar = () => {
         ) : (
           <>
             <div className="flex items-center">
-              <NavLink to="/" className="flex items-center navbar-logo-container mr-6">
+              <NavLink to="/" className="flex items-center navbar-logo-container mr-4">
                 <img 
                   src={theme === 'light' ? "/pulse.png" : "/pulse dark.png"}
                   alt="BiblioPulse Logo" 
-                  className="h-auto w-auto max-h-[28px]" 
+                  className="h-auto w-auto max-h-[24px]" 
                 />
               </NavLink>
               
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
                 <NavLinks />
               </div>
             </div>

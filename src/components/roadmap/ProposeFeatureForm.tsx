@@ -3,7 +3,6 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { FeatureStatus, RoadmapFeature, featureProposals } from "./RoadmapData";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,6 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "@/hooks/use-toast";
+import { featureProposals } from "./RoadmapData";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 
 const formSchema = z.object({
@@ -51,23 +51,28 @@ export function ProposeFeatureForm({ onSuccess }: ProposeFeatureFormProps) {
       return;
     }
 
-    // Create a proper RoadmapFeature object from the form values
-    const newFeatureProposal: RoadmapFeature = {
+    // Créer une date formatée pour l'affichage
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'long', 
+      year: 'numeric'
+    });
+
+    // Ajouter la proposition à la liste des propositions
+    featureProposals.push({
       name: values.name,
       description: values.description,
-      status: "planned" as FeatureStatus,
-      technical_details: values.technical_details || "",
+      status: "planned",
+      technical_details: values.technical_details || undefined,
       isProposal: true,
       proposedBy: user.email || "Utilisateur anonyme",
-      proposalDate: new Date().toISOString().split('T')[0]
-    };
+      proposalDate: formattedDate
+    });
 
-    // Add to proposals
-    featureProposals.push(newFeatureProposal);
-    
     toast({
-      title: "Proposition envoyée",
-      description: "Merci pour votre proposition ! Elle sera examinée par notre équipe.",
+      title: "Proposition soumise",
+      description: "Votre proposition de fonctionnalité a été enregistrée avec succès.",
     });
 
     // Reset form and call onSuccess callback
@@ -85,7 +90,7 @@ export function ProposeFeatureForm({ onSuccess }: ProposeFeatureFormProps) {
             <FormItem>
               <FormLabel>Nom de la fonctionnalité</FormLabel>
               <FormControl>
-                <Input placeholder="Exemples: Mode sombre, Import depuis Goodreads..." {...field} />
+                <Input placeholder="Ex: Mode sombre automatique" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -100,7 +105,7 @@ export function ProposeFeatureForm({ onSuccess }: ProposeFeatureFormProps) {
               <FormLabel>Description</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Décrivez la fonctionnalité que vous aimeriez voir ajoutée"
+                  placeholder="Décrivez brièvement votre proposition de fonctionnalité"
                   {...field}
                 />
               </FormControl>
@@ -117,7 +122,7 @@ export function ProposeFeatureForm({ onSuccess }: ProposeFeatureFormProps) {
               <FormLabel>Détails techniques (optionnel)</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Si vous avez des idées sur la façon dont cette fonctionnalité pourrait être implémentée, partagez-les ici"
+                  placeholder="Si vous avez des idées techniques sur l'implémentation, partagez-les ici"
                   {...field}
                 />
               </FormControl>
@@ -126,7 +131,7 @@ export function ProposeFeatureForm({ onSuccess }: ProposeFeatureFormProps) {
           )}
         />
 
-        <Button type="submit">Soumettre la proposition</Button>
+        <Button type="submit">Envoyer ma proposition</Button>
       </form>
     </Form>
   );
