@@ -45,47 +45,6 @@ img[alt="BiblioPulse Logo"] {
     align-items: center;
     justify-content: center; /* Center the logo in its container */
   }
-
-  /* Amélioration de l'agencement mobile pour le menu */
-  .mobile-drawer-content {
-    padding-top: 1.5rem;
-    padding-bottom: 2rem;
-  }
-
-  /* Style pour les sections du menu mobile */
-  .mobile-nav-section {
-    margin-bottom: 1.5rem;
-  }
-
-  .mobile-nav-section-title {
-    font-weight: 600;
-    margin-bottom: 0.75rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1rem;
-    color: var(--color-accent);
-  }
-
-  .mobile-nav-links {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    padding-left: 0.5rem;
-  }
-
-  .mobile-footer {
-    margin-top: auto;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  /* Amélioration du drawer pour le menu mobile */
-  [data-state="open"] > .mobile-drawer-content {
-    height: 100% !important;
-    display: flex;
-    flex-direction: column;
-  }
 }
 
 /* S'assurer que les textes sont bien lisibles en mode clair */

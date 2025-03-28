@@ -102,11 +102,11 @@ const Footer = () => {
         
         {/* Copyright et liens sociaux */}
         <div className="flex flex-col sm:flex-row justify-between items-center text-sm text-muted-foreground pt-2">
-          <div className="mb-3 sm:mb-0 text-center sm:text-left">
+          <div className="mb-3 sm:mb-0">
             © {currentYear} BiblioPulse, réalisé par <a href="https://www.beneloo.com/" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Beneloo.com</a>
           </div>
           
-          <div className="flex gap-6">
+          <div className="flex gap-4">
             <a 
               href="mailto:debruijneb@gmail.com"
               aria-label="Envoyer un email"
