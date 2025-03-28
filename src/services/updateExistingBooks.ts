@@ -2,10 +2,13 @@
 import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { loadBooks } from '@/services/supabaseBooks';
-import { getAmazonAffiliateUrl } from '@/lib/amazon-utils';
+import { getAmazonAffiliateUrl, isAmazonLinkValid } from '@/lib/amazon-utils';
 import { useToast } from '@/hooks/use-toast';
 
-// Cette fonction corrige les liens Amazon pour tous les livres dans la bibliothèque
+/**
+ * Cette fonction corrige les liens Amazon pour tous les livres dans la bibliothèque
+ * Elle sera exécutée automatiquement lors du chargement de la bibliothèque
+ */
 export async function updateAmazonLinksInLibrary() {
   try {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -15,7 +18,7 @@ export async function updateAmazonLinksInLibrary() {
       return { success: false, message: 'Vous devez être connecté pour effectuer cette action' };
     }
     
-    console.log('Updating Amazon links for all books...');
+    console.log('Vérification et mise à jour des liens Amazon pour tous les livres...');
     
     // Charger tous les livres de la bibliothèque
     const books = await loadBooks();
@@ -23,10 +26,25 @@ export async function updateAmazonLinksInLibrary() {
       return { success: true, message: 'Aucun livre à mettre à jour' };
     }
     
-    console.log(`Found ${books.length} books to update`);
+    console.log(`${books.length} livres trouvés, vérification des liens Amazon...`);
     
-    // Pour chaque livre, mettre à jour son lien Amazon
-    const updatedBooks = books.map(book => {
+    // Identifier les livres dont les liens Amazon sont incorrects
+    const booksToUpdate = books.filter(book => !isAmazonLinkValid(book.amazonUrl));
+    
+    if (booksToUpdate.length === 0) {
+      console.log('Tous les liens Amazon sont déjà corrects.');
+      return { 
+        success: true, 
+        message: 'Tous les liens Amazon sont déjà à jour',
+        updated: 0,
+        total: books.length
+      };
+    }
+    
+    console.log(`${booksToUpdate.length} livres nécessitent une mise à jour des liens Amazon`);
+    
+    // Mettre à jour uniquement les livres avec des liens incorrects
+    const updatedBooks = booksToUpdate.map(book => {
       // Générer le lien Amazon correct
       const amazonUrl = getAmazonAffiliateUrl(book);
       return { ...book, amazonUrl };
@@ -52,7 +70,7 @@ export async function updateAmazonLinksInLibrary() {
     const results = await Promise.all(updatePromises);
     const successCount = results.filter(Boolean).length;
     
-    console.log(`Successfully updated ${successCount} out of ${books.length} books`);
+    console.log(`${successCount} livres mis à jour avec des liens Amazon corrects`);
     
     return { 
       success: true, 
@@ -69,7 +87,10 @@ export async function updateAmazonLinksInLibrary() {
   }
 }
 
-// Hook pour déclencher la mise à jour des liens Amazon silencieusement
+/**
+ * Hook pour déclencher la mise à jour des liens Amazon silencieusement
+ * Cette fonction sera utilisée automatiquement lors du chargement de la bibliothèque
+ */
 export function useUpdateAmazonLinks() {
   const { toast } = useToast();
   

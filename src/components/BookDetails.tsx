@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Book, ReadingStatus } from '@/types/book';
 import { useToast } from '@/hooks/use-toast';
@@ -17,9 +18,9 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
     // Force une actualisation lorsque le composant est monté ou le livre change
     queryClient.invalidateQueries({ queryKey: ['books'] });
     
-    // S'assurer que le livre a un lien Amazon correct
+    // S'assurer que le livre a un lien Amazon correct à chaque ouverture
     if (book && book.id) {
-      // Mise à jour du lien Amazon
+      // Toujours regénérer un lien Amazon frais
       const amazonUrl = getAmazonAffiliateUrl(book);
       setCurrentBook(prev => ({
         ...prev,
@@ -68,7 +69,7 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
 
   const saveToLibrary = async (bookToSave: Book) => {
     try {
-      // Assurez-vous que le livre a un lien Amazon correct avant de le sauvegarder
+      // Toujours s'assurer que le livre a un lien Amazon correct avant de le sauvegarder
       const updatedBook = {
         ...bookToSave,
         amazonUrl: getAmazonAffiliateUrl(bookToSave)
