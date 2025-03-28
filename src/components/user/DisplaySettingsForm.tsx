@@ -76,47 +76,50 @@ export function DisplaySettingsForm() {
         toggleTheme(); // This will switch between light and dark
       }
       
-      // Mettre à jour le mode d'affichage de la bibliothèque
+      // Update library display mode
       if (viewMode !== selectedView) {
         toggleView();
       }
       
-      // Sauvegarder les préférences dans la base de données
-      // First ensure profile exists
-      const { data: existingProfile } = await supabase
+      // Save preferences to the database
+      // First check if profile exists
+      const { data: profileExists, error: checkError } = await supabase
         .from('profiles')
         .select('id')
         .eq('id', user.id)
-        .maybeSingle();
+        .single();
 
-      if (!existingProfile) {
-        // Create profile if it doesn't exist
-        const { error: insertError } = await supabase
+      if (checkError && checkError.code !== 'PGRST116') {
+        // If error is not 'no rows returned', it's a real error
+        console.error('Error checking profile:', checkError);
+        setErrorMessage("Une erreur est survenue lors de la vérification du profil.");
+        return;
+      }
+
+      let result;
+      
+      if (!profileExists) {
+        // Create new profile
+        result = await supabase
           .from('profiles')
           .insert({
             id: user.id,
             theme_preference: selectedTheme
           });
-
-        if (insertError) {
-          console.error('Error creating profile:', insertError);
-          setErrorMessage("Une erreur est survenue lors de la création du profil.");
-          return;
-        }
       } else {
         // Update existing profile
-        const { error } = await supabase
+        result = await supabase
           .from('profiles')
           .update({
             theme_preference: selectedTheme
           })
           .eq('id', user.id);
+      }
 
-        if (error) {
-          console.error('Error updating display settings:', error);
-          setErrorMessage("Une erreur est survenue lors de la mise à jour des paramètres d'affichage.");
-          return;
-        }
+      if (result.error) {
+        console.error('Error updating display settings:', result.error);
+        setErrorMessage("Une erreur est survenue lors de la mise à jour des paramètres d'affichage.");
+        return;
       }
 
       toast({
