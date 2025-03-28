@@ -1,12 +1,15 @@
 
 import { Book } from '@/types/book';
 import { BookGrid } from '@/components/search/BookGrid';
+import { BookList } from '@/components/search/BookList';
 import { BookDetails } from '@/components/BookDetails';
 import { useSelectedBook } from '@/hooks/use-selected-book';
 import { AddAllBooks } from '@/components/search/AddAllBooks';
 import { useToast } from '@/hooks/use-toast';
+import { useViewPreference } from '@/hooks/use-view-preference';
 import { useEffect } from 'react';
 import { Globe } from 'lucide-react';
+import { ViewToggle } from './ViewToggle';
 
 interface SearchResultsProps {
   books: Book[];
@@ -37,6 +40,7 @@ export function SearchResults({
 }: SearchResultsProps) {
   const { selectedBook, setSelectedBook, handleBookClick } = useSelectedBook(onUpdate);
   const { toast } = useToast();
+  const { viewMode, toggleView } = useViewPreference();
   
   useEffect(() => {
     if (books.length === 0 && searchQuery && !isLoading && !searchError) {
@@ -68,9 +72,12 @@ export function SearchResults({
       {books.length > 0 && searchQuery && (
         <div className="flex flex-col mb-4 space-y-2">
           <div className="flex justify-between items-center">
-            <div className="flex items-center text-sm">
-              <Globe className="h-4 w-4 mr-1 text-muted-foreground" />
-              <span className="text-muted-foreground">Résultats incluant livres et BD dans 7 langues</span>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center text-sm">
+                <Globe className="h-4 w-4 mr-1 text-muted-foreground" />
+                <span className="text-muted-foreground">Résultats incluant livres et BD dans 7 langues</span>
+              </div>
+              <ViewToggle viewMode={viewMode} onToggle={toggleView} />
             </div>
             <AddAllBooks 
               books={books} 
@@ -80,21 +87,39 @@ export function SearchResults({
         </div>
       )}
 
-      <BookGrid 
-        books={!searchQuery ? [] : books}
-        onBookClick={(book) => {
-          handleBookClick(book);
-          onBookClick(book);
-        }}
-        displayedBooks={displayedBooks}
-        totalBooks={totalBooks}
-        onLoadMore={onLoadMore}
-        onShowAll={onShowAll}
-        isLoading={isLoading}
-        searchQuery={searchQuery}
-        isShowingAll={isShowingAll}
-        searchError={searchError}
-      />
+      {viewMode === 'grid' ? (
+        <BookGrid 
+          books={!searchQuery ? [] : books}
+          onBookClick={(book) => {
+            handleBookClick(book);
+            onBookClick(book);
+          }}
+          displayedBooks={displayedBooks}
+          totalBooks={totalBooks}
+          onLoadMore={onLoadMore}
+          onShowAll={onShowAll}
+          isLoading={isLoading}
+          searchQuery={searchQuery}
+          isShowingAll={isShowingAll}
+          searchError={searchError}
+        />
+      ) : (
+        <BookList 
+          books={!searchQuery ? [] : books}
+          onBookClick={(book) => {
+            handleBookClick(book);
+            onBookClick(book);
+          }}
+          displayedBooks={displayedBooks}
+          totalBooks={totalBooks}
+          onLoadMore={onLoadMore}
+          onShowAll={onShowAll}
+          isLoading={isLoading}
+          searchQuery={searchQuery}
+          isShowingAll={isShowingAll}
+          searchError={searchError}
+        />
+      )}
 
       {isShowingAll && books.length > 0 && (
         <div className="mt-4 text-center bg-muted/30 py-2 rounded-md">
