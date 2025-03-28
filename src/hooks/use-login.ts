@@ -52,7 +52,7 @@ export function useLogin() {
     setSuggestedEmail(null);
     
     try {
-      console.log(`Tentative de connexion avec l'email: ${email} et mot de passe: ${password.length} caractères`);
+      console.log(`Tentative de connexion avec l'email: ${email}`);
       
       // Basic email validation
       if (!email.includes('@') || !email.includes('.')) {
@@ -74,19 +74,22 @@ export function useLogin() {
         console.log("Erreur de connexion:", error.message, "Code:", error.status);
         
         if (error.message === "Invalid login credentials") {
-          // Vérifiez si le compte existe sans donner d'informations sensibles
+          // Méthode améliorée pour vérifier l'existence du compte
           try {
-            const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+            // Tenter une inscription temporaire pour vérifier si l'utilisateur existe
+            const { error: checkError } = await supabase.auth.signUp({
               email,
-              password: `temporary-check-password-${Date.now()}`,
+              password: `temp-pwd-${Date.now()}`, // Mot de passe temporaire unique
               options: { emailRedirectTo: window.location.origin }
             });
             
-            if (signUpError && signUpError.message.includes('already')) {
-              console.log("Le compte existe bien, c'est donc un problème de mot de passe");
+            // Si l'erreur contient "User already registered", c'est que l'email existe
+            // donc c'est le mot de passe qui est incorrect
+            if (checkError && checkError.message.includes('already registered')) {
               setLoginError(`Le mot de passe est incorrect pour le compte ${email}. Veuillez réessayer ou utiliser "Mot de passe oublié" pour le réinitialiser.`);
             } else {
-              setLoginError(`Identifiants incorrects. Veuillez vérifier votre email et votre mot de passe.`);
+              // Si pas d'erreur "already registered", alors l'email n'existe pas
+              setLoginError(`Aucun compte n'existe avec l'adresse ${email}. Veuillez vérifier votre email ou créer un compte.`);
             }
           } catch (err) {
             console.error("Erreur lors de la vérification de l'existence du compte:", err);
