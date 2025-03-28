@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BookOpen, Heart, Compass, BarChart2 } from 'lucide-react';
+import { BookOpen, Heart, Compass, BarChart2, Hash, Languages, CalendarCheck2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -29,11 +29,11 @@ export const FeaturesSection = () => {
           <Card className="border-none shadow-md hover:shadow-lg transition-all">
             <CardContent className="pt-6">
               <div className="bg-primary/10 p-3 rounded-full w-fit mb-4">
-                <BookOpen className="h-6 w-6 text-primary" />
+                <Hash className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Organisez votre bibliothèque</h3>
+              <h3 className="text-xl font-semibold mb-2">Recherche avancée</h3>
               <p className="text-muted-foreground">
-                Classez vos livres par catégorie, statut de lecture et auteur pour retrouver facilement vos ouvrages préférés.
+                Trouvez vos livres avec précision grâce à la recherche par ISBN et filtrez par langue (7 langues disponibles).
               </p>
             </CardContent>
           </Card>
@@ -41,11 +41,11 @@ export const FeaturesSection = () => {
           <Card className="border-none shadow-md hover:shadow-lg transition-all">
             <CardContent className="pt-6">
               <div className="bg-primary/10 p-3 rounded-full w-fit mb-4">
-                <Heart className="h-6 w-6 text-primary" />
+                <CalendarCheck2 className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Suivez vos lectures</h3>
+              <h3 className="text-xl font-semibold mb-2">Suivi de lecture avancé</h3>
               <p className="text-muted-foreground">
-                Gardez une trace de vos lectures en cours, de vos livres préférés et de ceux que vous souhaitez découvrir.
+                Suivez vos jours consécutifs de lecture, définissez des objectifs personnalisés et visualisez votre temps de lecture.
               </p>
             </CardContent>
           </Card>
@@ -53,11 +53,11 @@ export const FeaturesSection = () => {
           <Card className="border-none shadow-md hover:shadow-lg transition-all">
             <CardContent className="pt-6">
               <div className="bg-primary/10 p-3 rounded-full w-fit mb-4">
-                <Compass className="h-6 w-6 text-primary" />
+                <BarChart2 className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Découvrez de nouvelles œuvres</h3>
+              <h3 className="text-xl font-semibold mb-2">Analyse détaillée</h3>
               <p className="text-muted-foreground">
-                Explorez notre vaste base de données pour trouver de nouveaux livres qui correspondent à vos goûts.
+                Visualisez la répartition de vos genres et découvrez vos auteurs favoris grâce à des graphiques interactifs.
               </p>
             </CardContent>
           </Card>
@@ -65,11 +65,11 @@ export const FeaturesSection = () => {
           <Card className="border-none shadow-md hover:shadow-lg transition-all">
             <CardContent className="pt-6">
               <div className="bg-primary/10 p-3 rounded-full w-fit mb-4">
-                <BarChart2 className="h-6 w-6 text-primary" />
+                <Languages className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Analysez vos statistiques</h3>
+              <h3 className="text-xl font-semibold mb-2">Outils pratiques</h3>
               <p className="text-muted-foreground">
-                Visualisez votre progression de lecture et obtenez des insights sur vos habitudes de lecture.
+                Importez/exportez votre bibliothèque et profitez de la traduction automatique des descriptions en français.
               </p>
             </CardContent>
           </Card>

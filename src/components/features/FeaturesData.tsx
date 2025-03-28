@@ -24,7 +24,12 @@ import {
   Target,
   Import,
   ExternalLink,
-  Sparkles
+  Sparkles,
+  Hash,
+  Languages,
+  LanguagesIcon,
+  Timer,
+  UsersRound
 } from "lucide-react";
 import { FeatureSection } from "./types";
 
@@ -73,14 +78,19 @@ export const featureSections: FeatureSection[] = [
         description: "Trouvez rapidement des livres par titre, auteur, ISBN ou mots-clés grâce à notre moteur de recherche intégré qui utilise l'API Google Books."
       },
       {
+        icon: <Hash className="h-6 w-6 text-[#CC4153]" />,
+        title: "Recherche par ISBN",
+        description: "Trouvez vos livres avec une précision absolue grâce à la recherche par ISBN, idéale pour les éditions spécifiques."
+      },
+      {
+        icon: <LanguagesIcon className="h-6 w-6 text-[#CC4153]" />,
+        title: "Filtrage par langue",
+        description: "Filtrez les résultats de recherche par langue (français, anglais, néerlandais, espagnol, allemand, portugais, italien)."
+      },
+      {
         icon: <ListFilter className="h-6 w-6 text-[#CC4153]" />,
         title: "Filtrage intelligent",
         description: "Filtrez votre collection par genre, statut de lecture, auteur, et plus encore pour trouver exactement ce que vous cherchez."
-      },
-      {
-        icon: <CalendarCheck2 className="h-6 w-6 text-[#CC4153]" />,
-        title: "Suivi de lecture",
-        description: "Suivez votre progression de lecture et enregistrez quand vous avez commencé et terminé chaque livre."
       },
       {
         icon: <FileText className="h-6 w-6 text-[#CC4153]" />,
@@ -105,19 +115,24 @@ export const featureSections: FeatureSection[] = [
         description: "Découvrez quels genres littéraires dominent votre bibliothèque grâce à des graphiques clairs et informatifs."
       },
       {
+        icon: <UsersRound className="h-6 w-6 text-[#CC4153]" />,
+        title: "Analyse des auteurs",
+        description: "Identifiez vos auteurs favoris et visualisez leur part dans votre collection avec des graphiques détaillés."
+      },
+      {
         icon: <Target className="h-6 w-6 text-[#CC4153]" />,
         title: "Objectifs de lecture",
         description: "Définissez des objectifs de lecture annuels ou mensuels et suivez votre progression pour rester motivé."
       },
       {
-        icon: <Clock className="h-6 w-6 text-[#CC4153]" />,
-        title: "Temps de lecture",
-        description: "Estimez votre temps de lecture total et par livre en fonction de votre vitesse de lecture personnalisée."
+        icon: <CalendarCheck2 className="h-6 w-6 text-[#CC4153]" />,
+        title: "Compteur de lecture",
+        description: "Suivez votre série de jours consécutifs de lecture (Reading Streak) pour maintenir une habitude régulière."
       },
       {
-        icon: <CircleCheck className="h-6 w-6 text-[#CC4153]" />,
-        title: "Séries de lectures",
-        description: "Suivez votre série de jours consécutifs de lecture pour maintenir une habitude régulière."
+        icon: <Timer className="h-6 w-6 text-[#CC4153]" />,
+        title: "Temps de lecture",
+        description: "Estimez votre temps de lecture total et par livre en fonction de votre vitesse de lecture personnalisée."
       }
     ]
   },
@@ -135,6 +150,11 @@ export const featureSections: FeatureSection[] = [
         icon: <ExternalLink className="h-6 w-6 text-[#CC4153]" />,
         title: "Exportation",
         description: "Exportez votre bibliothèque complète dans différents formats pour la sauvegarder ou l'utiliser dans d'autres applications."
+      },
+      {
+        icon: <LanguagesIcon className="h-6 w-6 text-[#CC4153]" />,
+        title: "Traduction automatique",
+        description: "Profitez de la traduction automatique des descriptions de livres en français pour une expérience de lecture optimale."
       },
       {
         icon: <Settings className="h-6 w-6 text-[#CC4153]" />,
