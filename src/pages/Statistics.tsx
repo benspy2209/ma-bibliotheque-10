@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Book } from '@/types/book';
 import { useReadingSpeed } from '@/hooks/use-reading-speed';
@@ -15,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, X } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Helmet } from 'react-helmet-async';
 
 import { StatsCalculator } from '@/components/statistics/StatsCalculator';
 import { StatsOverview } from '@/components/statistics/StatsOverview';
@@ -114,19 +114,22 @@ export default function Statistics() {
 
   return (
     <>
+      <Helmet>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      </Helmet>
       <div className="min-h-screen flex flex-col">
         <NavBar />
-        <div className="px-4 py-8 sm:px-6 lg:px-8 flex-grow">
-          <div className="max-w-7xl mx-auto space-y-8">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="px-3 sm:px-4 lg:px-6 py-6 sm:py-8 flex-grow overflow-x-hidden">
+          <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
               <div>
-                <h1 className="text-3xl font-bold">Statistiques de lecture</h1>
-                <p className="text-muted-foreground">
+                <h1 className="text-2xl sm:text-3xl font-bold">Statistiques de lecture</h1>
+                <p className="text-muted-foreground text-sm sm:text-base">
                   Analyse de vos habitudes de lecture
                 </p>
               </div>
               
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <YearFilter
                   years={availableYears}
                   selectedYear={selectedYear}
@@ -137,11 +140,11 @@ export default function Statistics() {
             </div>
             
             {selectedYear && (
-              <div className="bg-muted/30 border rounded-lg p-4 flex items-center justify-between">
+              <div className="bg-muted/30 border rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div className="flex items-center">
-                  <Calendar className="h-5 w-5 mr-2 text-primary" />
-                  <span className="font-medium">Filtré par année: {selectedYear}</span>
-                  <Badge className="ml-2 bg-primary text-primary-foreground">{completedBooks.length} livres</Badge>
+                  <Calendar className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-primary" />
+                  <span className="text-sm sm:text-base font-medium">Filtré par année: {selectedYear}</span>
+                  <Badge className="ml-2 bg-primary text-primary-foreground text-xs">{completedBooks.length} livres</Badge>
                 </div>
                 <Button 
                   variant="ghost" 
@@ -149,95 +152,99 @@ export default function Statistics() {
                   onClick={() => setSelectedYear(null)}
                   className="text-muted-foreground hover:text-foreground"
                 >
-                  <X className="h-4 w-4 mr-1" />
-                  Effacer le filtre
+                  <X className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                  <span className="text-xs sm:text-sm">Effacer le filtre</span>
                 </Button>
               </div>
             )}
 
-            {isAdmin && (
-              <AdminUsersStats />
-            )}
+            <div className="overflow-hidden">
+              {isAdmin && (
+                <AdminUsersStats />
+              )}
 
-            <StatsCalculator
-              completedBooks={completedBooks}
-              readingBooks={readingBooks}
-              toReadBooks={toReadBooks}
-              selectedYear={selectedYear}
-            >
-              {(stats) => (
-                <>
-                  <StatsOverview
-                    totalBooks={stats.totalBooks}
-                    totalPages={stats.totalPages}
-                    totalReadingDays={stats.totalReadingDays}
-                    readingBooks={stats.readingBooks}
-                    toReadBooks={stats.toReadBooks}
-                  />
+              <StatsCalculator
+                completedBooks={completedBooks}
+                readingBooks={readingBooks}
+                toReadBooks={toReadBooks}
+                selectedYear={selectedYear}
+              >
+                {(stats) => (
+                  <>
+                    <StatsOverview
+                      totalBooks={stats.totalBooks}
+                      totalPages={stats.totalPages}
+                      totalReadingDays={stats.totalReadingDays}
+                      readingBooks={stats.readingBooks}
+                      toReadBooks={stats.toReadBooks}
+                    />
 
-                  <Tabs defaultValue="overview" className="w-full">
-                    <TabsList className={`mb-4 ${isMobile ? 'flex-wrap h-auto py-2' : ''}`}>
-                      <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
-                      <TabsTrigger value="monthly">Données mensuelles</TabsTrigger>
-                      <TabsTrigger value="authors">Auteurs & Genres</TabsTrigger>
-                      <TabsTrigger value="reading-time">Temps de lecture</TabsTrigger>
-                    </TabsList>
+                    <Tabs defaultValue="overview" className="w-full">
+                      <div className="overflow-x-auto pb-1">
+                        <TabsList className={`mb-4 ${isMobile ? 'flex-wrap h-auto py-2 w-max min-w-full' : ''}`}>
+                          <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
+                          <TabsTrigger value="monthly">Données mensuelles</TabsTrigger>
+                          <TabsTrigger value="authors">Auteurs & Genres</TabsTrigger>
+                          <TabsTrigger value="reading-time">Temps de lecture</TabsTrigger>
+                        </TabsList>
+                      </div>
 
-                    <TabsContent value="overview" className="space-y-4">
-                      <div className="grid gap-4 md:grid-cols-3">
-                        <AverageStats
-                          avgPagesPerBook={stats.avgPagesPerBook}
-                          readingSpeed={stats.readingSpeed}
-                          avgReadingTime={stats.avgReadingTime}
+                      <TabsContent value="overview" className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-3">
+                          <AverageStats
+                            avgPagesPerBook={stats.avgPagesPerBook}
+                            readingSpeed={stats.readingSpeed}
+                            avgReadingTime={stats.avgReadingTime}
+                          />
+                          
+                          <GoalsAndStreak
+                            yearlyGoal={stats.yearlyGoal}
+                            monthlyGoal={stats.monthlyGoal}
+                            booksThisYear={stats.booksThisYear}
+                            booksThisMonth={stats.booksThisMonth}
+                            yearlyProgressPercentage={stats.yearlyProgressPercentage}
+                            monthlyProgressPercentage={stats.monthlyProgressPercentage}
+                          />
+                          
+                          <ReadingTimeStats
+                            totalReadingTimeHours={stats.totalReadingTimeHours}
+                            readingSpeed={stats.userReadingSpeed}
+                          />
+                        </div>
+                      </TabsContent>
+
+                      <TabsContent value="monthly" className="space-y-6">
+                        <MonthlyStats monthlyData={stats.monthlyData} />
+                      </TabsContent>
+
+                      <TabsContent value="authors" className="space-y-4">
+                        <AuthorsGenresStats
+                          topAuthors={stats.topAuthors}
+                          topGenres={stats.topGenres}
                         />
-                        
-                        <GoalsAndStreak
-                          yearlyGoal={stats.yearlyGoal}
-                          monthlyGoal={stats.monthlyGoal}
-                          booksThisYear={stats.booksThisYear}
-                          booksThisMonth={stats.booksThisMonth}
-                          yearlyProgressPercentage={stats.yearlyProgressPercentage}
-                          monthlyProgressPercentage={stats.monthlyProgressPercentage}
+                      </TabsContent>
+
+                      <TabsContent value="reading-time" className="space-y-4">
+                        <ReadingTimeDistribution
+                          readingTimeDistribution={stats.readingTimeDistribution}
+                          hasReadingTimeData={stats.hasReadingTimeData}
+                          completedBooks={completedBooks}
                         />
-                        
-                        <ReadingTimeStats
-                          totalReadingTimeHours={stats.totalReadingTimeHours}
-                          readingSpeed={stats.userReadingSpeed}
+                      </TabsContent>
+                    </Tabs>
+                    
+                    {selectedYear && (
+                      <div className="mt-8">
+                        <YearlyBooksList 
+                          books={allCompletedBooks} 
+                          selectedYear={selectedYear} 
                         />
                       </div>
-                    </TabsContent>
-
-                    <TabsContent value="monthly" className="space-y-6">
-                      <MonthlyStats monthlyData={stats.monthlyData} />
-                    </TabsContent>
-
-                    <TabsContent value="authors" className="space-y-4">
-                      <AuthorsGenresStats
-                        topAuthors={stats.topAuthors}
-                        topGenres={stats.topGenres}
-                      />
-                    </TabsContent>
-
-                    <TabsContent value="reading-time" className="space-y-4">
-                      <ReadingTimeDistribution
-                        readingTimeDistribution={stats.readingTimeDistribution}
-                        hasReadingTimeData={stats.hasReadingTimeData}
-                        completedBooks={completedBooks}
-                      />
-                    </TabsContent>
-                  </Tabs>
-                  
-                  {selectedYear && (
-                    <div className="mt-8">
-                      <YearlyBooksList 
-                        books={allCompletedBooks} 
-                        selectedYear={selectedYear} 
-                      />
-                    </div>
-                  )}
-                </>
-              )}
-            </StatsCalculator>
+                    )}
+                  </>
+                )}
+              </StatsCalculator>
+            </div>
           </div>
         </div>
         <Footer />

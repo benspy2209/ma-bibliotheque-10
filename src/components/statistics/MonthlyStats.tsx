@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type MonthData = {
   name: string;
@@ -31,26 +32,34 @@ interface MonthlyStatsProps {
 }
 
 export function MonthlyStats({ monthlyData }: MonthlyStatsProps) {
+  const isMobile = useIsMobile();
+  
   return (
     <>
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="col-span-2 md:col-span-1">
           <CardHeader>
-            <CardTitle>Livres lus par mois</CardTitle>
+            <CardTitle className={`${isMobile ? 'text-base' : 'text-lg'}`}>Livres lus par mois</CardTitle>
           </CardHeader>
-          <CardContent className="h-[300px]">
+          <CardContent className="h-[240px] sm:h-[300px] overflow-hidden">
             <ChartContainer config={{ books: { color: "#8884d8", label: "Livres lus" }}}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlyData}>
+              <ResponsiveContainer width="99%" height="100%">
+                <BarChart data={monthlyData} margin={{ top: 5, right: 5, left: isMobile ? -25 : 0, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
                     dataKey="name"
-                    tick={{ fontSize: 12 }}
-                    interval={0}
+                    tick={{ fontSize: isMobile ? 10 : 12 }}
+                    interval={isMobile ? 1 : 0}
                     angle={-45}
                     textAnchor="end"
+                    height={50}
+                    scale="point"
+                    padding={{ left: 10, right: 10 }}
                   />
-                  <YAxis />
+                  <YAxis 
+                    width={isMobile ? 25 : 40}
+                    tick={{ fontSize: isMobile ? 10 : 12 }}
+                  />
                   <ChartTooltip 
                     content={<ChartTooltipContent />}
                   />
@@ -59,6 +68,7 @@ export function MonthlyStats({ monthlyData }: MonthlyStatsProps) {
                     name="Livres"
                     fill="#8884d8"
                     radius={[4, 4, 0, 0]}
+                    maxBarSize={isMobile ? 15 : 25}
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -68,21 +78,27 @@ export function MonthlyStats({ monthlyData }: MonthlyStatsProps) {
 
         <Card className="col-span-2 md:col-span-1">
           <CardHeader>
-            <CardTitle>Pages lues par mois</CardTitle>
+            <CardTitle className={`${isMobile ? 'text-base' : 'text-lg'}`}>Pages lues par mois</CardTitle>
           </CardHeader>
-          <CardContent className="h-[300px]">
+          <CardContent className="h-[240px] sm:h-[300px] overflow-hidden">
             <ChartContainer config={{ pages: { color: "#82ca9d", label: "Pages lues" }}}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlyData}>
+              <ResponsiveContainer width="99%" height="100%">
+                <BarChart data={monthlyData} margin={{ top: 5, right: 5, left: isMobile ? -25 : 0, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
                     dataKey="name"
-                    tick={{ fontSize: 12 }}
-                    interval={0}
+                    tick={{ fontSize: isMobile ? 10 : 12 }}
+                    interval={isMobile ? 1 : 0}
                     angle={-45}
                     textAnchor="end"
+                    height={50}
+                    scale="point"
+                    padding={{ left: 10, right: 10 }}
                   />
-                  <YAxis />
+                  <YAxis 
+                    width={isMobile ? 25 : 40}
+                    tick={{ fontSize: isMobile ? 10 : 12 }}
+                  />
                   <ChartTooltip
                     content={<ChartTooltipContent />}
                   />
@@ -91,6 +107,7 @@ export function MonthlyStats({ monthlyData }: MonthlyStatsProps) {
                     name="Pages"
                     fill="#82ca9d"
                     radius={[4, 4, 0, 0]}
+                    maxBarSize={isMobile ? 15 : 25}
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -101,31 +118,33 @@ export function MonthlyStats({ monthlyData }: MonthlyStatsProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Détails mensuels</CardTitle>
+          <CardTitle className={`${isMobile ? 'text-base' : 'text-lg'}`}>Détails mensuels</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Mois</TableHead>
-                <TableHead className="text-right">Livres</TableHead>
-                <TableHead className="text-right">Pages</TableHead>
-                <TableHead className="text-right">Pages/Livre</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {monthlyData.map((month) => (
-                <TableRow key={month.name}>
-                  <TableCell>{month.name}</TableCell>
-                  <TableCell className="text-right">{month.books}</TableCell>
-                  <TableCell className="text-right">{month.pages}</TableCell>
-                  <TableCell className="text-right">
-                    {month.books > 0 ? Math.round(month.pages / month.books) : '-'}
-                  </TableCell>
+        <CardContent className="overflow-x-auto">
+          <div className="min-w-[500px]">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Mois</TableHead>
+                  <TableHead className="text-right">Livres</TableHead>
+                  <TableHead className="text-right">Pages</TableHead>
+                  <TableHead className="text-right">Pages/Livre</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {monthlyData.map((month) => (
+                  <TableRow key={month.name}>
+                    <TableCell>{month.name}</TableCell>
+                    <TableCell className="text-right">{month.books}</TableCell>
+                    <TableCell className="text-right">{month.pages}</TableCell>
+                    <TableCell className="text-right">
+                      {month.books > 0 ? Math.round(month.pages / month.books) : '-'}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </>
