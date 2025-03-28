@@ -9,11 +9,11 @@ interface FooterNavLinksProps {
 const FooterNavLinks = ({ className = "" }: FooterNavLinksProps) => {
   return (
     <div className={className}>
-      <h4 className="font-medium text-base mb-3 flex items-center">
+      <h4 className="font-medium text-base mb-3 flex items-center justify-center">
         <BookOpen className="h-4 w-4 mr-2 text-[#e4364a]" />
         Navigation
       </h4>
-      <ul className="space-y-2">
+      <ul className="space-y-2 text-center">
         <li>
           <Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">
             Accueil

@@ -19,18 +19,18 @@ const MobileFooter = () => {
         </div>
       </div>
       
-      {/* Navigation */}
-      <div className="grid grid-cols-2 gap-8 w-full mb-8">
-        <FooterNavLinks />
-        <FooterInfoLinks />
+      {/* Navigation et informations en dessous, centrés */}
+      <div className="grid grid-cols-2 gap-8 w-full mb-8 justify-items-center">
+        <FooterNavLinks className="flex flex-col items-center" />
+        <FooterInfoLinks className="flex flex-col items-center" />
       </div>
       
       {/* Séparateur */}
       <div className="border-t border-muted/40 my-4 w-full"></div>
       
       {/* Copyright et liens sociaux */}
-      <div className="flex flex-col sm:flex-row justify-between items-center text-sm text-muted-foreground pt-2 w-full">
-        <FooterCopyright className="mb-3 sm:mb-0" />
+      <div className="flex flex-col items-center gap-4 text-sm text-muted-foreground pt-2 w-full">
+        <FooterCopyright className="text-center" />
         <FooterSocialLinks />
       </div>
     </div>

@@ -45,56 +45,61 @@ export const MobileNavbar = ({
         </NavLink>
       </div>
       
-      <div className="flex items-center gap-3">
-        {user && (
-          <UserMenu 
-            user={user}
-            signOut={signOut}
-            getUserDisplayName={getUserDisplayName}
-            getInitials={getInitials}
-          />
-        )}
-        
-        <Drawer>
-          <DrawerTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Menu className="h-6 w-6" />
-              <span className="sr-only">Menu</span>
-            </Button>
-          </DrawerTrigger>
-          <DrawerContent className="px-4 py-6">
-            <div className="flex flex-col gap-6">
-              {/* Message de bienvenue en haut du drawer pour les utilisateurs connectés */}
-              {user && (
-                <div className="mb-2 px-2">
-                  <p className="text-sm text-muted-foreground">Bonjour, <span className="font-bold text-primary">{getUserDisplayName()}</span></p>
-                </div>
-              )}
-            
-              {/* Bouton Connexion en haut du drawer */}
-              <div className="mb-4 px-2">
-                <AuthButton user={user} signOut={signOut} handleSignIn={handleSignIn} />
-              </div>
-              
-              <div className="border-t pt-4"></div>
-              
-              {/* Navigation links */}
-              <div className="flex flex-col gap-4">
-                <NavLinks />
-              </div>
-              
-              {/* Thème et fermeture */}
-              <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-                
-                <DrawerClose asChild>
-                  <Button variant="outline" size="sm">Fermer</Button>
-                </DrawerClose>
-              </div>
+      <Drawer>
+        <DrawerTrigger asChild>
+          <Button variant="ghost" size="icon" className="relative z-50">
+            <Menu className="h-6 w-6" />
+            <span className="sr-only">Menu</span>
+          </Button>
+        </DrawerTrigger>
+        <DrawerContent className="px-4 py-6 max-h-[90vh] overflow-y-auto">
+          <div className="flex flex-col gap-6">
+            {/* Logo en premier dans le drawer */}
+            <div className="flex justify-center mb-4">
+              <img 
+                src={theme === 'light' ? "/pulse.png" : "/pulse dark.png"}
+                alt="BiblioPulse Logo" 
+                className="h-auto max-h-[60px] w-auto" 
+              />
             </div>
-          </DrawerContent>
-        </Drawer>
-      </div>
+            
+            <div className="text-center mb-6">
+              <h3 className="text-lg font-medium">BiblioPulse</h3>
+              <p className="text-sm text-muted-foreground">
+                Votre compagnon de lecture personnel pour organiser, suivre et découvrir vos livres.
+              </p>
+            </div>
+            
+            {/* Message de bienvenue en haut du drawer pour les utilisateurs connectés */}
+            {user && (
+              <div className="mb-2 px-2">
+                <p className="text-sm text-muted-foreground">Bonjour, <span className="font-bold text-primary">{getUserDisplayName()}</span></p>
+              </div>
+            )}
+          
+            {/* Bouton Connexion */}
+            <div className="mb-4 px-2">
+              <AuthButton user={user} signOut={signOut} handleSignIn={handleSignIn} />
+            </div>
+            
+            <div className="border-t pt-4"></div>
+            
+            {/* Navigation links */}
+            <div className="flex flex-col gap-4">
+              <NavLinks />
+            </div>
+            
+            {/* Thème et fermeture */}
+            <div className="flex items-center justify-between mt-4 pt-4 border-t">
+              <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+              
+              <DrawerClose asChild>
+                <Button variant="outline" size="sm">Fermer</Button>
+              </DrawerClose>
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 };
