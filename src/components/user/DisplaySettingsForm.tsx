@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AlertCircle, Sun, Moon, LayoutGrid, List } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useTheme } from "@/hooks/use-theme";
+import { useTheme, Theme } from "@/hooks/use-theme";
 import { useViewPreference } from "@/hooks/use-view-preference";
 
 export function DisplaySettingsForm() {
@@ -17,7 +17,7 @@ export function DisplaySettingsForm() {
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
   const { viewMode, toggleView } = useViewPreference();
-  const [selectedTheme, setSelectedTheme] = useState(theme);
+  const [selectedTheme, setSelectedTheme] = useState<Theme>(theme);
   const [selectedView, setSelectedView] = useState(viewMode);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,7 +46,10 @@ export function DisplaySettingsForm() {
       }
 
       if (data && data.theme_preference) {
-        setSelectedTheme(data.theme_preference as "dark" | "light" | "system");
+        const themeValue = data.theme_preference === 'light' || data.theme_preference === 'dark' 
+          ? data.theme_preference as Theme
+          : theme;
+        setSelectedTheme(themeValue);
       }
     } catch (error) {
       console.error('Error in fetchDisplaySettings:', error);
@@ -119,8 +122,8 @@ export function DisplaySettingsForm() {
             <Label>Thème</Label>
             <RadioGroup 
               value={selectedTheme} 
-              onValueChange={(value) => setSelectedTheme(value as "dark" | "light" | "system")}
-              className="grid grid-cols-3 gap-4"
+              onValueChange={(value) => setSelectedTheme(value as Theme)}
+              className="grid grid-cols-2 gap-4"
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="light" id="light" />
@@ -135,10 +138,6 @@ export function DisplaySettingsForm() {
                   <Moon className="h-4 w-4 mr-2" />
                   Sombre
                 </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="system" id="system" />
-                <Label htmlFor="system" className="cursor-pointer">Système</Label>
               </div>
             </RadioGroup>
           </div>

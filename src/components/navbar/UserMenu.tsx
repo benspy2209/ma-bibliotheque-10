@@ -9,7 +9,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator
 } from "../ui/dropdown-menu";
-import { LogOut, Settings, User as UserIcon } from "lucide-react";
+import { LogOut, Settings, UserCircle } from "lucide-react";
 import { User } from "@supabase/supabase-js";
 import { Link } from "react-router-dom";
 
@@ -22,27 +22,42 @@ interface UserMenuProps {
 
 export const UserMenu = ({ user, signOut, getUserDisplayName, getInitials }: UserMenuProps) => {
   const displayName = getUserDisplayName();
+  const initials = getInitials();
   
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-7 w-7 border border-primary/20">
-            <AvatarFallback className="bg-primary/10 text-primary">
-              {getInitials()}
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
+          <Avatar className="h-8 w-8 border-2 border-primary/20 transition-colors">
+            <AvatarFallback className="bg-primary text-primary-foreground text-sm font-bold">
+              {initials}
             </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 z-50">
-        <DropdownMenuLabel>
-          Connecté en tant que <span className="font-bold">{displayName}</span>
-        </DropdownMenuLabel>
+      <DropdownMenuContent align="end" className="w-64 z-50 mt-1">
+        <div className="flex items-center gap-3 p-3">
+          <Avatar className="h-10 w-10 border-2 border-primary/20">
+            <AvatarFallback className="bg-primary text-primary-foreground font-bold">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+          <div className="space-y-0.5">
+            <p className="text-sm font-medium">{displayName}</p>
+            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+          </div>
+        </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link to="/profile/settings" className="w-full cursor-pointer">
+          <Link to="/profile/settings" className="cursor-pointer flex items-center">
+            <UserCircle className="mr-2 h-4 w-4" />
+            <span>Mon profil</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/profile/settings" className="cursor-pointer flex items-center">
             <Settings className="mr-2 h-4 w-4" />
-            <span>Paramètres du profil</span>
+            <span>Paramètres</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

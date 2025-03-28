@@ -50,11 +50,11 @@ export const DesktopNavbar = ({
         </div>
         
         {/* Actions utilisateur à droite */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {user ? (
-            <div className="flex items-center gap-2">
-              <span className="text-xs mr-1 hidden lg:inline-block">
-                Bonjour, <span className="font-medium text-primary">{getUserDisplayName()}</span>
+            <div className="flex items-center gap-3 bg-primary/10 rounded-full pl-3 pr-1 py-1 transition-colors">
+              <span className="text-sm font-medium hidden lg:inline-block">
+                Bonjour, <span className="text-primary">{getUserDisplayName()}</span>
               </span>
               <UserMenu 
                 user={user}

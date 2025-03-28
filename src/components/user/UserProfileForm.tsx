@@ -63,17 +63,47 @@ export function UserProfileForm() {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
+      // Vérifier d'abord si le profil existe
+      const { data: existingProfile, error: checkError } = await supabase
         .from('profiles')
-        .update({
-          full_name: fullName,
-          bio,
-          location,
-        })
-        .eq('id', user.id);
+        .select('id')
+        .eq('id', user.id)
+        .single();
+        
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('Error checking profile:', checkError);
+        setErrorMessage("Une erreur est survenue lors de la vérification du profil.");
+        return;
+      }
+      
+      let updateError;
+      
+      // Si le profil n'existe pas, on l'insère
+      if (!existingProfile) {
+        const { error } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            full_name: fullName,
+            bio,
+            location,
+          });
+        updateError = error;
+      } else {
+        // Sinon on le met à jour
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            full_name: fullName,
+            bio,
+            location,
+          })
+          .eq('id', user.id);
+        updateError = error;
+      }
 
-      if (error) {
-        console.error('Error updating profile:', error);
+      if (updateError) {
+        console.error('Error updating profile:', updateError);
         setErrorMessage("Une erreur est survenue lors de la mise à jour du profil.");
         return;
       }
