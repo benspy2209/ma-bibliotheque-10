@@ -40,9 +40,10 @@ const Roadmap = () => {
           name="description"
           content="Découvrez notre roadmap technique et les fonctionnalités à venir sur BiblioPulse"
         />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
       </Helmet>
       <NavBar />
-      <main className="container max-w-5xl mx-auto px-4 py-10">
+      <main className="container mx-auto px-3 md:px-4 py-6 md:py-10 max-w-5xl">
         <RoadmapHeader />
         <FeatureProposalsList />
         <FeatureTimeline features={sortedFeatures} />

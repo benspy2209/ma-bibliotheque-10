@@ -13,6 +13,7 @@ import { BookHeader } from './BookHeader';
 import { BookForm } from './BookForm';
 import { BookActions } from './BookActions';
 import { DeleteButton } from './DeleteButton';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface BookDetailsDialogProps {
   book: Book;
@@ -43,6 +44,7 @@ export function BookDetailsDialog({
 }: BookDetailsDialogProps) {
   const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const handleSave = async () => {
     await onSaveToLibrary(book);
@@ -52,11 +54,11 @@ export function BookDetailsDialog({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="max-w-2xl max-h-[80vh] overflow-y-auto" 
+        className={`${isMobile ? 'w-[95vw] p-3' : 'max-w-2xl p-6'} max-h-[90vh] overflow-y-auto`}
         aria-describedby="book-details-description"
       >
         <DialogHeader className="pb-2">
-          <DialogTitle className="text-xl">Détails du livre</DialogTitle>
+          <DialogTitle className={`${isMobile ? 'text-lg' : 'text-xl'}`}>Détails du livre</DialogTitle>
           <DialogDescription id="book-details-description" className="sr-only">
             Informations détaillées sur le livre "{book.title}"
           </DialogDescription>
