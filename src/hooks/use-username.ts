@@ -58,7 +58,7 @@ export function useUsername() {
     try {
       setIsLoading(true);
       
-      // Check if user is admin first
+      // Check if user is admin first - admins can always change username
       const { data: userData } = await supabase.auth.getUser();
       if (userData?.user?.email === 'debruijneb@gmail.com') {
         setIsAdmin(true);
@@ -67,25 +67,37 @@ export function useUsername() {
         return;
       }
       
-      // For non-admin users, check the normal restrictions via the database function
+      // For non-admin users, check their last username change directly in the profiles table
+      // This avoids calling RPC functions that might have permission issues
       try {
         const { data, error } = await supabase
-          .rpc('can_change_username', { user_id: user.id });
+          .from('profiles')
+          .select('last_username_change')
+          .eq('id', user.id)
+          .single();
           
         if (error) {
-          console.error('Error checking username change ability:', error);
+          console.error('Error checking username change date:', error);
+          // En cas d'erreur, autoriser quand même mais log l'erreur
+          setCanChangeUsername(true);
           return;
         }
         
-        // Cast the data to our expected type with type assertion
-        const response = data as unknown as UsernameChangeResponse;
-        setCanChangeUsername(response.can_change);
-        
-        if (response.next_allowed) {
-          setNextChangeDate(new Date(response.next_allowed));
+        if (!data.last_username_change) {
+          // Si jamais changé, autoriser
+          setCanChangeUsername(true);
+          return;
         }
+        
+        const lastChange = new Date(data.last_username_change);
+        const nextAllowed = new Date(lastChange);
+        nextAllowed.setMonth(nextAllowed.getMonth() + 1);
+        
+        setNextChangeDate(nextAllowed);
+        setCanChangeUsername(nextAllowed <= new Date());
+        
       } catch (error) {
-        console.error('Error calling can_change_username RPC:', error);
+        console.error('Error checking username change date:', error);
         // En cas d'erreur, autoriser quand même mais log l'erreur
         setCanChangeUsername(true);
       }
@@ -138,6 +150,15 @@ export function useUsername() {
       // Si c'est un admin, permettre la mise à jour sans vérification supplémentaire
       const { data: userData } = await supabase.auth.getUser();
       const isAdminUser = userData?.user?.email === 'debruijneb@gmail.com';
+      
+      // Vérifie si l'utilisateur peut changer son nom d'utilisateur
+      if (!isAdminUser && !canChangeUsername) {
+        toast({
+          variant: "destructive",
+          description: "Vous ne pouvez modifier votre nom d'utilisateur qu'une fois par mois."
+        });
+        return false;
+      }
       
       // Update the username
       const { error } = await supabase
