@@ -26,7 +26,6 @@ export const BookSections = ({
   toBuyFilter, 
   onToBuyFilterChange 
 }: BookSectionsProps) => {
-  const [purchaseFilter, setPurchaseFilter] = useState<'all' | 'purchased' | 'not-purchased'>('all');
   const isMobile = useIsMobile();
   
   const completedBooks = books.filter(book => book.status === 'completed');
@@ -35,12 +34,6 @@ export const BookSections = ({
   // Make sure to only show unpurchased books in the toBuyBooks list
   const toBuyBooks = books.filter(book => book.purchased === false);
   const purchasedBooks = books.filter(book => book.purchased === true);
-
-  const filteredToReadBooks = toReadBooks.filter(book => {
-    if (purchaseFilter === 'purchased') return book.purchased;
-    if (purchaseFilter === 'not-purchased') return !book.purchased;
-    return true;
-  });
 
   const BookComponent = viewMode === 'grid' ? BookGrid : BookList;
 
@@ -132,24 +125,12 @@ export const BookSections = ({
       </TabsContent>
 
       <TabsContent value="to-read">
-        <div className="mb-6">
-          <Tabs defaultValue="all" className="w-fit" onValueChange={(value) => setPurchaseFilter(value as 'all' | 'purchased' | 'not-purchased')}>
-            <TabsList className={isMobile ? 'flex-col w-full' : ''}>
-              <TabsTrigger value="all">Tous</TabsTrigger>
-              <TabsTrigger value="purchased">Achetés</TabsTrigger>
-              <TabsTrigger value="not-purchased">À acheter</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-        
-        {filteredToReadBooks.length === 0 ? (
+        {toReadBooks.length === 0 ? (
           <p className="text-center text-gray-600 mt-8">
-            {purchaseFilter !== 'all' 
-              ? `Aucun livre ${purchaseFilter === 'purchased' ? 'acheté' : 'à acheter'} dans votre liste de lecture.`
-              : "Aucun livre dans votre liste de lecture."}
+            Aucun livre dans votre liste de lecture.
           </p>
         ) : (
-          <BookComponent books={filteredToReadBooks} onBookClick={onBookClick} />
+          <BookComponent books={toReadBooks} onBookClick={onBookClick} />
         )}
       </TabsContent>
 
