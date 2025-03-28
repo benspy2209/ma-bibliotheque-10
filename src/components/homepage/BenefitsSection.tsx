@@ -18,7 +18,7 @@ export const BenefitsSection = () => {
         <div className="flex flex-col lg:flex-row items-center gap-12">
           <div className="lg:w-1/2 order-2 lg:order-1">
             <img 
-              src="/bibliopulse-accueil-2.webp" 
+              src="/bibliopulse-2.webp" 
               alt="Tableau de statistiques et analyse de lecture" 
               className="rounded-lg shadow-xl w-full"
               onError={(e) => {
