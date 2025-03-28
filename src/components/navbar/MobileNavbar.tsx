@@ -13,6 +13,7 @@ import { NavLinks } from "./NavLinks";
 import { UserMenu } from "./UserMenu";
 import { AuthButton } from "./AuthButton";
 import { ThemeToggle } from "./ThemeToggle";
+import { useState } from "react";
 
 interface MobileNavbarProps {
   user: User | null;
@@ -33,6 +34,13 @@ export const MobileNavbar = ({
   signOut,
   handleSignIn
 }: MobileNavbarProps) => {
+  const [open, setOpen] = useState(false);
+  
+  // Function to close drawer when a link is clicked
+  const handleLinkClick = () => {
+    setOpen(false);
+  };
+
   return (
     <div className="flex justify-between items-center w-full">
       <div className="navbar-logo-container">
@@ -46,14 +54,14 @@ export const MobileNavbar = ({
       </div>
       
       <div className="flex items-center gap-2">
-        <Drawer>
+        <Drawer open={open} onOpenChange={setOpen}>
           <DrawerTrigger asChild>
             <Button variant="ghost" size="icon" className="relative z-50">
               <Menu className="h-6 w-6" />
               <span className="sr-only">Menu</span>
             </Button>
           </DrawerTrigger>
-          <DrawerContent className="px-4 py-6">
+          <DrawerContent className="px-4 py-6 max-h-[85vh] overflow-y-auto">
             <div className="flex flex-col gap-6">
               {/* Message de bienvenue en haut du drawer pour les utilisateurs connectés */}
               {user && (
@@ -70,7 +78,7 @@ export const MobileNavbar = ({
               <div className="border-t pt-4"></div>
               
               {/* Navigation links */}
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4" onClick={handleLinkClick}>
                 <NavLinks />
               </div>
               

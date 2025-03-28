@@ -7,7 +7,7 @@ const RoadmapFooter = () => {
     <>
       <Separator className="my-6 md:my-12" />
 
-      <section className="max-w-3xl mx-auto px-4 w-full">
+      <section className="max-w-3xl mx-auto px-6 w-full">
         <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 break-words">À propos de notre roadmap</h2>
         <div className="space-y-3 md:space-y-4 text-muted-foreground text-sm md:text-base">
           <p className="break-words">

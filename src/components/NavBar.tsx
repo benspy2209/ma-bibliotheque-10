@@ -6,12 +6,19 @@ import { LoginDialog } from "./auth/LoginDialog";
 import { MobileNavbar } from "./navbar/MobileNavbar";
 import { DesktopNavbar } from "./navbar/DesktopNavbar";
 import { useUserDisplay } from "./navbar/UserUtils";
+import { useEffect, useState } from "react";
 
 const NavBar = () => {
   const { theme, toggleTheme } = useTheme();
   const { signIn, signOut, user, showLoginDialog, setShowLoginDialog, setAuthMode } = useSupabaseAuth();
-  const isMobile = useIsMobile();
+  const isInitialMobile = useIsMobile();
+  const [isMobile, setIsMobile] = useState(isInitialMobile);
   const { getUserDisplayName, getInitials } = useUserDisplay(user);
+
+  // Use effect to track mobile state changes to avoid hydration issues
+  useEffect(() => {
+    setIsMobile(isInitialMobile);
+  }, [isInitialMobile]);
 
   // Fonction wrapper pour gérer le clic du bouton de connexion
   const handleSignIn = () => {

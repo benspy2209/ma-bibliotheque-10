@@ -12,7 +12,7 @@ const RoadmapHeader = () => {
         </p>
       </header>
 
-      <div className="flex flex-wrap justify-center items-center gap-3 md:gap-6 mb-8 md:mb-10 px-2 max-w-full">
+      <div className="flex flex-wrap justify-center items-center gap-3 md:gap-6 mb-8 md:mb-10 px-4 max-w-full">
         <div className="flex items-center gap-2">
           <CheckCircle className="h-4 w-4 md:h-5 md:w-5 text-green-500" />
           <span className="text-xs md:text-base">Implémenté</span>
