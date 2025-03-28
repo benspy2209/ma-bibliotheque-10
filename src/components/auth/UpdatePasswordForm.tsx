@@ -24,6 +24,15 @@ const adminPasswordFormSchema = z.object({
   path: ["confirmPassword"],
 });
 
+// Schéma de validation pour le formulaire standard de réinitialisation
+const passwordFormSchema = z.object({
+  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Les mots de passe ne correspondent pas",
+  path: ["confirmPassword"],
+});
+
 export function UpdatePasswordForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -37,6 +46,15 @@ export function UpdatePasswordForm() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useSupabaseAuth();
+  
+  // Formulaire pour le mode standard
+  const passwordForm = useForm<z.infer<typeof passwordFormSchema>>({
+    resolver: zodResolver(passwordFormSchema),
+    defaultValues: {
+      password: "",
+      confirmPassword: "",
+    },
+  });
   
   // Formulaire pour le mode administrateur direct
   const adminForm = useForm<z.infer<typeof adminPasswordFormSchema>>({
@@ -75,30 +93,44 @@ export function UpdatePasswordForm() {
     
     return hashParams;
   };
+
+  // Parse query parameters from URL
+  const parseQueryParameters = () => {
+    const params = new URLSearchParams(window.location.search);
+    return Object.fromEntries(params.entries());
+  };
   
-  // Check for recovery token in the URL hash
+  // Check for recovery token in the URL hash or query params
   useEffect(() => {
     const hash = window.location.hash;
+    const queryParams = parseQueryParameters();
     console.log("URL hash:", hash);
+    console.log("URL query params:", queryParams);
+    
+    // Check for email in query parameters
+    if (queryParams.email) {
+      setEmail(queryParams.email);
+    }
     
     // Check if we have a recovery type or token in the URL
     const hashParams = parseHashParameters(hash);
     const isRecovery = 
       hash.includes('type=recovery') || 
       hashParams.type === 'recovery' ||
-      hashParams.access_token;
+      hashParams.access_token ||
+      !!queryParams.token;
     
     if (isRecovery) {
-      console.log("Recovery link detected:", hashParams);
+      console.log("Recovery link detected:", { hashParams, queryParams });
       setHasRecoveryHash(true);
       
       // Try to extract email from token or URL parameters
-      if (hashParams.email) {
+      if (hashParams.email && !email) {
         setEmail(hashParams.email);
       }
       
       // Handle direct access tokens for Supabase password recovery
-      if (hashParams.access_token) {
+      if (hashParams.access_token || queryParams.token) {
         // When we have an access_token in the URL, Supabase has already authenticated the user
         // with a temporary session. We just need to notify users they can reset their password.
         toast({
@@ -157,6 +189,45 @@ export function UpdatePasswordForm() {
     }
   };
 
+  // Méthode standard pour la mise à jour du mot de passe via formulaire
+  const onResetPassword = async (values: z.infer<typeof passwordFormSchema>) => {
+    setError(null);
+    setIsLoading(true);
+    
+    try {
+      console.log("Using password reset form flow with values:", values);
+      
+      // Mettre à jour le mot de passe de l'utilisateur
+      const { error: updateError } = await supabase.auth.updateUser({ 
+        password: values.password 
+      });
+      
+      if (updateError) {
+        throw updateError;
+      }
+      
+      setSuccess(true);
+      toast({
+        description: "Votre mot de passe a été mis à jour avec succès."
+      });
+      
+      // Redirection après 3 secondes
+      setTimeout(() => {
+        navigate('/');
+      }, 3000);
+      
+    } catch (error: any) {
+      console.error("Erreur lors de la mise à jour du mot de passe:", error);
+      setError(error.message || "Une erreur est survenue lors de la mise à jour du mot de passe.");
+      toast({
+        variant: "destructive",
+        description: `Erreur : ${error.message || "Une erreur inattendue s'est produite."}`
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Méthode spéciale pour admin - réinitialiser le mot de passe d'un utilisateur
   const handleAdminPasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -203,7 +274,7 @@ export function UpdatePasswordForm() {
     }
   };
 
-  // Main method for password update
+  // Main method for password update using manual email entry
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -388,6 +459,7 @@ export function UpdatePasswordForm() {
           <Info className="h-4 w-4 text-blue-600" />
           <AlertDescription className="text-blue-800">
             Vous pouvez maintenant définir votre nouveau mot de passe.
+            {email && <div className="mt-1 font-medium">Email: {email}</div>}
           </AlertDescription>
         </Alert>
       )}
@@ -407,80 +479,123 @@ export function UpdatePasswordForm() {
         </Alert>
       ) : (
         !adminDirectAction && (
-        <form onSubmit={isAdminMode ? handleAdminPasswordReset : handlePasswordUpdate} className="space-y-4">
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          
-          <div className="space-y-2">
-            <Label htmlFor="email">
-              {isAdminMode ? "Email de l'utilisateur" : "Votre email"}
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="email@exemple.com"
-              disabled={isLoading || hasRecoveryHash}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="new-password">Nouveau mot de passe</Label>
-            <Input
-              id="new-password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              disabled={isLoading}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="confirm-password">Confirmer le mot de passe</Label>
-            <Input
-              id="confirm-password"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              minLength={6}
-              disabled={isLoading}
-            />
-          </div>
-          
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading 
-              ? 'Mise à jour...' 
-              : isAdminMode 
-                ? "Réinitialiser le mot de passe (Admin)" 
-                : hasRecoveryHash 
-                  ? 'Mettre à jour le mot de passe' 
+        hasRecoveryHash ? (
+          <Form {...passwordForm}>
+            <form onSubmit={passwordForm.handleSubmit(onResetPassword)} className="space-y-4">
+              {error && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              
+              {/* Email caché mais présent pour le traitement */}
+              <input type="hidden" value={email} />
+              
+              <FormField
+                control={passwordForm.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nouveau mot de passe</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} disabled={isLoading} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={passwordForm.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirmer le mot de passe</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} disabled={isLoading} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? 'Mise à jour...' : 'Mettre à jour le mot de passe'}
+              </Button>
+            </form>
+          </Form>
+        ) : (
+          <form onSubmit={handlePasswordUpdate} className="space-y-4">
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            
+            <div className="space-y-2">
+              <Label htmlFor="email">
+                {isAdminMode ? "Email de l'utilisateur" : "Votre email"}
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="email@exemple.com"
+                disabled={isLoading}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="new-password">Nouveau mot de passe</Label>
+              <Input
+                id="new-password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                disabled={isLoading}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Confirmer le mot de passe</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength={6}
+                disabled={isLoading}
+              />
+            </div>
+            
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading 
+                ? 'Mise à jour...' 
+                : isAdminMode 
+                  ? "Réinitialiser le mot de passe (Admin)" 
                   : 'Envoyer un lien de réinitialisation'
-            }
-          </Button>
+              }
+            </Button>
 
-          <Alert>
-            <AlertDescription className="text-xs">
-              {isAdminMode 
-                ? "En tant qu'administrateur, vous allez être redirigé vers le tableau de bord Supabase pour finaliser la réinitialisation."
-                : hasRecoveryHash 
-                  ? "Vous êtes sur le point de définir un nouveau mot de passe à l'aide du lien de réinitialisation que vous avez reçu par email."
+            <Alert>
+              <AlertDescription className="text-xs">
+                {isAdminMode 
+                  ? "En tant qu'administrateur, vous allez être redirigé vers le tableau de bord Supabase pour finaliser la réinitialisation."
                   : "Un email de réinitialisation sera envoyé à l'adresse indiquée. Vérifiez bien votre dossier SPAM si vous ne trouvez pas l'email."}
-            </AlertDescription>
-          </Alert>
-        </form>
-        )
+              </AlertDescription>
+            </Alert>
+          </form>
+        ))
       )}
       
-      {isAdminMode && success && (
+      {isAdminMode && success && !adminDirectAction && (
         <div className="mt-4 text-center">
           <p className="mb-2 text-sm text-muted-foreground">
             Pour réinitialiser le mot de passe via le tableau de bord Supabase:
