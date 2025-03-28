@@ -38,7 +38,15 @@ export function BooksToBuyList() {
       
       // Transformer les données pour extraire les livres à acheter
       const bookList: Book[] = data
-        .map(item => JSON.parse(item.book_data))
+        .map(item => {
+          // Handle the Json type safely by using a type guard
+          if (typeof item.book_data === 'string') {
+            return JSON.parse(item.book_data);
+          } else {
+            // If it's already an object, return it directly
+            return item.book_data as Book;
+          }
+        })
         .filter(book => !book.purchased);
         
       setBooks(bookList);
