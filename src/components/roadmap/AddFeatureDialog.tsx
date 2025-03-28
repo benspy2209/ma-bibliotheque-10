@@ -28,8 +28,8 @@ export function AddFeatureDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="pulse" className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-10 text-sm md:text-base px-3 py-2">
-          <Plus className="h-4 w-4 mr-1" />
+        <Button variant="pulse" className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-10 text-xs md:text-sm px-2 py-1 md:px-3 md:py-2">
+          <Plus className="h-3 w-3 md:h-4 md:w-4 mr-1" />
           Ajouter
         </Button>
       </DialogTrigger>

@@ -15,12 +15,12 @@ const FeatureTimeline = ({ features }: FeatureTimelineProps) => {
   const isMobile = useIsMobile();
   
   return (
-    <div className="relative">
+    <div className="relative w-full">
       {/* Timeline line */}
       <div className="absolute left-[1.65rem] top-10 bottom-10 w-[2px] bg-muted z-0"></div>
-      <div className="space-y-8 md:space-y-12 relative z-10">
+      <div className="space-y-8 md:space-y-12 relative z-10 w-full">
         {features.map((feature, index) => (
-          <div key={index} className="flex gap-3 md:gap-6">
+          <div key={index} className="flex gap-3 md:gap-6 w-full">
             {/* Icon */}
             <div className="mt-1 flex-shrink-0">
               <div className="bg-background p-1 rounded-full">
@@ -28,11 +28,11 @@ const FeatureTimeline = ({ features }: FeatureTimelineProps) => {
               </div>
             </div>
             {/* Card */}
-            <Card className="flex-1 shadow-md max-w-full">
+            <Card className="flex-1 shadow-md w-full max-w-full overflow-hidden roadmap-card">
               <CardHeader className="p-2 sm:p-4 md:p-6">
                 <div className="flex flex-col gap-2">
                   <div>
-                    <CardTitle className="text-base sm:text-lg md:text-xl line-clamp-2">{feature.name}</CardTitle>
+                    <CardTitle className="text-base sm:text-lg md:text-xl line-clamp-2 break-words">{feature.name}</CardTitle>
                     <CardDescription className="text-sm break-words">{feature.description}</CardDescription>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">

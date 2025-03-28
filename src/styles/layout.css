@@ -101,3 +101,47 @@ body, html {
     hyphens: auto;
   }
 }
+
+/* Fix for the Samsung S21 and other mobile devices */
+#root {
+  max-width: 100vw;
+  width: 100%;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Container fix for all screens */
+.container {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Roadmap specific fixes for mobile */
+@media (max-width: 767px) {
+  .roadmap-card,
+  .max-w-3xl,
+  .card,
+  .card-content {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* Fix for the FeatureTimeline component on mobile */
+  .flex.gap-3,
+  .flex.gap-6 {
+    width: 100%;
+    max-width: 100%;
+    padding-right: 8px;
+  }
+  
+  /* Make sure the text in cards doesn't overflow */
+  .card-title,
+  .card-description {
+    max-width: 100%;
+    width: 100%;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+}

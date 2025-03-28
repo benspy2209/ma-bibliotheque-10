@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Star, LogIn } from 'lucide-react';
@@ -28,7 +29,7 @@ export const HeroSection = () => {
   };
 
   return (
-    <section className="relative py-20 overflow-hidden">
+    <section className="relative py-20 overflow-hidden w-full">
       <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 -z-10" />
       <div className="container px-4 mx-auto">
         <div className="flex flex-col lg:flex-row items-center gap-12">
@@ -43,9 +44,9 @@ export const HeroSection = () => {
               Organisez, découvrez et partagez vos lectures préférées dans 7 langues différentes. BiblioPulse vous accompagne dans votre parcours littéraire.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row gap-4 pt-4 w-full">
               {user ? (
-                <Button size="lg" asChild>
+                <Button size="lg" asChild className="w-full sm:w-auto">
                   <Link to="/search">Découvrir des livres</Link>
                 </Button>
               ) : (
@@ -53,7 +54,7 @@ export const HeroSection = () => {
                   <Button 
                     size="lg" 
                     onClick={handleLoginClick}
-                    className="pulse-effect bg-[#e4364a] text-white hover:bg-[#d11a2e] flex items-center gap-2"
+                    className="pulse-effect bg-[#e4364a] text-white hover:bg-[#d11a2e] flex items-center gap-2 w-full sm:w-auto"
                   >
                     <LogIn className="h-5 w-5" /> Commencer l'aventure
                   </Button>
@@ -61,7 +62,7 @@ export const HeroSection = () => {
                     variant="outline" 
                     size="lg" 
                     asChild
-                    className="bg-black text-white hover:bg-gray-800 border-none"
+                    className="bg-black text-white hover:bg-gray-800 border-none w-full sm:w-auto"
                   >
                     <Link to="/features">Découvrir les fonctionnalités</Link>
                   </Button>
