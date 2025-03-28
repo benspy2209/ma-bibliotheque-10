@@ -9,7 +9,8 @@ export const HeroSection = () => {
   const { user, signIn } = useSupabaseAuth();
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
-  const [imageError, setImageError] = useState(false);
+  const [primaryImageError, setPrimaryImageError] = useState(false);
+  const [secondaryImageError, setSecondaryImageError] = useState(false);
 
   useEffect(() => {
     // Déclenche l'animation après le chargement du composant
@@ -76,24 +77,45 @@ export const HeroSection = () => {
             </div>
           </div>
           <div className="lg:w-1/2">
-            <div className="relative">
-              {imageError ? (
-                <img 
-                  src="/placeholder.svg" 
-                  alt="Placeholder" 
-                  className="rounded-lg shadow-2xl object-cover w-full"
-                />
-              ) : (
-                <img 
-                  src="/bibliopulse-accueil-1.webp" 
-                  alt="Personne lisant et organisant sa bibliothèque" 
-                  className="rounded-lg shadow-2xl object-cover w-full"
-                  onError={(e) => {
-                    console.error("Image failed to load:", e);
-                    setImageError(true);
-                  }}
-                />
-              )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="relative">
+                {primaryImageError ? (
+                  <img 
+                    src="/placeholder.svg" 
+                    alt="Placeholder" 
+                    className="rounded-lg shadow-2xl object-cover w-full h-auto"
+                  />
+                ) : (
+                  <img 
+                    src="/bibliopulse-1 .webp" 
+                    alt="BiblioPulse interface 1" 
+                    className="rounded-lg shadow-2xl object-cover w-full h-auto"
+                    onError={(e) => {
+                      console.error("Primary image failed to load:", e);
+                      setPrimaryImageError(true);
+                    }}
+                  />
+                )}
+              </div>
+              <div className="relative hidden md:block">
+                {secondaryImageError ? (
+                  <img 
+                    src="/placeholder.svg" 
+                    alt="Placeholder" 
+                    className="rounded-lg shadow-2xl object-cover w-full h-auto"
+                  />
+                ) : (
+                  <img 
+                    src="/bibliopulse-2 .webp" 
+                    alt="BiblioPulse interface 2" 
+                    className="rounded-lg shadow-2xl object-cover w-full h-auto"
+                    onError={(e) => {
+                      console.error("Secondary image failed to load:", e);
+                      setSecondaryImageError(true);
+                    }}
+                  />
+                )}
+              </div>
             </div>
           </div>
         </div>
