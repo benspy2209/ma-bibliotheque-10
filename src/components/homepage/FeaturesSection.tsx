@@ -17,8 +17,11 @@ export const FeaturesSection = () => {
       <div className="container px-4 mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">Tout ce dont vous avez besoin</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-muted-foreground max-w-2xl mx-auto mb-3">
             BiblioPulse vous offre tous les outils nécessaires pour gérer efficacement votre bibliothèque personnelle
+          </p>
+          <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
+            Recherchez dans notre base de <span className="font-medium text-primary/70">44 624 261 livres</span> et <span className="font-medium text-primary/70">12 839 586 auteurs</span> en français, anglais, néerlandais, espagnol, allemand, portugais et italien
           </p>
         </div>
 
