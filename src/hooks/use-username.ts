@@ -147,7 +147,7 @@ export function useUsername() {
         return false;
       }
       
-      // Si c'est un admin, permettre la mise à jour sans vérification supplémentaire
+      // Vérifier si l'utilisateur est l'administrateur
       const { data: userData } = await supabase.auth.getUser();
       const isAdminUser = userData?.user?.email === 'debruijneb@gmail.com';
       
@@ -160,21 +160,40 @@ export function useUsername() {
         return false;
       }
       
-      // Update the username
-      const { error } = await supabase
-        .from('profiles')
-        .update({ username: newUsername })
-        .eq('id', user.id);
-        
-      if (error) {
-        console.error('Error updating username:', error);
-        
-        toast({
-          variant: "destructive",
-          description: "Une erreur est survenue lors de la mise à jour du nom d'utilisateur."
-        });
-        
-        return false;
+      // Si c'est un administrateur, utiliser une approche différente pour contourner la validation du trigger
+      if (isAdminUser) {
+        // Mise à jour sans déclencher le trigger de validation en définissant directement last_username_change
+        const { error } = await supabase
+          .from('profiles')
+          .update({ 
+            username: newUsername,
+            last_username_change: new Date().toISOString()
+          })
+          .eq('id', user.id);
+          
+        if (error) {
+          console.error('Error updating admin username:', error);
+          toast({
+            variant: "destructive",
+            description: "Une erreur est survenue lors de la mise à jour du nom d'utilisateur administrateur."
+          });
+          return false;
+        }
+      } else {
+        // Pour les utilisateurs normaux, mise à jour standard
+        const { error } = await supabase
+          .from('profiles')
+          .update({ username: newUsername })
+          .eq('id', user.id);
+          
+        if (error) {
+          console.error('Error updating username:', error);
+          toast({
+            variant: "destructive",
+            description: "Une erreur est survenue lors de la mise à jour du nom d'utilisateur."
+          });
+          return false;
+        }
       }
       
       setUsername(newUsername);
