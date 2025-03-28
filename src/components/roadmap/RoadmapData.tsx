@@ -10,6 +10,9 @@ export interface RoadmapFeature {
   status: FeatureStatus;
   quarter?: string;
   technical_details?: string;
+  isProposal?: boolean;
+  proposedBy?: string;
+  proposalDate?: string;
 }
 
 // List of technical features for the roadmap
@@ -66,3 +69,6 @@ export const roadmapFeatures: RoadmapFeature[] = [
     technical_details: "Algorithmes de recommandation, clustering d'utilisateurs, modèles prédictifs"
   }
 ];
+
+// List of feature proposals from users
+export const featureProposals: RoadmapFeature[] = [];
