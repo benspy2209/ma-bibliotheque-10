@@ -112,14 +112,25 @@ export function useSupabaseAuth() {
 
   const signInWithFacebook = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      console.log("Tentative de connexion avec Facebook...");
+      
+      // Utiliser l'authentification OAuth de Supabase avec le provider Facebook
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'facebook',
         options: {
-          redirectTo: `${window.location.origin}`
+          redirectTo: `${window.location.origin}`,
+          // Vous pouvez spécifier des scopes supplémentaires si nécessaire
+          scopes: 'email,public_profile'
         }
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Erreur OAuth Facebook:", error);
+        throw error;
+      }
+      
+      console.log("Redirection vers Facebook pour authentification...", data);
+      
     } catch (error: any) {
       console.error("Erreur lors de la connexion avec Facebook:", error);
       toast({
