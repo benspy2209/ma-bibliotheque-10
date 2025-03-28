@@ -44,7 +44,7 @@ export const HeroSection = () => {
               <p className="mt-2 text-xl">Votre bibliothèque personnelle, amplifiée.</p>
             </div>
             <p className="text-xl text-muted-foreground">
-              Organisez, découvrez et partagez vos lectures préférées dans 7 langues différentes. BiblioPulse vous accompagne dans votre parcours littéraire.
+              Organisez, découvrez et partagez vos lectures préférées dans 7 langues différentes. Livres, bandes dessinées et romans graphiques - BiblioPulse vous accompagne dans votre parcours littéraire.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -85,8 +85,6 @@ export const HeroSection = () => {
                   target.src = '/placeholder.svg';
                 }}
               />
-              
-              {/* Testimonial has been removed */}
             </div>
           </div>
         </div>

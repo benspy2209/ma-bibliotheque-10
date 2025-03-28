@@ -61,7 +61,7 @@ export const BookGrid = ({
           <Search className="h-12 w-12 text-muted-foreground/60" />
         </div>
         <div className="text-center text-gray-600 mb-4">
-          <p className="text-lg font-medium">Aucun livre trouvé pour "{searchQuery}"</p>
+          <p className="text-lg font-medium">Aucun livre ou BD trouvé pour "{searchQuery}"</p>
           <p className="text-sm mt-2">
             Nous n'avons trouvé aucun résultat correspondant à votre recherche.
             {searchQuery.length < 4 ? " Essayez avec plus de caractères." : ""}
@@ -70,6 +70,7 @@ export const BookGrid = ({
             Suggestions :
             <ul className="list-disc list-inside mt-2 text-left max-w-md mx-auto">
               <li>Vérifiez l'orthographe du nom de l'auteur ou du titre</li>
+              <li>Pour les BD, essayez de rechercher par série ou dessinateur</li>
               <li>Essayez avec un nom plus complet (prénom et nom)</li>
               <li>Utilisez des termes de recherche différents</li>
               <li>Essayez de changer le filtre de langue</li>

@@ -42,13 +42,13 @@ export function SearchResults({
     if (books.length === 0 && searchQuery && !isLoading && !searchError) {
       toast({
         title: "Aucun résultat explicite",
-        description: "La recherche n'a trouvé aucun résultat correspondant explicitement à votre requête. Si vous cherchez un livre, essayez avec un titre exact.",
+        description: "La recherche n'a trouvé aucun résultat correspondant explicitement à votre requête. Si vous cherchez un livre ou une BD, essayez avec un titre exact.",
         duration: 5000,
       });
     }
   }, [books.length, searchQuery, isLoading, searchError, toast]);
 
-  // Show different message for exhibition catalogs or art books
+  // Show different message for exhibition catalogs, art books, or comics
   useEffect(() => {
     if (searchQuery && (
       searchQuery.toLowerCase().includes('exposition') ||
@@ -70,7 +70,7 @@ export function SearchResults({
           <div className="flex justify-between items-center">
             <div className="flex items-center text-sm">
               <Globe className="h-4 w-4 mr-1 text-muted-foreground" />
-              <span className="text-muted-foreground">Résultats dans 7 langues</span>
+              <span className="text-muted-foreground">Résultats incluant livres et BD dans 7 langues</span>
             </div>
             <AddAllBooks 
               books={books} 

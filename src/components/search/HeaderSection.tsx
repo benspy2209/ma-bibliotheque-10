@@ -15,7 +15,7 @@ export function HeaderSection({ onBookAdded }: HeaderSectionProps) {
           Rechercher des livres
         </h1>
         <p className="text-lg text-muted-foreground">
-          Trouvez des livres par auteur ou titre
+          Trouvez des livres et des bandes dessinées par auteur ou titre
         </p>
       </div>
       
