@@ -15,6 +15,7 @@ export function useUsername() {
   const [isLoading, setIsLoading] = useState(false);
   const [canChangeUsername, setCanChangeUsername] = useState(true);
   const [nextChangeDate, setNextChangeDate] = useState<Date | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { toast } = useToast();
   const { user } = useSupabaseAuth();
 
@@ -36,6 +37,13 @@ export function useUsername() {
       }
       
       setUsername(data.username);
+      
+      // Check if user is admin
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData?.user?.email === 'debruijneb@gmail.com') {
+        setIsAdmin(true);
+        setCanChangeUsername(true); // Admin can always change username
+      }
     } catch (error) {
       console.error('Error in fetchUsername:', error);
     } finally {
@@ -49,6 +57,17 @@ export function useUsername() {
     
     try {
       setIsLoading(true);
+      
+      // Check if user is admin first
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData?.user?.email === 'debruijneb@gmail.com') {
+        setIsAdmin(true);
+        setCanChangeUsername(true);
+        setNextChangeDate(null);
+        return;
+      }
+      
+      // For non-admin users, check the normal restrictions
       const { data, error } = await supabase
         .rpc('can_change_username', { user_id: user.id });
         
@@ -161,6 +180,7 @@ export function useUsername() {
       setUsername(null);
       setCanChangeUsername(true);
       setNextChangeDate(null);
+      setIsAdmin(false);
     }
   }, [user]);
 
@@ -169,6 +189,7 @@ export function useUsername() {
     isLoading,
     canChangeUsername,
     nextChangeDate,
+    isAdmin,
     updateUsername,
     fetchUsername,
     checkCanChangeUsername

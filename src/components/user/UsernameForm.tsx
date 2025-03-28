@@ -13,7 +13,7 @@ import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { useUserDisplay } from "@/components/navbar/UserUtils";
 
 export function UsernameForm() {
-  const { username, isLoading, canChangeUsername, nextChangeDate, updateUsername } = useUsername();
+  const { username, isLoading, canChangeUsername, nextChangeDate, isAdmin, updateUsername } = useUsername();
   const { user } = useSupabaseAuth();
   const { refreshUsername } = useUserDisplay(user);
   const [newUsername, setNewUsername] = useState("");
@@ -57,11 +57,13 @@ export function UsernameForm() {
         <CardDescription>
           {isFirstTimeSettingUsername 
             ? "Choisissez un nom d'utilisateur unique pour votre compte." 
-            : "Vous pouvez modifier votre nom d'utilisateur une fois par mois."}
+            : isAdmin 
+              ? "En tant qu'administrateur, vous pouvez modifier votre nom d'utilisateur à tout moment."
+              : "Vous pouvez modifier votre nom d'utilisateur une fois par mois."}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {!isFirstTimeSettingUsername && !canChangeUsername && nextChangeDate && (
+        {!isFirstTimeSettingUsername && !canChangeUsername && nextChangeDate && !isAdmin && (
           <Alert className="mb-4" variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
@@ -79,22 +81,23 @@ export function UsernameForm() {
               value={newUsername}
               onChange={(e) => setNewUsername(e.target.value)}
               placeholder="Entrez votre nom d'utilisateur"
-              disabled={isLoading || isSubmitting || (!isFirstTimeSettingUsername && !canChangeUsername)}
+              disabled={isLoading || isSubmitting || (!isFirstTimeSettingUsername && !canChangeUsername && !isAdmin)}
             />
           </div>
 
           <div className="mt-4 text-sm text-muted-foreground flex items-start gap-2">
             <InfoIcon className="h-4 w-4 mt-0.5 flex-shrink-0" />
             <span>
-              Votre nom d'utilisateur sera visible par les autres utilisateurs et ne peut 
-              être modifié qu'une fois par mois.
+              {isAdmin 
+                ? "En tant qu'administrateur, vous pouvez modifier votre nom d'utilisateur à tout moment."
+                : "Votre nom d'utilisateur sera visible par les autres utilisateurs et ne peut être modifié qu'une fois par mois."}
             </span>
           </div>
           
           <Button 
             type="submit" 
             className="w-full mt-4"
-            disabled={isLoading || isSubmitting || (!isFirstTimeSettingUsername && !canChangeUsername) || newUsername === username}
+            disabled={isLoading || isSubmitting || (!isFirstTimeSettingUsername && !canChangeUsername && !isAdmin) || newUsername === username}
           >
             {isSubmitting 
               ? "Enregistrement..." 
