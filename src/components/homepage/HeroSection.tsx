@@ -76,7 +76,7 @@ export const HeroSection = () => {
           <div className="lg:w-1/2">
             <div className="relative">
               <img 
-                src="https://raw.githubusercontent.com/votre-utilisateur/votre-repo/main/public/bibliopulse-belle-bibliotheque.webp" 
+                src="/bibliopulse-belle-bibliotheque.webp" 
                 alt="Magnifique bibliothèque avec architecture classique" 
                 className="rounded-lg shadow-2xl object-cover w-full"
                 onError={(e) => {
