@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -30,11 +29,14 @@ export function useSupabaseAuth() {
       // Only show toast notifications for actual auth state changes, not initial loading
       if (initialAuthCheckDone) {
         if (event === 'SIGNED_IN') {
-          setShowLoginDialog(false); // Ferme automatiquement le dialogue de connexion
+          setShowLoginDialog(false); // Close login dialog automatically
           toast({
             description: "Connexion réussie"
           });
-          navigate('/library');
+          
+          // Force navigation using window.location instead of React Router
+          // This ensures a complete page refresh and proper state initialization
+          window.location.href = '/library';
         } else if (event === 'SIGNED_OUT') {
           toast({
             description: "Déconnexion réussie"
@@ -72,24 +74,26 @@ export function useSupabaseAuth() {
     });
 
     return () => subscription.unsubscribe();
-  }, [queryClient, toast, navigate]);
+  }, [queryClient, toast, navigate, initialAuthCheckDone]);
 
-  const signIn = (mode: 'login' | 'signup' | 'reset' = 'signup') => {
+  const signIn = useCallback((mode: 'login' | 'signup' | 'reset' = 'signup') => {
     console.log(`signIn called with mode: ${mode}`);
     setAuthMode(mode);
     setShowLoginDialog(true);
-  };
+  }, []);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     try {
       await supabase.auth.signOut();
+      // Force a full page reload after sign out to ensure a clean state
+      window.location.href = '/';
     } catch (error: any) {
       toast({
         variant: "destructive",
         description: `Erreur lors de la déconnexion: ${error.message}`
       });
     }
-  };
+  }, [toast]);
 
   const signInWithGoogle = async () => {
     try {

@@ -20,9 +20,9 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="sm:max-w-md" 
-        onPointerDownOutside={(e) => e.preventDefault()} // Prevent closing when clicking outside
-        onInteractOutside={(e) => e.preventDefault()} // Prevent all outside interactions
+        className="sm:max-w-md max-h-[90vh] overflow-y-auto" 
+        onPointerDownOutside={(e) => e.preventDefault()} 
+        onInteractOutside={(e) => e.preventDefault()} 
       >
         <DialogHeader>
           <DialogTitle className="text-center">

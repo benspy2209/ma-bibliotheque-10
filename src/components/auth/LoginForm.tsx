@@ -37,7 +37,7 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
   // If activeTab is 'reset', render the reset password form directly
   if (activeTab === 'reset') {
     return (
-      <div className="w-full">
+      <div className="w-full auth-form-container">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-medium">Réinitialisation de mot de passe</h3>
           <button 
@@ -53,7 +53,7 @@ export function LoginForm({ defaultTab = 'login' }: LoginFormProps) {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full auth-form-container">
       {/* Social login buttons section */}
       <div className="space-y-4 mb-6">
         <Button 

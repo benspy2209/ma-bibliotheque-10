@@ -8,7 +8,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ResetPasswordForm } from '../ResetPasswordForm';
-import { useNavigate } from 'react-router-dom';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Eye, EyeOff } from "lucide-react";
 
@@ -25,7 +24,6 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
   const [loginError, setLoginError] = useState<string | null>(null);
   const { toast } = useToast();
   const { setAuthMode } = useSupabaseAuth();
-  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,8 +50,8 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
         description: "Connexion réussie"
       });
       
-      // Redirect to search page after successful login
-      navigate('/search');
+      // Use window.location.href for a full page reload after successful login
+      window.location.href = '/library';
     } catch (error: any) {
       console.error("Erreur d'authentification:", error);
       // Ne pas afficher de toast, car nous utilisons maintenant l'alerte dans l'interface
