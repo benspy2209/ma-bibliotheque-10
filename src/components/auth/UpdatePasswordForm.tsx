@@ -9,6 +9,20 @@ import { supabase } from '@/integrations/supabase/client';
 import { CheckCircle, AlertCircle, Info, Shield } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+// Schéma de validation pour le formulaire d'administration
+const adminPasswordFormSchema = z.object({
+  email: z.string().email("Email invalide"),
+  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Les mots de passe ne correspondent pas",
+  path: ["confirmPassword"],
+});
 
 export function UpdatePasswordForm() {
   const [email, setEmail] = useState('');
@@ -19,9 +33,20 @@ export function UpdatePasswordForm() {
   const [error, setError] = useState<string | null>(null);
   const [hasRecoveryHash, setHasRecoveryHash] = useState(false);
   const [isAdminMode, setIsAdminMode] = useState(false);
+  const [adminDirectAction, setAdminDirectAction] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useSupabaseAuth();
+  
+  // Formulaire pour le mode administrateur direct
+  const adminForm = useForm<z.infer<typeof adminPasswordFormSchema>>({
+    resolver: zodResolver(adminPasswordFormSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
   
   // Vérifier si l'utilisateur actuel est admin
   useEffect(() => {
@@ -85,6 +110,47 @@ export function UpdatePasswordForm() {
       setHasRecoveryHash(false);
     }
   }, [toast]);
+
+  // Méthode d'administration directe - réinitialiser le mot de passe d'un utilisateur
+  const onAdminDirectReset = async (values: z.infer<typeof adminPasswordFormSchema>) => {
+    console.log("Admin direct reset password for:", values.email);
+    setError(null);
+    setIsLoading(true);
+    
+    try {
+      // Utiliser l'API Admin de Supabase pour réinitialiser directement le mot de passe
+      // Note: Cela nécessite une Supabase Edge Function pour utiliser le service_role key
+      const { data, error: functionError } = await supabase.functions.invoke('admin-reset-password', {
+        body: { 
+          email: values.email, 
+          password: values.password 
+        }
+      });
+      
+      if (functionError) {
+        throw new Error(functionError.message || "Erreur lors de la réinitialisation du mot de passe");
+      }
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      setSuccess(true);
+      toast({
+        description: `Le mot de passe de ${values.email} a été réinitialisé avec succès.`
+      });
+      
+    } catch (error: any) {
+      console.error("Erreur lors de la réinitialisation directe du mot de passe:", error);
+      setError(error.message || "Une erreur est survenue lors de la réinitialisation du mot de passe.");
+      toast({
+        variant: "destructive",
+        description: `Erreur : ${error.message || "Une erreur inattendue s'est produite."}`
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Méthode spéciale pour admin - réinitialiser le mot de passe d'un utilisateur
   const handleAdminPasswordReset = async (e: React.FormEvent) => {
@@ -227,8 +293,89 @@ export function UpdatePasswordForm() {
           <Shield className="h-4 w-4 text-amber-600" />
           <AlertDescription className="text-amber-800">
             Mode administrateur activé. Vous pouvez réinitialiser le mot de passe de n'importe quel utilisateur.
+            {!adminDirectAction && (
+              <Button 
+                variant="link" 
+                className="text-amber-800 font-medium underline p-0 ml-1 h-auto"
+                onClick={() => setAdminDirectAction(true)}
+              >
+                Définir directement un mot de passe
+              </Button>
+            )}
           </AlertDescription>
         </Alert>
+      )}
+      
+      {isAdminMode && adminDirectAction && (
+        <div className="mb-6">
+          <Alert className="mb-4 bg-blue-50 border-blue-200">
+            <Info className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800">
+              Vous pouvez définir directement un nouveau mot de passe pour un utilisateur sans envoyer d'email.
+            </AlertDescription>
+          </Alert>
+          
+          <Form {...adminForm}>
+            <form onSubmit={adminForm.handleSubmit(onAdminDirectReset)} className="space-y-4">
+              <FormField
+                control={adminForm.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email de l'utilisateur</FormLabel>
+                    <FormControl>
+                      <Input placeholder="email@exemple.com" {...field} disabled={isLoading} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={adminForm.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nouveau mot de passe</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} disabled={isLoading} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={adminForm.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirmer le mot de passe</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} disabled={isLoading} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="flex gap-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="w-1/2" 
+                  disabled={isLoading}
+                  onClick={() => setAdminDirectAction(false)}
+                >
+                  Annuler
+                </Button>
+                <Button type="submit" className="w-1/2" disabled={isLoading}>
+                  {isLoading ? 'Mise à jour...' : 'Réinitialiser le mot de passe'}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </div>
       )}
       
       {hasRecoveryHash && (
@@ -244,14 +391,17 @@ export function UpdatePasswordForm() {
         <Alert className="mb-4 bg-green-50 border-green-200">
           <CheckCircle className="h-4 w-4 text-green-600" />
           <AlertDescription>
-            {isAdminMode 
-              ? "Consultez le tableau de bord Supabase pour réinitialiser le mot de passe de cet utilisateur."
-              : hasRecoveryHash 
-                ? "Votre mot de passe a été mis à jour avec succès. Vous allez être redirigé vers la page d'accueil..."
-                : "Un email de réinitialisation a été envoyé à l'adresse indiquée. Veuillez vérifier votre boîte de réception et votre dossier spam."}
+            {isAdminMode && adminDirectAction 
+              ? "Le mot de passe a été réinitialisé avec succès."
+              : isAdminMode 
+                ? "Consultez le tableau de bord Supabase pour réinitialiser le mot de passe de cet utilisateur."
+                : hasRecoveryHash 
+                  ? "Votre mot de passe a été mis à jour avec succès. Vous allez être redirigé vers la page d'accueil..."
+                  : "Un email de réinitialisation a été envoyé à l'adresse indiquée. Veuillez vérifier votre boîte de réception et votre dossier spam."}
           </AlertDescription>
         </Alert>
       ) : (
+        !adminDirectAction && (
         <form onSubmit={isAdminMode ? handleAdminPasswordReset : handlePasswordUpdate} className="space-y-4">
           {error && (
             <Alert variant="destructive" className="mb-4">
@@ -322,6 +472,7 @@ export function UpdatePasswordForm() {
             </AlertDescription>
           </Alert>
         </form>
+        )
       )}
       
       {isAdminMode && success && (
