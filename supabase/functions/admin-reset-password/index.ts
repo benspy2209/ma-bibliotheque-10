@@ -68,65 +68,26 @@ serve(async (req) => {
 
     console.log(`Tentative de réinitialisation du mot de passe pour l'utilisateur: ${email}`);
 
-    // Rechercher l'utilisateur par son email
-    const { data: user, error: userError } = await supabase
-      .from("users")
-      .select("id")
-      .eq("email", email)
-      .single();
-
-    if (userError) {
-      console.error("Error finding user:", userError);
-      
-      // Regardons s'il y a un problème d'accès à la table users
-      try {
-        // Essayer d'accéder aux utilisateurs via l'API Auth
-        const { data: authUser, error: authUserError } = await supabase.auth.admin.listUsers();
-        
-        if (authUserError) {
-          console.error("Error accessing auth users:", authUserError);
-          throw new Error("Erreur lors de l'accès aux utilisateurs via l'API Auth");
-        }
-        
-        // Trouver l'utilisateur par son email dans la liste des utilisateurs
-        const foundUser = authUser.users.find(u => u.email === email);
-        
-        if (!foundUser) {
-          console.error(`Utilisateur avec l'email ${email} non trouvé dans la liste des utilisateurs`);
-          throw new Error(`Utilisateur avec l'email ${email} non trouvé`);
-        }
-        
-        // Mise à jour du mot de passe de l'utilisateur directement via l'API admin
-        const { error: updateError } = await supabase.auth.admin.updateUserById(
-          foundUser.id,
-          { password: password }
-        );
-
-        if (updateError) {
-          console.error("Erreur lors de la mise à jour du mot de passe:", updateError);
-          throw updateError;
-        }
-        
-        console.log(`Mot de passe réinitialisé avec succès pour l'utilisateur: ${email} (méthode alternative)`);
-        
-        return new Response(
-          JSON.stringify({ 
-            success: true, 
-            message: `Mot de passe réinitialisé avec succès pour ${email}` 
-          }),
-          { 
-            headers: { 
-              "Content-Type": "application/json",
-              ...corsHeaders 
-            } 
-          }
-        );
-      } catch (alternativeError) {
-        console.error("Erreur lors de la tentative alternative:", alternativeError);
-        throw new Error(`Utilisateur avec l'email ${email} non trouvé`);
-      }
+    // Rechercher l'utilisateur directement via l'API d'authentification
+    const { data: authUsers, error: listUsersError } = await supabase.auth.admin.listUsers({
+      perPage: 1000, // Augmenter si nécessaire pour trouver l'utilisateur
+    });
+    
+    if (listUsersError) {
+      console.error("Error listing users:", listUsersError);
+      throw new Error("Erreur lors de la récupération des utilisateurs");
     }
-
+    
+    // Trouver l'utilisateur par son email
+    const user = authUsers.users.find(u => u.email === email);
+    
+    if (!user) {
+      console.error(`Utilisateur avec l'email ${email} non trouvé`);
+      throw new Error(`Utilisateur avec l'email ${email} non trouvé`);
+    }
+    
+    console.log(`Utilisateur trouvé avec l'ID: ${user.id}`);
+    
     // Mise à jour du mot de passe de l'utilisateur
     const { error: updateError } = await supabase.auth.admin.updateUserById(
       user.id,
