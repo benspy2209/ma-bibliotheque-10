@@ -1,4 +1,3 @@
-
 /* Animation styles for BiblioPulse */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
@@ -95,16 +94,12 @@
   animation: heartbeat 2s ease-in-out infinite;
   transition: all 0.3s ease;
   position: relative;
-  color: white !important;
-  background-color: #E4364A;
-  padding: 2px 8px;
-  border-radius: 4px;
+  color: #E4364A !important;
 }
 
 /* Light mode specific styling for title-pulse */
 .light .title-pulse {
-  color: white !important;
-  background-color: #E4364A;
+  color: #E4364A !important;
 }
 
 /* Effet de pulsation autour du texte - rendu plus subtil */
@@ -206,16 +201,12 @@
 }
 
 .animated-title .title-pulse {
-  background-color: #E4364A;
-  color: white !important;
-  background-clip: text;
-  -webkit-background-clip: padding-box;
+  color: #E4364A !important;
   transition: all 0.5s ease;
   animation: heartbeat 2s ease-in-out infinite;
 }
 
 /* Override for light mode to ensure proper color */
 .light .animated-title .title-pulse {
-  background-color: #E4364A !important;
-  color: white !important;
+  color: #E4364A !important;
 }
