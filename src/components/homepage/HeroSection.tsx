@@ -76,8 +76,8 @@ export const HeroSection = () => {
           <div className="lg:w-1/2">
             <div className="relative">
               <img 
-                src="/bibliopulse-belle-bibliotheque.webp" 
-                alt="Magnifique bibliothèque avec architecture classique" 
+                src="/photo 1.jpg" 
+                alt="Personne lisant et organisant sa bibliothèque" 
                 className="rounded-lg shadow-2xl object-cover w-full"
                 onError={(e) => {
                   console.error("Image failed to load:", e);
