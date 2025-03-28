@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { useToast } from '@/hooks/use-toast';

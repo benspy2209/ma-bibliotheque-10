@@ -1,27 +1,25 @@
 
 import { Button } from "@/components/ui/button";
-import { BookOpen } from 'lucide-react';
+import { SearchType } from '@/services/bookSearch';
 
 interface ShowAllResultsButtonProps {
   onShowAllResults: () => void;
   totalBooks: number;
-  searchType: 'author' | 'title';
+  searchType: SearchType;
 }
 
-export const ShowAllResultsButton = ({ 
-  onShowAllResults, 
+export function ShowAllResultsButton({
+  onShowAllResults,
   totalBooks,
   searchType
-}: ShowAllResultsButtonProps) => {
+}: ShowAllResultsButtonProps) {
   return (
-    <Button 
-      variant="outline" 
-      size="sm" 
+    <Button
+      variant="link"
       onClick={onShowAllResults}
-      className="flex items-center gap-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+      className="text-primary hover:text-primary/80"
     >
-      <BookOpen className="h-4 w-4 text-[#e4364a]" />
-      Afficher tous les {totalBooks} livres {searchType === 'author' ? 'de l\'auteur' : 'trouvés'}
+      Afficher tous les {totalBooks} {searchType === 'author' ? 'livres de l\'auteur' : searchType === 'title' ? 'résultats pour ce titre' : 'résultats pour cet ISBN'}
     </Button>
   );
-};
+}
