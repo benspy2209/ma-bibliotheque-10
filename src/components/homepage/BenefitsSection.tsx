@@ -33,7 +33,7 @@ export const BenefitsSection = () => {
                 <CircleCheck className="h-6 w-6 text-primary shrink-0 mt-0.5" />
                 <div>
                   <h3 className="font-medium">Base de données complète</h3>
-                  <p className="text-muted-foreground">Des milliers de livres avec descriptions, couvertures et détails</p>
+                  <p className="text-muted-foreground">Des millions de livres et d'auteurs avec descriptions, couvertures et détails</p>
                 </div>
               </div>
               
