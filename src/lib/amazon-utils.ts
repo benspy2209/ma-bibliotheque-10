@@ -52,4 +52,3 @@ export function getAmazonAffiliateUrl(book: Book) {
     return `https://www.amazon.fr/s?k=${searchQuery}&i=stripbooks&tag=${AMAZON_AFFILIATE_ID}`;
   }
 }
-

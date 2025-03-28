@@ -26,7 +26,7 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
         amazonUrl: amazonUrl
       }));
     }
-  }, [queryClient, isOpen, book]); // S'exécute uniquement lorsque le modal s'ouvre
+  }, [queryClient, isOpen, book]); 
 
   // Mettre à jour automatiquement le nombre de jours de lecture si les dates sont disponibles
   useEffect(() => {
@@ -68,8 +68,14 @@ export function BookDetails({ book, isOpen, onClose, onUpdate }: BookDetailsProp
 
   const saveToLibrary = async (bookToSave: Book) => {
     try {
-      console.log('Starting save operation for book:', bookToSave.id, 'with status:', bookToSave.status);
-      const result = await saveBook(bookToSave);
+      // Assurez-vous que le livre a un lien Amazon correct avant de le sauvegarder
+      const updatedBook = {
+        ...bookToSave,
+        amazonUrl: getAmazonAffiliateUrl(bookToSave)
+      };
+      
+      console.log('Starting save operation for book:', updatedBook.id, 'with status:', updatedBook.status);
+      const result = await saveBook(updatedBook);
       
       if (result.success) {
         // Force une invalidation IMMÉDIATE et COMPLÈTE du cache

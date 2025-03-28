@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
 import { useToast } from "@/hooks/use-toast";
@@ -12,7 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { BookSections } from '@/components/library/BookSections';
 import { AuthorFilter } from '@/components/library/AuthorFilter';
 import { Input } from "@/components/ui/input";
-import { Search, BookOpen, BookPlus, RefreshCw } from "lucide-react";
+import { Search, BookOpen, BookPlus } from "lucide-react";
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -27,7 +27,6 @@ export default function Library() {
   const [selectedAuthor, setSelectedAuthor] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [toBuyFilter, setToBuyFilter] = useState<boolean | null>(null);
-  const [isUpdatingLinks, setIsUpdatingLinks] = useState(false);
   const { toast } = useToast();
   const { sortBooks } = useBookSort();
   const { viewMode, toggleView } = useViewPreference();
@@ -47,6 +46,12 @@ export default function Library() {
       }
     }
   });
+
+  useEffect(() => {
+    if (user && books.length > 0) {
+      updateLinks(false);
+    }
+  }, [user, books.length]);
 
   const searchFilter = (book: Book) => {
     if (!searchQuery) return true;
@@ -102,18 +107,6 @@ export default function Library() {
     signIn('signup');
   };
 
-  const handleUpdateAmazonLinks = async () => {
-    setIsUpdatingLinks(true);
-    try {
-      const result = await updateLinks();
-      if (result.success) {
-        refetch();
-      }
-    } finally {
-      setIsUpdatingLinks(false);
-    }
-  };
-
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
@@ -143,16 +136,6 @@ export default function Library() {
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <h1 className="text-2xl md:text-3xl font-bold">Ma Bibliothèque</h1>
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleUpdateAmazonLinks}
-                    disabled={isUpdatingLinks}
-                    className="flex items-center gap-1"
-                  >
-                    <RefreshCw className={`h-4 w-4 ${isUpdatingLinks ? 'animate-spin' : ''}`} />
-                    {isUpdatingLinks ? 'Mise à jour...' : 'Corriger liens Amazon'}
-                  </Button>
                   <SortMenu sortBy={sortBy} onSortChange={setSortBy} />
                   <ViewToggle viewMode={viewMode} onToggle={toggleView} />
                 </div>

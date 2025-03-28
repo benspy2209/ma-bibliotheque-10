@@ -5,6 +5,7 @@ import { loadBooks } from '@/services/supabaseBooks';
 import { getAmazonAffiliateUrl } from '@/lib/amazon-utils';
 import { useToast } from '@/hooks/use-toast';
 
+// Cette fonction corrige les liens Amazon pour tous les livres dans la bibliothèque
 export async function updateAmazonLinksInLibrary() {
   try {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -68,36 +69,39 @@ export async function updateAmazonLinksInLibrary() {
   }
 }
 
-// Hook pour déclencher la mise à jour des liens Amazon
+// Hook pour déclencher la mise à jour des liens Amazon silencieusement
 export function useUpdateAmazonLinks() {
   const { toast } = useToast();
   
-  const updateLinks = async () => {
+  const updateLinks = async (showToasts = false) => {
     try {
       const result = await updateAmazonLinksInLibrary();
       
-      if (result.success) {
-        toast({
-          description: result.message,
-        });
-      } else {
-        toast({
-          variant: "destructive",
-          description: result.message || "Une erreur est survenue",
-        });
+      if (showToasts) {
+        if (result.success) {
+          toast({
+            description: result.message,
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            description: result.message || "Une erreur est survenue",
+          });
+        }
       }
       
       return result;
     } catch (error) {
       console.error('Error in updateLinks:', error);
-      toast({
-        variant: "destructive",
-        description: "Une erreur est survenue lors de la mise à jour des liens",
-      });
+      if (showToasts) {
+        toast({
+          variant: "destructive",
+          description: "Une erreur est survenue lors de la mise à jour des liens",
+        });
+      }
       return { success: false, message: 'Erreur interne' };
     }
   };
   
   return { updateLinks };
 }
-
