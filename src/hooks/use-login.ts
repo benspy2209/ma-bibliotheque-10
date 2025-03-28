@@ -63,8 +63,7 @@ export function useLogin() {
         return;
       }
       
-      // Utilisation directe de l'API d'authentification de Supabase
-      // C'est l'approche recommandée plutôt que de vérifier si un utilisateur existe d'abord
+      // Connexion à Supabase
       const { data: authData, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -74,15 +73,7 @@ export function useLogin() {
         console.log("Erreur de connexion:", error.message);
         
         if (error.message === "Invalid login credentials") {
-          // Cela peut être soit un mauvais mot de passe ou un compte inexistant
-          // Suggérer un email similaire en cas de faute de frappe
-          const similar = await findSimilarEmail(email);
-          if (similar) {
-            setSuggestedEmail(similar);
-            setLoginError(`Compte non trouvé. Avez-vous voulu dire "${similar}" ?`);
-          } else {
-            setLoginError("Ce compte n'existe pas ou le mot de passe est incorrect. Veuillez vérifier vos identifiants.");
-          }
+          setLoginError(`Identifiants incorrects. Veuillez vérifier votre email et votre mot de passe.`);
         } else {
           setLoginError(`Erreur : ${error.message}`);
         }
