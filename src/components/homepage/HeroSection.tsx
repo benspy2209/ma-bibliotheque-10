@@ -37,11 +37,11 @@ export const HeroSection = () => {
       <div className="container px-4 mx-auto">
         <div className="flex flex-col lg:flex-row items-center gap-12">
           <div className="lg:w-1/2 space-y-6">
-            <div className="text-4xl md:text-5xl font-bold leading-tight">
-              <h1 className={`animated-title relative inline-block ${isVisible ? 'animate-in' : ''}`}>
+            <div className="font-bold leading-none">
+              <h1 className={`animated-title relative inline-block text-[51px] font-bold ${isVisible ? 'animate-in' : ''}`} style={{ lineHeight: '51px' }}>
                 Biblio<span className="text-primary title-pulse">Pulse</span>
               </h1>
-              <p className="mt-2">Votre bibliothèque personnelle, amplifiée.</p>
+              <p className="mt-2 text-xl">Votre bibliothèque personnelle, amplifiée.</p>
             </div>
             <p className="text-xl text-muted-foreground">
               Organisez, découvrez et partagez vos lectures préférées dans 7 langues différentes. BiblioPulse vous accompagne dans votre parcours littéraire.
