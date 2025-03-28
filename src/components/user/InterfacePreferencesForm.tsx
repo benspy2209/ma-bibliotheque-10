@@ -22,19 +22,22 @@ export function InterfacePreferencesForm() {
   const { user } = useSupabaseAuth();
   const { toast } = useToast();
   const { theme, toggleTheme } = useTheme();
-  const { t, changeLanguage } = useTranslation();
+  const { t, changeLanguage, language } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   
   const form = useForm<InterfacePreferencesFormValues>({
     defaultValues: {
       theme_preference: 'dark',
-      language_preference: 'fr',
+      language_preference: language,
     },
   });
 
   // Charger les données du profil au chargement
   useEffect(() => {
+    // Mettre à jour le formulaire avec la langue actuelle
+    form.setValue('language_preference', language);
+    
     const fetchProfileData = async () => {
       if (!user) return;
       
@@ -54,7 +57,7 @@ export function InterfacePreferencesForm() {
         // Mettre à jour le formulaire avec les données existantes
         form.reset({
           theme_preference: (data.theme_preference as 'dark' | 'light') || 'dark',
-          language_preference: (data.language_preference as 'fr' | 'en') || 'fr',
+          language_preference: (data.language_preference as 'fr' | 'en') || language,
         });
       } catch (error) {
         console.error('Erreur dans fetchProfileData:', error);
@@ -64,31 +67,12 @@ export function InterfacePreferencesForm() {
     };
 
     fetchProfileData();
-  }, [user, form]);
+  }, [user, form, language]);
 
   // Gestion de la soumission du formulaire
   const onSubmit = async (values: InterfacePreferencesFormValues) => {
-    if (!user) return;
-    
     try {
       setIsLoading(true);
-      
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          theme_preference: values.theme_preference,
-          language_preference: values.language_preference,
-        })
-        .eq('id', user.id);
-        
-      if (error) {
-        console.error('Erreur lors de la mise à jour des préférences:', error);
-        toast({
-          variant: "destructive",
-          description: t("toast.error")
-        });
-        return;
-      }
       
       // Appliquer le thème si différent du thème actuel
       if (values.theme_preference !== theme) {
@@ -96,14 +80,38 @@ export function InterfacePreferencesForm() {
       }
       
       // Appliquer la langue
-      await changeLanguage(values.language_preference);
+      const languageChanged = values.language_preference !== language;
+      if (languageChanged) {
+        await changeLanguage(values.language_preference);
+      }
+
+      // Uniquement mettre à jour la base de données si l'utilisateur est connecté
+      if (user) {
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            theme_preference: values.theme_preference,
+            language_preference: values.language_preference,
+          })
+          .eq('id', user.id);
+          
+        if (error) {
+          console.error('Erreur lors de la mise à jour des préférences:', error);
+          toast({
+            variant: "destructive",
+            description: t("toast.error")
+          });
+          setIsLoading(false);
+          return;
+        }
+      }
       
       toast({
         description: t("toast.preferences_updated")
       });
       
-      // Recharger la page pour appliquer les changements de langue
-      if (values.language_preference !== form.getValues().language_preference) {
+      // Recharger la page pour appliquer les changements de langue à toute l'interface
+      if (languageChanged) {
         setTimeout(() => {
           window.location.reload();
         }, 1000);
@@ -113,6 +121,10 @@ export function InterfacePreferencesForm() {
       setTimeout(() => setIsSaved(false), 3000);
     } catch (error) {
       console.error('Erreur dans onSubmit:', error);
+      toast({
+        variant: "destructive",
+        description: t("toast.error")
+      });
     } finally {
       setIsLoading(false);
     }
@@ -138,7 +150,7 @@ export function InterfacePreferencesForm() {
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value}
                       className="flex space-x-4"
                     >
                       <FormItem className="flex items-center space-x-2 space-y-0">
@@ -176,7 +188,7 @@ export function InterfacePreferencesForm() {
                   <FormLabel>{t('interface_form.language')}</FormLabel>
                   <Select 
                     onValueChange={field.onChange} 
-                    defaultValue={field.value}
+                    value={field.value}
                     disabled={isLoading}
                   >
                     <FormControl>

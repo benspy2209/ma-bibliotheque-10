@@ -14,28 +14,39 @@ export function useTranslation() {
   // Charger la préférence de langue de l'utilisateur
   useEffect(() => {
     const loadLanguagePreference = async () => {
-      if (!user) return;
+      // Essayons d'abord de récupérer la langue depuis localStorage
+      const storedLanguage = localStorage.getItem('app_language') as Language | null;
+      
+      if (storedLanguage && (storedLanguage === 'fr' || storedLanguage === 'en')) {
+        setLanguage(storedLanguage);
+      }
+      
+      // Si l'utilisateur est connecté, chargeons sa préférence depuis la base de données
+      if (user) {
+        try {
+          setIsLoading(true);
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('language_preference')
+            .eq('id', user.id)
+            .single();
 
-      try {
-        setIsLoading(true);
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('language_preference')
-          .eq('id', user.id)
-          .single();
+          if (error) {
+            console.error('Erreur lors du chargement de la préférence de langue:', error);
+            return;
+          }
 
-        if (error) {
-          console.error('Erreur lors du chargement de la préférence de langue:', error);
-          return;
+          if (data && data.language_preference) {
+            const userLanguage = data.language_preference as Language;
+            setLanguage(userLanguage);
+            // Mettons également à jour le localStorage
+            localStorage.setItem('app_language', userLanguage);
+          }
+        } catch (error) {
+          console.error('Erreur dans loadLanguagePreference:', error);
+        } finally {
+          setIsLoading(false);
         }
-
-        if (data && data.language_preference) {
-          setLanguage(data.language_preference as Language);
-        }
-      } catch (error) {
-        console.error('Erreur dans loadLanguagePreference:', error);
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -49,29 +60,37 @@ export function useTranslation() {
 
   // Changer la langue
   const changeLanguage = useCallback(async (newLanguage: Language): Promise<boolean> => {
-    if (!user) return false;
+    // Toujours mettre à jour localStorage pour les utilisateurs connectés et non connectés
+    localStorage.setItem('app_language', newLanguage);
     
-    try {
-      setIsLoading(true);
-      
-      const { error } = await supabase
-        .from('profiles')
-        .update({ language_preference: newLanguage })
-        .eq('id', user.id);
+    // Mettre à jour l'état local
+    setLanguage(newLanguage);
+    
+    // Si l'utilisateur est connecté, mettre à jour la préférence en base de données
+    if (user) {
+      try {
+        setIsLoading(true);
         
-      if (error) {
-        console.error('Erreur lors de la mise à jour de la langue:', error);
+        const { error } = await supabase
+          .from('profiles')
+          .update({ language_preference: newLanguage })
+          .eq('id', user.id);
+          
+        if (error) {
+          console.error('Erreur lors de la mise à jour de la langue:', error);
+          return false;
+        }
+        
+        return true;
+      } catch (error) {
+        console.error('Erreur dans changeLanguage:', error);
         return false;
+      } finally {
+        setIsLoading(false);
       }
-      
-      setLanguage(newLanguage);
-      return true;
-    } catch (error) {
-      console.error('Erreur dans changeLanguage:', error);
-      return false;
-    } finally {
-      setIsLoading(false);
     }
+    
+    return true;
   }, [user]);
 
   return {
