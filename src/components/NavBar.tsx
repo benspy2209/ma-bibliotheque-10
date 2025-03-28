@@ -12,7 +12,7 @@ const NavBar = () => {
   const { theme, toggleTheme } = useTheme();
   const { signIn, signOut, user, showLoginDialog, setShowLoginDialog, setAuthMode } = useSupabaseAuth();
   const isMobile = useIsMobile();
-  const { getUserDisplayName, getInitials, username } = useUserDisplay(user);
+  const { getUserDisplayName, getInitials, username, refreshUsername } = useUserDisplay(user);
 
   // Fonction wrapper pour gérer le clic du bouton de connexion
   const handleSignIn = () => {
@@ -20,6 +20,13 @@ const NavBar = () => {
     setAuthMode('login');
     setShowLoginDialog(true);
   };
+
+  // Force refresh username when component mounts or when user changes
+  useEffect(() => {
+    if (user) {
+      refreshUsername();
+    }
+  }, [user, refreshUsername]);
 
   // Force rerender when username changes
   useEffect(() => {

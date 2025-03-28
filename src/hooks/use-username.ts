@@ -57,7 +57,8 @@ export function useUsername() {
         return;
       }
       
-      const response = data as UsernameChangeResponse;
+      // Cast the data to our expected type with type assertion
+      const response = data as unknown as UsernameChangeResponse;
       setCanChangeUsername(response.can_change);
       
       if (response.next_allowed) {

@@ -35,6 +35,28 @@ export const useUserDisplay = (user: User | null) => {
     fetchUsername();
   }, [user]);
 
+  // Force fetch the username
+  const refreshUsername = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', user.id)
+        .single();
+      
+      if (error) {
+        console.error('Error refreshing username:', error);
+        return;
+      }
+      
+      setUsername(data.username);
+    } catch (error) {
+      console.error('Error in refreshUsername:', error);
+    }
+  };
+
   // Récupérer le nom d'utilisateur ou utiliser son email
   const getUserDisplayName = () => {
     if (!user) return "";
@@ -72,6 +94,7 @@ export const useUserDisplay = (user: User | null) => {
   return {
     getUserDisplayName,
     getInitials,
-    username
+    username,
+    refreshUsername
   };
 };

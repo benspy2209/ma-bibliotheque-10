@@ -10,10 +10,12 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useUsername } from "@/hooks/use-username";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
+import { useUserDisplay } from "@/components/navbar/UserUtils";
 
 export function UsernameForm() {
   const { username, isLoading, canChangeUsername, nextChangeDate, updateUsername } = useUsername();
   const { user } = useSupabaseAuth();
+  const { refreshUsername } = useUserDisplay(user);
   const [newUsername, setNewUsername] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -29,7 +31,11 @@ export function UsernameForm() {
     
     setIsSubmitting(true);
     try {
-      await updateUsername(newUsername);
+      const success = await updateUsername(newUsername);
+      if (success) {
+        // Refresh the username display in the navbar
+        refreshUsername();
+      }
     } finally {
       setIsSubmitting(false);
     }
