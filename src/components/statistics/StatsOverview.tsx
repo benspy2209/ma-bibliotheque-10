@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookIcon, BookOpen, Calendar, BookMarked, Library } from "lucide-react";
+import { BookIcon, BookOpen, Calendar, BookMarked, Library, ShoppingCart, CheckSquare } from "lucide-react";
 
 interface StatsOverviewProps {
   totalBooks: number;
@@ -8,6 +8,8 @@ interface StatsOverviewProps {
   totalReadingDays: number;
   readingBooks: number;
   toReadBooks: number;
+  purchasedBooks: number;  // Nouvelle propriété
+  toBuyBooks: number;      // Nouvelle propriété
 }
 
 export function StatsOverview({
@@ -15,10 +17,12 @@ export function StatsOverview({
   totalPages,
   totalReadingDays,
   readingBooks,
-  toReadBooks
+  toReadBooks,
+  purchasedBooks,  // Nouvelle propriété
+  toBuyBooks       // Nouvelle propriété
 }: StatsOverviewProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-5">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total des livres lus</CardTitle>
@@ -71,6 +75,28 @@ export function StatsOverview({
         <CardContent>
           <div className="text-2xl font-bold">{toReadBooks}</div>
           <p className="text-xs text-muted-foreground mt-1">Livres dans la file d'attente</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Achetés</CardTitle>
+          <CheckSquare className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{purchasedBooks}</div>
+          <p className="text-xs text-muted-foreground mt-1">Livres déjà achetés</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">À acheter</CardTitle>
+          <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{toBuyBooks}</div>
+          <p className="text-xs text-muted-foreground mt-1">Livres à acquérir</p>
         </CardContent>
       </Card>
     </div>

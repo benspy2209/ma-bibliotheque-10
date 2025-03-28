@@ -1,3 +1,4 @@
+
 import { useMemo } from 'react';
 import { Book } from '@/types/book';
 import { useReadingSpeed } from '@/hooks/use-reading-speed';
@@ -27,6 +28,8 @@ export interface CalculatedStats {
   avgReadingTime: string;
   readingTimeDistribution: {name: string; value: number; color: string}[];
   hasReadingTimeData: boolean;
+  purchasedBooks: number; // Nouvelle statistique
+  toBuyBooks: number;     // Nouvelle statistique
 }
 
 interface StatsCalculatorProps {
@@ -187,6 +190,10 @@ export function StatsCalculator({
     const monthlyGoal = readingGoals.monthly_goal;
     const monthlyProgressPercentage = Math.min(100, (booksThisMonth / monthlyGoal) * 100);
 
+    // Nouvelles statistiques d'achat
+    const purchasedBooks = [...completedBooks, ...readingBooks, ...toReadBooks].filter(book => book.purchased === true).length;
+    const toBuyBooks = [...completedBooks, ...readingBooks, ...toReadBooks].filter(book => book.purchased === false).length;
+
     const booksWithReadingTime = completedBooks.filter(book => 
       (book.readingTimeDays !== undefined) || 
       (book.startReadingDate && book.completionDate)
@@ -253,7 +260,9 @@ export function StatsCalculator({
       totalReadingDays,
       avgReadingTime: avgReadingTime.toFixed(1),
       readingTimeDistribution: hasReadingTimeData ? readingTimeDistribution : [],
-      hasReadingTimeData
+      hasReadingTimeData,
+      purchasedBooks, // Nouvelle statistique ajoutée
+      toBuyBooks      // Nouvelle statistique ajoutée
     };
   }, [completedBooks, readingBooks, toReadBooks, readingGoals, readingSpeed]);
 

@@ -32,12 +32,15 @@ export const BookSections = ({
   const completedBooks = books.filter(book => book.status === 'completed');
   const readingBooks = books.filter(book => book.status === 'reading');
   const toReadBooks = books.filter(book => !book.status || book.status === 'to-read');
-  const toBuyBooks = books.filter(book => !book.purchased && (!book.status || book.status === 'to-read'));
+  
+  // Modification importante : compter seulement les livres qui ont explicitement purchased === false
+  const toBuyBooks = books.filter(book => book.purchased === false);
+  // Compter les livres qui ont explicitement purchased === true
   const purchasedBooks = books.filter(book => book.purchased === true);
 
   const filteredToReadBooks = toReadBooks.filter(book => {
-    if (purchaseFilter === 'purchased') return book.purchased;
-    if (purchaseFilter === 'not-purchased') return !book.purchased;
+    if (purchaseFilter === 'purchased') return book.purchased === true;
+    if (purchaseFilter === 'not-purchased') return book.purchased === false;
     return true;
   });
 
