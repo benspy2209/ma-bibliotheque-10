@@ -33,6 +33,19 @@ export const HeroSection = () => {
             <p className="text-xl text-muted-foreground">
               Organisez, découvrez et partagez vos lectures préférées. BiblioPulse vous accompagne dans votre parcours littéraire.
             </p>
+            
+            {/* Nouvelles statistiques ajoutées */}
+            <div className="grid grid-cols-2 gap-4 py-4">
+              <div className="bg-primary/5 p-4 rounded-lg text-center">
+                <div className="font-bold text-2xl md:text-3xl text-primary">44 624 261</div>
+                <div className="text-sm text-muted-foreground">livres disponibles</div>
+              </div>
+              <div className="bg-primary/5 p-4 rounded-lg text-center">
+                <div className="font-bold text-2xl md:text-3xl text-primary">12 839 586</div>
+                <div className="text-sm text-muted-foreground">auteurs référencés</div>
+              </div>
+            </div>
+            
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               {user ? (
                 <Button size="lg" asChild>

@@ -29,9 +29,21 @@ const Features = () => {
             <h1 className="text-4xl sm:text-5xl font-bold mb-6 tracking-tight text-center">
               Fonctionnalités de Bibliopulse
             </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto text-center mb-16">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto text-center mb-8">
               Découvrez tout ce que Bibliopulse peut faire pour transformer votre expérience de lecture et la gestion de votre bibliothèque personnelle.
             </p>
+            
+            {/* Statistiques ajoutées */}
+            <div className="flex justify-center space-x-8 mb-16">
+              <div className="text-center">
+                <div className="font-bold text-3xl sm:text-4xl text-primary mb-1">44 624 261</div>
+                <div className="text-muted-foreground">livres dans notre base</div>
+              </div>
+              <div className="text-center">
+                <div className="font-bold text-3xl sm:text-4xl text-primary mb-1">12 839 586</div>
+                <div className="text-muted-foreground">auteurs référencés</div>
+              </div>
+            </div>
 
             <FeaturesTabs featureSections={featureSections} />
 

@@ -53,6 +53,22 @@ img[alt="BiblioPulse Logo"] {
   }
 }
 
+/* Animation pour les statistiques */
+@keyframes count-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.text-primary {
+  animation: count-up 0.8s ease-out forwards;
+}
+
 /* S'assurer que les textes sont bien lisibles en mode clair */
 .light {
   color-scheme: light;
