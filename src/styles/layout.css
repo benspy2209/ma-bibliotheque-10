@@ -49,12 +49,36 @@
   @apply overflow-x-auto;
 }
 
+/* Improved horizontal scrolling tabs */
+[role="tablist"],
+.tabs-list {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.25rem;
+}
+
+[role="tablist"]::-webkit-scrollbar,
+.tabs-list::-webkit-scrollbar {
+  display: none;
+}
+
+/* Ensure tab triggers don't wrap text and maintain size */
+[role="tab"] {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* For TabsList component */
 .tabs-list-scroll {
-  @apply flex-wrap justify-start h-auto py-1 overflow-x-auto;
+  @apply h-auto py-1 overflow-x-auto flex;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  flex-wrap: nowrap !important;
 }
 
 .tabs-list-scroll::-webkit-scrollbar {
   display: none;
 }
+

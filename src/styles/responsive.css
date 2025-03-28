@@ -73,6 +73,27 @@ body {
   .active\:bg-accent:active {
     background-color: var(--accent);
   }
+  
+  /* Tabs styling for mobile - making them horizontally scrollable */
+  [role="tabslist"],
+  .tabs-list {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 5px;
+    gap: 0.5rem !important;
+  }
+  
+  [role="tabslist"]::-webkit-scrollbar,
+  .tabs-list::-webkit-scrollbar {
+    display: none;
+  }
+  
+  [role="tab"] {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
 }
 
 /* Desktop navbar styles */
@@ -166,3 +187,4 @@ img[alt="BiblioPulse Logo"] {
   max-width: 100%;
   height: auto;
 }
+

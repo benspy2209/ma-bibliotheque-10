@@ -46,21 +46,21 @@ const ProfileSettings = () => {
         </div>
 
         <Tabs defaultValue={activeTab} className="w-full">
-          <TabsList className="mb-8 flex flex-wrap h-auto">
+          <TabsList className="mb-8 h-auto overflow-x-auto scrollbar-hide tabs-list-scroll">
             <TabsTrigger 
               value="to-buy"
-              className="bg-amber-100 text-amber-800 dark:bg-amber-800 dark:text-amber-100 hover:bg-amber-200 dark:hover:bg-amber-700 data-[state=active]:bg-amber-500 data-[state=active]:text-white"
+              className="bg-amber-100 text-amber-800 dark:bg-amber-800 dark:text-amber-100 hover:bg-amber-200 dark:hover:bg-amber-700 data-[state=active]:bg-amber-500 data-[state=active]:text-white whitespace-nowrap"
             >
               <ShoppingCart className="h-4 w-4 mr-1" />
               À acheter
             </TabsTrigger>
-            <TabsTrigger value="profile">Profil</TabsTrigger>
-            <TabsTrigger value="username">Nom d'utilisateur</TabsTrigger>
-            <TabsTrigger value="social">Réseaux sociaux</TabsTrigger>
-            <TabsTrigger value="reading">Préférences de lecture</TabsTrigger>
-            <TabsTrigger value="display">Affichage</TabsTrigger>
-            <TabsTrigger value="goals">Objectifs</TabsTrigger>
-            <TabsTrigger value="account">Compte</TabsTrigger>
+            <TabsTrigger value="profile" className="whitespace-nowrap">Profil</TabsTrigger>
+            <TabsTrigger value="username" className="whitespace-nowrap">Nom d'utilisateur</TabsTrigger>
+            <TabsTrigger value="social" className="whitespace-nowrap">Réseaux sociaux</TabsTrigger>
+            <TabsTrigger value="reading" className="whitespace-nowrap">Préférences de lecture</TabsTrigger>
+            <TabsTrigger value="display" className="whitespace-nowrap">Affichage</TabsTrigger>
+            <TabsTrigger value="goals" className="whitespace-nowrap">Objectifs</TabsTrigger>
+            <TabsTrigger value="account" className="whitespace-nowrap">Compte</TabsTrigger>
           </TabsList>
           
           <TabsContent value="to-buy" className="space-y-8">
