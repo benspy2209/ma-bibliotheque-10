@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -49,6 +50,8 @@ export function useSupabaseAuth() {
           toast({
             description: "Récupération de mot de passe initiée"
           });
+          // Redirection vers la page de réinitialisation du mot de passe
+          navigate('/reset-password');
         }
       }
       
@@ -60,6 +63,23 @@ export function useSupabaseAuth() {
       }
     });
 
+    // Vérifier s'il y a un hash token de récupération dans l'URL 
+    const checkForRecoveryToken = () => {
+      const hash = window.location.hash;
+      const searchParams = new URLSearchParams(window.location.search);
+      
+      if (hash.includes('type=recovery') || hash.includes('access_token') || searchParams.has('token')) {
+        console.log("Token de récupération détecté dans l'URL");
+        
+        // Si on est sur la page de reset password, on n'a rien à faire,
+        // sinon on redirige vers cette page
+        if (!window.location.pathname.includes('/reset-password')) {
+          navigate('/reset-password');
+        }
+      }
+    };
+
+    // Vérifier la session au chargement
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
@@ -67,9 +87,12 @@ export function useSupabaseAuth() {
       setInitialAuthCheckDone(true);
       
       if (currentSession?.user) {
-        console.log(`Initial session retrieved, user ID: ${currentSession.user.id}`);
+        console.log(`Session initiale récupérée, ID utilisateur: ${currentSession.user.id}`);
       } else {
-        console.log('No initial session found');
+        console.log('Aucune session initiale trouvée');
+        
+        // Vérifier les tokens de récupération
+        checkForRecoveryToken();
       }
     });
 
@@ -77,7 +100,7 @@ export function useSupabaseAuth() {
   }, [queryClient, toast, navigate, initialAuthCheckDone]);
 
   const signIn = useCallback((mode: 'login' | 'signup' | 'reset' = 'signup') => {
-    console.log(`signIn called with mode: ${mode}`);
+    console.log(`signIn appelé avec le mode: ${mode}`);
     setAuthMode(mode);
     setShowLoginDialog(true);
   }, []);
@@ -85,7 +108,7 @@ export function useSupabaseAuth() {
   const signOut = useCallback(async () => {
     try {
       await supabase.auth.signOut();
-      // Force a full page reload after sign out to ensure a clean state
+      // Force un rechargement complet de la page après la déconnexion
       window.location.href = '/';
     } catch (error: any) {
       toast({

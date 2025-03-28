@@ -8,6 +8,8 @@ import {
 } from "@/components/ui/dialog";
 import { LoginForm } from "./LoginForm";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface LoginDialogProps {
   open: boolean;
@@ -15,7 +17,19 @@ interface LoginDialogProps {
 }
 
 export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
-  const { authMode } = useSupabaseAuth();
+  const { authMode, setAuthMode } = useSupabaseAuth();
+  const navigate = useNavigate();
+  
+  // Si le mode est "reset", rediriger vers la page de réinitialisation du mot de passe
+  useEffect(() => {
+    if (authMode === 'reset' && open) {
+      // Fermer la boîte de dialogue
+      onOpenChange(false);
+      
+      // Rediriger vers la page de réinitialisation du mot de passe
+      navigate('/reset-password');
+    }
+  }, [authMode, open, onOpenChange, navigate]);
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
