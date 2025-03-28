@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import NavBar from '@/components/NavBar';
@@ -11,7 +10,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Card, CardContent } from '@/components/ui/card';
-import { HelpCircle, BookOpen, Search, BookMarkIcon, BarChart2, Users, BookText } from 'lucide-react';
+import { HelpCircle, BookOpen, Search, BookmarkIcon, BarChart2, Users, BookText } from 'lucide-react';
 
 const FAQ = () => {
   return (
@@ -66,7 +65,7 @@ const FAQ = () => {
                 <Card>
                   <CardContent className="pt-6">
                     <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-                      <BookMarkIcon className="h-5 w-5 text-primary" />
+                      <BookmarkIcon className="h-5 w-5 text-primary" />
                       Gérer votre bibliothèque
                     </h2>
                     <div className="space-y-4">
