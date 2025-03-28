@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { BookOpen, Mail, Heart, Shield, BookText, Facebook } from "lucide-react";
+import { BookOpen, Mail, Heart, Shield, BookText, Facebook, HelpCircle } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -83,6 +83,11 @@ const Footer = () => {
                     </Link>
                   </li>
                   <li>
+                    <Link to="/faq" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                      FAQ
+                    </Link>
+                  </li>
+                  <li>
                     <Link to="/privacy-policy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                       Politique de confidentialité
                     </Link>
@@ -162,6 +167,11 @@ const Footer = () => {
                     </Link>
                   </li>
                   <li>
+                    <Link to="/faq" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                      FAQ
+                    </Link>
+                  </li>
+                  <li>
                     <Link to="/privacy-policy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                       Politique de confidentialité
                     </Link>
@@ -222,6 +232,13 @@ const Footer = () => {
             >
               <Shield className="h-4 w-4" />
             </a>
+            <Link 
+              to="/faq"
+              aria-label="FAQ" 
+              className="hover:text-primary transition-colors"
+            >
+              <HelpCircle className="h-4 w-4" />
+            </Link>
           </div>
         </div>
       </div>
