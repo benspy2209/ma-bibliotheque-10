@@ -20,6 +20,7 @@ import Contact from "./pages/Contact";
 import FAQ from "./pages/FAQ";
 import Roadmap from "./pages/Roadmap";
 import About from "./pages/About";
+import ProfileSettings from "./pages/ProfileSettings";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
             <Route path="/faq" element={<FAQ />} />
             <Route path="/roadmap" element={<Roadmap />} />
             <Route path="/about" element={<About />} />
+            <Route path="/profile/settings" element={<ProfileSettings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

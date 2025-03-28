@@ -36,6 +36,24 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          id: string
+          last_username_change: string | null
+          username: string | null
+        }
+        Insert: {
+          id: string
+          last_username_change?: string | null
+          username?: string | null
+        }
+        Update: {
+          id?: string
+          last_username_change?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
       reading_goals: {
         Row: {
           created_at: string
@@ -167,6 +185,12 @@ export type Database = {
       }
     }
     Functions: {
+      can_change_username: {
+        Args: {
+          user_id: string
+        }
+        Returns: Json
+      }
       can_perform_search: {
         Args: {
           p_user_id?: string
