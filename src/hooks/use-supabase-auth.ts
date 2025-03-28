@@ -114,8 +114,8 @@ export function useSupabaseAuth() {
     try {
       console.log("Tentative de connexion avec Facebook...");
       
-      // Vérification si l'API Facebook est correctement chargée
-      if (!window.FB) {
+      // Safe check for FB object with proper type checking
+      if (typeof window.FB === 'undefined') {
         console.warn("Le SDK Facebook n'est pas correctement chargé");
         toast({
           variant: "destructive",
