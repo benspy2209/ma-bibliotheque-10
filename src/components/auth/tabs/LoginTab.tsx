@@ -38,9 +38,9 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
       });
 
       if (error) {
-        // Personnaliser le message d'erreur pour rendre plus clair si l'utilisateur n'est pas inscrit
+        // Améliorer le message d'erreur pour être plus précis
         if (error.message === "Invalid login credentials") {
-          setLoginError("Ce compte n'existe pas. Veuillez créer un compte dans l'onglet \"Inscription\".");
+          setLoginError("Identifiants incorrects. Vérifiez votre adresse email et mot de passe ou créez un compte dans l'onglet \"Inscription\".");
         } else {
           setLoginError(`Erreur : ${error.message}`);
         }
