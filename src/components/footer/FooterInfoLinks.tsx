@@ -15,37 +15,37 @@ const FooterInfoLinks = ({ className = "" }: FooterInfoLinksProps) => {
       </h4>
       <ul className="space-y-2">
         <li>
-          <Link to="/features" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+          <Link to="/features" className="text-sm text-muted-foreground hover:text-[#e4364a] transition-colors">
             Fonctionnalités
           </Link>
         </li>
         <li>
-          <Link to="/roadmap" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+          <Link to="/roadmap" className="text-sm text-muted-foreground hover:text-[#e4364a] transition-colors">
             Roadmap
           </Link>
         </li>
         <li>
-          <Link to="/faq" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+          <Link to="/faq" className="text-sm text-muted-foreground hover:text-[#e4364a] transition-colors">
             FAQ
           </Link>
         </li>
         <li>
-          <Link to="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+          <Link to="/about" className="text-sm text-muted-foreground hover:text-[#e4364a] transition-colors">
             À propos
           </Link>
         </li>
         <li>
-          <Link to="/privacy-policy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+          <Link to="/privacy-policy" className="text-sm text-muted-foreground hover:text-[#e4364a] transition-colors">
             Politique de confidentialité
           </Link>
         </li>
         <li>
-          <Link to="/legal-notice" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+          <Link to="/legal-notice" className="text-sm text-muted-foreground hover:text-[#e4364a] transition-colors">
             Mentions légales
           </Link>
         </li>
         <li>
-          <Link to="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+          <Link to="/contact" className="text-sm text-muted-foreground hover:text-[#e4364a] transition-colors">
             Contact
           </Link>
         </li>

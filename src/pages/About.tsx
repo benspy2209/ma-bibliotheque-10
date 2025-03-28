@@ -27,7 +27,7 @@ const About = () => {
           </div>
 
           <Card className="overflow-hidden">
-            <div className="relative h-64 bg-gradient-to-r from-blue-600 to-indigo-700">
+            <div className="relative h-64 bg-[#e4364a]">
               <div className="absolute inset-0 flex items-center justify-center">
                 <h2 className="text-3xl font-bold text-white">Benjamin de Bruijne</h2>
               </div>
@@ -80,7 +80,7 @@ const About = () => {
                         href="https://beneloo.com" 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
+                        className="text-[#e4364a] hover:underline"
                       >
                         Visiter beneloo.com
                       </a>
@@ -95,7 +95,7 @@ const About = () => {
                         href="https://benjamindebruijne.com" 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
+                        className="text-[#e4364a] hover:underline"
                       >
                         Visiter benjamindebruijne.com
                       </a>
