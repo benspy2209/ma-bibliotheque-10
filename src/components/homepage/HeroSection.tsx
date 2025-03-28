@@ -39,7 +39,7 @@ export const HeroSection = () => {
           <div className="lg:w-1/2 space-y-6">
             <div className="font-bold leading-none">
               <h1 className={`animated-title relative inline-block text-[51px] font-bold ${isVisible ? 'animate-in' : ''}`} style={{ lineHeight: '51px' }}>
-                Biblio<span className="text-primary title-pulse">Pulse</span>
+                Biblio<span className="text-[#E4364A] title-pulse">Pulse</span>
               </h1>
               <p className="mt-2 text-xl">Votre bibliothèque personnelle, amplifiée.</p>
             </div>
@@ -57,12 +57,13 @@ export const HeroSection = () => {
                   <Button 
                     size="lg" 
                     onClick={handleLoginClick}
-                    className="pulse-effect bg-[#e4364a] text-white hover:bg-[#d11a2e] flex items-center gap-2"
+                    variant="pulse"
+                    className="font-semibold text-base flex items-center gap-2"
                   >
                     <LogIn className="h-5 w-5" /> Commencer l'aventure
                   </Button>
                   <Button 
-                    variant="pulse" 
+                    variant="outline" 
                     size="lg" 
                     asChild
                     className="border-2 border-[#222] dark:border-white"

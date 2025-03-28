@@ -25,7 +25,7 @@ export const FeatureCallToAction = () => {
       {!user && (
         <div className="flex justify-center">
           <div className="relative inline-block">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500/50 opacity-75"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E4364A]/50 opacity-75"></span>
             <Button 
               size="lg" 
               onClick={handleSignInClick}

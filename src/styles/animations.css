@@ -115,7 +115,8 @@
 .pulse-effect {
   animation: pulse 2s infinite;
   transition: all 0.3s ease;
-  background-color: #e4364a !important;
+  background-color: #E4364A !important;
+  color: white !important;
 }
 
 .glow-effect {
