@@ -261,9 +261,9 @@ const NavBar = () => {
               
               {/* Conteneur flex avec les liens à gauche et les actions à droite */}
               <div className="w-full flex justify-between items-center">
-                {/* Menu centré */}
+                {/* Menu centré avec espacement réduit */}
                 <div className="desktop-menu-container flex-grow">
-                  <div className="nav-links-container flex items-center justify-center space-x-6">
+                  <div className="nav-links-container flex items-center justify-center space-x-4">
                     <NavLinks />
                   </div>
                 </div>
