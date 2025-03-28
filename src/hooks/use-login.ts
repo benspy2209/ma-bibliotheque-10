@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
@@ -45,6 +44,27 @@ export function useLogin() {
     }
   };
 
+  // Fonction pour vérifier si l'email existe dans user_books_stats
+  const checkEmailInUserStats = async (email: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase
+        .from('user_books_stats')
+        .select('user_email')
+        .eq('user_email', email)
+        .maybeSingle();
+      
+      if (error) {
+        console.error("Erreur lors de la vérification dans user_books_stats:", error);
+        return false;
+      }
+      
+      return data !== null;
+    } catch (err) {
+      console.error("Exception lors de la vérification dans user_books_stats:", err);
+      return false;
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -74,6 +94,15 @@ export function useLogin() {
         console.log("Erreur de connexion:", error.message, "Code:", error.status);
         
         if (error.message === "Invalid login credentials") {
+          // Vérifier d'abord si l'email existe dans user_books_stats
+          const existsInStats = await checkEmailInUserStats(email);
+          
+          if (existsInStats) {
+            setLoginError(`L'email ${email} existe dans vos statistiques mais n'a pas de compte d'authentification associé. Veuillez vous inscrire pour créer un compte.`);
+            setIsLoading(false);
+            return;
+          }
+          
           // Méthode améliorée pour vérifier l'existence du compte
           try {
             // Tenter une inscription temporaire pour vérifier si l'utilisateur existe
