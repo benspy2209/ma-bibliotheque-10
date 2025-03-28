@@ -221,6 +221,13 @@ export type Database = {
       }
     }
     Functions: {
+      admin_update_username: {
+        Args: {
+          user_id: string
+          new_username: string
+        }
+        Returns: undefined
+      }
       can_change_username: {
         Args: {
           user_id: string

@@ -10,6 +10,24 @@ interface UsernameChangeResponse {
   next_allowed: string | null;
 }
 
+// This helps TypeScript recognize our custom RPC function
+type CustomRPC = 
+  | "can_change_username" 
+  | "can_perform_search" 
+  | "fetch_reading_goals" 
+  | "get_all_users_statistics" 
+  | "get_reading_streak" 
+  | "increment_search_count" 
+  | "upsert_reading_goals"
+  | "admin_update_username";  // Added the new RPC function here
+
+// Extend the supabase client type to include our custom RPC
+declare module '@supabase/supabase-js' {
+  interface SupabaseClient {
+    rpc<T = any>(fn: CustomRPC, params?: object): { data: T; error: Error };
+  }
+}
+
 export function useUsername() {
   const [username, setUsername] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
