@@ -13,7 +13,7 @@ export function FeatureProposalsList() {
   // Vérifier si l'utilisateur est l'administrateur
   const isAdmin = user?.email === "debruijneb@gmail.com";
   
-  // Si aucune proposition, ne rien afficher
+  // Si aucune proposition, ne rien afficher et retourner null
   if (featureProposals.length === 0) {
     return null;
   }

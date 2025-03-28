@@ -70,24 +70,6 @@ export const roadmapFeatures: RoadmapFeature[] = [
   }
 ];
 
-// List of feature proposals from users
-export const featureProposals: RoadmapFeature[] = [
-  {
-    name: "Mode sombre automatique",
-    description: "Basculement automatique du thème en fonction des préférences système",
-    status: "planned",
-    technical_details: "Intégration avec prefers-color-scheme et stockage des préférences utilisateur",
-    isProposal: true,
-    proposedBy: "example@email.com",
-    proposalDate: "2024-04-01"
-  },
-  {
-    name: "Export PDF des statistiques",
-    description: "Possibilité d'exporter ses statistiques de lecture au format PDF",
-    status: "planned",
-    technical_details: "Utilisation de React-PDF pour générer des rapports de statistiques téléchargeables",
-    isProposal: true,
-    proposedBy: "lecteur@gmail.com",
-    proposalDate: "2024-04-02"
-  }
-];
+// Liste vide des propositions de fonctionnalités des utilisateurs
+// Les propositions seront ajoutées dynamiquement quand les utilisateurs en soumettront
+export const featureProposals: RoadmapFeature[] = [];
