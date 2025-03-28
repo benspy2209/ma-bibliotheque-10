@@ -114,16 +114,6 @@ export function useSupabaseAuth() {
     try {
       console.log("Tentative de connexion avec Facebook...");
       
-      // Vérification si l'API Facebook est correctement chargée
-      if (!window.FB) {
-        console.warn("Le SDK Facebook n'est pas correctement chargé");
-        toast({
-          variant: "destructive",
-          description: "Erreur: Le SDK Facebook n'est pas correctement chargé"
-        });
-        return;
-      }
-      
       // Utiliser l'authentification OAuth de Supabase avec le provider Facebook
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'facebook',
@@ -136,19 +126,6 @@ export function useSupabaseAuth() {
       
       if (error) {
         console.error("Erreur OAuth Facebook:", error);
-        
-        // Message d'erreur plus détaillé pour les erreurs de domaine non configuré
-        if (error.message.includes("domain") || error.message.includes("URL")) {
-          toast({
-            variant: "destructive",
-            description: "Erreur: Le domaine de votre application n'est pas autorisé dans les paramètres de votre application Facebook. Veuillez ajouter votre domaine dans les paramètres développeur Facebook."
-          });
-        } else {
-          toast({
-            variant: "destructive",
-            description: `Erreur: ${error.message}`
-          });
-        }
         throw error;
       }
       
