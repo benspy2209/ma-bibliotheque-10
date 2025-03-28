@@ -82,36 +82,38 @@ export function BookFilters({
       </div>
 
       {isFiltersVisible && (
-        <div className={`space-y-4 p-4 border rounded-md mt-2 bg-background ${isMobile ? 'flex flex-col' : 'grid grid-cols-2 gap-4'}`}>
-          <div className="space-y-2">
-            <Label htmlFor="titleFilter">Titre</Label>
-            <Input
-              id="titleFilter"
-              placeholder="Filtrer par titre"
-              value={titleFilter}
-              onChange={(e) => onTitleFilterChange(e.target.value)}
-              className="w-full"
-            />
-          </div>
+        <div className="space-y-4 p-4 border rounded-md mt-2 bg-background">
+          <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-4`}>
+            <div className="space-y-2">
+              <Label htmlFor="titleFilter" className="block mb-1">Titre</Label>
+              <Input
+                id="titleFilter"
+                placeholder="Filtrer par titre"
+                value={titleFilter}
+                onChange={(e) => onTitleFilterChange(e.target.value)}
+                className="w-full"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="authorFilter">Auteur</Label>
-            <Select
-              value={selectedAuthor || ""}
-              onValueChange={(value) => onAuthorSelect(value === "" ? null : value)}
-            >
-              <SelectTrigger id="authorFilter" className="w-full">
-                <SelectValue placeholder="Tous les auteurs" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tous les auteurs</SelectItem>
-                {authors.map((author) => (
-                  <SelectItem key={author} value={author || "unknown"}>
-                    {author || "Auteur inconnu"}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="space-y-2">
+              <Label htmlFor="authorFilter" className="block mb-1">Auteur</Label>
+              <Select
+                value={selectedAuthor || ""}
+                onValueChange={(value) => onAuthorSelect(value === "" ? null : value)}
+              >
+                <SelectTrigger id="authorFilter" className="w-full">
+                  <SelectValue placeholder="Tous les auteurs" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous les auteurs</SelectItem>
+                  {authors.map((author) => (
+                    <SelectItem key={author} value={author || "unknown"}>
+                      {author || "Auteur inconnu"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
       )}
