@@ -27,8 +27,8 @@ export const UserMenu = ({ user, signOut, getUserDisplayName, getInitials }: Use
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
-          <Avatar className="h-8 w-8 border-2 border-primary/20 transition-colors">
+        <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
+          <Avatar className="h-9 w-9 border-2 border-primary transition-colors">
             <AvatarFallback className="bg-primary text-primary-foreground text-sm font-bold">
               {initials}
             </AvatarFallback>
@@ -37,7 +37,7 @@ export const UserMenu = ({ user, signOut, getUserDisplayName, getInitials }: Use
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64 z-50 mt-1">
         <div className="flex items-center gap-3 p-3">
-          <Avatar className="h-10 w-10 border-2 border-primary/20">
+          <Avatar className="h-12 w-12 border-2 border-primary">
             <AvatarFallback className="bg-primary text-primary-foreground font-bold">
               {initials}
             </AvatarFallback>

@@ -52,17 +52,12 @@ export const DesktopNavbar = ({
         {/* Actions utilisateur à droite */}
         <div className="flex items-center gap-3">
           {user ? (
-            <div className="flex items-center gap-3 bg-primary/10 rounded-full pl-3 pr-1 py-1 transition-colors">
-              <span className="text-sm font-medium hidden lg:inline-block">
-                Bonjour, <span className="text-primary">{getUserDisplayName()}</span>
-              </span>
-              <UserMenu 
-                user={user}
-                signOut={signOut}
-                getUserDisplayName={getUserDisplayName}
-                getInitials={getInitials}
-              />
-            </div>
+            <UserMenu 
+              user={user}
+              signOut={signOut}
+              getUserDisplayName={getUserDisplayName}
+              getInitials={getInitials}
+            />
           ) : (
             <Button 
               variant="outline" 
