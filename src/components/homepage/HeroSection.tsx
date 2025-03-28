@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Star, LogIn } from 'lucide-react';
@@ -11,7 +10,6 @@ export const HeroSection = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Déclenche l'animation après le chargement du composant
     const timer = setTimeout(() => {
       setIsVisible(true);
     }, 300);
@@ -19,13 +17,11 @@ export const HeroSection = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Modified to redirect to library page instead of search
   const handleLoginClick = () => {
     console.log("Commencer l'aventure clicked");
     navigate('/library');
   };
 
-  // Wrapper function for login
   const handleSignIn = () => {
     console.log("Opening login dialog from HeroSection");
     signIn('login');
@@ -75,18 +71,20 @@ export const HeroSection = () => {
           </div>
           <div className="lg:w-1/2">
             <div className="relative">
-              <img 
-                src="/photo 1.jpg" 
-                alt="Personne lisant et organisant sa bibliothèque" 
-                className="rounded-lg shadow-2xl object-cover w-full"
-                onError={(e) => {
-                  console.error("Image failed to load:", e);
-                  const target = e.target as HTMLImageElement;
-                  target.src = '/placeholder.svg';
-                }}
-              />
+              <picture>
+                <source srcSet="/photo1.webp" type="image/webp" />
+                <img 
+                  src="/photo 1.jpg" 
+                  alt="Personne lisant et organisant sa bibliothèque" 
+                  className="rounded-lg shadow-2xl object-cover w-full"
+                  onError={(e) => {
+                    console.error("Image failed to load:", e);
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/placeholder.svg';
+                  }}
+                />
+              </picture>
               
-              {/* Témoignage */}
               <div className="absolute -bottom-12 -left-6 bg-background rounded-lg shadow-lg p-4 w-64 max-w-[80%] sm:max-w-full">
                 <div className="flex items-center gap-2">
                   <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
