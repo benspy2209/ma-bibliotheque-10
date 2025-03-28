@@ -7,6 +7,7 @@ import RoadmapHeader from "@/components/roadmap/RoadmapHeader";
 import FeatureTimeline from "@/components/roadmap/FeatureTimeline";
 import RoadmapFooter from "@/components/roadmap/RoadmapFooter";
 import { roadmapFeatures } from "@/components/roadmap/RoadmapData";
+import { AddFeatureDialog } from "@/components/roadmap/AddFeatureDialog";
 
 const Roadmap = () => {
   return (
@@ -23,6 +24,7 @@ const Roadmap = () => {
         <RoadmapHeader />
         <FeatureTimeline features={roadmapFeatures} />
         <RoadmapFooter />
+        <AddFeatureDialog />
       </main>
       <Footer />
     </>

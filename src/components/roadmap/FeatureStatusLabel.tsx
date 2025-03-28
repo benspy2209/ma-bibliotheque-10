@@ -6,14 +6,14 @@ interface FeatureStatusLabelProps {
   status: FeatureStatus;
 }
 
-const FeatureStatusLabel = ({ status }: FeatureStatusLabelProps): string => {
+const FeatureStatusLabel = ({ status }: FeatureStatusLabelProps) => {
   switch (status) {
     case "completed":
-      return "Implémenté";
+      return <span>Implémenté</span>;
     case "in-progress":
-      return "En développement";
+      return <span>En développement</span>;
     case "planned":
-      return "Planifié";
+      return <span>Planifié</span>;
   }
 };
 
