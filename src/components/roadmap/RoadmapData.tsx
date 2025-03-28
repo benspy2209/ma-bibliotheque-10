@@ -18,12 +18,13 @@ export interface RoadmapFeature {
 
 // List of technical features for the roadmap
 export const roadmapFeatures: RoadmapFeature[] = [
+  // Completed features in chronological order
   {
-    name: "Authentification par réseaux sociaux",
-    description: "Connexion via Google et Facebook pour simplifier l'accès des utilisateurs",
+    name: "Base de données de livres",
+    description: "Stockage et gestion des livres dans la bibliothèque de l'utilisateur",
     status: "completed",
-    completionDate: "28 mars 2025",
-    technical_details: "Intégration des API OAuth de Google et Facebook avec Supabase Auth, gestion des redirections et des états d'authentification"
+    completionDate: "10 mars 2025",
+    technical_details: "Architecture PostgreSQL avec Supabase, relations entre tables utilisateurs et livres"
   },
   {
     name: "Authentification utilisateur",
@@ -31,13 +32,6 @@ export const roadmapFeatures: RoadmapFeature[] = [
     status: "completed",
     completionDate: "15 mars 2025",
     technical_details: "Implémentation avec Supabase Auth, JWT, et protection des routes"
-  },
-  {
-    name: "Base de données de livres",
-    description: "Stockage et gestion des livres dans la bibliothèque de l'utilisateur",
-    status: "completed",
-    completionDate: "10 mars 2025",
-    technical_details: "Architecture PostgreSQL avec Supabase, relations entre tables utilisateurs et livres"
   },
   {
     name: "API de recherche de livres",
@@ -60,6 +54,14 @@ export const roadmapFeatures: RoadmapFeature[] = [
     completionDate: "22 mars 2025",
     technical_details: "Parsers CSV/JSON personnalisés, validation des données, gestion des erreurs"
   },
+  {
+    name: "Authentification par réseaux sociaux",
+    description: "Connexion via Google et Facebook pour simplifier l'accès des utilisateurs",
+    status: "completed",
+    completionDate: "28 mars 2025",
+    technical_details: "Intégration des API OAuth de Google et Facebook avec Supabase Auth, gestion des redirections et des états d'authentification"
+  },
+  // In-progress and planned features in sequential order
   {
     name: "Mode hors-ligne",
     description: "Utilisation de l'application sans connexion internet",
