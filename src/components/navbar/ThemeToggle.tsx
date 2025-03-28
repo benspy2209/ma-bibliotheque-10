@@ -1,9 +1,10 @@
 
 import { Button } from "../ui/button";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, Monitor } from "lucide-react";
+import { Theme } from "@/hooks/use-theme";
 
 interface ThemeToggleProps {
-  theme: string;
+  theme: Theme;
   toggleTheme: () => void;
 }
 
@@ -15,7 +16,9 @@ export const ThemeToggle = ({ theme, toggleTheme }: ThemeToggleProps) => {
       onClick={toggleTheme}
       className="transition-colors duration-300 h-8 w-8"
     >
-      {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+      {theme === 'light' && <Moon className="h-4 w-4" />}
+      {theme === 'dark' && <Sun className="h-4 w-4" />}
+      {theme === 'system' && <Monitor className="h-4 w-4" />}
     </Button>
   );
 };
