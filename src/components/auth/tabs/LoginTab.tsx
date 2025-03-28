@@ -140,7 +140,7 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
             </Button>
           </div>
         </div>
-        <Button type="submit" className="w-full" variant="pulse" disabled={isLoading}>
+        <Button type="submit" className="w-full h-12 mt-6 text-base" variant="pulse" disabled={isLoading}>
           {isLoading ? 'Connexion...' : 'Se connecter'}
         </Button>
 
@@ -158,7 +158,7 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
       </form>
 
       <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Réinitialisation de mot de passe</DialogTitle>
             <DialogDescription>

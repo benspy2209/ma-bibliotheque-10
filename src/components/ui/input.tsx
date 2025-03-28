@@ -15,7 +15,12 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentPropsWithoutRef<
         ref={ref}
         autoComplete="on"
         spellCheck="false"
-        style={{ caretColor: 'auto', WebkitAppearance: 'none', WebkitUserSelect: 'auto' }}
+        style={{ 
+          caretColor: 'auto', 
+          WebkitAppearance: 'none', 
+          WebkitUserSelect: 'auto',
+          fontSize: '16px'  // Important pour éviter le zoom sur les appareils iOS
+        }}
         {...props}
       />
     )
