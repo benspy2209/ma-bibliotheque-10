@@ -66,66 +66,88 @@ const NavBar = () => {
     </>
   );
 
+  // Afficher le bouton de connexion/déconnexion
+  const AuthButton = () => (
+    user ? (
+      <Button 
+        variant="outline" 
+        size="sm"
+        onClick={signOut}
+        className="transition-colors duration-300 text-base w-full"
+      >
+        Se déconnecter
+      </Button>
+    ) : (
+      <Button 
+        variant="outline" 
+        size="sm"
+        onClick={handleSignIn}
+        className="transition-colors duration-300 text-base w-full"
+      >
+        <LogIn className="h-5 w-5 mr-2" />
+        Se connecter
+      </Button>
+    )
+  );
+
   return (
     <nav className="w-full border-b py-5 px-6 transition-colors duration-300">
       <div className="max-w-7xl mx-auto flex flex-row items-center justify-between gap-4">
         {isMobile ? (
-          <div className="flex flex-col items-center w-full">
-            {/* Logo en haut */}
-            <div className="navbar-logo-container mb-3">
-              <NavLink to="/" className="flex items-center">
-                <img 
-                  src={theme === 'light' ? "/pulse.png" : "/pulse dark.png"}
-                  alt="BiblioPulse Logo" 
-                  className="h-auto w-auto max-h-[32px] md:max-h-40" 
-                />
-              </NavLink>
-            </div>
-            
-            {/* Bouton Se Connecter au milieu */}
-            <div className="mb-3">
-              {user ? (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={signOut}
-                  className="transition-colors duration-300 text-base"
-                >
-                  Se déconnecter
-                </Button>
-              ) : (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={handleSignIn}
-                  className="transition-colors duration-300 text-base"
-                >
-                  <LogIn className="h-5 w-5 mr-2" />
-                  Se connecter
-                </Button>
-              )}
-            </div>
-            
-            {/* Menu Hamburger en bas */}
-            <Drawer>
-              <DrawerTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Menu</span>
-                </Button>
-              </DrawerTrigger>
-              <DrawerContent className="px-4 py-6">
-                <div className="flex flex-col gap-6">
-                  <div className="flex flex-col gap-4">
-                    <NavLinks />
+          <>
+            {/* Layout mobile amélioré: logo à gauche et menu hamburger à droite */}
+            <div className="flex justify-between items-center w-full">
+              <div className="navbar-logo-container">
+                <NavLink to="/" className="flex items-center">
+                  <img 
+                    src={theme === 'light' ? "/pulse.png" : "/pulse dark.png"}
+                    alt="BiblioPulse Logo" 
+                    className="h-auto w-auto max-h-[40px]" 
+                  />
+                </NavLink>
+              </div>
+              
+              <Drawer>
+                <DrawerTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-6 w-6" />
+                    <span className="sr-only">Menu</span>
+                  </Button>
+                </DrawerTrigger>
+                <DrawerContent className="px-4 py-6">
+                  <div className="flex flex-col gap-6">
+                    {/* Bouton Connexion en haut du drawer */}
+                    <div className="mb-4 px-2">
+                      <AuthButton />
+                    </div>
+                    
+                    <div className="border-t pt-4"></div>
+                    
+                    {/* Navigation links */}
+                    <div className="flex flex-col gap-4">
+                      <NavLinks />
+                    </div>
+                    
+                    {/* Thème et fermeture */}
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={toggleTheme}
+                        className="transition-colors duration-300"
+                      >
+                        {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+                      </Button>
+                      
+                      <DrawerClose asChild>
+                        <Button variant="outline" size="sm">Fermer</Button>
+                      </DrawerClose>
+                    </div>
                   </div>
-                  <DrawerClose asChild>
-                    <Button variant="outline" size="sm">Fermer</Button>
-                  </DrawerClose>
-                </div>
-              </DrawerContent>
-            </Drawer>
-          </div>
+                </DrawerContent>
+              </Drawer>
+            </div>
+          </>
         ) : (
           <>
             <div className="flex items-center gap-6">
