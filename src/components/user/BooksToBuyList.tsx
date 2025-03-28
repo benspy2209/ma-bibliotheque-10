@@ -64,7 +64,7 @@ export function BooksToBuyList() {
             return item.book_data as Book;
           }
         })
-        .filter(book => !book.purchased);
+        .filter(book => book.purchased === false);
         
       setBooks(bookList);
     } catch (err: any) {

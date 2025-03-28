@@ -31,10 +31,11 @@ export function BookDetailsTable({ bookDetails }: BookDetailsTableProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
 
-  // Filter Stephen King books for the admin user that need to be updated (all Stephen King books)
+  // Filter Stephen King books for the admin user that need to be updated
   const stephenKingBooks = bookDetails.filter(book => 
     book.user_email === 'debruijneb@gmail.com' && 
-    book.book_author.toLowerCase().includes('stephen king')
+    book.book_author.toLowerCase().includes('stephen king') &&
+    (!book.purchased || book.status !== 'to-read')  // Only include books that aren't already marked as purchased
   );
 
   const updateStephenKingBooksStatus = async () => {
@@ -114,7 +115,7 @@ export function BookDetailsTable({ bookDetails }: BookDetailsTableProps) {
       {stephenKingBooks.length > 0 && (
         <div className="mb-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md">
           <p className="text-sm mb-2">
-            <strong>{stephenKingBooks.length} livres de Stephen King</strong> dans le compte admin.
+            <strong>{stephenKingBooks.length} livres de Stephen King</strong> dans le compte admin nécessitent une mise à jour.
           </p>
           <Button 
             onClick={updateStephenKingBooksStatus} 
