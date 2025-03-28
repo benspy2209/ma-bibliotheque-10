@@ -32,6 +32,7 @@ export const useUserDisplay = (user: User | null) => {
         }
         
         setUsername(data?.username || null);
+        console.log("Username fetch complete:", data?.username);
       } catch (error) {
         console.error('Error in fetchUsername:', error);
       }
@@ -60,6 +61,7 @@ export const useUserDisplay = (user: User | null) => {
       }
       
       setUsername(data?.username || null);
+      console.log("Username refreshed:", data?.username);
     } catch (error) {
       console.error('Error in refreshUsername:', error);
     }

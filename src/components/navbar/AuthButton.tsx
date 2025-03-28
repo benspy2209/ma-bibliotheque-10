@@ -1,7 +1,7 @@
 
-import { Button } from "../ui/button";
-import { LogIn } from "lucide-react";
 import { User } from "@supabase/supabase-js";
+import { Button } from "@/components/ui/button";
+import { LogIn, LogOut } from "lucide-react";
 
 interface AuthButtonProps {
   user: User | null;
@@ -10,26 +10,27 @@ interface AuthButtonProps {
 }
 
 export const AuthButton = ({ user, signOut, handleSignIn }: AuthButtonProps) => {
-  return (
-    user ? (
+  if (user) {
+    return (
       <Button 
         variant="outline" 
-        size="sm"
+        className="w-full touch-manipulation" 
         onClick={signOut}
-        className="transition-colors duration-300 text-base w-full"
       >
-        Se déconnecter
+        <LogOut className="mr-2 h-4 w-4" />
+        Déconnexion
       </Button>
-    ) : (
-      <Button 
-        variant="outline" 
-        size="sm"
-        onClick={handleSignIn}
-        className="transition-colors duration-300 text-base w-full"
-      >
-        <LogIn className="h-5 w-5 mr-2" />
-        Se connecter
-      </Button>
-    )
+    );
+  }
+
+  return (
+    <Button 
+      variant="pulse" 
+      className="w-full touch-manipulation" 
+      onClick={handleSignIn}
+    >
+      <LogIn className="mr-2 h-4 w-4" />
+      Connexion
+    </Button>
   );
 };

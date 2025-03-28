@@ -40,6 +40,26 @@ body {
   }
 }
 
+/* Mobile touch improvements */
+@media (max-width: 1023px) {
+  /* Améliorer la zone de toucher pour les boutons sur mobile */
+  button, a {
+    touch-action: manipulation;
+    min-height: 40px;
+  }
+  
+  /* Augmenter la taille de frappe pour les contrôles de tiroir */
+  [role="button"], 
+  [type="button"] {
+    touch-action: manipulation;
+  }
+  
+  /* Assurer que le menu de tiroir est bien défilable */
+  .drawer-content {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 /* Desktop navbar styles */
 @media (min-width: 1024px) {
   /* Styles pour centrer le menu de navigation */

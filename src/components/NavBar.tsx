@@ -26,10 +26,11 @@ const NavBar = () => {
     if (user) {
       // S'assurer qu'un profil existe pour l'utilisateur actuel
       ensureUserProfile(user.id).then(() => {
+        console.log("Refreshing username after ensuring profile exists");
         refreshUsername();
       });
     }
-  }, [user]);
+  }, [user, ensureUserProfile, refreshUsername]);
 
   // Force rerender when username changes
   useEffect(() => {

@@ -61,7 +61,12 @@ export const MobileNavbar = ({
         
         <Drawer>
           <DrawerTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative z-50">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="relative z-50 touch-manipulation"
+              aria-label="Menu principal"
+            >
               <Menu className="h-6 w-6" />
               <span className="sr-only">Menu</span>
             </Button>
