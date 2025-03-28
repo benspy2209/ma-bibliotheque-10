@@ -11,9 +11,11 @@ import { ReadingPreferencesForm } from '@/components/user/ReadingPreferencesForm
 import { InterfacePreferencesForm } from '@/components/user/InterfacePreferencesForm';
 import { AccountSettingsForm } from '@/components/user/AccountSettingsForm';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
+import { useTranslation } from '@/hooks/use-translation';
 
 const ProfileSettings = () => {
   const { user, isLoading } = useSupabaseAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   // Redirect to login page if not authenticated
@@ -26,26 +28,26 @@ const ProfileSettings = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Helmet>
-        <title>Paramètres du profil | BiblioPulse</title>
+        <title>{t('profile_settings.title')} | BiblioPulse</title>
       </Helmet>
       
       <NavBar />
       
       <div className="container max-w-4xl mx-auto px-4 py-8 flex-grow">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Paramètres du profil</h1>
+          <h1 className="text-3xl font-bold mb-2">{t('profile_settings.title')}</h1>
           <p className="text-muted-foreground">
-            Gérez vos informations personnelles et vos préférences.
+            {t('profile_settings.subtitle')}
           </p>
         </div>
 
         <Tabs defaultValue="username" className="w-full">
           <TabsList className="mb-6 flex overflow-x-auto pb-px">
-            <TabsTrigger value="username">Nom d'utilisateur</TabsTrigger>
-            <TabsTrigger value="personal-info">Informations personnelles</TabsTrigger>
-            <TabsTrigger value="reading">Préférences de lecture</TabsTrigger>
-            <TabsTrigger value="interface">Interface</TabsTrigger>
-            <TabsTrigger value="account">Compte</TabsTrigger>
+            <TabsTrigger value="username">{t('profile_settings.tab.username')}</TabsTrigger>
+            <TabsTrigger value="personal-info">{t('profile_settings.tab.personal_info')}</TabsTrigger>
+            <TabsTrigger value="reading">{t('profile_settings.tab.reading')}</TabsTrigger>
+            <TabsTrigger value="interface">{t('profile_settings.tab.interface')}</TabsTrigger>
+            <TabsTrigger value="account">{t('profile_settings.tab.account')}</TabsTrigger>
           </TabsList>
           
           <TabsContent value="username" className="py-2">

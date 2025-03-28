@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/hooks/use-theme";
+import { useTranslation } from "@/hooks/use-translation";
 
 interface InterfacePreferencesFormValues {
   theme_preference: 'dark' | 'light';
@@ -21,6 +22,7 @@ export function InterfacePreferencesForm() {
   const { user } = useSupabaseAuth();
   const { toast } = useToast();
   const { theme, toggleTheme } = useTheme();
+  const { t, changeLanguage } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   
@@ -83,7 +85,7 @@ export function InterfacePreferencesForm() {
         console.error('Erreur lors de la mise à jour des préférences:', error);
         toast({
           variant: "destructive",
-          description: "Une erreur est survenue lors de la mise à jour des préférences."
+          description: t("toast.error")
         });
         return;
       }
@@ -93,9 +95,19 @@ export function InterfacePreferencesForm() {
         toggleTheme();
       }
       
+      // Appliquer la langue
+      await changeLanguage(values.language_preference);
+      
       toast({
-        description: "Préférences d'interface mises à jour avec succès!"
+        description: t("toast.preferences_updated")
       });
+      
+      // Recharger la page pour appliquer les changements de langue
+      if (values.language_preference !== form.getValues().language_preference) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
       
       setIsSaved(true);
       setTimeout(() => setIsSaved(false), 3000);
@@ -109,9 +121,9 @@ export function InterfacePreferencesForm() {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Personnalisation de l'interface</CardTitle>
+        <CardTitle>{t('interface_form.title')}</CardTitle>
         <CardDescription>
-          Modifiez l'apparence et la langue de l'application.
+          {t('interface_form.subtitle')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -122,7 +134,7 @@ export function InterfacePreferencesForm() {
               name="theme_preference"
               render={({ field }) => (
                 <FormItem className="space-y-3">
-                  <FormLabel>Thème</FormLabel>
+                  <FormLabel>{t('interface_form.theme')}</FormLabel>
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
@@ -135,7 +147,7 @@ export function InterfacePreferencesForm() {
                         </FormControl>
                         <FormLabel htmlFor="light" className="flex items-center space-x-2 cursor-pointer">
                           <Sun className="h-4 w-4" />
-                          <span>Clair</span>
+                          <span>{t('interface_form.theme_light')}</span>
                         </FormLabel>
                       </FormItem>
                       <FormItem className="flex items-center space-x-2 space-y-0">
@@ -144,13 +156,13 @@ export function InterfacePreferencesForm() {
                         </FormControl>
                         <FormLabel htmlFor="dark" className="flex items-center space-x-2 cursor-pointer">
                           <Moon className="h-4 w-4" />
-                          <span>Sombre</span>
+                          <span>{t('interface_form.theme_dark')}</span>
                         </FormLabel>
                       </FormItem>
                     </RadioGroup>
                   </FormControl>
                   <FormDescription>
-                    Choisissez le thème qui vous convient le mieux.
+                    {t('interface_form.theme_description')}
                   </FormDescription>
                 </FormItem>
               )}
@@ -161,7 +173,7 @@ export function InterfacePreferencesForm() {
               name="language_preference"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Langue</FormLabel>
+                  <FormLabel>{t('interface_form.language')}</FormLabel>
                   <Select 
                     onValueChange={field.onChange} 
                     defaultValue={field.value}
@@ -169,7 +181,7 @@ export function InterfacePreferencesForm() {
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Sélectionnez une langue" />
+                        <SelectValue placeholder={t('interface_form.language')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -178,7 +190,7 @@ export function InterfacePreferencesForm() {
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    La langue de l'interface utilisateur.
+                    {t('interface_form.language_description')}
                   </FormDescription>
                 </FormItem>
               )}
@@ -186,7 +198,7 @@ export function InterfacePreferencesForm() {
 
             <div className="flex justify-end pt-2">
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Enregistrement..." : "Enregistrer les préférences"}
+                {isLoading ? t('interface_form.saving') : t('interface_form.save')}
                 {isSaved && <CheckCircle2 className="ml-2 h-4 w-4" />}
               </Button>
             </div>

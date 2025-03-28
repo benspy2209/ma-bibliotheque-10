@@ -11,6 +11,7 @@ import { InfoIcon, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/hooks/use-translation";
 
 interface ProfileFormValues {
   full_name: string;
@@ -22,6 +23,7 @@ interface ProfileFormValues {
 export function ProfileForm() {
   const { user } = useSupabaseAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   
@@ -90,13 +92,13 @@ export function ProfileForm() {
         console.error('Erreur lors de la mise à jour du profil:', error);
         toast({
           variant: "destructive",
-          description: "Une erreur est survenue lors de la mise à jour du profil."
+          description: t("toast.error")
         });
         return;
       }
       
       toast({
-        description: "Informations du profil mises à jour avec succès!"
+        description: t("toast.profile_updated")
       });
       
       setIsSaved(true);
@@ -111,9 +113,9 @@ export function ProfileForm() {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Informations personnelles</CardTitle>
+        <CardTitle>{t('profile_form.title')}</CardTitle>
         <CardDescription>
-          Modifiez vos informations personnelles qui seront affichées sur votre profil.
+          {t('profile_form.subtitle')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -124,16 +126,16 @@ export function ProfileForm() {
               name="full_name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nom complet</FormLabel>
+                  <FormLabel>{t('profile_form.full_name')}</FormLabel>
                   <FormControl>
                     <Input 
-                      placeholder="Votre nom complet" 
+                      placeholder={t('profile_form.full_name')} 
                       disabled={isLoading} 
                       {...field} 
                     />
                   </FormControl>
                   <FormDescription>
-                    Ce nom sera utilisé pour vous identifier sur votre profil.
+                    {t('profile_form.full_name_description')}
                   </FormDescription>
                 </FormItem>
               )}
@@ -144,10 +146,10 @@ export function ProfileForm() {
               name="bio"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Biographie</FormLabel>
+                  <FormLabel>{t('profile_form.bio')}</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Parlez un peu de vous et de vos goûts de lecture..." 
+                      placeholder={t('profile_form.bio')} 
                       disabled={isLoading} 
                       className="min-h-[100px]"
                       {...field} 
@@ -162,10 +164,10 @@ export function ProfileForm() {
               name="location"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Localisation</FormLabel>
+                  <FormLabel>{t('profile_form.location')}</FormLabel>
                   <FormControl>
                     <Input 
-                      placeholder="Paris, France" 
+                      placeholder={t('profile_form.location')} 
                       disabled={isLoading} 
                       {...field} 
                     />
@@ -179,10 +181,10 @@ export function ProfileForm() {
               name="website"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Site web</FormLabel>
+                  <FormLabel>{t('profile_form.website')}</FormLabel>
                   <FormControl>
                     <Input 
-                      placeholder="https://monsite.fr" 
+                      placeholder={t('profile_form.website')} 
                       disabled={isLoading} 
                       {...field} 
                     />
@@ -193,7 +195,7 @@ export function ProfileForm() {
 
             <div className="flex justify-end pt-2">
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Enregistrement..." : "Enregistrer les modifications"}
+                {isLoading ? t('profile_form.saving') : t('profile_form.save')}
                 {isSaved && <CheckCircle2 className="ml-2 h-4 w-4" />}
               </Button>
             </div>
