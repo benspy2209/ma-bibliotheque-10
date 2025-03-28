@@ -1,0 +1,60 @@
+
+/* Component-specific styles */
+
+/* Cards styling */
+.card-transparent {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Cards dans toute l'application par défaut */
+.card {
+  background: transparent !important;
+}
+
+/* Mobile tabs styling */
+@media (max-width: 640px) {
+  [role="tablist"] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  
+  [role="tab"] {
+    flex: 1 0 auto;
+    min-width: calc(50% - 0.25rem);
+    white-space: nowrap;
+  }
+}
+
+/* Animation pour les statistiques */
+@keyframes count-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.text-primary {
+  animation: count-up 0.8s ease-out forwards;
+}
+
+/* Supprime l'animation de pulsation pour le background de la navbar */
+nav {
+  transition: all 0.5s ease;
+}
+
+/* Animation pour le background avec le nom */
+.animate-pulse-background {
+  animation: pulse-background 2s infinite;
+}
+
+/* Supprime l'animation de pulsation pour le background de la navbar en mode clair */
+.light nav {
+  transition: all 0.5s ease;
+}

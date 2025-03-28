@@ -1,0 +1,56 @@
+
+/* Typography styles for BiblioPulse */
+
+/* Base font settings */
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 17px;
+  }
+}
+
+/* Title styling for BiblioPulse */
+.animated-title {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+@media (min-width: 640px) {
+  .animated-title {
+    font-size: 51px;
+    line-height: 51px;
+  }
+}
+
+/* Text color adjustments for light mode */
+.light .text-muted-foreground {
+  color: rgba(0, 0, 0, 0.8) !important; 
+}
+
+.light p, .light h1, .light h2, .light h3, .light span, .light div {
+  color: rgba(0, 0, 0, 0.85) !important;
+}
+
+.light .nav-link, .light button {
+  color: rgba(0, 0, 0, 0.9) !important;
+}
+
+.light a {
+  color: #222 !important;
+}
+
+/* Exception for dark sections even in light mode */
+.bg-black p, .bg-black h1, .bg-black h2, .bg-black h3, .bg-black span, .bg-black div,
+.bg-zinc-900 p, .bg-zinc-900 h1, .bg-zinc-900 h2, .bg-zinc-900 h3, .bg-zinc-900 span, .bg-zinc-900 div,
+.bg-black a, .bg-zinc-900 a {
+  color: white !important;
+}
+
+.bg-black .text-muted-foreground, .bg-zinc-900 .text-muted-foreground {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
