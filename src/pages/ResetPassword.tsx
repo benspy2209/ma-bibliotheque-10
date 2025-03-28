@@ -5,39 +5,77 @@ import NavBar from "@/components/NavBar";
 import { useEffect, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function ResetPassword() {
   const [token, setToken] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [type, setType] = useState<string | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  // Extraire les paramètres de l'URL au chargement de la page
+  // Extract parameters from the URL when the page loads
   useEffect(() => {
-    // Vérifier les paramètres dans le hash URL (format #token=xxx&type=recovery)
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const queryParams = new URLSearchParams(window.location.search);
+    // Function to parse parameters from different URL formats
+    const parseParams = () => {
+      // Try to get params from hash, query, or pathname
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const queryParams = new URLSearchParams(window.location.search);
+      
+      // Check if token is in URL path (e.g., from external redirects)
+      const pathMatch = window.location.pathname.match(/\/reset-password\/([^\/]+)/);
+      const tokenFromPath = pathMatch ? pathMatch[1] : null;
+      
+      // Get token from different possible sources
+      const tokenFromHash = hashParams.get('token') || hashParams.get('access_token');
+      const tokenFromQuery = queryParams.get('token');
+      
+      // Get email from different possible sources
+      const emailFromHash = hashParams.get('email');
+      const emailFromQuery = queryParams.get('email');
+      
+      // Get type from different possible sources
+      const typeFromHash = hashParams.get('type');
+      const typeFromQuery = queryParams.get('type');
+      
+      // Set the values found
+      setToken(tokenFromPath || tokenFromHash || tokenFromQuery);
+      setEmail(emailFromHash || emailFromQuery);
+      setType(typeFromHash || typeFromQuery || 'recovery'); // Default to recovery type
+      
+      console.log("URL parameters parsed:", {
+        token: tokenFromPath || tokenFromHash || tokenFromQuery,
+        email: emailFromHash || emailFromQuery,
+        type: typeFromHash || typeFromQuery,
+        hash: window.location.hash,
+        query: window.location.search,
+        path: window.location.pathname
+      });
+    };
     
-    // Récupérer les paramètres de différentes sources possibles
-    const tokenFromHash = hashParams.get('token') || hashParams.get('access_token');
-    const tokenFromQuery = queryParams.get('token');
-    const emailFromHash = hashParams.get('email');
-    const emailFromQuery = queryParams.get('email');
-    const typeFromHash = hashParams.get('type');
-    const typeFromQuery = queryParams.get('type');
+    // Check if we're redirected from Supabase auth endpoint
+    const isExternalRedirect = document.referrer.includes('api.bibliopulse.com/auth') || 
+                              document.referrer.includes('kbmnsxakgyokifzoiajo.supabase.co');
     
-    // Utiliser les paramètres trouvés
-    setToken(tokenFromHash || tokenFromQuery);
-    setEmail(emailFromHash || emailFromQuery);
-    setType(typeFromHash || typeFromQuery);
+    // If this is an initial load after redirect from Supabase,
+    // and there's no token in our URL, check for it in sessionStorage
+    // where Supabase might have stored it
+    if (isExternalRedirect) {
+      console.log("Detected redirect from Supabase auth endpoint");
+      
+      // If token is in the URL path as a separate segment, format it correctly
+      if (location.pathname.includes('/reset-password/') && !location.search.includes('token=')) {
+        const pathToken = location.pathname.split('/reset-password/')[1];
+        if (pathToken) {
+          console.log("Found token in path:", pathToken);
+          navigate(`/reset-password?token=${pathToken}&type=recovery`, { replace: true });
+          return;
+        }
+      }
+    }
     
-    console.log("URL parameters:", {
-      token: tokenFromHash || tokenFromQuery,
-      email: emailFromHash || emailFromQuery,
-      type: typeFromHash || typeFromQuery,
-      hash: window.location.hash,
-      query: window.location.search
-    });
-  }, []);
+    parseParams();
+  }, [location, navigate]);
 
   return (
     <div className="min-h-screen bg-background">

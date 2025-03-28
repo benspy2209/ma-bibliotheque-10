@@ -20,14 +20,18 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const { authMode, setAuthMode } = useSupabaseAuth();
   const navigate = useNavigate();
   
-  // Si le mode est "reset", rediriger vers la page de réinitialisation du mot de passe
+  // If the mode is "reset", redirect to the password reset page
   useEffect(() => {
     if (authMode === 'reset' && open) {
-      // Fermer la boîte de dialogue
+      console.log("Reset password requested, redirecting to reset password page");
+      
+      // Close the login dialog
       onOpenChange(false);
       
-      // Rediriger vers la page de réinitialisation du mot de passe
-      navigate('/reset-password');
+      // Redirect to the password reset page
+      setTimeout(() => {
+        navigate('/reset-password');
+      }, 100);
     }
   }, [authMode, open, onOpenChange, navigate]);
   

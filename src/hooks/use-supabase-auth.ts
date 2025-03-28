@@ -50,7 +50,7 @@ export function useSupabaseAuth() {
           toast({
             description: "Récupération de mot de passe initiée"
           });
-          // Redirection vers la page de réinitialisation du mot de passe
+          // Redirect to the password reset page
           navigate('/reset-password');
         }
       }
@@ -63,23 +63,42 @@ export function useSupabaseAuth() {
       }
     });
 
-    // Vérifier s'il y a un hash token de récupération dans l'URL 
+    // Check for recovery token in URL
     const checkForRecoveryToken = () => {
+      // Check different URL patterns where token might be present
       const hash = window.location.hash;
       const searchParams = new URLSearchParams(window.location.search);
+      const pathname = window.location.pathname;
       
-      if (hash.includes('type=recovery') || hash.includes('access_token') || searchParams.has('token')) {
-        console.log("Token de récupération détecté dans l'URL");
+      // Check for token in various locations
+      const hasRecoveryToken = 
+        hash.includes('type=recovery') || 
+        hash.includes('access_token') || 
+        searchParams.has('token') ||
+        searchParams.get('type') === 'recovery' ||
+        pathname.includes('/reset-password/');
+      
+      if (hasRecoveryToken) {
+        console.log("Password recovery token detected in URL");
         
-        // Si on est sur la page de reset password, on n'a rien à faire,
-        // sinon on redirige vers cette page
-        if (!window.location.pathname.includes('/reset-password')) {
-          navigate('/reset-password');
+        // If not already on reset password page, redirect there
+        if (!pathname.startsWith('/reset-password')) {
+          console.log("Redirecting to reset password page");
+          
+          // Extract token from path if present
+          if (pathname.match(/\/verify\/[^\/]+/)) {
+            const pathToken = pathname.split('/verify/')[1];
+            navigate(`/reset-password?token=${pathToken}&type=recovery`);
+          } else {
+            navigate('/reset-password');
+          }
         }
+        return true;
       }
+      return false;
     };
 
-    // Vérifier la session au chargement
+    // Check current session on load
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
@@ -87,12 +106,20 @@ export function useSupabaseAuth() {
       setInitialAuthCheckDone(true);
       
       if (currentSession?.user) {
-        console.log(`Session initiale récupérée, ID utilisateur: ${currentSession.user.id}`);
+        console.log(`Initial session retrieved, user ID: ${currentSession.user.id}`);
       } else {
-        console.log('Aucune session initiale trouvée');
+        console.log('No initial session found');
         
-        // Vérifier les tokens de récupération
-        checkForRecoveryToken();
+        // Check for recovery tokens
+        const hasRecoveryToken = checkForRecoveryToken();
+        
+        // If no recovery token and on reset password page without parameters, redirect home
+        const pathname = window.location.pathname;
+        const searchParams = new URLSearchParams(window.location.search);
+        if (!hasRecoveryToken && pathname === '/reset-password' && !searchParams.has('token')) {
+          console.log("No recovery token found, redirecting to home");
+          navigate('/');
+        }
       }
     });
 
@@ -100,7 +127,7 @@ export function useSupabaseAuth() {
   }, [queryClient, toast, navigate, initialAuthCheckDone]);
 
   const signIn = useCallback((mode: 'login' | 'signup' | 'reset' = 'signup') => {
-    console.log(`signIn appelé avec le mode: ${mode}`);
+    console.log(`signIn called with mode: ${mode}`);
     setAuthMode(mode);
     setShowLoginDialog(true);
   }, []);
@@ -108,7 +135,7 @@ export function useSupabaseAuth() {
   const signOut = useCallback(async () => {
     try {
       await supabase.auth.signOut();
-      // Force un rechargement complet de la page après la déconnexion
+      // Force a complete page reload after sign out
       window.location.href = '/';
     } catch (error: any) {
       toast({
@@ -141,28 +168,28 @@ export function useSupabaseAuth() {
     try {
       console.log("Tentative de connexion avec Facebook...");
       
-      // Utiliser l'authentification OAuth de Supabase avec le provider Facebook
+      // Use Supabase OAuth authentication with Facebook provider
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'facebook',
         options: {
           redirectTo: `${window.location.origin}`,
-          // Vous pouvez spécifier des scopes supplémentaires si nécessaire
+          // You can specify additional scopes if needed
           scopes: 'email,public_profile'
         }
       });
       
       if (error) {
-        console.error("Erreur OAuth Facebook:", error);
+        console.error("Facebook OAuth Error:", error);
         throw error;
       }
       
-      console.log("Redirection vers Facebook pour authentification...", data);
+      console.log("Redirecting to Facebook for authentication...", data);
       
     } catch (error: any) {
-      console.error("Erreur lors de la connexion avec Facebook:", error);
+      console.error("Error logging in with Facebook:", error);
       toast({
         variant: "destructive",
-        description: `Erreur: ${error.message}`
+        description: `Error: ${error.message}`
       });
     }
   };
