@@ -31,16 +31,14 @@ export function BookDetailsTable({ bookDetails }: BookDetailsTableProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
 
-  // Filter Stephen King books for the admin user that are marked as "to-buy"
-  const stephenKingToBuyBooks = bookDetails.filter(book => 
+  // Filter Stephen King books for the admin user that need to be updated (all Stephen King books)
+  const stephenKingBooks = bookDetails.filter(book => 
     book.user_email === 'debruijneb@gmail.com' && 
-    book.book_author.toLowerCase().includes('stephen king') &&
-    (!book.status || book.status === 'to-read') && 
-    !book.purchased
+    book.book_author.toLowerCase().includes('stephen king')
   );
 
   const updateStephenKingBooksStatus = async () => {
-    if (stephenKingToBuyBooks.length === 0) {
+    if (stephenKingBooks.length === 0) {
       toast({
         description: "Aucun livre de Stephen King à mettre à jour.",
       });
@@ -50,7 +48,7 @@ export function BookDetailsTable({ bookDetails }: BookDetailsTableProps) {
     setIsUpdating(true);
     try {
       // Get each book's complete data
-      const updatePromises = stephenKingToBuyBooks.map(async (bookDetail) => {
+      const updatePromises = stephenKingBooks.map(async (bookDetail) => {
         // First, get the complete book data
         const { data: bookData, error: getError } = await supabase
           .from('books')
@@ -69,7 +67,7 @@ export function BookDetailsTable({ bookDetails }: BookDetailsTableProps) {
           return { success: false, error: 'Invalid book data' };
         }
 
-        // Update the status and purchased flag
+        // Update the status to 'to-read' and purchased flag to true
         const updatedBookData = {
           ...bookData.book_data,
           status: 'to-read',
@@ -113,10 +111,10 @@ export function BookDetailsTable({ bookDetails }: BookDetailsTableProps) {
 
   return (
     <div className="overflow-auto max-h-[500px]">
-      {stephenKingToBuyBooks.length > 0 && (
+      {stephenKingBooks.length > 0 && (
         <div className="mb-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md">
           <p className="text-sm mb-2">
-            <strong>{stephenKingToBuyBooks.length} livres de Stephen King</strong> marqués comme "à acheter" dans le compte admin.
+            <strong>{stephenKingBooks.length} livres de Stephen King</strong> dans le compte admin.
           </p>
           <Button 
             onClick={updateStephenKingBooksStatus} 
@@ -124,7 +122,7 @@ export function BookDetailsTable({ bookDetails }: BookDetailsTableProps) {
             className="bg-amber-500 hover:bg-amber-600 text-white"
             size="sm"
           >
-            {isUpdating ? "Mise à jour en cours..." : "Marquer comme 'À lire' (achetés)"}
+            {isUpdating ? "Mise à jour en cours..." : "Marquer comme achetés"}
           </Button>
         </div>
       )}
