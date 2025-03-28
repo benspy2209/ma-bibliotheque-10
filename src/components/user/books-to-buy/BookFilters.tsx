@@ -98,16 +98,16 @@ export function BookFilters({
             <Label htmlFor="authorFilter">Auteur</Label>
             <Select
               value={selectedAuthor || ""}
-              onValueChange={(value) => onAuthorSelect(value || null)}
+              onValueChange={(value) => onAuthorSelect(value === "" ? null : value)}
             >
               <SelectTrigger id="authorFilter" className="w-full">
                 <SelectValue placeholder="Tous les auteurs" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tous les auteurs</SelectItem>
+                <SelectItem value="all">Tous les auteurs</SelectItem>
                 {authors.map((author) => (
-                  <SelectItem key={author} value={author}>
-                    {author}
+                  <SelectItem key={author} value={author || "unknown"}>
+                    {author || "Auteur inconnu"}
                   </SelectItem>
                 ))}
               </SelectContent>
