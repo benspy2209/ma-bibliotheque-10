@@ -49,36 +49,63 @@
   @apply overflow-x-auto;
 }
 
-/* Improved horizontal scrolling tabs */
-[role="tablist"],
-.tabs-list {
-  display: flex;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 0.25rem;
+/* Mobile-specific tab layout */
+@media (max-width: 768px) {
+  [role="tablist"],
+  .tabs-list,
+  .tabs-list-scroll {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  [role="tab"],
+  .tabs-list [role="tab"],
+  .tabs-list-scroll [role="tab"] {
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+    margin-bottom: 0.25rem;
+  }
 }
 
-[role="tablist"]::-webkit-scrollbar,
-.tabs-list::-webkit-scrollbar {
-  display: none;
-}
+/* Horizontal scrolling tabs for tablet and desktop */
+@media (min-width: 769px) {
+  [role="tablist"],
+  .tabs-list {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.25rem;
+  }
 
-/* Ensure tab triggers don't wrap text and maintain size */
-[role="tab"] {
-  white-space: nowrap;
-  flex-shrink: 0;
+  [role="tablist"]::-webkit-scrollbar,
+  .tabs-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Ensure tab triggers don't wrap text and maintain size */
+  [role="tab"] {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
 }
 
 /* For TabsList component */
 .tabs-list-scroll {
-  @apply h-auto py-1 overflow-x-auto flex;
+  @apply h-auto py-1;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  flex-wrap: nowrap !important;
 }
 
-.tabs-list-scroll::-webkit-scrollbar {
-  display: none;
+@media (min-width: 769px) {
+  .tabs-list-scroll {
+    @apply overflow-x-auto flex;
+    flex-wrap: nowrap !important;
+  }
+  
+  .tabs-list-scroll::-webkit-scrollbar {
+    display: none;
+  }
 }
-
