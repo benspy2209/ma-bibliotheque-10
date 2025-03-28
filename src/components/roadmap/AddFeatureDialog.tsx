@@ -11,9 +11,19 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { RoadmapFeatureForm } from "./RoadmapFeatureForm";
+import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 
 export function AddFeatureDialog() {
   const [open, setOpen] = React.useState(false);
+  const { user } = useSupabaseAuth();
+  
+  // Check if current user is the admin (debruijneb@gmail.com)
+  const isAdmin = user?.email === "debruijneb@gmail.com";
+
+  // If user is not admin, don't render the button at all
+  if (!isAdmin) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
