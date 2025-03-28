@@ -14,6 +14,14 @@ import { AuthButton } from "./AuthButton";
 import { ThemeToggle } from "./ThemeToggle";
 import { Theme } from "@/hooks/use-theme";
 import { Avatar, AvatarFallback } from "../ui/avatar";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuSeparator,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "../ui/dropdown-menu";
+import { LogOut } from "lucide-react";
 
 interface MobileNavbarProps {
   user: User | null;
@@ -49,11 +57,44 @@ export const MobileNavbar = ({
       <div className="flex items-center gap-2">
         {user && (
           <div className="flex items-center mr-1">
-            <Avatar className="h-8 w-8 border-2 border-primary/20">
-              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-bold">
-                {getInitials()}
-              </AvatarFallback>
-            </Avatar>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Avatar className="h-8 w-8 border-2 border-primary/20 cursor-pointer">
+                  <AvatarFallback className="bg-primary text-primary-foreground text-sm font-bold">
+                    {getInitials()}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 z-50">
+                <div className="flex items-center gap-2 p-3">
+                  <Avatar className="h-9 w-9 border-2 border-primary/20">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-sm font-bold">
+                      {getInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <span className="font-medium text-sm">{getUserDisplayName()}</span>
+                    <span className="text-xs text-muted-foreground truncate">
+                      {user.email}
+                    </span>
+                  </div>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <NavLink to="/profile/settings" className="cursor-pointer w-full">
+                    Mon profil
+                  </NavLink>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  onClick={signOut} 
+                  className="text-red-500 cursor-pointer"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Se déconnecter
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         )}
         
