@@ -77,6 +77,13 @@ export const roadmapFeatures: RoadmapFeature[] = [
     technical_details: "Algorithmes de recommandation, clustering d'utilisateurs, modèles prédictifs"
   },
   {
+    name: "Partage sur réseaux sociaux",
+    description: "Partage de livres et critiques de lecture sur les principales plateformes sociales",
+    status: "in-progress",
+    quarter: "Q2 2025",
+    technical_details: "Intégration des API Twitter, Facebook, et Instagram, génération d'images partageables, statistiques d'engagement"
+  },
+  {
     name: "Application mobile native",
     description: "Applications iOS et Android natives",
     status: "planned",
