@@ -179,20 +179,34 @@ img[alt="BiblioPulse Logo"] {
     height: 100% !important;
     border-radius: 0 !important;
     overscroll-behavior: none !important;
+    overscroll-behavior-y: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+    position: fixed !important;
   }
   
   .DialogContent {
-    max-height: 90vh !important;
+    max-height: 95vh !important;
     padding-bottom: 80px !important; /* Plus grand espace en bas */
+    overscroll-behavior: contain !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  .ScrollArea {
+    overflow-y: visible !important;
+    height: auto !important;
+    min-height: 70vh !important;
   }
   
   .auth-form-container {
     margin-bottom: 4rem !important;
-    padding-bottom: 5rem !important;
-    max-height: 80vh !important;
+    padding-bottom: 6rem !important;
+    max-height: 100% !important;
+    height: auto !important;
     -webkit-user-select: none !important;
     user-select: none !important;
     touch-action: manipulation !important;
+    overflow-y: visible !important;
   }
   
   /* Agrandir les boutons pour faciliter les clics sur mobile */
@@ -202,11 +216,43 @@ img[alt="BiblioPulse Logo"] {
     margin-top: 1.5rem !important;
     margin-bottom: 1.5rem !important;
     touch-action: manipulation !important;
+    position: relative !important;
+    z-index: 10 !important;
   }
   
   /* Désactiver le comportement de zoom sur les inputs */
   .auth-form-container input {
     font-size: 16px !important; /* Évite le zoom sur iOS */
     touch-action: manipulation !important;
+  }
+
+  /* Fix pour les problèmes de scroll et de focus sur iOS */
+  .auth-form-container form {
+    padding-bottom: 80px !important;
+    margin-bottom: 30px !important;
+    position: relative !important;
+    z-index: 5 !important;
+  }
+  
+  /* Amélioration pour la lisibilité des formulaires */
+  .DialogHeader {
+    margin-bottom: 1.5rem !important;
+  }
+  
+  /* Visibilité améliorée des messages d'erreur */
+  [role="alert"] {
+    margin-bottom: 1.5rem !important;
+  }
+}
+
+/* Fixes for iOS scroll behavior in auth modals */
+@supports (-webkit-touch-callout: none) {
+  .DialogContent, .auth-form-container {
+    overflow-y: scroll !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  .auth-form-container form {
+    padding-bottom: 100px !important;
   }
 }

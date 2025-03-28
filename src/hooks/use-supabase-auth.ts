@@ -14,9 +14,77 @@ export function useSupabaseAuth() {
   const [isLoading, setIsLoading] = useState(true);
   const [initialAuthCheckDone, setInitialAuthCheckDone] = useState(false);
   const [resetEmailError, setResetEmailError] = useState<string | null>(null);
+  const [hasRecoveryToken, setHasRecoveryToken] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Parse hash parameters from URL
+  const parseHashParameters = useCallback((hash: string) => {
+    if (!hash || hash === '') return {};
+    
+    const hashParams: Record<string, string> = {};
+    const hashParts = hash.substring(1).split('&');
+    
+    hashParts.forEach(part => {
+      const [key, value] = part.split('=');
+      if (key && value) {
+        hashParams[key] = decodeURIComponent(value);
+      }
+    });
+    
+    return hashParams;
+  }, []);
+
+  // Check for recovery token in URL hash
+  const checkForRecoveryToken = useCallback(() => {
+    const hash = window.location.hash;
+    const hashParams = parseHashParameters(hash);
+    
+    // Check if we have recovery type or access_token in hash
+    const hasValidRecoveryToken = 
+      (hash.includes('type=recovery') && !hash.includes('error=')) || 
+      !!hashParams.access_token;
+    
+    // Check for error in token
+    const hasTokenError = hash.includes('error=') && hash.includes('error_code=');
+    
+    console.log("Recovery token check:", { 
+      hasValidRecoveryToken, 
+      hasTokenError, 
+      hash 
+    });
+    
+    setHasRecoveryToken(hasValidRecoveryToken);
+    
+    if (hasTokenError) {
+      // Extract error details
+      const errorCode = hashParams.error_code;
+      const errorDescription = hashParams.error_description;
+      
+      console.log("Recovery token error:", { errorCode, errorDescription });
+      
+      if (errorCode === 'otp_expired' || hash.includes('expired')) {
+        setResetEmailError('Le lien de réinitialisation a expiré. Veuillez demander un nouveau lien.');
+      } else {
+        setResetEmailError(`Erreur: ${errorDescription || 'Lien de réinitialisation invalide'}`);
+      }
+      
+      setAuthMode('reset');
+      setShowLoginDialog(true);
+      navigate('/reset-password');
+      return false;
+    }
+    
+    if (hasValidRecoveryToken) {
+      setAuthMode('reset');
+      setShowLoginDialog(true);
+      navigate('/reset-password');
+      return true;
+    }
+    
+    return false;
+  }, [parseHashParameters, navigate]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
@@ -47,6 +115,12 @@ export function useSupabaseAuth() {
           toast({
             description: "Profil mis à jour"
           });
+          
+          // Close the dialog and redirect after successful password update
+          setTimeout(() => {
+            setShowLoginDialog(false);
+            window.location.href = '/';
+          }, 1500);
         } else if (event === 'PASSWORD_RECOVERY') {
           toast({
             description: "Récupération de mot de passe initiée"
@@ -64,42 +138,6 @@ export function useSupabaseAuth() {
       }
     });
 
-    // Check for recovery hash in URL and handle it
-    const handleRecoveryHash = () => {
-      const hash = window.location.hash;
-      
-      // Check for errors in the hash (expired link)
-      if (hash && hash.includes('error=') && hash.includes('error_description=')) {
-        try {
-          // Parse the error message from the hash
-          const errorParams = new URLSearchParams(hash.substring(1));
-          const errorCode = errorParams.get('error_code');
-          const errorDesc = errorParams.get('error_description');
-          
-          console.log('Error detected in hash:', errorCode, errorDesc);
-          
-          if (errorCode === 'otp_expired' || hash.includes('expired')) {
-            // Store the error for display on the reset password form
-            setResetEmailError('Le lien de réinitialisation a expiré. Veuillez demander un nouveau lien.');
-            setAuthMode('reset');
-            setShowLoginDialog(true);
-            navigate('/reset-password');
-            return;
-          }
-        } catch (e) {
-          console.error('Error parsing hash parameters:', e);
-        }
-      }
-      
-      // Normal recovery link handling
-      if (hash && hash.includes('type=recovery')) {
-        console.log('Recovery hash detected:', hash);
-        setAuthMode('reset');
-        setShowLoginDialog(true);
-        navigate('/reset-password');
-      }
-    };
-
     // Initial session check
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
@@ -112,16 +150,27 @@ export function useSupabaseAuth() {
       } else {
         console.log('No initial session found');
         
-        // Check for recovery hash if no session
-        handleRecoveryHash();
+        // Only check for recovery token if no active session
+        checkForRecoveryToken();
       }
     });
 
-    // Run hash check on mount
-    handleRecoveryHash();
-
     return () => subscription.unsubscribe();
-  }, [queryClient, toast, navigate, initialAuthCheckDone]);
+  }, [queryClient, toast, navigate, initialAuthCheckDone, checkForRecoveryToken]);
+
+  // Re-check for recovery token when URL hash changes
+  useEffect(() => {
+    const handleHashChange = () => {
+      console.log("URL hash changed, checking for recovery token");
+      checkForRecoveryToken();
+    };
+    
+    window.addEventListener('hashchange', handleHashChange);
+    
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, [checkForRecoveryToken]);
 
   const signIn = useCallback((mode: 'login' | 'signup' | 'reset' = 'signup') => {
     console.log(`signIn called with mode: ${mode}`);
@@ -191,6 +240,11 @@ export function useSupabaseAuth() {
     }
   };
 
+  // Clear error when changing auth mode
+  useEffect(() => {
+    setResetEmailError(null);
+  }, [authMode]);
+
   return { 
     user, 
     session, 
@@ -203,6 +257,8 @@ export function useSupabaseAuth() {
     authMode, 
     setAuthMode,
     isLoading,
-    resetEmailError 
+    resetEmailError,
+    hasRecoveryToken,
+    checkForRecoveryToken
   };
 }

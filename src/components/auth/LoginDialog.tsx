@@ -11,6 +11,7 @@ import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { UpdatePasswordForm } from "./UpdatePasswordForm";
 
 interface LoginDialogProps {
   open: boolean;
@@ -18,7 +19,7 @@ interface LoginDialogProps {
 }
 
 export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
-  const { authMode, setAuthMode, resetEmailError } = useSupabaseAuth();
+  const { authMode, setAuthMode, resetEmailError, hasRecoveryToken } = useSupabaseAuth();
   const location = useLocation();
   const dialogRef = useRef<HTMLDivElement>(null);
   
@@ -63,17 +64,26 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
             <DialogTitle className="text-center">
               {authMode === 'login' && "Connexion à Bibliopulse"}
               {authMode === 'signup' && "Créer un compte Bibliopulse"}
-              {authMode === 'reset' && "Réinitialiser votre mot de passe"}
+              {authMode === 'reset' && hasRecoveryToken 
+                ? "Définir un nouveau mot de passe" 
+                : "Réinitialiser votre mot de passe"}
             </DialogTitle>
             <DialogDescription className="text-center">
               {authMode === 'login' && "Accédez à votre bibliothèque personnelle"}
               {authMode === 'signup' && "Inscrivez-vous pour gérer votre bibliothèque personnelle"}
-              {authMode === 'reset' && resetEmailError ? 
-                "Le lien a expiré, veuillez demander un nouveau lien" : 
-                "Nous vous enverrons un lien pour réinitialiser votre mot de passe"}
+              {authMode === 'reset' && resetEmailError 
+                ? "Le lien a expiré, veuillez demander un nouveau lien" 
+                : hasRecoveryToken 
+                  ? "Entrez votre nouveau mot de passe pour finaliser la réinitialisation" 
+                  : "Nous vous enverrons un lien pour réinitialiser votre mot de passe"}
             </DialogDescription>
           </DialogHeader>
-          <LoginForm defaultTab={authMode} />
+          
+          {(authMode === 'reset' && hasRecoveryToken) ? (
+            <UpdatePasswordForm />
+          ) : (
+            <LoginForm defaultTab={authMode} />
+          )}
         </ScrollArea>
       </DialogContent>
     </Dialog>
