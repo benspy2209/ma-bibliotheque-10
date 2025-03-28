@@ -73,3 +73,31 @@
     white-space: nowrap;
   }
 }
+
+/* Fix for mobile overflow issues */
+body, html {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Make sure dialogs and content don't overflow */
+.dialog-content,
+[role="dialog"] {
+  max-width: 95vw !important;
+  width: 100% !important;
+}
+
+/* Mobile roadmap adjustment */
+@media (max-width: 640px) {
+  .roadmap-card {
+    max-width: 100%;
+    overflow-wrap: break-word;
+  }
+  
+  /* Ensure long words don't cause overflow */
+  p, h1, h2, h3, h4, h5, h6, span, div {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+}

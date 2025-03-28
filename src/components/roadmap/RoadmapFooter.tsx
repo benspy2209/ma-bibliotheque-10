@@ -5,11 +5,11 @@ import { Separator } from "@/components/ui/separator";
 const RoadmapFooter = () => {
   return (
     <>
-      <Separator className="my-12" />
+      <Separator className="my-8 md:my-12" />
 
-      <section className="max-w-3xl mx-auto">
-        <h2 className="text-2xl font-semibold mb-6">À propos de notre roadmap</h2>
-        <div className="space-y-4 text-muted-foreground">
+      <section className="max-w-3xl mx-auto px-2">
+        <h2 className="text-xl md:text-2xl font-semibold mb-4 md:mb-6">À propos de notre roadmap</h2>
+        <div className="space-y-3 md:space-y-4 text-muted-foreground text-sm md:text-base">
           <p>
             Notre roadmap technique est un aperçu des fonctionnalités que nous développons pour BiblioPulse. 
             Elle représente notre vision à moyen et long terme, mais peut évoluer en fonction des retours utilisateurs et des priorités.

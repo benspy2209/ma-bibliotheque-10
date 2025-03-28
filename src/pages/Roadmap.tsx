@@ -43,10 +43,10 @@ const Roadmap = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </Helmet>
       <NavBar />
-      <main className="container mx-auto px-3 md:px-4 py-6 md:py-10 max-w-5xl overflow-hidden">
+      <main className="container mx-auto px-2 md:px-4 py-6 md:py-10 max-w-5xl">
         <RoadmapHeader />
         <FeatureProposalsList />
-        <div className="overflow-x-hidden">
+        <div className="w-full overflow-hidden">
           <FeatureTimeline features={sortedFeatures} />
         </div>
         <RoadmapFooter />
