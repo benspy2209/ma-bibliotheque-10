@@ -2,9 +2,16 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
+import { UserProfileForm } from '@/components/user/UserProfileForm';
 import { UsernameForm } from '@/components/user/UsernameForm';
+import { SocialLinksForm } from '@/components/user/SocialLinksForm';
+import { ReadingPreferencesForm } from '@/components/user/ReadingPreferencesForm';
+import { DisplaySettingsForm } from '@/components/user/DisplaySettingsForm';
+import { ReadingGoalsSettingsForm } from '@/components/user/ReadingGoalsSettingsForm';
+import { DeleteAccountForm } from '@/components/user/DeleteAccountForm';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
 const ProfileSettings = () => {
@@ -26,7 +33,7 @@ const ProfileSettings = () => {
       
       <NavBar />
       
-      <div className="container max-w-4xl mx-auto px-4 py-8 flex-grow">
+      <div className="container max-w-5xl mx-auto px-4 py-8 flex-grow">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Paramètres du profil</h1>
           <p className="text-muted-foreground">
@@ -34,14 +41,45 @@ const ProfileSettings = () => {
           </p>
         </div>
 
-        <div className="grid gap-8">
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Nom d'utilisateur</h2>
-            <UsernameForm />
-          </div>
+        <Tabs defaultValue="profile" className="w-full">
+          <TabsList className="mb-8 flex flex-wrap h-auto">
+            <TabsTrigger value="profile">Profil</TabsTrigger>
+            <TabsTrigger value="username">Nom d'utilisateur</TabsTrigger>
+            <TabsTrigger value="social">Réseaux sociaux</TabsTrigger>
+            <TabsTrigger value="reading">Préférences de lecture</TabsTrigger>
+            <TabsTrigger value="display">Affichage</TabsTrigger>
+            <TabsTrigger value="goals">Objectifs</TabsTrigger>
+            <TabsTrigger value="account">Compte</TabsTrigger>
+          </TabsList>
           
-          {/* Additional profile sections can be added here */}
-        </div>
+          <TabsContent value="profile" className="space-y-8">
+            <UserProfileForm />
+          </TabsContent>
+          
+          <TabsContent value="username" className="space-y-8">
+            <UsernameForm />
+          </TabsContent>
+
+          <TabsContent value="social" className="space-y-8">
+            <SocialLinksForm />
+          </TabsContent>
+          
+          <TabsContent value="reading" className="space-y-8">
+            <ReadingPreferencesForm />
+          </TabsContent>
+          
+          <TabsContent value="display" className="space-y-8">
+            <DisplaySettingsForm />
+          </TabsContent>
+          
+          <TabsContent value="goals" className="space-y-8">
+            <ReadingGoalsSettingsForm />
+          </TabsContent>
+
+          <TabsContent value="account" className="space-y-8">
+            <DeleteAccountForm />
+          </TabsContent>
+        </Tabs>
       </div>
       
       <Footer />
