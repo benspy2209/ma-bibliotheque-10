@@ -13,10 +13,13 @@ export function FeatureProposalsList() {
   // Vérifier si l'utilisateur est l'administrateur
   const isAdmin = user?.email === "debruijneb@gmail.com";
   
-  // Si aucune proposition ou l'utilisateur n'est pas admin, ne rien afficher
-  if (featureProposals.length === 0 || !isAdmin) {
+  // Si aucune proposition, ne rien afficher
+  if (featureProposals.length === 0) {
     return null;
   }
+  
+  // Pour les utilisateurs non-admin, montrer uniquement une liste sans les boutons d'action
+  const isViewOnly = !isAdmin;
   
   const approveProposal = (index: number) => {
     const proposal = featureProposals[index];
@@ -60,26 +63,28 @@ export function FeatureProposalsList() {
                     Proposé par {proposal.proposedBy} le {proposal.proposalDate}
                   </CardDescription>
                 </div>
-                <div className="flex gap-2">
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="border-green-500 hover:bg-green-100"
-                    onClick={() => approveProposal(index)}
-                  >
-                    <Check className="h-4 w-4 mr-1 text-green-500" />
-                    Approuver
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="border-red-500 hover:bg-red-100"
-                    onClick={() => rejectProposal(index)}
-                  >
-                    <X className="h-4 w-4 mr-1 text-red-500" />
-                    Rejeter
-                  </Button>
-                </div>
+                {isAdmin && (
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="border-green-500 hover:bg-green-100"
+                      onClick={() => approveProposal(index)}
+                    >
+                      <Check className="h-4 w-4 mr-1 text-green-500" />
+                      Approuver
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="border-red-500 hover:bg-red-100"
+                      onClick={() => rejectProposal(index)}
+                    >
+                      <X className="h-4 w-4 mr-1 text-red-500" />
+                      Rejeter
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardHeader>
             <CardContent className="pt-4">
