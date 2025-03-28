@@ -177,8 +177,6 @@ export default function Statistics() {
                       totalReadingDays={stats.totalReadingDays}
                       readingBooks={stats.readingBooks}
                       toReadBooks={stats.toReadBooks}
-                      purchasedBooks={stats.purchasedBooks}
-                      toBuyBooks={stats.toBuyBooks}
                     />
 
                     <Tabs defaultValue="overview" className="w-full">
