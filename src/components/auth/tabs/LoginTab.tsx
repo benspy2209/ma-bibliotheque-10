@@ -96,18 +96,9 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
     try {
       console.log(`Tentative de connexion avec: ${email}`);
       
-      // Vérifier si l'utilisateur existe avant d'essayer de se connecter
-      const { data: userExistsData, error: userExistsError } = await supabase.auth.admin
-        .listUsers({
-          filters: {
-            email: email,
-          },
-        })
-        .catch(() => ({ data: null, error: null }));
-      
-      console.log("Vérification existence utilisateur:", 
-        userExistsData ? `Trouvé: ${JSON.stringify(userExistsData)}` : "Non trouvé", 
-        userExistsError ? `Erreur: ${userExistsError.message}` : "Pas d'erreur");
+      // Vérifier si l'utilisateur existe sans utiliser filters, qui n'est pas supporté
+      // Nous utilisons directement une requête de connexion pour vérifier si le compte existe
+      console.log("Vérification de l'existence de l'utilisateur en tentant une connexion test");
       
       // Tenter la connexion proprement dite
       const { data: authData, error } = await supabase.auth.signInWithPassword({
