@@ -63,21 +63,6 @@ export function useLogin() {
         return;
       }
       
-      // Tenter de vérifier si l'utilisateur existe d'abord
-      console.log("Vérification de l'existence de l'utilisateur...");
-      const { data: userData, error: userError } = await supabase.auth.admin
-        .getUserByEmail(email)
-        .catch(err => {
-          console.log("Erreur lors de la vérification de l'utilisateur (attendu si non-admin):", err);
-          return { data: null, error: err };
-        });
-      
-      if (userError) {
-        console.log("Impossible de vérifier directement l'existence de l'utilisateur (normal si non-admin).");
-      } else if (userData) {
-        console.log("Utilisateur trouvé dans la base de données:", userData.id);
-      }
-      
       // Connexion à Supabase
       console.log("Tentative d'authentification avec Supabase...");
       const { data: authData, error } = await supabase.auth.signInWithPassword({
@@ -89,18 +74,8 @@ export function useLogin() {
         console.log("Erreur de connexion:", error.message, "Code:", error.status);
         
         if (error.message === "Invalid login credentials") {
-          // Essayer de déterminer si l'erreur est due au mot de passe ou à l'email
-          const { count } = await supabase
-            .from('profiles')
-            .select('id', { count: 'exact', head: true })
-            .eq('id', email)
-            .single()
-            .catch(() => ({ count: null }));
-          
-          if (count === null) {
-            console.log("Impossible de vérifier dans les profils. Tentative avec une autre méthode...");
-            
-            // Vérifiez si le compte existe sans donner d'informations sensibles
+          // Vérifiez si le compte existe sans donner d'informations sensibles
+          try {
             const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
               email,
               password: `temporary-check-password-${Date.now()}`,
@@ -113,8 +88,9 @@ export function useLogin() {
             } else {
               setLoginError(`Identifiants incorrects. Veuillez vérifier votre email et votre mot de passe.`);
             }
-          } else {
-            setLoginError(`Le mot de passe est incorrect. Veuillez vérifier votre mot de passe ou cliquer sur "Mot de passe oublié" pour le réinitialiser.`);
+          } catch (err) {
+            console.error("Erreur lors de la vérification de l'existence du compte:", err);
+            setLoginError(`Identifiants incorrects. Veuillez vérifier votre email et votre mot de passe.`);
           }
         } else {
           setLoginError(`Erreur : ${error.message}`);
