@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
@@ -98,7 +99,11 @@ export function useLogin() {
           const existsInStats = await checkEmailInUserStats(email);
           
           if (existsInStats) {
-            setLoginError(`L'email ${email} existe dans vos statistiques mais n'a pas de compte d'authentification associé. Veuillez vous inscrire pour créer un compte.`);
+            // L'utilisateur existe dans les statistiques mais n'a pas de compte
+            // Au lieu de simplement afficher un message d'erreur, proposons une solution
+            setLoginError(`L'email ${email} a des livres associés mais pas de compte d'authentification. Nous vous suggérons de vous inscrire avec ce même email et mot de passe pour accéder à vos livres existants.`);
+            
+            // Ajout d'un bouton "S'inscrire maintenant" dans le LoginError component
             setIsLoading(false);
             return;
           }
