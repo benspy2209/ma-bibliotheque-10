@@ -81,49 +81,26 @@ export function DisplaySettingsForm() {
         toggleView();
       }
       
-      // Save preferences to the database
-      // First check if profile already exists for this user
-      const { data: existingProfiles, error: checkError } = await supabase
+      // Update theme preference in database
+      const { error: updateError } = await supabase
         .from('profiles')
-        .select('*')
-        .eq('id', user.id);
-        
-      if (checkError) {
-        console.error('Error checking profile:', checkError);
-        setErrorMessage("Une erreur est survenue lors de la vérification du profil.");
-        return;
-      }
+        .upsert({
+          id: user.id,
+          theme_preference: selectedTheme
+        }, {
+          onConflict: 'id'
+        });
 
-      let updateResult;
-      
-      if (!existingProfiles || existingProfiles.length === 0) {
-        // Create new profile
-        updateResult = await supabase
-          .from('profiles')
-          .insert([{
-            id: user.id,
-            theme_preference: selectedTheme
-          }]);
-      } else {
-        // Update existing profile
-        updateResult = await supabase
-          .from('profiles')
-          .update({
-            theme_preference: selectedTheme
-          })
-          .eq('id', user.id);
-      }
-
-      if (updateResult.error) {
-        console.error('Error updating display settings:', updateResult.error);
-        setErrorMessage(`Une erreur est survenue lors de la mise à jour des paramètres d'affichage: ${updateResult.error.message}`);
+      if (updateError) {
+        console.error('Error updating display settings:', updateError);
+        setErrorMessage(`Une erreur est survenue lors de la mise à jour des paramètres d'affichage: ${updateError.message}`);
         return;
       }
 
       toast({
         description: "Paramètres d'affichage mis à jour avec succès!"
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in handleSubmit:', error);
       setErrorMessage("Une erreur est survenue lors de la mise à jour des paramètres d'affichage.");
     } finally {

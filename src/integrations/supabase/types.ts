@@ -90,6 +90,60 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles_backup: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          custom_reading_goal: number | null
+          favorite_authors: string[] | null
+          full_name: string | null
+          id: string | null
+          language_preference: string | null
+          last_username_change: string | null
+          location: string | null
+          preferred_genres: string[] | null
+          reading_pace: number | null
+          social_links: Json | null
+          theme_preference: string | null
+          username: string | null
+          website: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          custom_reading_goal?: number | null
+          favorite_authors?: string[] | null
+          full_name?: string | null
+          id?: string | null
+          language_preference?: string | null
+          last_username_change?: string | null
+          location?: string | null
+          preferred_genres?: string[] | null
+          reading_pace?: number | null
+          social_links?: Json | null
+          theme_preference?: string | null
+          username?: string | null
+          website?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          custom_reading_goal?: number | null
+          favorite_authors?: string[] | null
+          full_name?: string | null
+          id?: string | null
+          language_preference?: string | null
+          last_username_change?: string | null
+          location?: string | null
+          preferred_genres?: string[] | null
+          reading_pace?: number | null
+          social_links?: Json | null
+          theme_preference?: string | null
+          username?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       reading_goals: {
         Row: {
           created_at: string
