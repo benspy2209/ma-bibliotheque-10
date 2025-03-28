@@ -1,18 +1,31 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
-import { Info } from "lucide-react";
+import { Info, AlertTriangle } from "lucide-react";
+import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
 export function ResetPasswordForm() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const { toast } = useToast();
+  const { resetEmailError } = useSupabaseAuth();
+
+  // Extract email from URL if available
+  useEffect(() => {
+    // Try to get email from URL query parameters
+    const params = new URLSearchParams(window.location.search);
+    const emailParam = params.get('email');
+
+    if (emailParam) {
+      setEmail(emailParam);
+    }
+  }, []);
 
   // Déterminer l'URL de production en fonction de l'environnement
   const getRedirectUrl = () => {
@@ -58,6 +71,15 @@ export function ResetPasswordForm() {
 
   return (
     <div className="w-full max-w-sm">
+      {resetEmailError && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            {resetEmailError}
+          </AlertDescription>
+        </Alert>
+      )}
+      
       {emailSent ? (
         <Alert className="mb-4">
           <Info className="h-4 w-4" />

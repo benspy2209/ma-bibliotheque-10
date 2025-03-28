@@ -13,6 +13,7 @@ export function useSupabaseAuth() {
   const [authMode, setAuthMode] = useState<'login' | 'signup' | 'reset'>('signup');
   const [isLoading, setIsLoading] = useState(true);
   const [initialAuthCheckDone, setInitialAuthCheckDone] = useState(false);
+  const [resetEmailError, setResetEmailError] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -66,6 +67,31 @@ export function useSupabaseAuth() {
     // Check for recovery hash in URL and handle it
     const handleRecoveryHash = () => {
       const hash = window.location.hash;
+      
+      // Check for errors in the hash (expired link)
+      if (hash && hash.includes('error=') && hash.includes('error_description=')) {
+        try {
+          // Parse the error message from the hash
+          const errorParams = new URLSearchParams(hash.substring(1));
+          const errorCode = errorParams.get('error_code');
+          const errorDesc = errorParams.get('error_description');
+          
+          console.log('Error detected in hash:', errorCode, errorDesc);
+          
+          if (errorCode === 'otp_expired' || hash.includes('expired')) {
+            // Store the error for display on the reset password form
+            setResetEmailError('Le lien de réinitialisation a expiré. Veuillez demander un nouveau lien.');
+            setAuthMode('reset');
+            setShowLoginDialog(true);
+            navigate('/reset-password');
+            return;
+          }
+        } catch (e) {
+          console.error('Error parsing hash parameters:', e);
+        }
+      }
+      
+      // Normal recovery link handling
       if (hash && hash.includes('type=recovery')) {
         console.log('Recovery hash detected:', hash);
         setAuthMode('reset');
@@ -176,6 +202,7 @@ export function useSupabaseAuth() {
     setShowLoginDialog, 
     authMode, 
     setAuthMode,
-    isLoading 
+    isLoading,
+    resetEmailError 
   };
 }

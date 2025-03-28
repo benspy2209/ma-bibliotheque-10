@@ -17,13 +17,14 @@ interface LoginDialogProps {
 }
 
 export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
-  const { authMode, setAuthMode } = useSupabaseAuth();
+  const { authMode, setAuthMode, resetEmailError } = useSupabaseAuth();
   const location = useLocation();
   
   // Check if we're on the reset-password page or if we have a hash with recovery token
   useEffect(() => {
     if (location.pathname === "/reset-password" || 
-        window.location.hash.includes('type=recovery')) {
+        window.location.hash.includes('type=recovery') ||
+        window.location.hash.includes('error=') && window.location.hash.includes('error_code=otp_expired')) {
       setAuthMode('reset');
     }
   }, [location.pathname, setAuthMode]);
@@ -44,7 +45,9 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
           <DialogDescription className="text-center">
             {authMode === 'login' && "Accédez à votre bibliothèque personnelle"}
             {authMode === 'signup' && "Inscrivez-vous pour gérer votre bibliothèque personnelle"}
-            {authMode === 'reset' && "Nous vous enverrons un lien pour réinitialiser votre mot de passe"}
+            {authMode === 'reset' && resetEmailError ? 
+              "Le lien a expiré, veuillez demander un nouveau lien" : 
+              "Nous vous enverrons un lien pour réinitialiser votre mot de passe"}
           </DialogDescription>
         </DialogHeader>
         <LoginForm defaultTab={authMode} />
