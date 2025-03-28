@@ -65,7 +65,7 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
         purchased: true // By default, books are marked as purchased
       };
       
-      // If the book is added to the to-read list from the "Acheter" option
+      // If the book is added to the to-read list from the "À acheter" option
       // we mark it as not purchased so it appears in the "Books to Buy" list
       const referrer = document.referrer;
       const isFromPurchaseAction = sessionStorage.getItem('purchase_action') === 'true';
@@ -164,9 +164,9 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
             <div onClick={(e) => e.stopPropagation()} className="z-10">
               <AddToLibrary 
                 onStatusChange={(status) => {
-                  // If status comes from the "Acheter" option in the dropdown
+                  // If status comes from the "À acheter" option in the dropdown
                   // we set a flag to mark the book as not purchased
-                  if (status === 'to-read' && event && (event.target as HTMLElement).innerText === 'Acheter') {
+                  if (status === 'to-read' && event && (event.target as HTMLElement).innerText === 'À acheter') {
                     sessionStorage.setItem('purchase_action', 'true');
                   }
                   handleStatusChange(status);
