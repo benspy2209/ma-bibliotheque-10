@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Book } from '@/types/book';
 import { getAmazonAffiliateUrl, AMAZON_AFFILIATE_ID } from '@/lib/amazon-utils';
@@ -46,8 +45,7 @@ export function BooksToBuyList() {
       const { data, error } = await supabase
         .from('books')
         .select('book_data')
-        .eq('user_id', user?.id)
-        .eq('status', 'to-read');
+        .eq('user_id', user?.id);
       
       if (error) {
         throw error;
@@ -126,7 +124,7 @@ export function BooksToBuyList() {
             <li>• Votre soutien via ces liens permet à BiblioPulse de rester à jamais gratuit et de continuer à se développer.</li>
           </ul>
           <p className="text-sm text-amber-700 dark:text-amber-200 mt-2 italic">
-            Note: Si vous accédez à Amazon via un autre lien affilié après le nôtre, notre cookie est remplacé et nous ne percevrons pas de commission sur vos achats suivants.
+            Note: Si vous accédez à Amazon via un autre lien affilié après le nôtre, notre cookie est remplacé et nous ne percevons pas de commission sur vos achats suivants.
           </p>
         </div>
 

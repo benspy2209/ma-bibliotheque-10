@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
@@ -88,9 +87,9 @@ export default function Library() {
     .filter(searchFilter)
     .filter(book => {
       if (toBuyFilter === true) {
-        return !book.purchased && (!book.status || book.status === 'to-read');
+        return book.purchased === false;
       } else if (toBuyFilter === false) {
-        return book.purchased || !((!book.status || book.status === 'to-read'));
+        return book.purchased === true;
       }
       return true;
     });

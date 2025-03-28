@@ -33,7 +33,7 @@ export const BookSections = ({
   const readingBooks = books.filter(book => book.status === 'reading');
   const toReadBooks = books.filter(book => !book.status || book.status === 'to-read');
   // Make sure to only show unpurchased books in the toBuyBooks list
-  const toBuyBooks = books.filter(book => book.purchased === false && (!book.status || book.status === 'to-read'));
+  const toBuyBooks = books.filter(book => book.purchased === false);
   const purchasedBooks = books.filter(book => book.purchased === true);
 
   const filteredToReadBooks = toReadBooks.filter(book => {
