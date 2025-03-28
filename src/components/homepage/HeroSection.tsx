@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Star, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,16 @@ import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 export const HeroSection = () => {
   const { user, signIn } = useSupabaseAuth();
   const navigate = useNavigate();
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    // Déclenche l'animation après le chargement du composant
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   // Modified to redirect to library page instead of search
   const handleLoginClick = () => {
@@ -28,7 +38,9 @@ export const HeroSection = () => {
         <div className="flex flex-col lg:flex-row items-center gap-12">
           <div className="lg:w-1/2 space-y-6">
             <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-              <span className="text-primary title-pulse">BiblioPulse</span>: Votre bibliothèque personnelle, amplifiée.
+              <span className={`animated-title relative inline-block ${isVisible ? 'animate-in' : ''}`}>
+                <span className="text-primary title-pulse">BiblioPulse</span>
+              </span>: Votre bibliothèque personnelle, amplifiée.
             </h1>
             <p className="text-xl text-muted-foreground">
               Organisez, découvrez et partagez vos lectures préférées dans 7 langues différentes. BiblioPulse vous accompagne dans votre parcours littéraire.
