@@ -95,6 +95,16 @@
   animation: heartbeat 2s ease-in-out infinite;
   transition: all 0.3s ease;
   position: relative;
+  color: white !important;
+  background-color: #E4364A;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* Light mode specific styling for title-pulse */
+.light .title-pulse {
+  color: white !important;
+  background-color: #E4364A;
 }
 
 /* Effet de pulsation autour du texte - rendu plus subtil */
@@ -196,10 +206,16 @@
 }
 
 .animated-title .title-pulse {
-  background: linear-gradient(90deg, #e4364a, #ff8a80, #e4364a);
-  background-size: 200% 100%;
+  background-color: #E4364A;
+  color: white !important;
   background-clip: text;
-  -webkit-background-clip: text;
+  -webkit-background-clip: padding-box;
   transition: all 0.5s ease;
-  animation: heartbeat 2s ease-in-out infinite, gradientShift 3s ease infinite;
+  animation: heartbeat 2s ease-in-out infinite;
+}
+
+/* Override for light mode to ensure proper color */
+.light .animated-title .title-pulse {
+  background-color: #E4364A !important;
+  color: white !important;
 }

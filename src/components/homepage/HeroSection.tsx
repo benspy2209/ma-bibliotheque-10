@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
@@ -39,7 +38,7 @@ export const HeroSection = () => {
           <div className="lg:w-1/2 space-y-6">
             <div className="font-bold leading-none">
               <h1 className={`animated-title relative inline-block text-[51px] font-bold ${isVisible ? 'animate-in' : ''}`} style={{ lineHeight: '51px' }}>
-                Biblio<span className="text-[#E4364A] title-pulse">Pulse</span>
+                Biblio<span className="text-white title-pulse">Pulse</span>
               </h1>
               <p className="mt-2 text-xl">Votre bibliothèque personnelle, amplifiée.</p>
             </div>
