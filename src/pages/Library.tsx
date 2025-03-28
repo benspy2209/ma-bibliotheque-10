@@ -74,6 +74,8 @@ export default function Library() {
     return titleMatch || authorMatch;
   };
 
+  // Si toBuyFilter est true, on ne montre que les livres à acheter (purchased === false)
+  // Sinon, on montre tous les livres selon les autres filtres
   const filteredBooks = books
     .filter(book => {
       if (selectedAuthor) {
@@ -84,15 +86,7 @@ export default function Library() {
       }
       return true;
     })
-    .filter(searchFilter)
-    .filter(book => {
-      if (toBuyFilter === true) {
-        return book.purchased === false;
-      } else if (toBuyFilter === false) {
-        return book.purchased === true;
-      }
-      return true;
-    });
+    .filter(searchFilter);
 
   const sortedBooks = sortBooks(filteredBooks, sortBy);
 
