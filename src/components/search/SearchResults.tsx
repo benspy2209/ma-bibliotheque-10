@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 import { BookGrid } from '@/components/search/BookGrid';
 import { BookList } from '@/components/search/BookList';
@@ -10,6 +9,7 @@ import { useViewPreference } from '@/hooks/use-view-preference';
 import { useEffect } from 'react';
 import { Globe } from 'lucide-react';
 import { ViewToggle } from './ViewToggle';
+import { SearchType, LanguageFilter } from '@/services/bookSearch';
 
 interface SearchResultsProps {
   books: Book[];
@@ -23,6 +23,8 @@ interface SearchResultsProps {
   isShowingAll: boolean;
   searchError?: string;
   onUpdate: () => void;
+  searchType?: SearchType;
+  language?: LanguageFilter;
 }
 
 export function SearchResults({
@@ -36,7 +38,9 @@ export function SearchResults({
   searchQuery,
   isShowingAll,
   searchError,
-  onUpdate
+  onUpdate,
+  searchType = 'title',
+  language = 'fr'
 }: SearchResultsProps) {
   const { selectedBook, setSelectedBook, handleBookClick } = useSelectedBook(onUpdate);
   const { toast } = useToast();
@@ -52,7 +56,6 @@ export function SearchResults({
     }
   }, [books.length, searchQuery, isLoading, searchError, toast]);
 
-  // Show different message for exhibition catalogs, art books, or comics
   useEffect(() => {
     if (searchQuery && (
       searchQuery.toLowerCase().includes('exposition') ||
@@ -67,6 +70,52 @@ export function SearchResults({
     }
   }, [searchQuery, toast]);
 
+  const getSearchDescription = () => {
+    let searchTypeLabel = "";
+    switch (searchType) {
+      case 'title':
+        searchTypeLabel = "titre";
+        break;
+      case 'author':
+        searchTypeLabel = "auteur";
+        break;
+      case 'isbn':
+        searchTypeLabel = "ISBN";
+        break;
+      default:
+        searchTypeLabel = "titre";
+    }
+
+    let languageName = "";
+    switch (language) {
+      case 'fr':
+        languageName = "français";
+        break;
+      case 'en':
+        languageName = "anglais";
+        break;
+      case 'nl':
+        languageName = "néerlandais";
+        break;
+      case 'es':
+        languageName = "espagnol";
+        break;
+      case 'de':
+        languageName = "allemand";
+        break;
+      case 'pt':
+        languageName = "portugais";
+        break;
+      case 'it':
+        languageName = "italien";
+        break;
+      default:
+        languageName = "français";
+    }
+
+    return `Résultats incluant livres et BD en ${languageName} par ${searchTypeLabel}`;
+  };
+
   return (
     <>
       {books.length > 0 && searchQuery && (
@@ -75,7 +124,7 @@ export function SearchResults({
             <div className="flex items-center gap-2">
               <div className="flex items-center text-sm">
                 <Globe className="h-4 w-4 mr-1 text-muted-foreground" />
-                <span className="text-muted-foreground">Résultats incluant livres et BD dans 7 langues</span>
+                <span className="text-muted-foreground">{getSearchDescription()}</span>
               </div>
               <ViewToggle viewMode={viewMode} onToggle={toggleView} />
             </div>

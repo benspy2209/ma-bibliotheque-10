@@ -66,6 +66,8 @@ const Index = () => {
             isShowingAll={showAllResults}
             searchError={searchError}
             onUpdate={handleRefresh}
+            searchType={searchParams.type}
+            language={searchParams.language}
           />
         </div>
       </div>
