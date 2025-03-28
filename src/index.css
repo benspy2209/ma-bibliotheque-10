@@ -45,7 +45,8 @@ img[alt="BiblioPulse Logo"] {
 
   /* Make header logo specifically larger */
   .navbar-logo-container img {
-    max-height: 40px !important; /* Increase the max height for the header logo */
+    max-height: 60px !important; /* Increase from 40px to 60px for the header logo */
+    min-width: 120px !important; /* Set a minimum width to ensure visibility */
   }
 }
 
