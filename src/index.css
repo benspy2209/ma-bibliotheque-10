@@ -42,6 +42,11 @@ img[alt="BiblioPulse Logo"] {
   .navbar-logo-container, .footer-logo-container {
     overflow: visible; /* Allow overflow to prevent clipping */
   }
+
+  /* Make header logo specifically larger */
+  .navbar-logo-container img {
+    max-height: 40px !important; /* Increase the max height for the header logo */
+  }
 }
 
 /* S'assurer que les textes sont bien lisibles en mode clair */
