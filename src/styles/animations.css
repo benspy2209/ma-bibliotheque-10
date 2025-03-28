@@ -95,10 +95,6 @@
   animation: heartbeat 2s ease-in-out infinite;
   transition: all 0.3s ease;
   position: relative;
-  color: #FFFFFF;
-  background-color: #E4364A;
-  padding: 0 0.1em;
-  border-radius: 4px;
 }
 
 /* Effet de pulsation autour du texte - rendu plus subtil */
@@ -187,7 +183,7 @@
   left: 0;
   width: 100%;
   height: 2px;
-  background: linear-gradient(90deg, #E4364A, #ff8a80, #E4364A);
+  background: linear-gradient(90deg, #e4364a, #ff8a80, #e4364a);
   background-size: 200% 100%;
   animation: gradientShift 3s ease infinite;
   transform: scaleX(0);
@@ -200,10 +196,10 @@
 }
 
 .animated-title .title-pulse {
-  background: #E4364A;
-  color: #FFFFFF;
-  border-radius: 4px;
-  padding: 0 0.1em;
+  background: linear-gradient(90deg, #e4364a, #ff8a80, #e4364a);
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
   transition: all 0.5s ease;
-  animation: heartbeat 2s ease-in-out infinite;
+  animation: heartbeat 2s ease-in-out infinite, gradientShift 3s ease infinite;
 }
