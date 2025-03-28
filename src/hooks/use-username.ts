@@ -67,21 +67,27 @@ export function useUsername() {
         return;
       }
       
-      // For non-admin users, check the normal restrictions
-      const { data, error } = await supabase
-        .rpc('can_change_username', { user_id: user.id });
+      // For non-admin users, check the normal restrictions via the database function
+      try {
+        const { data, error } = await supabase
+          .rpc('can_change_username', { user_id: user.id });
+          
+        if (error) {
+          console.error('Error checking username change ability:', error);
+          return;
+        }
         
-      if (error) {
-        console.error('Error checking username change ability:', error);
-        return;
-      }
-      
-      // Cast the data to our expected type with type assertion
-      const response = data as unknown as UsernameChangeResponse;
-      setCanChangeUsername(response.can_change);
-      
-      if (response.next_allowed) {
-        setNextChangeDate(new Date(response.next_allowed));
+        // Cast the data to our expected type with type assertion
+        const response = data as unknown as UsernameChangeResponse;
+        setCanChangeUsername(response.can_change);
+        
+        if (response.next_allowed) {
+          setNextChangeDate(new Date(response.next_allowed));
+        }
+      } catch (error) {
+        console.error('Error calling can_change_username RPC:', error);
+        // En cas d'erreur, autoriser quand même mais log l'erreur
+        setCanChangeUsername(true);
       }
     } catch (error) {
       console.error('Error in checkCanChangeUsername:', error);
@@ -129,6 +135,10 @@ export function useUsername() {
         return false;
       }
       
+      // Si c'est un admin, permettre la mise à jour sans vérification supplémentaire
+      const { data: userData } = await supabase.auth.getUser();
+      const isAdminUser = userData?.user?.email === 'debruijneb@gmail.com';
+      
       // Update the username
       const { error } = await supabase
         .from('profiles')
@@ -138,25 +148,20 @@ export function useUsername() {
       if (error) {
         console.error('Error updating username:', error);
         
-        // Check if error is due to frequency limitation
-        if (error.message.includes('once per month')) {
-          toast({
-            variant: "destructive",
-            description: error.message
-          });
-          await checkCanChangeUsername(); // Refresh the limitation status
-        } else {
-          toast({
-            variant: "destructive",
-            description: "Une erreur est survenue lors de la mise à jour du nom d'utilisateur."
-          });
-        }
+        toast({
+          variant: "destructive",
+          description: "Une erreur est survenue lors de la mise à jour du nom d'utilisateur."
+        });
         
         return false;
       }
       
       setUsername(newUsername);
-      await checkCanChangeUsername(); // Refresh the limitation status
+      
+      // Seulement vérifier les limitations pour les non-admins
+      if (!isAdminUser) {
+        await checkCanChangeUsername();
+      }
       
       toast({
         description: "Nom d'utilisateur mis à jour avec succès!"
@@ -165,6 +170,10 @@ export function useUsername() {
       return true;
     } catch (error) {
       console.error('Error in updateUsername:', error);
+      toast({
+        variant: "destructive",
+        description: "Une erreur est survenue lors de la mise à jour du nom d'utilisateur."
+      });
       return false;
     } finally {
       setIsLoading(false);

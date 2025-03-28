@@ -18,6 +18,7 @@ export function UsernameForm() {
   const { refreshUsername } = useUserDisplay(user);
   const [newUsername, setNewUsername] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (username) {
@@ -29,13 +30,19 @@ export function UsernameForm() {
     e.preventDefault();
     if (!user) return;
     
+    setErrorMessage(null);
     setIsSubmitting(true);
     try {
       const success = await updateUsername(newUsername);
       if (success) {
         // Refresh the username display in the navbar
         refreshUsername();
+      } else {
+        setErrorMessage("Une erreur est survenue lors de la mise à jour du nom d'utilisateur.");
       }
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du nom d'utilisateur:", error);
+      setErrorMessage("Une erreur est survenue lors de la mise à jour du nom d'utilisateur.");
     } finally {
       setIsSubmitting(false);
     }
@@ -69,6 +76,15 @@ export function UsernameForm() {
             <AlertDescription>
               Vous ne pouvez modifier votre nom d'utilisateur qu'une fois par mois. 
               Prochain changement possible à partir du {formatNextChangeDate()}.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {errorMessage && (
+          <Alert className="mb-4" variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {errorMessage}
             </AlertDescription>
           </Alert>
         )}
