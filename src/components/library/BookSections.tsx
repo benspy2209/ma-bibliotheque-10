@@ -31,7 +31,8 @@ export const BookSections = ({
   const completedBooks = books.filter(book => book.status === 'completed');
   const readingBooks = books.filter(book => book.status === 'reading');
   const toReadBooks = books.filter(book => !book.status || book.status === 'to-read');
-  // Make sure to only show unpurchased books in the toBuyBooks list
+  
+  // Important: Show ALL books that have purchased === false in the toBuyBooks tab
   const toBuyBooks = books.filter(book => book.purchased === false);
   const purchasedBooks = books.filter(book => book.purchased === true);
 
