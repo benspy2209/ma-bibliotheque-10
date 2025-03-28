@@ -13,38 +13,51 @@ export interface RoadmapFeature {
   isProposal?: boolean;
   proposedBy?: string;
   proposalDate?: string;
+  completionDate?: string;
 }
 
 // List of technical features for the roadmap
 export const roadmapFeatures: RoadmapFeature[] = [
   {
+    name: "Authentification par réseaux sociaux",
+    description: "Connexion via Google et Facebook pour simplifier l'accès des utilisateurs",
+    status: "completed",
+    completionDate: "18 juin 2024",
+    technical_details: "Intégration des API OAuth de Google et Facebook avec Supabase Auth, gestion des redirections et des états d'authentification"
+  },
+  {
     name: "Authentification utilisateur",
     description: "Système d'authentification complet avec inscription, connexion et réinitialisation de mot de passe",
     status: "completed",
+    completionDate: "8 juin 2024",
     technical_details: "Implémentation avec Supabase Auth, JWT, et protection des routes"
   },
   {
     name: "Base de données de livres",
     description: "Stockage et gestion des livres dans la bibliothèque de l'utilisateur",
     status: "completed",
+    completionDate: "4 juin 2024",
     technical_details: "Architecture PostgreSQL avec Supabase, relations entre tables utilisateurs et livres"
   },
   {
     name: "API de recherche de livres",
     description: "Recherche de livres dans plusieurs langues et par différents critères",
     status: "completed",
+    completionDate: "10 juin 2024",
     technical_details: "Intégration de Google Books API, optimisation des requêtes, mise en cache"
   },
   {
     name: "Système de statistiques de lecture",
     description: "Suivi avancé des habitudes de lecture et visualisation des données",
     status: "completed",
+    completionDate: "12 juin 2024",
     technical_details: "Data mining avec Recharts, calculs complexes de statistiques, optimisation des requêtes"
   },
   {
     name: "Import/Export de bibliothèque",
     description: "Importation et exportation des données de bibliothèque",
     status: "completed",
+    completionDate: "15 juin 2024",
     technical_details: "Parsers CSV/JSON personnalisés, validation des données, gestion des erreurs"
   },
   {

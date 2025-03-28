@@ -37,6 +37,11 @@ const FeatureTimeline = ({ features }: FeatureTimelineProps) => {
                         {feature.quarter}
                       </span>
                     )}
+                    {feature.completionDate && feature.status === "completed" && (
+                      <span className="ml-2 bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                        {feature.completionDate}
+                      </span>
+                    )}
                   </div>
                 </div>
               </CardHeader>
