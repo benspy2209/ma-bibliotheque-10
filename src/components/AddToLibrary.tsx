@@ -40,7 +40,7 @@ export function AddToLibrary({
     setStatus(currentStatus);
   }, [currentStatus]);
 
-  const handleStatusChange = async (newStatus: ReadingStatus) => {
+  const handleStatusChange = async (newStatus: ReadingStatus, purchased: boolean = true) => {
     setIsLoading(true);
     try {
       // Mettre à jour le statut local immédiatement pour l'interface utilisateur
@@ -48,6 +48,12 @@ export function AddToLibrary({
       
       // Appeler la fonction de changement de statut
       await onStatusChange(newStatus);
+      
+      // For non-purchased books, set the purchased flag
+      if (!purchased) {
+        // This is handled in the BookCard component where the book's purchased flag is set to false
+        console.log("Setting book as not purchased");
+      }
       
       // Force une invalidation IMMÉDIATE de toutes les requêtes liées aux livres
       await queryClient.invalidateQueries({ 
@@ -58,13 +64,18 @@ export function AddToLibrary({
       
       console.log(`Statut du livre ${bookId} changé à: ${newStatus} - Cache invalidé`);
       
-      toast({
-        description: newStatus === 'to-read' 
-          ? "Livre ajouté à votre liste de lecture" 
-          : newStatus === 'reading' 
-          ? "Livre ajouté à vos lectures en cours" 
-          : "Livre marqué comme lu",
-      });
+      let toastMessage = "";
+      if (newStatus === 'to-read' && !purchased) {
+        toastMessage = "Livre ajouté à votre liste d'achats";
+      } else if (newStatus === 'to-read') {
+        toastMessage = "Livre ajouté à votre liste de lecture";
+      } else if (newStatus === 'reading') {
+        toastMessage = "Livre ajouté à vos lectures en cours";
+      } else {
+        toastMessage = "Livre marqué comme lu";
+      }
+      
+      toast({ description: toastMessage });
       
     } catch (error) {
       // En cas d'erreur, rétablir le statut précédent
@@ -83,7 +94,7 @@ export function AddToLibrary({
   };
 
   // Icônes et labels pour chaque statut
-  const statusConfig: Record<ReadingStatus, { icon: React.ReactNode, label: string, bgColor: string, textColor: string }> = {
+  const statusConfig: Record<string, { icon: React.ReactNode, label: string, bgColor: string, textColor: string, action?: () => Promise<void> }> = {
     'to-read': { 
       icon: <BookmarkPlus className="h-4 w-4 text-[#CC4153]" />, 
       label: 'À lire',
@@ -101,6 +112,13 @@ export function AddToLibrary({
       label: 'Lu',
       bgColor: theme === 'dark' ? 'bg-green-500' : 'bg-green-100', 
       textColor: theme === 'dark' ? 'text-white' : 'text-green-800'
+    },
+    'to-buy': {
+      icon: <ShoppingBag className="h-4 w-4 text-[#CC4153]" />,
+      label: 'Acheter',
+      bgColor: theme === 'dark' ? 'bg-orange-500' : 'bg-orange-100', 
+      textColor: theme === 'dark' ? 'text-white' : 'text-orange-800',
+      action: () => handleStatusChange('to-read', false)
     }
   };
 
@@ -128,7 +146,22 @@ export function AddToLibrary({
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent className={theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-white text-gray-800'}>
-        {Object.entries(statusConfig).map(([statusKey, { icon, label }]) => (
+        {/* Option to add to purchase list */}
+        <DropdownMenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            statusConfig['to-buy'].action?.();
+          }}
+          className={`flex items-center gap-2 ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
+        >
+          {statusConfig['to-buy'].icon}
+          {statusConfig['to-buy'].label}
+        </DropdownMenuItem>
+        
+        {/* Standard reading status options */}
+        {Object.entries(statusConfig)
+          .filter(([key]) => key !== 'to-buy')
+          .map(([statusKey, { icon, label }]) => (
           <DropdownMenuItem
             key={statusKey}
             onClick={(e) => {

@@ -1,3 +1,4 @@
+
 import { useNavigate } from 'react-router-dom';
 import { Book, ReadingStatus } from '@/types/book';
 import { Card, CardContent } from "@/components/ui/card";
@@ -60,8 +61,20 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
       const bookToSave: Book = {
         ...book,
         status,
-        amazonUrl // Ajouter le lien Amazon correct
+        amazonUrl, // Ajouter le lien Amazon correct
+        purchased: true // By default, books are marked as purchased
       };
+      
+      // If the book is added to the to-read list from the "Acheter" option
+      // we mark it as not purchased so it appears in the "Books to Buy" list
+      const referrer = document.referrer;
+      const isFromPurchaseAction = sessionStorage.getItem('purchase_action') === 'true';
+      
+      if (isFromPurchaseAction) {
+        bookToSave.purchased = false;
+        sessionStorage.removeItem('purchase_action');
+        console.log("Setting book as not purchased through purchase action flag");
+      }
       
       // Si le statut est "reading" et qu'il n'y a pas de date de début, on l'ajoute automatiquement
       if (status === 'reading' && !bookToSave.startReadingDate) {
@@ -150,7 +163,14 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
             {/* Badge Ajouter à la bibliothèque */}
             <div onClick={(e) => e.stopPropagation()} className="z-10">
               <AddToLibrary 
-                onStatusChange={handleStatusChange}
+                onStatusChange={(status) => {
+                  // If status comes from the "Acheter" option in the dropdown
+                  // we set a flag to mark the book as not purchased
+                  if (status === 'to-read' && event && (event.target as HTMLElement).innerText === 'Acheter') {
+                    sessionStorage.setItem('purchase_action', 'true');
+                  }
+                  handleStatusChange(status);
+                }}
                 bookId={book.id}
                 bookTitle={book.title}
                 bookAuthor={book.author}
