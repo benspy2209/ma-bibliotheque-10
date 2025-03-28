@@ -9,6 +9,8 @@ import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ResetPasswordForm } from '../ResetPasswordForm';
 import { useNavigate } from 'react-router-dom';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface LoginTabProps {
   isLoading: boolean;
@@ -19,6 +21,7 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showResetDialog, setShowResetDialog] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
   const { toast } = useToast();
   const { setAuthMode } = useSupabaseAuth();
   const navigate = useNavigate();
@@ -26,6 +29,7 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setLoginError(null);
     
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -33,7 +37,15 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
         password
       });
 
-      if (error) throw error;
+      if (error) {
+        // Personnaliser le message d'erreur pour rendre plus clair si l'utilisateur n'est pas inscrit
+        if (error.message === "Invalid login credentials") {
+          setLoginError("Ce compte n'existe pas. Veuillez créer un compte dans l'onglet \"Inscription\".");
+        } else {
+          setLoginError(`Erreur : ${error.message}`);
+        }
+        throw error;
+      }
 
       toast({
         description: "Connexion réussie"
@@ -43,10 +55,7 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
       navigate('/search');
     } catch (error: any) {
       console.error("Erreur d'authentification:", error);
-      toast({
-        variant: "destructive",
-        description: `Erreur : ${error.message}`
-      });
+      // Ne pas afficher de toast, car nous utilisons maintenant l'alerte dans l'interface
     } finally {
       setIsLoading(false);
     }
@@ -54,13 +63,25 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
 
   const handleForgotPassword = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent default button behavior
-    console.log("Ouverture du dialogue de réinitialisation du mot de passe");
     setShowResetDialog(true);
+  };
+
+  const switchToSignup = () => {
+    setAuthMode('signup');
   };
 
   return (
     <>
       <form onSubmit={handleLogin} className="space-y-4 w-full max-w-sm">
+        {loginError && (
+          <Alert variant="destructive" className="bg-[#E4364A] text-white border-[#E4364A]">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {loginError}
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="space-y-2">
           <Label htmlFor="email-login">Email</Label>
           <Input
@@ -98,6 +119,18 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? 'Connexion...' : 'Se connecter'}
         </Button>
+
+        <div className="text-center text-sm mt-4">
+          <span>Pas encore de compte? </span>
+          <Button 
+            type="button" 
+            variant="link" 
+            className="p-0 h-auto text-sm" 
+            onClick={switchToSignup}
+          >
+            Créer un compte
+          </Button>
+        </div>
       </form>
 
       <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>

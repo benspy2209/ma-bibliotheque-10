@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
 import { AlertCircle, Info } from "lucide-react";
+import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 
 interface SignupTabProps {
   isLoading: boolean;
@@ -19,6 +20,7 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
   const [emailSentMessage, setEmailSentMessage] = useState('');
   const [isRateLimited, setIsRateLimited] = useState(false);
   const { toast } = useToast();
+  const { setAuthMode } = useSupabaseAuth();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,10 +104,17 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
     }
   };
 
+  const switchToLogin = () => {
+    setAuthMode('login');
+  };
+
   return (
     <form onSubmit={handleSignup} className="space-y-4 w-full max-w-sm">
       {emailSentMessage && (
-        <Alert variant={emailSentMessage.includes("existe déjà") || (emailSentMessage.includes("rate limit") && !isRateLimited) ? "destructive" : "default"} className="mb-4">
+        <Alert 
+          variant={emailSentMessage.includes("existe déjà") || (emailSentMessage.includes("rate limit") && !isRateLimited) ? "destructive" : "default"}
+          className={emailSentMessage.includes("existe déjà") || (emailSentMessage.includes("rate limit") && !isRateLimited) ? "bg-[#E4364A] text-white border-[#E4364A]" : ""}
+        >
           {emailSentMessage.includes("existe déjà") || (emailSentMessage.includes("rate limit") && !isRateLimited) ? <AlertCircle className="h-4 w-4" /> : <Info className="h-4 w-4" />}
           <AlertDescription>
             {emailSentMessage}
@@ -144,6 +153,18 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? 'Création...' : 'Créer un compte'}
       </Button>
+      
+      <div className="text-center text-sm mt-4">
+        <span>Déjà un compte? </span>
+        <Button 
+          type="button" 
+          variant="link" 
+          className="p-0 h-auto text-sm" 
+          onClick={switchToLogin}
+        >
+          Se connecter
+        </Button>
+      </div>
       
       <Alert className="mt-4">
         <AlertDescription className="text-xs">
