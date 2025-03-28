@@ -94,21 +94,55 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
     setSuggestedEmail(null);
     
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log(`Tentative de connexion avec: ${email}`);
+      
+      // Vérifier si l'utilisateur existe avant d'essayer de se connecter
+      const { data: userExistsData, error: userExistsError } = await supabase.auth.admin
+        .listUsers({
+          filters: {
+            email: email,
+          },
+        })
+        .catch(() => ({ data: null, error: null }));
+      
+      console.log("Vérification existence utilisateur:", 
+        userExistsData ? `Trouvé: ${JSON.stringify(userExistsData)}` : "Non trouvé", 
+        userExistsError ? `Erreur: ${userExistsError.message}` : "Pas d'erreur");
+      
+      // Tenter la connexion proprement dite
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
+
+      console.log("Résultat connexion:", 
+        authData ? `Succès: ${JSON.stringify(authData)}` : "Échec", 
+        error ? `Erreur: ${error.message}` : "Pas d'erreur");
 
       if (error) {
         // Personnaliser le message d'erreur
         if (error.message === "Invalid login credentials") {
           // Chercher un email similaire
           const similar = await findSimilarEmail(email);
+          console.log("Email similaire trouvé:", similar);
+          
           if (similar) {
             setSuggestedEmail(similar);
             setLoginError(`Identifiants invalides. Avez-vous voulu dire "${similar}" ?`);
           } else {
-            setLoginError("Ce compte n'existe pas ou le mot de passe est incorrect. Veuillez réessayer ou créer un compte.");
+            // Vérifier si le compte existe pour donner un message plus précis
+            const { count } = await supabase
+              .from('profiles')
+              .select('*', { count: 'exact', head: true })
+              .eq('id', email);
+              
+            console.log(`Recherche dans profiles pour ${email}: ${count} résultats`);
+            
+            if (count && count > 0) {
+              setLoginError("Le mot de passe est incorrect. Veuillez réessayer ou utiliser la fonction de réinitialisation.");
+            } else {
+              setLoginError("Ce compte n'existe pas ou le mot de passe est incorrect. Veuillez réessayer ou créer un compte.");
+            }
           }
         } else {
           setLoginError(`Erreur : ${error.message}`);
