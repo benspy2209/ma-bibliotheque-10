@@ -17,6 +17,17 @@ export function useUsername() {
   const [nextChangeDate, setNextChangeDate] = useState<Date | null>(null);
   const { toast } = useToast();
   const { user } = useSupabaseAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Check if user is admin
+  useEffect(() => {
+    if (user?.email === 'debruijneb@gmail.com') {
+      setIsAdmin(true);
+      setCanChangeUsername(true);
+    } else {
+      setIsAdmin(false);
+    }
+  }, [user]);
 
   // Fetch the current username
   const fetchUsername = async () => {
@@ -46,6 +57,12 @@ export function useUsername() {
   // Check if the user can change their username
   const checkCanChangeUsername = async () => {
     if (!user) return;
+    
+    // Admin can always change username
+    if (isAdmin) {
+      setCanChangeUsername(true);
+      return;
+    }
     
     try {
       setIsLoading(true);
@@ -156,11 +173,20 @@ export function useUsername() {
   useEffect(() => {
     if (user) {
       fetchUsername();
-      checkCanChangeUsername();
+      
+      // Admin can always change username
+      if (user.email === 'debruijneb@gmail.com') {
+        setIsAdmin(true);
+        setCanChangeUsername(true);
+      } else {
+        setIsAdmin(false);
+        checkCanChangeUsername();
+      }
     } else {
       setUsername(null);
       setCanChangeUsername(true);
       setNextChangeDate(null);
+      setIsAdmin(false);
     }
   }, [user]);
 
@@ -171,6 +197,7 @@ export function useUsername() {
     nextChangeDate,
     updateUsername,
     fetchUsername,
-    checkCanChangeUsername
+    checkCanChangeUsername,
+    isAdmin
   };
 }

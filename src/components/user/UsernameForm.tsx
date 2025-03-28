@@ -11,13 +11,15 @@ import { fr } from 'date-fns/locale';
 import { useUsername } from "@/hooks/use-username";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
 import { useUserDisplay } from "@/components/navbar/UserUtils";
+import { useTranslation } from "@/hooks/use-translation";
 
 export function UsernameForm() {
-  const { username, isLoading, canChangeUsername, nextChangeDate, updateUsername } = useUsername();
+  const { username, isLoading, canChangeUsername, nextChangeDate, updateUsername, isAdmin } = useUsername();
   const { user } = useSupabaseAuth();
   const { refreshUsername } = useUserDisplay(user);
   const [newUsername, setNewUsername] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (username) {
@@ -52,55 +54,64 @@ export function UsernameForm() {
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
         <CardTitle>
-          {isFirstTimeSettingUsername ? "Définir votre nom d'utilisateur" : "Modifier votre nom d'utilisateur"}
+          {isFirstTimeSettingUsername 
+            ? t("username_form.title") 
+            : t("username_form.title_modify")}
         </CardTitle>
         <CardDescription>
           {isFirstTimeSettingUsername 
-            ? "Choisissez un nom d'utilisateur unique pour votre compte." 
-            : "Vous pouvez modifier votre nom d'utilisateur une fois par mois."}
+            ? t("username_form.subtitle") 
+            : t("username_form.subtitle_modify")}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {!isFirstTimeSettingUsername && !canChangeUsername && nextChangeDate && (
+        {!isFirstTimeSettingUsername && !canChangeUsername && nextChangeDate && !isAdmin && (
           <Alert className="mb-4" variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Vous ne pouvez modifier votre nom d'utilisateur qu'une fois par mois. 
-              Prochain changement possible à partir du {formatNextChangeDate()}.
+              {t("username_form.next_change")} {formatNextChangeDate()}.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {isAdmin && !isFirstTimeSettingUsername && (
+          <Alert className="mb-4">
+            <InfoIcon className="h-4 w-4" />
+            <AlertDescription>
+              En tant qu'administrateur, vous pouvez modifier votre nom d'utilisateur à tout moment.
             </AlertDescription>
           </Alert>
         )}
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-2">
-            <Label htmlFor="username">Nom d'utilisateur</Label>
+            <Label htmlFor="username">{t("username_form.label")}</Label>
             <Input
               id="username"
               value={newUsername}
               onChange={(e) => setNewUsername(e.target.value)}
-              placeholder="Entrez votre nom d'utilisateur"
-              disabled={isLoading || isSubmitting || (!isFirstTimeSettingUsername && !canChangeUsername)}
+              placeholder={t("username_form.placeholder")}
+              disabled={isLoading || isSubmitting || (!isFirstTimeSettingUsername && !canChangeUsername && !isAdmin)}
             />
           </div>
 
           <div className="mt-4 text-sm text-muted-foreground flex items-start gap-2">
             <InfoIcon className="h-4 w-4 mt-0.5 flex-shrink-0" />
             <span>
-              Votre nom d'utilisateur sera visible par les autres utilisateurs et ne peut 
-              être modifié qu'une fois par mois.
+              {t("username_form.info")}
             </span>
           </div>
           
           <Button 
             type="submit" 
             className="w-full mt-4"
-            disabled={isLoading || isSubmitting || (!isFirstTimeSettingUsername && !canChangeUsername) || newUsername === username}
+            disabled={isLoading || isSubmitting || (!isFirstTimeSettingUsername && !canChangeUsername && !isAdmin) || newUsername === username}
           >
             {isSubmitting 
-              ? "Enregistrement..." 
+              ? t("username_form.submitting")
               : isFirstTimeSettingUsername 
-                ? "Définir le nom d'utilisateur" 
-                : "Modifier le nom d'utilisateur"}
+                ? t("username_form.submit") 
+                : t("username_form.submit_modify")}
           </Button>
         </form>
       </CardContent>
