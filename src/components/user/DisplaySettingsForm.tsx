@@ -82,33 +82,31 @@ export function DisplaySettingsForm() {
       }
       
       // Save preferences to the database
-      // First check if profile exists
-      const { data: profileExists, error: checkError } = await supabase
+      // First check if profile already exists for this user
+      const { data: existingProfiles, error: checkError } = await supabase
         .from('profiles')
-        .select('id')
-        .eq('id', user.id)
-        .single();
-
-      if (checkError && checkError.code !== 'PGRST116') {
-        // If error is not 'no rows returned', it's a real error
+        .select('*')
+        .eq('id', user.id);
+        
+      if (checkError) {
         console.error('Error checking profile:', checkError);
         setErrorMessage("Une erreur est survenue lors de la vérification du profil.");
         return;
       }
 
-      let result;
+      let updateResult;
       
-      if (!profileExists) {
+      if (!existingProfiles || existingProfiles.length === 0) {
         // Create new profile
-        result = await supabase
+        updateResult = await supabase
           .from('profiles')
-          .insert({
+          .insert([{
             id: user.id,
             theme_preference: selectedTheme
-          });
+          }]);
       } else {
         // Update existing profile
-        result = await supabase
+        updateResult = await supabase
           .from('profiles')
           .update({
             theme_preference: selectedTheme
@@ -116,9 +114,9 @@ export function DisplaySettingsForm() {
           .eq('id', user.id);
       }
 
-      if (result.error) {
-        console.error('Error updating display settings:', result.error);
-        setErrorMessage("Une erreur est survenue lors de la mise à jour des paramètres d'affichage.");
+      if (updateResult.error) {
+        console.error('Error updating display settings:', updateResult.error);
+        setErrorMessage(`Une erreur est survenue lors de la mise à jour des paramètres d'affichage: ${updateResult.error.message}`);
         return;
       }
 
