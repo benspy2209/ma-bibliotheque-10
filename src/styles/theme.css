@@ -80,7 +80,7 @@
 
 @layer components {
   .nav-link {
-    @apply text-base font-medium transition-colors hover:text-[#e4364a];
+    @apply text-sm font-medium transition-colors hover:text-[#e4364a];
   }
   
   .card-transparent {

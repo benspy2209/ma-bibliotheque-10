@@ -1,3 +1,4 @@
+
 import { NavLink } from "react-router-dom";
 import { Search, BookOpen, BarChart2, Sun, Moon, LogIn, Menu, Lightbulb, HelpCircle, User, UserRound, LogOut, Info } from "lucide-react";
 import { Button } from "./ui/button";
@@ -20,6 +21,14 @@ import {
   DropdownMenuSeparator
 } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "./ui/avatar";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
 
 const NavBar = () => {
   const { theme, toggleTheme } = useTheme();
@@ -57,52 +66,52 @@ const NavBar = () => {
     <>
       <NavLink 
         to="/" 
-        className={({ isActive }) => `flex items-center gap-2 text-base font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
+        className={({ isActive }) => `flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
         end
       >
-        <BookOpen className="h-5 w-5 text-[#e4364a]" />
+        <BookOpen className="h-4 w-4 text-[#e4364a]" />
         Accueil
       </NavLink>
       <NavLink 
         to="/library" 
-        className={({ isActive }) => `flex items-center gap-2 text-base font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
+        className={({ isActive }) => `flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
       >
-        <BookOpen className="h-5 w-5 text-[#e4364a]" />
+        <BookOpen className="h-4 w-4 text-[#e4364a]" />
         Ma Bibliothèque
       </NavLink>
       <NavLink 
         to="/search" 
-        className={({ isActive }) => `flex items-center gap-2 text-base font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
+        className={({ isActive }) => `flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
       >
-        <Search className="h-5 w-5 text-[#e4364a]" />
+        <Search className="h-4 w-4 text-[#e4364a]" />
         Recherche
       </NavLink>
       <NavLink 
         to="/statistics" 
-        className={({ isActive }) => `flex items-center gap-2 text-base font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
+        className={({ isActive }) => `flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
       >
-        <BarChart2 className="h-5 w-5 text-[#e4364a]" />
+        <BarChart2 className="h-4 w-4 text-[#e4364a]" />
         Statistiques
       </NavLink>
       <NavLink 
         to="/features" 
-        className={({ isActive }) => `flex items-center gap-2 text-base font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
+        className={({ isActive }) => `flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
       >
-        <Lightbulb className="h-5 w-5 text-[#e4364a]" />
+        <Lightbulb className="h-4 w-4 text-[#e4364a]" />
         Fonctionnalités
       </NavLink>
       <NavLink 
         to="/faq" 
-        className={({ isActive }) => `flex items-center gap-2 text-base font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
+        className={({ isActive }) => `flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
       >
-        <HelpCircle className="h-5 w-5 text-[#e4364a]" />
+        <HelpCircle className="h-4 w-4 text-[#e4364a]" />
         FAQ
       </NavLink>
       <NavLink 
         to="/about" 
-        className={({ isActive }) => `flex items-center gap-2 text-base font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
+        className={({ isActive }) => `flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary ${isActive ? 'text-primary' : theme === 'light' ? 'text-black' : 'text-muted-foreground'}`}
       >
-        <Info className="h-5 w-5 text-[#e4364a]" />
+        <Info className="h-4 w-4 text-[#e4364a]" />
         À propos
       </NavLink>
     </>
@@ -112,8 +121,8 @@ const NavBar = () => {
   const UserMenu = () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <Avatar className="h-9 w-9 border border-primary/20">
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+          <Avatar className="h-7 w-7 border border-primary/20">
             <AvatarFallback className="bg-primary/10 text-primary">
               {getInitials()}
             </AvatarFallback>
@@ -158,8 +167,8 @@ const NavBar = () => {
   );
 
   return (
-    <nav className="w-full border-b py-5 px-6 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto flex flex-row items-center justify-between gap-4">
+    <nav className="w-full border-b py-2 px-4 transition-colors duration-300">
+      <div className="max-w-6xl mx-auto flex flex-row items-center justify-between gap-2">
         {isMobile ? (
           <>
             {/* Layout mobile amélioré: logo à gauche et menu hamburger à droite */}
@@ -230,25 +239,25 @@ const NavBar = () => {
           </>
         ) : (
           <>
-            <div className="flex items-center gap-6">
-              <NavLink to="/" className="flex items-center navbar-logo-container">
+            <div className="flex items-center">
+              <NavLink to="/" className="flex items-center navbar-logo-container mr-6">
                 <img 
                   src={theme === 'light' ? "/pulse.png" : "/pulse dark.png"}
                   alt="BiblioPulse Logo" 
-                  className="h-auto w-auto max-h-[32px] md:max-h-40" 
+                  className="h-auto w-auto max-h-[28px]" 
                 />
               </NavLink>
               
-              <div className="flex items-center gap-8">
+              <div className="flex items-center space-x-4">
                 <NavLinks />
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               {user ? (
-                <div className="flex items-center gap-3">
-                  <span className="text-sm mr-2 hidden md:inline-block">
-                    Bonjour, <span className="font-bold text-primary">{getUserDisplayName()}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs mr-1 hidden lg:inline-block">
+                    Bonjour, <span className="font-medium text-primary">{getUserDisplayName()}</span>
                   </span>
                   <UserMenu />
                 </div>
@@ -257,19 +266,19 @@ const NavBar = () => {
                   variant="outline" 
                   size="sm"
                   onClick={handleSignIn}
-                  className="transition-colors duration-300 text-base"
+                  className="transition-colors duration-300 text-sm h-8"
                 >
-                  <LogIn className="h-5 w-5 mr-2" />
+                  <LogIn className="h-4 w-4 mr-1" />
                   Se connecter
                 </Button>
               )}
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={toggleTheme}
-                className="transition-colors duration-300"
+                className="transition-colors duration-300 h-8 w-8"
               >
-                {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+                {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
               </Button>
             </div>
           </>
