@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -85,7 +86,8 @@ export function UserProfileForm() {
       }
 
       toast({
-        description: "Profil mis à jour avec succès!"
+        description: "Profil mis à jour avec succès!",
+        duration: 2000 // Set to 2 seconds (2000ms)
       });
     } catch (error) {
       console.error('Error in handleSubmit:', error);

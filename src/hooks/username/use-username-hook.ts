@@ -78,7 +78,8 @@ export function useUsernameHook(): UsernameHookReturn {
       if (success) {
         setUsername(newUsername);
         toast({
-          description: "Nom d'utilisateur mis à jour avec succès!"
+          description: "Nom d'utilisateur mis à jour avec succès!",
+          duration: 2000 // Set to 2 seconds (2000ms)
         });
         return true;
       }
