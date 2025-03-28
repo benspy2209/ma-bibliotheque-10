@@ -16,6 +16,7 @@ export const AuthButton = ({ user, signOut, handleSignIn }: AuthButtonProps) => 
         variant="outline" 
         className="w-full touch-manipulation" 
         onClick={signOut}
+        style={{ touchAction: 'manipulation' }}
       >
         <LogOut className="mr-2 h-4 w-4" />
         Déconnexion
@@ -28,6 +29,7 @@ export const AuthButton = ({ user, signOut, handleSignIn }: AuthButtonProps) => 
       variant="pulse" 
       className="w-full touch-manipulation" 
       onClick={handleSignIn}
+      style={{ touchAction: 'manipulation' }}
     >
       <LogIn className="mr-2 h-4 w-4" />
       Connexion

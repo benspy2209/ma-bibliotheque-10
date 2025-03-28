@@ -46,9 +46,12 @@ export const MobileNavbar = ({
         </NavLink>
       </div>
       
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         {user && (
-          <div className="flex items-center mr-1">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium hidden sm:inline-block">
+              {getUserDisplayName()}
+            </span>
             <Avatar className="h-8 w-8 border-2 border-primary/20">
               <AvatarFallback className="bg-primary text-primary-foreground text-sm font-bold">
                 {getInitials()}
@@ -64,8 +67,9 @@ export const MobileNavbar = ({
             <Button 
               variant="ghost" 
               size="icon" 
-              className="relative z-50 touch-manipulation"
+              className="relative z-50 touch-manipulation active:scale-95 active:bg-accent"
               aria-label="Menu principal"
+              style={{ touchAction: 'manipulation' }}
             >
               <Menu className="h-6 w-6" />
               <span className="sr-only">Menu</span>
