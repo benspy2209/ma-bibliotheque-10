@@ -10,13 +10,17 @@ import { useQueryClient } from '@tanstack/react-query';
 import { BooksToBuyHeader } from './books-to-buy/BooksToBuyHeader';
 import { AffiliateInfo } from './books-to-buy/AffiliateInfo';
 import { BooksList } from './books-to-buy/BooksList';
+import { BookFilters } from './books-to-buy/BookFilters';
 
 export function BooksToBuyList() {
   const { user } = useSupabaseAuth();
   const [books, setBooks] = useState<Book[]>([]);
+  const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [selectedAuthor, setSelectedAuthor] = useState<string | null>(null);
+  const [titleFilter, setTitleFilter] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -25,6 +29,32 @@ export function BooksToBuyList() {
       fetchBooksToBuy();
     }
   }, [user]);
+
+  // Apply filters when books, selectedAuthor or titleFilter change
+  useEffect(() => {
+    let result = [...books];
+    
+    // Apply author filter
+    if (selectedAuthor) {
+      result = result.filter(book => {
+        if (Array.isArray(book.author)) {
+          return book.author.includes(selectedAuthor);
+        } else {
+          return book.author === selectedAuthor;
+        }
+      });
+    }
+    
+    // Apply title filter
+    if (titleFilter) {
+      const searchTerm = titleFilter.toLowerCase();
+      result = result.filter(book => 
+        book.title.toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    setFilteredBooks(result);
+  }, [books, selectedAuthor, titleFilter]);
 
   const fetchBooksToBuy = async () => {
     try {
@@ -55,6 +85,7 @@ export function BooksToBuyList() {
         .filter(book => !book.purchased);
         
       setBooks(bookList);
+      setFilteredBooks(bookList); // Initialize filtered books with all books
     } catch (err: any) {
       console.error('Error fetching books to buy:', err);
       setError(`Erreur lors du chargement des livres: ${err.message || 'Erreur inconnue'}`);
@@ -73,7 +104,8 @@ export function BooksToBuyList() {
       await deleteBook(bookToDelete.id);
       
       // Update local state - remove the deleted book from the list
-      setBooks(prevBooks => prevBooks.filter(book => book.id !== bookToDelete.id));
+      const updatedBooks = books.filter(book => book.id !== bookToDelete.id);
+      setBooks(updatedBooks);
       
       // Invalidate the books query to refresh any other components using this data
       await queryClient.invalidateQueries({ queryKey: ['books'] });
@@ -96,13 +128,35 @@ export function BooksToBuyList() {
     }
   };
 
+  // Handle author selection
+  const handleAuthorSelect = (author: string | null) => {
+    setSelectedAuthor(author);
+  };
+
+  // Handle title filter change
+  const handleTitleFilterChange = (value: string) => {
+    setTitleFilter(value);
+  };
+
   return (
     <Card className="w-full">
       <BooksToBuyHeader />
       <CardContent className="pt-6">
         <AffiliateInfo />
+        
+        {/* Show filters only if there are books */}
+        {books.length > 0 && (
+          <BookFilters 
+            books={books}
+            selectedAuthor={selectedAuthor}
+            onAuthorSelect={handleAuthorSelect}
+            titleFilter={titleFilter}
+            onTitleFilterChange={handleTitleFilterChange}
+          />
+        )}
+
         <BooksList 
-          books={books}
+          books={filteredBooks}
           isLoading={isLoading}
           error={error}
           isDeleting={isDeleting}
