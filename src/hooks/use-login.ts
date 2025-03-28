@@ -66,6 +66,27 @@ export function useLogin() {
     }
   };
 
+  // Fonction pour créer automatiquement un compte utilisateur
+  const createUserAccount = async (email: string, password: string): Promise<{ success: boolean, error?: any }> => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: window.location.origin }
+      });
+
+      if (error) {
+        console.error("Erreur lors de la création du compte:", error);
+        return { success: false, error };
+      }
+
+      return { success: true };
+    } catch (err) {
+      console.error("Exception lors de la création du compte:", err);
+      return { success: false, error: err };
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -100,34 +121,53 @@ export function useLogin() {
           
           if (existsInStats) {
             // L'utilisateur existe dans les statistiques mais n'a pas de compte
-            // Au lieu de simplement afficher un message d'erreur, proposons une solution
-            setLoginError(`L'email ${email} a des livres associés mais pas de compte d'authentification. Nous vous suggérons de vous inscrire avec ce même email et mot de passe pour accéder à vos livres existants.`);
+            console.log(`L'email ${email} a des livres associés mais pas de compte d'authentification. Création automatique du compte...`);
             
-            // Ajout d'un bouton "S'inscrire maintenant" dans le LoginError component
-            setIsLoading(false);
-            return;
-          }
-          
-          // Méthode améliorée pour vérifier l'existence du compte
-          try {
-            // Tenter une inscription temporaire pour vérifier si l'utilisateur existe
-            const { error: checkError } = await supabase.auth.signUp({
-              email,
-              password: `temp-pwd-${Date.now()}`, // Mot de passe temporaire unique
-              options: { emailRedirectTo: window.location.origin }
-            });
+            // Création automatique du compte
+            const { success, error: signupError } = await createUserAccount(email, password);
             
-            // Si l'erreur contient "User already registered", c'est que l'email existe
-            // donc c'est le mot de passe qui est incorrect
-            if (checkError && checkError.message.includes('already registered')) {
-              setLoginError(`Le mot de passe est incorrect pour le compte ${email}. Veuillez réessayer ou utiliser "Mot de passe oublié" pour le réinitialiser.`);
+            if (success) {
+              // Tentative de connexion immédiate après la création du compte
+              const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+                email,
+                password
+              });
+              
+              if (!loginError) {
+                toast({
+                  description: "Compte créé et connexion réussie"
+                });
+                
+                navigate('/search');
+                return;
+              } else {
+                setLoginError(`Compte créé mais erreur lors de la connexion: ${loginError.message}. Veuillez réessayer.`);
+              }
             } else {
-              // Si pas d'erreur "already registered", alors l'email n'existe pas
-              setLoginError(`Aucun compte n'existe avec l'adresse ${email}. Veuillez vérifier votre email ou créer un compte.`);
+              setLoginError(`Erreur lors de la création automatique du compte: ${signupError?.message || "Erreur inconnue"}`);
             }
-          } catch (err) {
-            console.error("Erreur lors de la vérification de l'existence du compte:", err);
-            setLoginError(`Identifiants incorrects. Veuillez vérifier votre email et votre mot de passe.`);
+          } else {
+            // Méthode améliorée pour vérifier l'existence du compte
+            try {
+              // Tenter une inscription temporaire pour vérifier si l'utilisateur existe
+              const { error: checkError } = await supabase.auth.signUp({
+                email,
+                password: `temp-pwd-${Date.now()}`, // Mot de passe temporaire unique
+                options: { emailRedirectTo: window.location.origin }
+              });
+              
+              // Si l'erreur contient "User already registered", c'est que l'email existe
+              // donc c'est le mot de passe qui est incorrect
+              if (checkError && checkError.message.includes('already registered')) {
+                setLoginError(`Le mot de passe est incorrect pour le compte ${email}. Veuillez réessayer ou utiliser "Mot de passe oublié" pour le réinitialiser.`);
+              } else {
+                // Si pas d'erreur "already registered", alors l'email n'existe pas
+                setLoginError(`Aucun compte n'existe avec l'adresse ${email}. Veuillez vérifier votre email ou créer un compte.`);
+              }
+            } catch (err) {
+              console.error("Erreur lors de la vérification de l'existence du compte:", err);
+              setLoginError(`Identifiants incorrects. Veuillez vérifier votre email et votre mot de passe.`);
+            }
           }
         } else {
           setLoginError(`Erreur : ${error.message}`);

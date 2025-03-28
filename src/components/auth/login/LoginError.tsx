@@ -19,13 +19,6 @@ export function LoginError({
   
   if (!errorMessage) return null;
   
-  // Vérifier si le message concerne un utilisateur qui a des livres mais pas de compte
-  const hasExistingBooks = errorMessage.includes("a des livres associés mais pas de compte");
-  
-  const handleSwitchToSignup = () => {
-    setAuthMode('signup');
-  };
-  
   return (
     <Alert variant="destructive">
       <AlertCircle className="h-4 w-4" />
@@ -41,18 +34,6 @@ export function LoginError({
             onClick={onUseSuggestion}
           >
             Utiliser "{suggestedEmail}"
-          </Button>
-        )}
-        
-        {hasExistingBooks && (
-          <Button 
-            type="button" 
-            variant="default"
-            size="sm"
-            className="self-start mt-2 text-sm"
-            onClick={handleSwitchToSignup}
-          >
-            S'inscrire maintenant
           </Button>
         )}
       </AlertDescription>
