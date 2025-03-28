@@ -19,7 +19,7 @@ type CustomRPC =
   | "get_reading_streak" 
   | "increment_search_count" 
   | "upsert_reading_goals"
-  | "admin_update_username";  // Added the new RPC function here
+  | "admin_update_username";
 
 // Extend the supabase client type to include our custom RPC
 declare module '@supabase/supabase-js' {
@@ -32,7 +32,6 @@ export function useUsername() {
   const [username, setUsername] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [canChangeUsername, setCanChangeUsername] = useState(true);
-  const [nextChangeDate, setNextChangeDate] = useState<Date | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const { toast } = useToast();
   const { user } = useSupabaseAuth();
@@ -60,67 +59,9 @@ export function useUsername() {
       const { data: userData } = await supabase.auth.getUser();
       if (userData?.user?.email === 'debruijneb@gmail.com') {
         setIsAdmin(true);
-        setCanChangeUsername(true); // Admin can always change username
       }
     } catch (error) {
       console.error('Error in fetchUsername:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Check if the user can change their username
-  const checkCanChangeUsername = async () => {
-    if (!user) return;
-    
-    try {
-      setIsLoading(true);
-      
-      // Check if user is admin first - admins can always change username
-      const { data: userData } = await supabase.auth.getUser();
-      if (userData?.user?.email === 'debruijneb@gmail.com') {
-        setIsAdmin(true);
-        setCanChangeUsername(true);
-        setNextChangeDate(null);
-        return;
-      }
-      
-      // For non-admin users, check their last username change directly in the profiles table
-      // This avoids calling RPC functions that might have permission issues
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('last_username_change')
-          .eq('id', user.id)
-          .single();
-          
-        if (error) {
-          console.error('Error checking username change date:', error);
-          // En cas d'erreur, autoriser quand même mais log l'erreur
-          setCanChangeUsername(true);
-          return;
-        }
-        
-        if (!data.last_username_change) {
-          // Si jamais changé, autoriser
-          setCanChangeUsername(true);
-          return;
-        }
-        
-        const lastChange = new Date(data.last_username_change);
-        const nextAllowed = new Date(lastChange);
-        nextAllowed.setMonth(nextAllowed.getMonth() + 1);
-        
-        setNextChangeDate(nextAllowed);
-        setCanChangeUsername(nextAllowed <= new Date());
-        
-      } catch (error) {
-        console.error('Error checking username change date:', error);
-        // En cas d'erreur, autoriser quand même mais log l'erreur
-        setCanChangeUsername(true);
-      }
-    } catch (error) {
-      console.error('Error in checkCanChangeUsername:', error);
     } finally {
       setIsLoading(false);
     }
@@ -169,17 +110,7 @@ export function useUsername() {
       const { data: userData } = await supabase.auth.getUser();
       const isAdminUser = userData?.user?.email === 'debruijneb@gmail.com';
       
-      // Check if user can change username
-      if (!isAdminUser && !canChangeUsername) {
-        toast({
-          variant: "destructive",
-          description: "Vous ne pouvez modifier votre nom d'utilisateur qu'une fois par mois."
-        });
-        return false;
-      }
-      
       // For admin users, we'll use a special approach
-      // Note: We're using a direct RPC call to bypass RLS
       if (isAdminUser) {
         try {
           // Call an RPC function for admin username update
@@ -235,11 +166,6 @@ export function useUsername() {
       
       setUsername(newUsername);
       
-      // Only check limitations for non-admins
-      if (!isAdminUser) {
-        await checkCanChangeUsername();
-      }
-      
       toast({
         description: "Nom d'utilisateur mis à jour avec succès!"
       });
@@ -261,11 +187,9 @@ export function useUsername() {
   useEffect(() => {
     if (user) {
       fetchUsername();
-      checkCanChangeUsername();
     } else {
       setUsername(null);
       setCanChangeUsername(true);
-      setNextChangeDate(null);
       setIsAdmin(false);
     }
   }, [user]);
@@ -274,10 +198,8 @@ export function useUsername() {
     username,
     isLoading,
     canChangeUsername,
-    nextChangeDate,
     isAdmin,
     updateUsername,
-    fetchUsername,
-    checkCanChangeUsername
+    fetchUsername
   };
 }
