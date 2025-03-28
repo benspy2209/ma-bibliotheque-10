@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -96,10 +95,9 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
     try {
       console.log(`Tentative de connexion avec: ${email}`);
       
-      // Tenter la connexion directement
-      console.log("Tentative de connexion avec les identifiants fournis");
+      // Tenter la connexion directement avec l'API d'authentification Supabase
+      console.log("Tentative de connexion avec l'API auth de Supabase");
       
-      // Tenter la connexion proprement dite
       const { data: authData, error } = await supabase.auth.signInWithPassword({
         email,
         password
