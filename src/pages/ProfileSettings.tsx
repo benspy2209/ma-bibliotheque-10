@@ -47,7 +47,6 @@ const ProfileSettings = () => {
 
         <Tabs defaultValue={activeTab} className="w-full">
           <TabsList className="mb-8 flex flex-wrap h-auto">
-            {/* Onglet "À acheter" mis en évidence */}
             <TabsTrigger 
               value="to-buy"
               className="bg-amber-100 text-amber-800 dark:bg-amber-800 dark:text-amber-100 hover:bg-amber-200 dark:hover:bg-amber-700 data-[state=active]:bg-amber-500 data-[state=active]:text-white"
@@ -64,7 +63,6 @@ const ProfileSettings = () => {
             <TabsTrigger value="account">Compte</TabsTrigger>
           </TabsList>
           
-          {/* Onglet "À acheter" */}
           <TabsContent value="to-buy" className="space-y-8">
             <BooksToBuyList />
           </TabsContent>

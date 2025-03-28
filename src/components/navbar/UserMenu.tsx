@@ -9,7 +9,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator
 } from "../ui/dropdown-menu";
-import { LogOut, Settings, UserCircle } from "lucide-react";
+import { LogOut, UserCircle } from "lucide-react";
 import { User } from "@supabase/supabase-js";
 import { Link } from "react-router-dom";
 
@@ -53,15 +53,9 @@ export const UserMenu = ({ user, signOut, getUserDisplayName, getInitials }: Use
           </div>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
-            <Link to="/profile/settings?tab=profile" className="cursor-pointer flex items-center">
+            <Link to="/profile/settings?tab=to-buy" className="cursor-pointer flex items-center">
               <UserCircle className="mr-2 h-4 w-4" />
               <span>Mon profil</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/profile/settings?tab=display" className="cursor-pointer flex items-center">
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Paramètres</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
