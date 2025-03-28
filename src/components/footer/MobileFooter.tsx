@@ -4,6 +4,7 @@ import FooterNavLinks from "./FooterNavLinks";
 import FooterInfoLinks from "./FooterInfoLinks";
 import FooterCopyright from "./FooterCopyright";
 import FooterSocialLinks from "./FooterSocialLinks";
+import FooterPartner from "./FooterPartner";
 
 const MobileFooter = () => {
   return (
@@ -17,6 +18,11 @@ const MobileFooter = () => {
             Votre compagnon de lecture personnel pour organiser, suivre et découvrir vos livres.
           </p>
         </div>
+      </div>
+      
+      {/* Partenaire en dessous du logo */}
+      <div className="mb-6">
+        <FooterPartner className="flex flex-col items-center" />
       </div>
       
       {/* Navigation et informations en dessous, centrés */}

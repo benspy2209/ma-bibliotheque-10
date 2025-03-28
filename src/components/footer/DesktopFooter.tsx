@@ -4,11 +4,12 @@ import FooterNavLinks from "./FooterNavLinks";
 import FooterInfoLinks from "./FooterInfoLinks";
 import FooterCopyright from "./FooterCopyright";
 import FooterSocialLinks from "./FooterSocialLinks";
+import FooterPartner from "./FooterPartner";
 
 const DesktopFooter = () => {
   return (
     <>
-      <div className="flex flex-col sm:flex-row items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row items-start justify-between mb-8">
         <div className="flex items-center mb-4 sm:mb-0">
           <FooterLogo isMobile={false} />
           <div className="text-left">
@@ -19,9 +20,10 @@ const DesktopFooter = () => {
           </div>
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-6">
+        <div className="flex flex-col sm:flex-row gap-6 sm:gap-10">
           <FooterNavLinks />
           <FooterInfoLinks />
+          <FooterPartner />
         </div>
       </div>
       
