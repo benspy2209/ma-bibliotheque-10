@@ -20,6 +20,7 @@ interface UserBookDetail {
   book_title: string;
   book_author: string;
   status: string | null;
+  purchased?: boolean; // Added purchased property
 }
 
 interface BookDetailsTableProps {
@@ -60,6 +61,12 @@ export function BookDetailsTable({ bookDetails }: BookDetailsTableProps) {
         if (getError) {
           console.error('Erreur lors de la récupération du livre:', getError);
           return { success: false, error: getError };
+        }
+
+        // Make sure book_data is a valid object before spreading
+        if (!bookData || typeof bookData.book_data !== 'object') {
+          console.error('Les données du livre sont invalides:', bookData);
+          return { success: false, error: 'Invalid book data' };
         }
 
         // Update the status and purchased flag
