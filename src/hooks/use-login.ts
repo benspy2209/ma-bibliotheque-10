@@ -63,94 +63,40 @@ export function useLogin() {
         return;
       }
       
-      // First, check if the user exists
-      console.log("Checking if user exists...");
-      
-      // The error was here - we're using `filter` incorrectly in the admin.listUsers call
-      // Let's query for users properly according to Supabase's API
-      const { data, error: getUserError } = await supabase.auth.admin.listUsers();
-      
-      // Handle case where we can't check if user exists (fallback to normal sign in)
-      if (getUserError) {
-        console.log("Error checking if user exists, falling back to normal sign in:", getUserError);
-        
-        // Attempt to sign in directly
-        const { data: authData, error } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
-
-        if (error) {
-          if (error.message === "Invalid login credentials") {
-            // Get a similar email suggestion
-            const similar = await findSimilarEmail(email);
-            if (similar) {
-              setSuggestedEmail(similar);
-              setLoginError(`Compte non trouvé. Avez-vous voulu dire "${similar}" ?`);
-            } else {
-              setLoginError("Ce compte n'existe pas ou le mot de passe est incorrect. Veuillez vérifier vos identifiants.");
-            }
-          } else {
-            setLoginError(`Erreur : ${error.message}`);
-          }
-          throw error;
-        }
-        
-        toast({
-          description: "Connexion réussie"
-        });
-        
-        navigate('/search');
-        return;
-      }
-      
-      // Check if user exists in the system
-      const userExists = data && data.users && data.users.some(user => user.email === email);
-      console.log("User exists check:", userExists);
-      
-      if (!userExists) {
-        // User does not exist, suggest similar email
-        const similar = await findSimilarEmail(email);
-        if (similar) {
-          setSuggestedEmail(similar);
-          setLoginError(`Compte non trouvé. Avez-vous voulu dire "${similar}" ?`);
-        } else {
-          setLoginError("Ce compte n'existe pas. Veuillez créer un compte ou vérifier votre email.");
-        }
-        setIsLoading(false);
-        return;
-      }
-      
-      // If user exists, try to sign in
-      console.log("User exists, attempting to sign in");
+      // We'll directly attempt to sign in and handle errors appropriately
+      // This is the recommended approach rather than trying to check if a user exists first
       const { data: authData, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
-      console.log("Login result:", 
-        authData ? `Success: ${JSON.stringify(authData)}` : "Failed", 
-        error ? `Error: ${error.message}` : "No error");
-
       if (error) {
-        // If user exists but login failed, it's likely a password issue
+        console.log("Login error:", error.message);
+        
         if (error.message === "Invalid login credentials") {
-          setLoginError("Le mot de passe est incorrect. Veuillez réessayer ou utiliser la récupération de mot de passe.");
+          // This could be either wrong password or non-existent account
+          // Let's try to suggest a similar email in case it's a typo
+          const similar = await findSimilarEmail(email);
+          if (similar) {
+            setSuggestedEmail(similar);
+            setLoginError(`Compte non trouvé. Avez-vous voulu dire "${similar}" ?`);
+          } else {
+            setLoginError("Ce compte n'existe pas ou le mot de passe est incorrect. Veuillez vérifier vos identifiants.");
+          }
         } else {
           setLoginError(`Erreur : ${error.message}`);
         }
-        throw error;
+        return;
       }
-
+      
       toast({
         description: "Connexion réussie"
       });
       
-      // Redirect to search page after successful login
       navigate('/search');
     } catch (error: any) {
       console.error("Authentication error:", error);
-      // Error is handled above
+      setLoginError(`Erreur inattendue: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
