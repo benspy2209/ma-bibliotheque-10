@@ -27,59 +27,71 @@ export const BookSections = ({
   onToBuyFilterChange 
 }: BookSectionsProps) => {
   const isMobile = useIsMobile();
+  const [activeTab, setActiveTab] = useState("all");
   
+  // Filtres de base pour les différentes catégories
   const completedBooks = books.filter(book => book.status === 'completed');
   const readingBooks = books.filter(book => book.status === 'reading');
   const toReadBooks = books.filter(book => !book.status || book.status === 'to-read');
   
-  // Important: Show ALL books that have purchased === false in the toBuyBooks tab 
-  // regardless of their status or other filters
+  // Livres à acheter (tous les livres avec purchased === false)
   const toBuyBooks = books.filter(book => book.purchased === false);
   const purchasedBooks = books.filter(book => book.purchased === true);
 
   const BookComponent = viewMode === 'grid' ? BookGrid : BookList;
 
+  // Gestionnaire du changement d'onglet
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    // Si l'utilisateur clique sur "to-buy", activer le filtre toBuy
+    if (value === "to-buy") {
+      onToBuyFilterChange(true);
+    } else {
+      // Sinon, réinitialiser le filtre
+      onToBuyFilterChange(null);
+    }
+  };
+
   return (
-    <Tabs defaultValue="all" className="w-full">
+    <Tabs 
+      defaultValue="all" 
+      value={activeTab} 
+      onValueChange={handleTabChange}
+      className="w-full"
+    >
       <TabsList className={`mb-8 ${isMobile ? 'flex-col' : 'flex-wrap h-auto justify-start overflow-x-auto'}`}>
         <TabsTrigger 
           value="all" 
-          onClick={() => onToBuyFilterChange(null)}
           className="text-xs sm:text-sm"
         >
           Tous ({books.length})
         </TabsTrigger>
         <TabsTrigger 
           value="reading" 
-          onClick={() => onToBuyFilterChange(null)}
           className="text-xs sm:text-sm"
         >
           En cours ({readingBooks.length})
         </TabsTrigger>
         <TabsTrigger 
           value="completed" 
-          onClick={() => onToBuyFilterChange(null)}
           className="text-xs sm:text-sm"
         >
           Lu ({completedBooks.length})
         </TabsTrigger>
         <TabsTrigger 
           value="to-read" 
-          onClick={() => onToBuyFilterChange(null)}
           className="text-xs sm:text-sm"
         >
           À lire ({toReadBooks.length})
         </TabsTrigger>
         <TabsTrigger 
           value="purchased" 
-          onClick={() => onToBuyFilterChange(null)}
           className="text-xs sm:text-sm"
         >
           Achetés ({purchasedBooks.length})
         </TabsTrigger>
         <TabsTrigger 
           value="to-buy" 
-          onClick={() => onToBuyFilterChange(true)}
           className="bg-destructive/10 hover:bg-destructive/20 data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground text-xs sm:text-sm"
         >
           À acheter ({toBuyBooks.length})

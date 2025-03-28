@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
@@ -75,9 +74,6 @@ export default function Library() {
     return titleMatch || authorMatch;
   };
 
-  // Filtre les livres selon les critères (auteur, recherche)
-  // IMPORTANT: Le filtre toBuyFilter est géré directement dans BookSections.tsx
-  // pour assurer qu'il fonctionne correctement avec les onglets
   const filteredBooks = books
     .filter(book => {
       if (selectedAuthor) {
