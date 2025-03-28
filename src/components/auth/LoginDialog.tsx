@@ -32,34 +32,40 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
     }
   }, [location.pathname, setAuthMode]);
   
-  // Fix mobile scrolling issues by preventing default touchmove behavior
+  // Fix mobile scrolling issues by preventing body scroll
   useEffect(() => {
-    const handleTouchMove = (e: TouchEvent) => {
-      // Allow scrolling inside the dialog content
-      if (dialogRef.current?.contains(e.target as Node)) {
-        e.stopPropagation();
-      }
-    };
-
-    // Only add the listeners when the dialog is open
+    // Add body class to prevent scrolling when modal is open
     if (open) {
+      document.body.classList.add('modal-open');
+      
+      // Prevent touchmove on iOS devices
+      const handleTouchMove = (e: TouchEvent) => {
+        // Allow scrolling inside the dialog content
+        if (dialogRef.current?.contains(e.target as Node)) {
+          e.stopPropagation();
+        } else {
+          e.preventDefault();
+        }
+      };
+      
       document.addEventListener('touchmove', handleTouchMove, { passive: false });
+      
+      return () => {
+        document.body.classList.remove('modal-open');
+        document.removeEventListener('touchmove', handleTouchMove);
+      };
     }
-
-    return () => {
-      document.removeEventListener('touchmove', handleTouchMove);
-    };
   }, [open]);
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
         ref={dialogRef}
-        className="sm:max-w-md max-h-[90vh] overflow-y-auto auth-form-container DialogContent" 
+        className="sm:max-w-md max-h-[90vh] auth-form-container DialogContent" 
         onPointerDownOutside={(e) => e.preventDefault()} 
         onInteractOutside={(e) => e.preventDefault()}
       >
-        <ScrollArea className="h-full pr-4 overflow-y-auto">
+        <ScrollArea className="h-full pr-4 overflow-y-auto ScrollArea">
           <DialogHeader>
             <DialogTitle className="text-center">
               {authMode === 'login' && "Connexion à Bibliopulse"}
