@@ -72,7 +72,7 @@ export function useTranslation() {
         setIsLoading(true);
         
         const { error } = await supabase
-          .from('profiles')
+          .from('profiles')  // On utilise la table 'profiles' et non 'users'
           .update({ language_preference: newLanguage })
           .eq('id', user.id);
           

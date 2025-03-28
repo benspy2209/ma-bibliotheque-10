@@ -28,16 +28,19 @@ export function InterfacePreferencesForm() {
   
   const form = useForm<InterfacePreferencesFormValues>({
     defaultValues: {
-      theme_preference: 'dark',
+      theme_preference: theme as 'dark' | 'light',
       language_preference: language,
     },
   });
 
+  // Synchroniser le formulaire avec les valeurs actuelles de la langue et du thème
+  useEffect(() => {
+    form.setValue('language_preference', language);
+    form.setValue('theme_preference', theme as 'dark' | 'light');
+  }, [language, theme, form]);
+
   // Charger les données du profil au chargement
   useEffect(() => {
-    // Mettre à jour le formulaire avec la langue actuelle
-    form.setValue('language_preference', language);
-    
     const fetchProfileData = async () => {
       if (!user) return;
       
@@ -55,10 +58,12 @@ export function InterfacePreferencesForm() {
         }
         
         // Mettre à jour le formulaire avec les données existantes
-        form.reset({
-          theme_preference: (data.theme_preference as 'dark' | 'light') || 'dark',
-          language_preference: (data.language_preference as 'fr' | 'en') || language,
-        });
+        if (data) {
+          form.reset({
+            theme_preference: (data.theme_preference as 'dark' | 'light') || theme as 'dark' | 'light',
+            language_preference: (data.language_preference as 'fr' | 'en') || language,
+          });
+        }
       } catch (error) {
         console.error('Erreur dans fetchProfileData:', error);
       } finally {
@@ -67,7 +72,7 @@ export function InterfacePreferencesForm() {
     };
 
     fetchProfileData();
-  }, [user, form, language]);
+  }, [user, form, language, theme]);
 
   // Gestion de la soumission du formulaire
   const onSubmit = async (values: InterfacePreferencesFormValues) => {
@@ -82,7 +87,15 @@ export function InterfacePreferencesForm() {
       // Appliquer la langue
       const languageChanged = values.language_preference !== language;
       if (languageChanged) {
-        await changeLanguage(values.language_preference);
+        const success = await changeLanguage(values.language_preference);
+        if (!success) {
+          toast({
+            variant: "destructive",
+            description: t("toast.error")
+          });
+          setIsLoading(false);
+          return;
+        }
       }
 
       // Uniquement mettre à jour la base de données si l'utilisateur est connecté
