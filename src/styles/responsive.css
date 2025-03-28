@@ -122,6 +122,13 @@ body {
     justify-content: center !important;
     padding: 0.75rem !important;
   }
+  
+  /* Fix for mobile drawer scrolling */
+  [data-state="open"].drawer-content, .drawer-content {
+    max-height: 90vh !important; 
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
 }
 
 /* Fix pour l'affichage de la sidebar sur mobile dans les pages détaillées */
@@ -138,6 +145,7 @@ body {
   .drawer-content {
     max-height: 90vh !important;
     overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 }
 

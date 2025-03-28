@@ -107,8 +107,8 @@ export const MobileNavbar = ({
               <span className="sr-only">Menu</span>
             </Button>
           </DrawerTrigger>
-          <DrawerContent className="px-4 py-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex flex-col gap-6">
+          <DrawerContent className="px-4 py-6 h-[90vh] flex flex-col">
+            <div className="flex flex-col gap-6 overflow-y-auto flex-1">
               {/* Logo en premier dans le drawer */}
               <div className="flex justify-center mb-4">
                 <img 
