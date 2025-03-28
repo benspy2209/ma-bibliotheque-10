@@ -29,11 +29,29 @@ export const BookSections = ({
   const [purchaseFilter, setPurchaseFilter] = useState<'all' | 'purchased' | 'not-purchased'>('all');
   const isMobile = useIsMobile();
   
-  const completedBooks = books.filter(book => book.status === 'completed');
-  const readingBooks = books.filter(book => book.status === 'reading');
-  const toReadBooks = books.filter(book => !book.status || book.status === 'to-read');
-  const toBuyBooks = books.filter(book => !book.purchased && (!book.status || book.status === 'to-read'));
-  const purchasedBooks = books.filter(book => book.purchased === true);
+  // Automatically mark Stephen King books as purchased
+  const processedBooks = books.map(book => {
+    // Check if the author is Stephen King (either as string or in array)
+    const isStephenKing = 
+      (typeof book.author === 'string' && book.author.toLowerCase().includes('stephen king')) ||
+      (Array.isArray(book.author) && book.author.some(author => 
+        author.toLowerCase().includes('stephen king')
+      ));
+    
+    // If it's a Stephen King book, mark it as purchased
+    if (isStephenKing && book.purchased === false) {
+      return { ...book, purchased: true };
+    }
+    
+    return book;
+  });
+  
+  const completedBooks = processedBooks.filter(book => book.status === 'completed');
+  const readingBooks = processedBooks.filter(book => book.status === 'reading');
+  const toReadBooks = processedBooks.filter(book => !book.status || book.status === 'to-read');
+  // Update toBuyBooks to only include books that are explicitly marked as not purchased
+  const toBuyBooks = processedBooks.filter(book => book.purchased === false);
+  const purchasedBooks = processedBooks.filter(book => book.purchased === true);
 
   const filteredToReadBooks = toReadBooks.filter(book => {
     if (purchaseFilter === 'purchased') return book.purchased;
@@ -51,7 +69,7 @@ export const BookSections = ({
           onClick={() => onToBuyFilterChange(null)}
           className="text-xs sm:text-sm"
         >
-          Tous ({books.length})
+          Tous ({processedBooks.length})
         </TabsTrigger>
         <TabsTrigger 
           value="reading" 
@@ -91,12 +109,12 @@ export const BookSections = ({
       </TabsList>
 
       <TabsContent value="all" className="space-y-8">
-        {books.length === 0 ? (
+        {processedBooks.length === 0 ? (
           <p className="text-center text-gray-600 mt-8">
             Votre bibliothèque est vide. Ajoutez des livres depuis la recherche !
           </p>
         ) : (
-          <BookComponent books={books} onBookClick={onBookClick} />
+          <BookComponent books={processedBooks} onBookClick={onBookClick} />
         )}
       </TabsContent>
 
