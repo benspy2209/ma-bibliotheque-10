@@ -59,9 +59,17 @@ export function InterfacePreferencesForm() {
         
         // Mettre à jour le formulaire avec les données existantes
         if (data) {
+          const themeValue = data.theme_preference === 'light' || data.theme_preference === 'dark' 
+            ? data.theme_preference 
+            : (theme as 'dark' | 'light');
+          
+          const langValue = data.language_preference === 'fr' || data.language_preference === 'en'
+            ? data.language_preference
+            : language;
+            
           form.reset({
-            theme_preference: (data.theme_preference as 'dark' | 'light') || theme as 'dark' | 'light',
-            language_preference: (data.language_preference as 'fr' | 'en') || language,
+            theme_preference: themeValue,
+            language_preference: langValue,
           });
         }
       } catch (error) {

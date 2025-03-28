@@ -60,6 +60,11 @@ export function useTranslation() {
 
   // Changer la langue
   const changeLanguage = useCallback(async (newLanguage: Language): Promise<boolean> => {
+    if (newLanguage !== 'fr' && newLanguage !== 'en') {
+      console.error('Langue non supportée:', newLanguage);
+      return false;
+    }
+    
     // Toujours mettre à jour localStorage pour les utilisateurs connectés et non connectés
     localStorage.setItem('app_language', newLanguage);
     
@@ -72,7 +77,7 @@ export function useTranslation() {
         setIsLoading(true);
         
         const { error } = await supabase
-          .from('profiles')  // On utilise la table 'profiles' et non 'users'
+          .from('profiles')
           .update({ language_preference: newLanguage })
           .eq('id', user.id);
           

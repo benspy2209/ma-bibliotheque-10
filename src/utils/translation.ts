@@ -130,6 +130,122 @@ export const translations: Translations = {
     fr: "Une erreur est survenue lors de la mise à jour.",
     en: "An error occurred during the update.",
   },
+
+  // Formulaire de nom d'utilisateur
+  "username_form.title": {
+    fr: "Définir votre nom d'utilisateur",
+    en: "Set Your Username",
+  },
+  "username_form.title_modify": {
+    fr: "Modifier votre nom d'utilisateur",
+    en: "Modify Your Username",
+  },
+  "username_form.subtitle": {
+    fr: "Choisissez un nom d'utilisateur unique pour votre compte.",
+    en: "Choose a unique username for your account.",
+  },
+  "username_form.subtitle_modify": {
+    fr: "Vous pouvez modifier votre nom d'utilisateur une fois par mois.",
+    en: "You can modify your username once a month.",
+  },
+  "username_form.next_change": {
+    fr: "Vous ne pouvez modifier votre nom d'utilisateur qu'une fois par mois. Prochain changement possible à partir du",
+    en: "You can only change your username once a month. Next change possible from",
+  },
+  "username_form.label": {
+    fr: "Nom d'utilisateur",
+    en: "Username",
+  },
+  "username_form.placeholder": {
+    fr: "Entrez votre nom d'utilisateur",
+    en: "Enter your username",
+  },
+  "username_form.info": {
+    fr: "Votre nom d'utilisateur sera visible par les autres utilisateurs et ne peut être modifié qu'une fois par mois.",
+    en: "Your username will be visible to other users and can only be modified once a month.",
+  },
+  "username_form.submit": {
+    fr: "Définir le nom d'utilisateur",
+    en: "Set Username",
+  },
+  "username_form.submit_modify": {
+    fr: "Modifier le nom d'utilisateur",
+    en: "Modify Username",
+  },
+  "username_form.submitting": {
+    fr: "Enregistrement...",
+    en: "Saving...",
+  },
+
+  // Formulaire de compte
+  "account_form.title": {
+    fr: "Paramètres du compte",
+    en: "Account Settings",
+  },
+  "account_form.subtitle": {
+    fr: "Gérez les paramètres de sécurité de votre compte.",
+    en: "Manage your account security settings.",
+  },
+  "account_form.email": {
+    fr: "Adresse e-mail",
+    en: "Email address",
+  },
+  "account_form.password": {
+    fr: "Mot de passe",
+    en: "Password",
+  },
+  "account_form.change_password": {
+    fr: "Changer le mot de passe",
+    en: "Change Password",
+  },
+  "account_form.password_dialog_title": {
+    fr: "Changer le mot de passe",
+    en: "Change Password",
+  },
+  "account_form.password_dialog_description": {
+    fr: "Entrez votre mot de passe actuel et votre nouveau mot de passe.",
+    en: "Enter your current password and your new password.",
+  },
+  "account_form.current_password": {
+    fr: "Mot de passe actuel",
+    en: "Current Password",
+  },
+  "account_form.current_password_placeholder": {
+    fr: "Entrez votre mot de passe actuel",
+    en: "Enter your current password",
+  },
+  "account_form.new_password": {
+    fr: "Nouveau mot de passe",
+    en: "New Password",
+  },
+  "account_form.new_password_placeholder": {
+    fr: "Entrez un nouveau mot de passe",
+    en: "Enter a new password",
+  },
+  "account_form.confirm_password": {
+    fr: "Confirmer le mot de passe",
+    en: "Confirm Password",
+  },
+  "account_form.confirm_password_placeholder": {
+    fr: "Confirmez le nouveau mot de passe",
+    en: "Confirm the new password",
+  },
+  "account_form.cancel": {
+    fr: "Annuler",
+    en: "Cancel",
+  },
+  "account_form.submit": {
+    fr: "Modifier le mot de passe",
+    en: "Change Password",
+  },
+  "account_form.submitting": {
+    fr: "Modification...",
+    en: "Changing...",
+  },
+  "account_form.success": {
+    fr: "Mot de passe mis à jour avec succès",
+    en: "Password successfully updated",
+  },
 };
 
 // Obtenir une traduction
@@ -139,7 +255,7 @@ export const getTranslation = (
 ): string => {
   const translationObj = translations[key];
   if (!translationObj) {
-    console.warn(`Translation key not found: ${key}`);
+    console.warn(`Translation key not found: ${key}`, key);
     return key;
   }
   return translationObj[language] || translationObj["fr"] || key;
