@@ -65,11 +65,10 @@ export function useLogin() {
       
       // First, check if the user exists
       console.log("Checking if user exists...");
-      const { data: { users }, error: getUserError } = await supabase.auth.admin.listUsers({
-        filter: {
-          email: email
-        }
-      });
+      
+      // The error was here - we're using `filter` incorrectly in the admin.listUsers call
+      // Let's query for users properly according to Supabase's API
+      const { data, error: getUserError } = await supabase.auth.admin.listUsers();
       
       // Handle case where we can't check if user exists (fallback to normal sign in)
       if (getUserError) {
@@ -106,7 +105,7 @@ export function useLogin() {
       }
       
       // Check if user exists in the system
-      const userExists = users && users.length > 0;
+      const userExists = data && data.users && data.users.some(user => user.email === email);
       console.log("User exists check:", userExists);
       
       if (!userExists) {
