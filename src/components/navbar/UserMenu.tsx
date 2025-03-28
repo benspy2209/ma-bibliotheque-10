@@ -9,11 +9,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator
 } from "../ui/dropdown-menu";
-import { LogOut } from "lucide-react";
-import { User } from "@supabase/supabase-js";
+import { LogOut, User } from "lucide-react";
+import { User as SupabaseUser } from "@supabase/supabase-js";
+import { Link } from "react-router-dom";
 
 interface UserMenuProps {
-  user: User;
+  user: SupabaseUser;
   signOut: () => void;
   getUserDisplayName: () => string;
   getInitials: () => string;
@@ -35,6 +36,13 @@ export const UserMenu = ({ user, signOut, getUserDisplayName, getInitials }: Use
         <DropdownMenuLabel>
           Connecté en tant que <span className="font-bold">{getUserDisplayName()}</span>
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to="/profile" className="cursor-pointer w-full">
+            <User className="mr-2 h-4 w-4" />
+            <span>Gérer le profil</span>
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={signOut} className="text-red-500 cursor-pointer">
           <LogOut className="mr-2 h-4 w-4" />

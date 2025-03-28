@@ -17,16 +17,64 @@ interface SignupTabProps {
 export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [emailSentMessage, setEmailSentMessage] = useState('');
   const [isRateLimited, setIsRateLimited] = useState(false);
+  const [usernameError, setUsernameError] = useState<string | null>(null);
   const { toast } = useToast();
   const { setAuthMode } = useSupabaseAuth();
+
+  // Fonction pour vérifier la disponibilité du nom d'utilisateur
+  const checkUsernameAvailability = async (username: string) => {
+    if (!username.trim()) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('username', username)
+        .maybeSingle();
+
+      if (error) throw error;
+      
+      if (data) {
+        setUsernameError('Ce pseudo est déjà utilisé');
+      } else {
+        setUsernameError(null);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la vérification du pseudo:", error);
+    }
+  };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setEmailSentMessage('');
     setIsRateLimited(false);
+    
+    // Vérifier si le pseudo est disponible
+    if (username) {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('username', username)
+          .maybeSingle();
+
+        if (error) throw error;
+        
+        if (data) {
+          setUsernameError('Ce pseudo est déjà utilisé');
+          setIsLoading(false);
+          return;
+        } else {
+          setUsernameError(null);
+        }
+      } catch (error) {
+        console.error("Erreur lors de la vérification du pseudo:", error);
+      }
+    }
     
     try {
       console.log("Tentative d'inscription avec:", email);
@@ -35,7 +83,10 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
         email,
         password,
         options: {
-          emailRedirectTo: window.location.origin
+          emailRedirectTo: window.location.origin,
+          data: {
+            username: username || null // Enregistrer le pseudo dans les métadonnées utilisateur
+          }
         }
       };
       
@@ -56,6 +107,18 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
             console.error("Erreur lors de la connexion après rate limit:", signInError);
             setEmailSentMessage(`L'inscription a été traitée, mais Supabase a limité l'envoi d'emails. Vous pourrez vous connecter ultérieurement. Vous pourrez confirmer votre email plus tard.`);
           } else if (signInData.session) {
+            // Mettre à jour le profil avec le pseudo
+            if (username) {
+              const { error: updateError } = await supabase
+                .from('profiles')
+                .update({ username })
+                .eq('id', signInData.user.id);
+
+              if (updateError) {
+                console.error("Erreur lors de la mise à jour du pseudo:", updateError);
+              }
+            }
+            
             setEmailSentMessage(`Compte créé avec succès! L'email de confirmation sera envoyé ultérieurement (limite d'envoi d'emails atteinte). Vous pouvez utiliser l'application normalement.`);
             toast({
               description: "Connexion réussie! Vous pourrez confirmer votre email plus tard."
@@ -82,6 +145,18 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
       } else if (data?.user) {
         if (data.session) {
           // L'utilisateur est déjà connecté
+          // Mettre à jour le profil avec le pseudo
+          if (username) {
+            const { error: updateError } = await supabase
+              .from('profiles')
+              .update({ username })
+              .eq('id', data.user.id);
+
+            if (updateError) {
+              console.error("Erreur lors de la mise à jour du pseudo:", updateError);
+            }
+          }
+          
           toast({
             description: "Inscription réussie ! Vous êtes maintenant connecté."
           });
@@ -123,6 +198,25 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
           </AlertDescription>
         </Alert>
       )}
+      
+      <div className="space-y-2">
+        <Label htmlFor="username-signup">Pseudo (optionnel)</Label>
+        <Input
+          id="username-signup"
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          onBlur={() => checkUsernameAvailability(username)}
+          placeholder="Votre pseudo"
+          disabled={isLoading}
+          aria-describedby={usernameError ? "username-error" : undefined}
+        />
+        {usernameError && (
+          <p id="username-error" className="text-sm text-destructive mt-1">
+            {usernameError}
+          </p>
+        )}
+      </div>
       
       <div className="space-y-2">
         <Label htmlFor="email-signup">Email</Label>
