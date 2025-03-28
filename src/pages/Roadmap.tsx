@@ -64,13 +64,6 @@ const Roadmap = () => {
       technical_details: "Service Workers, IndexedDB, synchronisation différée des données"
     },
     {
-      name: "API publique",
-      description: "API pour intégrer BiblioPulse avec d'autres services",
-      status: "in-progress",
-      quarter: "Q3 2024",
-      technical_details: "REST API avec authentification OAuth2, documentation avec Swagger, rate limiting"
-    },
-    {
       name: "Application mobile native",
       description: "Applications iOS et Android natives",
       status: "planned",
@@ -83,13 +76,6 @@ const Roadmap = () => {
       status: "planned",
       quarter: "Q1 2025",
       technical_details: "Algorithmes de recommandation, clustering d'utilisateurs, modèles prédictifs"
-    },
-    {
-      name: "Intégration avec liseuses électroniques",
-      description: "Synchronisation avec Kindle, Kobo et autres liseuses",
-      status: "planned",
-      quarter: "Q2 2025",
-      technical_details: "APIs propriétaires des liseuses, protocoles de synchronisation, conversion de formats"
     }
   ];
 
@@ -200,7 +186,7 @@ const Roadmap = () => {
             </p>
             <p>
               Si vous avez des suggestions de fonctionnalités ou des priorités différentes, 
-              n'hésitez pas à nous contacter via notre <a href="/contact" className="text-[#e4364a] hover:underline">formulaire de contact</a>.
+              n'hésitez pas à nous contacter via notre <a href="/contact" className="text-[#e4364a] hover:underline">page de contact</a>.
             </p>
             <p>
               Nous croyons en la transparence du développement et souhaitons partager notre vision technique avec notre communauté.
