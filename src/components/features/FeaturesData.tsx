@@ -1,4 +1,3 @@
-
 import React from "react";
 import { 
   BookOpen, 
@@ -153,8 +152,8 @@ export const featureSections: FeatureSection[] = [
       },
       {
         icon: <LanguagesIcon className="h-6 w-6 text-[#CC4153]" />,
-        title: "Traduction automatique",
-        description: "Profitez de la traduction automatique des descriptions de livres en français pour une expérience de lecture optimale."
+        title: "Détection automatique de langue",
+        description: "BiblioPulse détecte automatiquement si le texte est déjà en français pour une meilleure présentation de vos descriptions de livres."
       },
       {
         icon: <Settings className="h-6 w-6 text-[#CC4153]" />,

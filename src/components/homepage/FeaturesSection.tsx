@@ -69,7 +69,7 @@ export const FeaturesSection = () => {
               </div>
               <h3 className="text-xl font-semibold mb-2">Outils pratiques</h3>
               <p className="text-muted-foreground">
-                Importez/exportez votre bibliothèque et profitez de la traduction automatique des descriptions en français.
+                Importez/exportez votre bibliothèque et profitez de la détection automatique des langues pour une meilleure expérience.
               </p>
             </CardContent>
           </Card>
