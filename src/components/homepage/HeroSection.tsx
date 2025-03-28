@@ -9,6 +9,7 @@ export const HeroSection = () => {
   const { user, signIn } = useSupabaseAuth();
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     // Déclenche l'animation après le chargement du composant
@@ -76,16 +77,23 @@ export const HeroSection = () => {
           </div>
           <div className="lg:w-1/2">
             <div className="relative">
-              <img 
-                src="/bibliopulse-accueil-1.webp" 
-                alt="Personne lisant et organisant sa bibliothèque" 
-                className="rounded-lg shadow-2xl object-cover w-full"
-                onError={(e) => {
-                  console.error("Image failed to load:", e);
-                  const target = e.target as HTMLImageElement;
-                  target.src = '/placeholder.svg';
-                }}
-              />
+              {imageError ? (
+                <img 
+                  src="/placeholder.svg" 
+                  alt="Placeholder" 
+                  className="rounded-lg shadow-2xl object-cover w-full"
+                />
+              ) : (
+                <img 
+                  src="/bibliopulse-accueil-1.webp" 
+                  alt="Personne lisant et organisant sa bibliothèque" 
+                  className="rounded-lg shadow-2xl object-cover w-full"
+                  onError={(e) => {
+                    console.error("Image failed to load:", e);
+                    setImageError(true);
+                  }}
+                />
+              )}
             </div>
           </div>
         </div>
