@@ -15,6 +15,7 @@ export const ThemeToggle = ({ theme, toggleTheme }: ThemeToggleProps) => {
       size="icon"
       onClick={toggleTheme}
       className="transition-colors duration-300 h-8 w-8"
+      aria-label={`Activer le mode ${theme === 'light' ? 'sombre' : 'clair'}`}
     >
       {theme === 'light' && <Moon className="h-4 w-4" />}
       {theme === 'dark' && <Sun className="h-4 w-4" />}
