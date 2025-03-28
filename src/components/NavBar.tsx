@@ -1,6 +1,6 @@
 
 import { NavLink } from "react-router-dom";
-import { Search, BookOpen, BarChart2, Sun, Moon, LogIn, Menu, Lightbulb } from "lucide-react";
+import { Search, BookOpen, BarChart2, Sun, Moon, LogIn, Menu, Lightbulb, BookText, Info } from "lucide-react";
 import { Button } from "./ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
@@ -25,7 +25,7 @@ const NavBar = () => {
     setShowLoginDialog(true);
   };
 
-  const NavLinks = () => (
+  const NavLinks = ({ mobile = false }) => (
     <>
       <NavLink 
         to="/" 
@@ -107,45 +107,149 @@ const NavBar = () => {
                 </NavLink>
               </div>
               
-              <Drawer>
-                <DrawerTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Menu className="h-6 w-6" />
-                    <span className="sr-only">Menu</span>
-                  </Button>
-                </DrawerTrigger>
-                <DrawerContent className="px-4 py-6">
-                  <div className="flex flex-col gap-6">
-                    {/* Bouton Connexion en haut du drawer */}
-                    <div className="mb-4 px-2">
-                      <AuthButton />
-                    </div>
-                    
-                    <div className="border-t pt-4"></div>
-                    
-                    {/* Navigation links */}
-                    <div className="flex flex-col gap-4">
-                      <NavLinks />
-                    </div>
-                    
-                    {/* Thème et fermeture */}
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={toggleTheme}
-                        className="transition-colors duration-300"
-                      >
-                        {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-                      </Button>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleSignIn}
+                  className="transition-colors duration-300 text-sm"
+                >
+                  <LogIn className="h-4 w-4 mr-1" />
+                  Connexion
+                </Button>
+                
+                <Drawer>
+                  <DrawerTrigger asChild>
+                    <Button variant="ghost" size="icon" className="ml-2">
+                      <Menu className="h-5 w-5" />
+                      <span className="sr-only">Menu</span>
+                    </Button>
+                  </DrawerTrigger>
+                  <DrawerContent className="mobile-drawer-content">
+                    <div className="flex flex-col h-full px-6 py-4">
+                      {/* Logo en haut */}
+                      <div className="flex justify-center mb-6">
+                        <NavLink to="/" className="flex items-center navbar-logo-container">
+                          <img 
+                            src={theme === 'light' ? "/pulse.png" : "/pulse dark.png"}
+                            alt="BiblioPulse Logo" 
+                            className="h-auto w-auto max-h-12" 
+                          />
+                        </NavLink>
+                      </div>
                       
-                      <DrawerClose asChild>
-                        <Button variant="outline" size="sm">Fermer</Button>
-                      </DrawerClose>
+                      {/* Section Navigation */}
+                      <div className="mobile-nav-section">
+                        <div className="mobile-nav-section-title">
+                          <BookText className="h-4 w-4 text-[#e4364a]" />
+                          Navigation
+                        </div>
+                        <div className="mobile-nav-links">
+                          <NavLink 
+                            to="/" 
+                            className={({ isActive }) => `flex items-center gap-2 py-1 text-base transition-colors hover:text-primary ${isActive ? 'text-primary' : ''}`}
+                            end
+                          >
+                            <BookOpen className="h-4 w-4 text-[#e4364a]" />
+                            Accueil
+                          </NavLink>
+                          <NavLink 
+                            to="/library" 
+                            className={({ isActive }) => `flex items-center gap-2 py-1 text-base transition-colors hover:text-primary ${isActive ? 'text-primary' : ''}`}
+                          >
+                            <BookOpen className="h-4 w-4 text-[#e4364a]" />
+                            Ma Bibliothèque
+                          </NavLink>
+                          <NavLink 
+                            to="/search" 
+                            className={({ isActive }) => `flex items-center gap-2 py-1 text-base transition-colors hover:text-primary ${isActive ? 'text-primary' : ''}`}
+                          >
+                            <Search className="h-4 w-4 text-[#e4364a]" />
+                            Recherche
+                          </NavLink>
+                          <NavLink 
+                            to="/statistics" 
+                            className={({ isActive }) => `flex items-center gap-2 py-1 text-base transition-colors hover:text-primary ${isActive ? 'text-primary' : ''}`}
+                          >
+                            <BarChart2 className="h-4 w-4 text-[#e4364a]" />
+                            Statistiques
+                          </NavLink>
+                        </div>
+                      </div>
+                      
+                      {/* Section Informations */}
+                      <div className="mobile-nav-section">
+                        <div className="mobile-nav-section-title">
+                          <Info className="h-4 w-4 text-[#e4364a]" />
+                          Informations
+                        </div>
+                        <div className="mobile-nav-links">
+                          <NavLink 
+                            to="/features" 
+                            className={({ isActive }) => `flex items-center gap-2 py-1 text-base transition-colors hover:text-primary ${isActive ? 'text-primary' : ''}`}
+                          >
+                            <Lightbulb className="h-4 w-4 text-[#e4364a]" />
+                            Fonctionnalités
+                          </NavLink>
+                          <NavLink 
+                            to="/privacy-policy" 
+                            className={({ isActive }) => `flex items-center gap-2 py-1 text-base transition-colors hover:text-primary ${isActive ? 'text-primary' : ''}`}
+                          >
+                            <Lightbulb className="h-4 w-4 text-[#e4364a]" />
+                            Politique de confidentialité
+                          </NavLink>
+                          <NavLink 
+                            to="/legal-notice" 
+                            className={({ isActive }) => `flex items-center gap-2 py-1 text-base transition-colors hover:text-primary ${isActive ? 'text-primary' : ''}`}
+                          >
+                            <Lightbulb className="h-4 w-4 text-[#e4364a]" />
+                            Mentions légales
+                          </NavLink>
+                          <NavLink 
+                            to="/contact" 
+                            className={({ isActive }) => `flex items-center gap-2 py-1 text-base transition-colors hover:text-primary ${isActive ? 'text-primary' : ''}`}
+                          >
+                            <Lightbulb className="h-4 w-4 text-[#e4364a]" />
+                            Contact
+                          </NavLink>
+                        </div>
+                      </div>
+                      
+                      {/* Pied de page mobile */}
+                      <div className="mobile-footer mt-auto pt-4">
+                        <div className="flex items-center justify-between">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={toggleTheme}
+                            className="transition-colors duration-300"
+                          >
+                            {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+                            <span className="ml-2">{theme === 'light' ? 'Mode sombre' : 'Mode clair'}</span>
+                          </Button>
+                          
+                          <DrawerClose asChild>
+                            <Button variant="outline" size="sm">Fermer</Button>
+                          </DrawerClose>
+                        </div>
+                        
+                        {user && (
+                          <div className="mt-4">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={signOut}
+                              className="transition-colors duration-300 text-base w-full"
+                            >
+                              Se déconnecter
+                            </Button>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </DrawerContent>
-              </Drawer>
+                  </DrawerContent>
+                </Drawer>
+              </div>
             </div>
           </>
         ) : (
