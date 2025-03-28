@@ -62,10 +62,10 @@ export const HeroSection = () => {
                     <LogIn className="h-5 w-5" /> Commencer l'aventure
                   </Button>
                   <Button 
-                    variant="outline" 
+                    variant="pulse" 
                     size="lg" 
                     asChild
-                    className="bg-black text-white hover:bg-gray-800 border-none"
+                    className="border-2 border-[#222] dark:border-white"
                   >
                     <Link to="/features">Découvrir les fonctionnalités</Link>
                   </Button>

@@ -28,6 +28,7 @@ export const CallToAction = () => {
               size="lg" 
               onClick={handleSignUp}
               className="pulse-effect flex items-center gap-2"
+              variant="pulse"
             >
               <LogIn className="h-5 w-5" /> Créer un compte gratuitement
             </Button>
@@ -36,7 +37,7 @@ export const CallToAction = () => {
               <Link to="/library">Accéder à ma bibliothèque</Link>
             </Button>
           )}
-          <Button variant="outline" size="lg" asChild>
+          <Button variant="outline" size="lg" asChild className="border-2 border-[#222] dark:border-white">
             <Link to="/features">Explorer les fonctionnalités</Link>
           </Button>
         </div>

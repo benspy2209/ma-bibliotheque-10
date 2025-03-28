@@ -113,7 +113,6 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
       {emailSentMessage && (
         <Alert 
           variant={emailSentMessage.includes("existe déjà") || (emailSentMessage.includes("rate limit") && !isRateLimited) ? "destructive" : "default"}
-          className={emailSentMessage.includes("existe déjà") || (emailSentMessage.includes("rate limit") && !isRateLimited) ? "bg-[#E4364A] text-white border-[#E4364A]" : ""}
         >
           {emailSentMessage.includes("existe déjà") || (emailSentMessage.includes("rate limit") && !isRateLimited) ? <AlertCircle className="h-4 w-4" /> : <Info className="h-4 w-4" />}
           <AlertDescription>
@@ -150,7 +149,7 @@ export function SignupTab({ isLoading, setIsLoading }: SignupTabProps) {
         />
       </div>
       
-      <Button type="submit" className="w-full" disabled={isLoading}>
+      <Button type="submit" className="w-full" variant="pulse" disabled={isLoading}>
         {isLoading ? 'Création...' : 'Créer un compte'}
       </Button>
       

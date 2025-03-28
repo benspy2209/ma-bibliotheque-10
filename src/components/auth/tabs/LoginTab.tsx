@@ -74,7 +74,7 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
     <>
       <form onSubmit={handleLogin} className="space-y-4 w-full max-w-sm">
         {loginError && (
-          <Alert variant="destructive" className="bg-[#E4364A] text-white border-[#E4364A]">
+          <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               {loginError}
@@ -116,7 +116,7 @@ export function LoginTab({ isLoading, setIsLoading }: LoginTabProps) {
             </Button>
           </div>
         </div>
-        <Button type="submit" className="w-full" disabled={isLoading}>
+        <Button type="submit" className="w-full" variant="pulse" disabled={isLoading}>
           {isLoading ? 'Connexion...' : 'Se connecter'}
         </Button>
 
