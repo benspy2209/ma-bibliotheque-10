@@ -1,6 +1,6 @@
 
 import { NavLink } from "react-router-dom";
-import { Menu } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { User } from "@supabase/supabase-js";
 import { 
@@ -108,6 +108,16 @@ export const MobileNavbar = ({
             </Button>
           </DrawerTrigger>
           <DrawerContent className="px-4 py-6 h-[90vh] flex flex-col">
+            {/* Close button at the top-right */}
+            <div className="absolute top-2 right-2">
+              <DrawerClose asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <X className="h-5 w-5" />
+                  <span className="sr-only">Fermer</span>
+                </Button>
+              </DrawerClose>
+            </div>
+            
             <div className="flex flex-col gap-6 overflow-y-auto flex-1">
               {/* Logo en premier dans le drawer */}
               <div className="flex justify-center mb-4">
