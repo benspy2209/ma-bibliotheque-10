@@ -58,6 +58,21 @@ body {
   .drawer-content {
     -webkit-overflow-scrolling: touch;
   }
+  
+  /* Fix pour les dropdown menus sur mobile */
+  .dropdown-menu-content {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Améliorer le retour visuel pour les interactions tactiles */
+  .active\:scale-95:active {
+    transform: scale(0.95);
+  }
+  
+  .active\:bg-accent:active {
+    background-color: var(--accent);
+  }
 }
 
 /* Desktop navbar styles */

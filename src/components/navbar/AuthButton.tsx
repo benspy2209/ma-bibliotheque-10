@@ -14,7 +14,7 @@ export const AuthButton = ({ user, signOut, handleSignIn }: AuthButtonProps) => 
     return (
       <Button 
         variant="outline" 
-        className="w-full touch-manipulation" 
+        className="w-full touch-manipulation active:scale-95" 
         onClick={signOut}
         style={{ touchAction: 'manipulation' }}
       >
@@ -27,7 +27,7 @@ export const AuthButton = ({ user, signOut, handleSignIn }: AuthButtonProps) => 
   return (
     <Button 
       variant="pulse" 
-      className="w-full touch-manipulation" 
+      className="w-full touch-manipulation active:scale-95" 
       onClick={handleSignIn}
       style={{ touchAction: 'manipulation' }}
     >
