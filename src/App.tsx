@@ -18,6 +18,7 @@ import Features from "./pages/Features";
 import Contact from "./pages/Contact";
 import FAQ from "./pages/FAQ";
 import Roadmap from "./pages/Roadmap";
+import About from "./pages/About";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/roadmap" element={<Roadmap />} />
+            <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

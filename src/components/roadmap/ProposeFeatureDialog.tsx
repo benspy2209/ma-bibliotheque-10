@@ -25,7 +25,7 @@ export function ProposeFeatureDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="fixed bottom-6 left-6 z-10">
+        <Button className="fixed bottom-6 right-6 z-10">
           <MessageSquarePlus className="mr-2" />
           Proposer une fonctionnalité
         </Button>
