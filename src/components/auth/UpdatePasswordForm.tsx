@@ -118,8 +118,9 @@ export function UpdatePasswordForm() {
     setIsLoading(true);
     
     try {
+      console.log("Preparing to call admin-reset-password edge function...");
+      
       // Utiliser l'API Admin de Supabase pour réinitialiser directement le mot de passe
-      // Note: Cela nécessite une Supabase Edge Function pour utiliser le service_role key
       const { data, error: functionError } = await supabase.functions.invoke('admin-reset-password', {
         body: { 
           email: values.email, 
@@ -127,11 +128,15 @@ export function UpdatePasswordForm() {
         }
       });
       
+      console.log("Edge function response:", data, "Error:", functionError);
+      
       if (functionError) {
+        console.error("Edge function error:", functionError);
         throw new Error(functionError.message || "Erreur lors de la réinitialisation du mot de passe");
       }
       
-      if (data.error) {
+      if (data && data.error) {
+        console.error("Data error from edge function:", data.error);
         throw new Error(data.error);
       }
       
