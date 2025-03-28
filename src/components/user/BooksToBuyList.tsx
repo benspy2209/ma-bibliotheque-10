@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, AlertCircle, Trash2 } from "lucide-react";
+import { ShoppingCart, AlertCircle, Trash2, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { deleteBook } from '@/services/supabaseBooks';
@@ -22,6 +22,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useQueryClient } from '@tanstack/react-query';
 
 export function BooksToBuyList() {
   const { user } = useSupabaseAuth();
@@ -30,7 +31,9 @@ export function BooksToBuyList() {
   const [error, setError] = useState<string | null>(null);
   const [bookToDelete, setBookToDelete] = useState<Book | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (user) {
@@ -80,15 +83,22 @@ export function BooksToBuyList() {
     
     try {
       setIsDeleting(true);
+      
+      console.log('Deleting book with ID:', bookToDelete.id);
       await deleteBook(bookToDelete.id);
       
-      // Update local state
-      setBooks(books.filter(book => book.id !== bookToDelete.id));
+      // Update local state - remove the deleted book from the list
+      setBooks(prevBooks => prevBooks.filter(book => book.id !== bookToDelete.id));
+      
+      // Invalidate the books query to refresh any other components using this data
+      await queryClient.invalidateQueries({ queryKey: ['books'] });
       
       toast({
         title: "Livre supprimé",
         description: `"${bookToDelete.title}" a été retiré de votre liste d'achats`,
       });
+      
+      console.log('Book deleted successfully');
     } catch (err: any) {
       console.error('Error deleting book:', err);
       toast({
@@ -99,6 +109,7 @@ export function BooksToBuyList() {
     } finally {
       setIsDeleting(false);
       setBookToDelete(null);
+      setIsDeleteDialogOpen(false);
     }
   };
 
@@ -177,12 +188,16 @@ export function BooksToBuyList() {
                       Acheter sur Amazon
                     </a>
                     
-                    <AlertDialog>
+                    <AlertDialog open={isDeleteDialogOpen && bookToDelete?.id === book.id} onOpenChange={setIsDeleteDialogOpen}>
                       <AlertDialogTrigger asChild>
                         <Button 
                           variant="destructive" 
                           size="sm" 
                           className="px-3 py-1.5"
+                          onClick={() => {
+                            setBookToDelete(book);
+                            setIsDeleteDialogOpen(true);
+                          }}
                         >
                           <Trash2 className="h-4 w-4 mr-1" />
                           Supprimer
@@ -197,15 +212,18 @@ export function BooksToBuyList() {
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Annuler</AlertDialogCancel>
-                          <AlertDialogAction 
-                            onClick={() => {
-                              setBookToDelete(book);
-                              handleDeleteBook();
-                            }}
+                          <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>Annuler</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={handleDeleteBook}
                             disabled={isDeleting}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           >
-                            {isDeleting ? 'Suppression...' : 'Supprimer'}
+                            {isDeleting ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Suppression...
+                              </>
+                            ) : 'Supprimer'}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
