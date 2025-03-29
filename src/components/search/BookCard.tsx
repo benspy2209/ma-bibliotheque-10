@@ -17,6 +17,7 @@ interface BookCardProps {
 
 export const BookCard = ({ book, onBookClick }: BookCardProps) => {
   const navigate = useNavigate();
+  // Generate a fresh Amazon affiliate URL
   const amazonUrl = getAmazonAffiliateUrl(book);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -57,11 +58,14 @@ export const BookCard = ({ book, onBookClick }: BookCardProps) => {
     try {
       console.log("Changing book status to:", status);
       
+      // Always generate a fresh Amazon affiliate URL
+      const freshAmazonUrl = getAmazonAffiliateUrl(book);
+      
       // Créer une copie du livre avec le nouveau statut
       const bookToSave: Book = {
         ...book,
         status,
-        amazonUrl, // Ajouter le lien Amazon correct
+        amazonUrl: freshAmazonUrl, // Ajouter le lien Amazon correct
         purchased: true // By default, books are marked as purchased
       };
       

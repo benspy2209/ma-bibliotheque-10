@@ -6,7 +6,7 @@ export const AMAZON_AFFILIATE_ID = 'bibliopulse22-21';
 
 /**
  * Génère un lien d'affiliation Amazon correct pour un livre donné
- * Cette fonction améliorée gère mieux les ISBN et inclut toujours l'ID d'affilié
+ * Cette fonction génère toujours une URL fraîche avec l'ID d'affilié
  */
 export function getAmazonAffiliateUrl(book: Book) {
   if (!book) return `https://www.amazon.fr/?tag=${AMAZON_AFFILIATE_ID}`;
@@ -51,8 +51,9 @@ export function getAmazonAffiliateUrl(book: Book) {
     }
   }
 
-  // Générer le lien Amazon avec l'ASIN/ISBN
+  // Générer le lien Amazon avec l'ASIN/ISBN - assurons-nous que la structure de l'URL est correcte
   if (asin && (asin.length === 10 || asin.length === 13)) {
+    // S'assurer que l'URL est correctement formée avec le tag d'affiliation
     return `https://www.amazon.fr/dp/${asin}/?tag=${AMAZON_AFFILIATE_ID}`;
   } else {
     // Fallback: recherche par titre et auteur

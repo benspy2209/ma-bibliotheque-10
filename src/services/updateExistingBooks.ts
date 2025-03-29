@@ -28,7 +28,7 @@ export async function updateAmazonLinksInLibrary() {
     
     console.log(`${books.length} livres trouvés, vérification des liens Amazon...`);
     
-    // Identifier les livres dont les liens Amazon sont incorrects
+    // Identifier les livres dont les liens Amazon sont incorrects ou manquants
     const booksToUpdate = books.filter(book => !isAmazonLinkValid(book.amazonUrl));
     
     if (booksToUpdate.length === 0) {
