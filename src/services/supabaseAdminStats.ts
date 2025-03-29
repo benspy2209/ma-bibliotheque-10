@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 interface UserBookStats {
@@ -129,75 +128,15 @@ export async function fetchAllUsersStatistics(): Promise<UserStatistics[]> {
  */
 export async function fetchSystemLogs(): Promise<SystemLog[]> {
   try {
-    // Utilisation de fetch pour récupérer les logs d'authentification directement
-    // plutôt que d'essayer d'accéder à une table qui n'est pas définie dans le schéma
-    const response = await fetch(`${supabase.supabaseUrl}/auth/v1/admin/logs`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${process.env.VITE_SUPABASE_SERVICE_ROLE_KEY || ''}`,
-        'apikey': process.env.VITE_SUPABASE_SERVICE_ROLE_KEY || '',
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      console.error('Erreur lors de la récupération des logs:', response.statusText);
-      return getSimulatedLogs();
-    }
-
-    const authLogs = await response.json();
-
-    if (!authLogs || authLogs.length === 0) {
-      return getSimulatedLogs();
-    }
-
-    const logs: SystemLog[] = authLogs.map((log: any) => {
-      let level: 'info' | 'warning' | 'error' | 'success' = 'info';
-      
-      if (log.error) {
-        level = 'error';
-      } else if (log.event_message && (
-        log.event_message.includes('success') || 
-        log.event_message.includes('completed') ||
-        log.event_message.includes('Login')
-      )) {
-        level = 'success';
-      } else if (log.event_message && (
-        log.event_message.includes('warning') ||
-        log.event_message.includes('Invalid')
-      )) {
-        level = 'warning';
-      }
-
-      let message = log.event_message || 'Événement système';
-      if (typeof message === 'string' && message.startsWith('{')) {
-        try {
-          const parsed = JSON.parse(message);
-          message = parsed.msg || parsed.message || message;
-        } catch (e) {
-          // Garde le message tel quel en cas d'erreur
-        }
-      }
-
-      let user = undefined;
-      if (log.event_message && typeof log.event_message === 'string') {
-        const userMatch = log.event_message.match(/user_id":"([^"]+)"/);
-        if (userMatch && userMatch[1]) {
-          user = userMatch[1];
-        }
-      }
-
-      return {
-        id: log.id || `log-${Math.random().toString(36).substr(2, 9)}`,
-        timestamp: log.timestamp ? new Date(Number(log.timestamp) / 1000).toISOString() : new Date().toISOString(),
-        level,
-        message: message.substring(0, 200),
-        user,
-        path: log.path || undefined
-      };
-    });
-
-    return logs;
+    // Constantes pour l'URL de Supabase - on utilise les valeurs du client supabase
+    const SUPABASE_URL = "https://kbmnsxakgyokifzoiajo.supabase.co";
+    // La clé de service role n'est pas disponible dans le navigateur, 
+    // nous utilisons donc directement les logs simulés pour éviter l'erreur
+    console.log("Tentative de récupération des logs système (simulation uniquement)");
+    
+    // Utilisation des logs simulés car l'accès à l'API Auth nécessite la clé de service
+    // qui n'est pas sécuritaire à exposer au frontend
+    return getSimulatedLogs();
   } catch (error) {
     console.error('Erreur lors de l\'appel aux logs système:', error);
     return getSimulatedLogs();
