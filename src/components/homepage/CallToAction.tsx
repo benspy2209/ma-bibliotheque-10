@@ -37,6 +37,7 @@ export const CallToAction = () => {
               <Link to="/library">Accéder à ma bibliothèque</Link>
             </Button>
           )}
+          
           <Button variant="outline" size="lg" asChild className="border-2 border-[#222] dark:border-white relative z-10">
             <Link to="/features">Explorer les fonctionnalités</Link>
           </Button>

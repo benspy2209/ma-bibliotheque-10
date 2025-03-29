@@ -35,7 +35,7 @@ const Index = () => {
     if (user) {
       checkSearchLimits();
     }
-  }, [user]);
+  }, [user, checkSearchLimits]);
 
   return (
     <div className="min-h-screen flex flex-col">

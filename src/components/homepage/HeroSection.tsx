@@ -56,12 +56,8 @@ export const HeroSection = () => {
                   >
                     <LogIn className="h-5 w-5" /> Commencer l'aventure
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="lg" 
-                    asChild
-                    className="border-2 border-[#222] dark:border-white relative z-10"
-                  >
+                  
+                  <Button variant="outline" size="lg" asChild className="border-2 border-[#222] dark:border-white relative z-10">
                     <Link to="/features">Découvrir les fonctionnalités</Link>
                   </Button>
                 </>
