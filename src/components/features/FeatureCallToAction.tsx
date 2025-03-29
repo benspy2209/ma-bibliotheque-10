@@ -3,18 +3,10 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
 import { useSupabaseAuth } from "@/hooks/use-supabase-auth";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export const FeatureCallToAction = () => {
-  const { user, setShowLoginDialog, setAuthMode } = useSupabaseAuth();
-  const navigate = useNavigate();
-
-  // Function to handle click on the login button
-  const handleSignInClick = () => {
-    console.log("Opening login dialog from Features page");
-    setAuthMode('signup');
-    setShowLoginDialog(true);
-  };
+  const { user } = useSupabaseAuth();
 
   return (
     <div className="mt-16 text-center bg-primary/5 py-16 px-6 rounded-lg">
@@ -25,17 +17,14 @@ export const FeatureCallToAction = () => {
       
       {!user && (
         <div className="flex justify-center">
-          <div className="relative inline-block">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E4364A]/50 opacity-75"></span>
-            <Button 
-              size="lg" 
-              onClick={handleSignInClick}
-              variant="pulse"
-              className="relative z-10 font-semibold text-base transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2"
-            >
-              <LogIn className="h-5 w-5" /> Commencer l'aventure
-            </Button>
-          </div>
+          <Button 
+            size="lg" 
+            variant="pulse"
+            className="relative z-10 font-semibold text-base transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2"
+            asChild
+          >
+            <Link to="/library"><LogIn className="h-5 w-5" /> Commencer l'aventure</Link>
+          </Button>
         </div>
       )}
     </div>

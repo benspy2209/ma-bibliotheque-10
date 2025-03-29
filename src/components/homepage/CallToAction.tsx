@@ -6,14 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
 export const CallToAction = () => {
-  const { user, setShowLoginDialog, setAuthMode } = useSupabaseAuth();
-
-  // Modified to open login dialog
-  const handleSignUp = () => {
-    console.log("Opening login dialog from CallToAction");
-    setAuthMode('signup');
-    setShowLoginDialog(true);
-  };
+  const { user } = useSupabaseAuth();
 
   return (
     <section className="py-16 bg-primary/5">
@@ -26,11 +19,11 @@ export const CallToAction = () => {
           {!user ? (
             <Button 
               size="lg" 
-              onClick={handleSignUp}
               variant="pulse"
               className="flex items-center gap-2 font-semibold text-base relative z-10"
+              asChild
             >
-              <LogIn className="h-5 w-5" /> Créer un compte gratuitement
+              <Link to="/library"><LogIn className="h-5 w-5" /> Créer un compte gratuitement</Link>
             </Button>
           ) : (
             <Button size="lg" asChild className="relative z-10">

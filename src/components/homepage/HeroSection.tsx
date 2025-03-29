@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
 export const HeroSection = () => {
-  const { user, setShowLoginDialog, setAuthMode } = useSupabaseAuth();
+  const { user } = useSupabaseAuth();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -17,13 +17,6 @@ export const HeroSection = () => {
     
     return () => clearTimeout(timer);
   }, []);
-
-  // Modified to open login dialog
-  const handleLoginClick = () => {
-    console.log("Opening login dialog from HeroSection");
-    setAuthMode('signup');
-    setShowLoginDialog(true);
-  };
 
   return (
     <section className="relative py-20 overflow-hidden">
@@ -50,11 +43,11 @@ export const HeroSection = () => {
                 <>
                   <Button 
                     size="lg" 
-                    onClick={handleLoginClick}
                     variant="pulse"
                     className="font-semibold text-base flex items-center gap-2 relative z-10"
+                    asChild
                   >
-                    <LogIn className="h-5 w-5" /> Commencer l'aventure
+                    <Link to="/library"><LogIn className="h-5 w-5" /> Commencer l'aventure</Link>
                   </Button>
                   
                   <Button variant="outline" size="lg" asChild className="border-2 border-[#222] dark:border-white relative z-10">
