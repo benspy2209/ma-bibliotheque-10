@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getAmazonAffiliateUrl } from '@/lib/amazon-utils';
 import { AMAZON_AFFILIATE_ID } from '@/lib/amazon-utils';
 import { useToast } from '@/hooks/use-toast';
+import { Book } from '@/types/book';
 
 /**
  * Met à jour tous les liens d'affiliation Amazon pour tous les livres de tous les utilisateurs
@@ -44,10 +45,9 @@ export async function updateAllAmazonLinks() {
     // Mettre à jour chaque livre
     for (const book of books) {
       try {
-        // Extraire et mettre à jour les données du livre
-        const bookData = book.book_data;
+        // Extraire et vérifier les données du livre
+        const bookData = book.book_data as Book;
         
-        // Si le livre a un amazonUrl, le mettre à jour
         if (bookData) {
           // Générer un nouveau lien Amazon
           const newAmazonUrl = getAmazonAffiliateUrl(bookData);
@@ -82,12 +82,16 @@ export async function updateAllAmazonLinks() {
     
     // Ajouter un log système si la fonction existe
     try {
+      // Note: Comme cette fonction RPC n'est pas encore définie, nous ne l'appelons pas
+      /*
       await supabase.rpc('add_system_log', {
         p_level: 'success',
         p_message: `Mise à jour globale des liens Amazon: ${successCount} livres mis à jour, ${errorCount} erreurs`,
         p_user_id: user.id,
         p_path: '/profile/settings'
       });
+      */
+      console.log('Note: Impossible d\'ajouter un log système (la fonction n\'existe pas encore)');
     } catch (error) {
       // Si la fonction n'existe pas, ignorer l'erreur
       console.log('Note: Impossible d\'ajouter un log système (la fonction n\'existe peut-être pas)');
