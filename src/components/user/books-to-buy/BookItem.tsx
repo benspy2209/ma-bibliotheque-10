@@ -14,6 +14,11 @@ export function BookItem({ book, isDeleting, onDeleteConfirm }: BookItemProps) {
   // Generate a fresh Amazon affiliate URL every time
   const amazonUrl = getAmazonAffiliateUrl(book);
   
+  const handleAmazonClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.open(amazonUrl, '_blank', 'noopener,noreferrer');
+  };
+  
   return (
     <div className="flex gap-4 border-b pb-4">
       <div className="relative w-[80px] h-[120px] shrink-0">
@@ -37,6 +42,7 @@ export function BookItem({ book, isDeleting, onDeleteConfirm }: BookItemProps) {
         <div className="mt-auto flex flex-wrap gap-2">
           <a 
             href={amazonUrl}
+            onClick={handleAmazonClick}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded text-sm transition-colors"
