@@ -4,6 +4,7 @@ import { useAuthMethods } from './auth/use-auth-methods';
 import { useAuthUI } from './auth/use-auth-ui';
 import { useRecoveryToken } from './auth/use-recovery-token';
 import { useEffect } from 'react';
+import { addSystemLog } from '@/services/supabaseAdminStats';
 
 /**
  * Main hook for Supabase authentication
@@ -31,14 +32,50 @@ export function useSupabaseAuth() {
     }
   }, [initialAuthCheckDone, user]);
 
-  // Expose a unified API that matches the original hook
+  // Enhanced auth methods with logging
+  const enhancedSignIn = async (email: string, password: string) => {
+    const result = await signIn(email, password);
+    if (result.session) {
+      addSystemLog('success', 'Connexion réussie', result.session.user.id, '/auth/login');
+    } else if (result.error) {
+      addSystemLog('error', `Échec de connexion: ${result.error.message}`, null, '/auth/login');
+    }
+    return result;
+  };
+
+  const enhancedSignOut = async () => {
+    const userId = user?.id;
+    const result = await signOut();
+    if (!result.error && userId) {
+      addSystemLog('info', 'Déconnexion réussie', userId, '/auth/logout');
+    }
+    return result;
+  };
+
+  const enhancedSignInWithGoogle = async () => {
+    const result = await signInWithGoogle();
+    if (result.error) {
+      addSystemLog('error', `Échec de connexion Google: ${result.error.message}`, null, '/auth/google-login');
+    }
+    return result;
+  };
+
+  const enhancedSignInWithFacebook = async () => {
+    const result = await signInWithFacebook();
+    if (result.error) {
+      addSystemLog('error', `Échec de connexion Facebook: ${result.error.message}`, null, '/auth/facebook-login');
+    }
+    return result;
+  };
+
+  // Expose a unified API that matches the original hook but with enhanced methods
   return {
     user,
     session,
-    signIn,
-    signOut,
-    signInWithGoogle,
-    signInWithFacebook,
+    signIn: enhancedSignIn,
+    signOut: enhancedSignOut,
+    signInWithGoogle: enhancedSignInWithGoogle,
+    signInWithFacebook: enhancedSignInWithFacebook,
     showLoginDialog,
     setShowLoginDialog,
     authMode,

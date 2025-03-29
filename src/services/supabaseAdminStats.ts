@@ -47,12 +47,14 @@ export async function fetchAllUserStats(): Promise<UserBookStats[]> {
 
     if (error) {
       console.error('Erreur lors de la récupération des statistiques utilisateurs:', error);
+      addSystemLog('error', `Erreur lors de la récupération des statistiques utilisateurs: ${error.message}`);
       return [];
     }
 
     return data || [];
   } catch (error) {
     console.error('Erreur lors de l\'appel aux statistiques utilisateurs:', error);
+    addSystemLog('error', `Erreur lors de l'appel aux statistiques utilisateurs: ${error}`);
     return [];
   }
 }
@@ -69,12 +71,14 @@ export async function fetchAllUserBookDetails(): Promise<UserBookDetail[]> {
 
     if (error) {
       console.error('Erreur lors de la récupération des détails des livres:', error);
+      addSystemLog('error', `Erreur lors de la récupération des détails des livres: ${error.message}`);
       return [];
     }
 
     return data || [];
   } catch (error) {
     console.error('Erreur lors de l\'appel aux détails des livres:', error);
+    addSystemLog('error', `Erreur lors de l'appel aux détails des livres: ${error}`);
     return [];
   }
 }
@@ -90,12 +94,14 @@ export async function fetchBooksCompleteView() {
 
     if (error) {
       console.error('Erreur lors de la récupération des détails complets des livres:', error);
+      addSystemLog('error', `Erreur lors de la récupération des détails complets des livres: ${error.message}`);
       return [];
     }
 
     return data || [];
   } catch (error) {
     console.error('Erreur lors de l\'appel aux détails complets des livres:', error);
+    addSystemLog('error', `Erreur lors de l'appel aux détails complets des livres: ${error}`);
     return [];
   }
 }
@@ -112,12 +118,14 @@ export async function fetchAllUsersStatistics(): Promise<UserStatistics[]> {
 
     if (error) {
       console.error('Erreur lors de la récupération des statistiques globales:', error);
+      addSystemLog('error', `Erreur lors de la récupération des statistiques globales: ${error.message}`);
       return [];
     }
 
     return data as UserStatistics[] || [];
   } catch (error) {
     console.error('Erreur lors de l\'appel aux statistiques globales:', error);
+    addSystemLog('error', `Erreur lors de l'appel aux statistiques globales: ${error}`);
     return [];
   }
 }
@@ -168,11 +176,14 @@ export async function addSystemLog(
   path?: string
 ): Promise<string | null> {
   try {
+    // Ajouter le path actuel si non fourni
+    const currentPath = path || (typeof window !== 'undefined' ? window.location.pathname : null);
+    
     const { data, error } = await supabase.rpc('add_system_log', {
       p_level: level,
       p_message: message, 
       p_user_id: userId || null,
-      p_path: path || null
+      p_path: currentPath || null
     });
 
     if (error) {

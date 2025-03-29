@@ -93,6 +93,15 @@ export function AdminDashboard() {
     } catch (error) {
       console.error("Erreur lors du chargement des données:", error);
       toast.error("Erreur lors du chargement des données");
+      
+      if (user?.id) {
+        addSystemLog(
+          'error',
+          'Erreur lors du chargement des données du tableau de bord admin',
+          user.id,
+          '/admin/dashboard'
+        );
+      }
     } finally {
       setIsLoading(false);
     }

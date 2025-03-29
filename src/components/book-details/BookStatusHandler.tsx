@@ -1,79 +1,102 @@
+import React, { useState } from 'react';
+import { toast } from 'sonner';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { updateBookStatus } from '@/services/supabase';
+import { Button } from '@/components/ui/button';
+import { ReloadIcon } from '@radix-ui/react-icons';
+import { useBook } from '@/hooks/use-book';
+import { addSystemLog } from '@/services/supabaseAdminStats';
+import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
-import { BookStatusHandlerProps } from './types';
-import { ReadingStatus } from '@/types/book';
-import { useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
+interface BookStatusHandlerProps {
+  bookId: string;
+}
 
-export function BookStatusHandler({ book, onStatusChange }: BookStatusHandlerProps) {
+export function BookStatusHandler({
+  bookId,
+}: BookStatusHandlerProps) {
+  const [isUpdating, setIsUpdating] = useState(false);
   const queryClient = useQueryClient();
-  const { toast } = useToast();
-  
-  useEffect(() => {
-    // Force une invalidation du cache chaque fois que le statut du livre change
-    if (book.status) {
-      queryClient.invalidateQueries({ 
-        queryKey: ['books'],
-        refetchType: 'all',
-        exact: false
-      });
-    }
-  }, [book.status, queryClient]);
-  
-  const handleStatusChange = async (status: ReadingStatus) => {
-    console.log("BookStatusHandler: Changement de statut du livre à", status);
-    console.log("BookStatusHandler: Données actuelles du livre:", book);
-    
-    // Appeler la fonction de changement de statut
-    await onStatusChange(status);
-    
-    // Si le livre est marqué comme "lu", informer l'utilisateur de mettre à jour les dates de lecture
-    if (status === 'completed') {
-      toast({
-        title: "Livre marqué comme lu",
-        description: "N'oubliez pas de mettre à jour les dates de lecture pour des statistiques précises !",
-        duration: 6000,
-      });
-    }
-    
-    console.log("BookStatusHandler: Statut modifié, invalidation des caches...");
-    
-    // Forcer une invalidation et un rechargement complet du cache
-    await queryClient.resetQueries({
-      queryKey: ['books'],
-      exact: false
-    });
-    
-    // Attendre que les requêtes soient invalidées
-    setTimeout(async () => {
-      console.log("BookStatusHandler: Rechargement forcé des données...");
-      
-      // Recharger explicitement les données
-      await queryClient.refetchQueries({ 
-        queryKey: ['books'],
-        exact: false,
-        type: 'all'
-      });
-      
-      // Forcer refetch des statistiques spécifiquement
-      await queryClient.refetchQueries({
-        queryKey: ['readingGoals'],
-        exact: false
-      });
-      
-      // Recharger une deuxième fois après un court délai pour s'assurer que tout est à jour
-      setTimeout(async () => {
-        console.log("BookStatusHandler: Deuxième rechargement des données...");
-        await queryClient.refetchQueries({ 
-          queryKey: ['books'],
-          exact: false,
-          type: 'all'
-        });
-      }, 500);
-      
-      console.log("BookStatusHandler: Données rechargées après changement de statut");
-    }, 300);
+  const { book } = useBook(bookId);
+  const { user } = useSupabaseAuth();
+
+  const mutation = useMutation(updateBookStatus, {
+    onSuccess: () => {
+      queryClient.invalidateQueries(['books']);
+      queryClient.invalidateQueries(['book', bookId]);
+    },
+  });
+
+  const handleUpdateStatus = async (bookId: string, status: string) => {
+    mutation.mutate({ bookId, status });
   };
-  
-  return null; // This is a logic-only component, no UI rendering
+
+  const updateStatus = async (newStatus: string) => {
+    setIsUpdating(true);
+    try {
+      await handleUpdateStatus(bookId, newStatus);
+      
+      // Log status change
+      const bookTitle = book?.title || 'Livre inconnu';
+      addSystemLog(
+        'success', 
+        `Statut du livre "${bookTitle}" changé en "${newStatus}"`, 
+        user?.id,
+        '/library'
+      );
+      
+      // Refresh book details and book list
+      queryClient.invalidateQueries(['book', bookId]);
+      queryClient.invalidateQueries(['books']);
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du statut :', error);
+      toast.error('Impossible de mettre à jour le statut du livre');
+      
+      // Log error
+      addSystemLog(
+        'error', 
+        `Erreur lors de la mise à jour du statut: ${error instanceof Error ? error.message : 'Erreur inconnue'}`, 
+        user?.id,
+        '/library'
+      );
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  if (!book) {
+    return <p>Loading...</p>;
+  }
+
+  return (
+    <div className="flex space-x-2">
+      <Button
+        variant="outline"
+        className={`${book.status === 'to-read' ? 'bg-secondary text-secondary-foreground hover:bg-secondary/80' : ''}`}
+        onClick={() => updateStatus('to-read')}
+        disabled={isUpdating}
+      >
+        {isUpdating && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
+        {book.status === 'to-read' ? '✅' : ''} A lire
+      </Button>
+      <Button
+        variant="outline"
+        className={`${book.status === 'reading' ? 'bg-secondary text-secondary-foreground hover:bg-secondary/80' : ''}`}
+        onClick={() => updateStatus('reading')}
+        disabled={isUpdating}
+      >
+        {isUpdating && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
+        {book.status === 'reading' ? '✅' : ''} En cours
+      </Button>
+      <Button
+        variant="outline"
+        className={`${book.status === 'completed' ? 'bg-secondary text-secondary-foreground hover:bg-secondary/80' : ''}`}
+        onClick={() => updateStatus('completed')}
+        disabled={isUpdating}
+      >
+        {isUpdating && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
+        {book.status === 'completed' ? '✅' : ''} Terminé
+      </Button>
+    </div>
+  );
 }
