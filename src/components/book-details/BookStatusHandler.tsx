@@ -2,11 +2,12 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateBookStatus } from '@/services/supabaseBooks'; // Fixed import
+import { updateBookStatus } from '@/services/supabase'; 
 import { Button } from '@/components/ui/button';
-import { ReloadIcon } from '@radix-ui/react-icons'; // Will install this package
+import { ReloadIcon } from '@radix-ui/react-icons';
 import { addSystemLog } from '@/services/supabaseAdminStats';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
+import { Book } from '@/types/book';
 
 interface BookStatusHandlerProps {
   bookId: string;
@@ -20,7 +21,7 @@ export function BookStatusHandler({
   const { user } = useSupabaseAuth();
   
   // Get book data from the existing state to access its title
-  const book = queryClient.getQueryData(['book', bookId]);
+  const book = queryClient.getQueryData<Book>(['book', bookId]);
 
   const mutation = useMutation({
     mutationFn: updateBookStatus,
@@ -32,7 +33,7 @@ export function BookStatusHandler({
   });
 
   const handleUpdateStatus = async (bookId: string, status: string) => {
-    mutation.mutate({ bookId, status } as any); // Fixed type
+    mutation.mutate({ bookId, status });
   };
 
   const updateStatus = async (newStatus: string) => {
@@ -62,18 +63,16 @@ export function BookStatusHandler({
         toastMessage = "Livre marqué comme lu";
       }
       
-      toast({ description: toastMessage });
+      toast(toastMessage);
       
     } catch (error) {
       // En cas d'erreur, rétablir le statut précédent
       console.error("Erreur lors de l'ajout du livre:", error);
       
-      toast({
-        variant: "destructive",
-        description: error instanceof Error 
-          ? error.message 
-          : "Une erreur est survenue lors de l'ajout du livre",
-      });
+      toast(error instanceof Error 
+        ? error.message 
+        : "Une erreur est survenue lors de l'ajout du livre"
+      );
     } finally {
       setIsUpdating(false);
     }
