@@ -4,7 +4,6 @@ import { useAuthMethods } from './auth/use-auth-methods';
 import { useAuthUI } from './auth/use-auth-ui';
 import { useRecoveryToken } from './auth/use-recovery-token';
 import { useEffect } from 'react';
-import { addSystemLog } from '@/services/supabaseAdminStats';
 
 /**
  * Main hook for Supabase authentication
@@ -32,70 +31,14 @@ export function useSupabaseAuth() {
     }
   }, [initialAuthCheckDone, user]);
 
-  // Enhanced auth methods with logging
-  const enhancedSignIn = async (email: string, password: string) => {
-    try {
-      const result = await signIn(email, password);
-      if (result && result.user) {
-        addSystemLog('success', 'Connexion réussie', result.user.id, '/auth/login');
-      } else if (result && result.error) {
-        addSystemLog('error', `Échec de connexion: ${result.error.message}`, null, '/auth/login');
-      }
-      return result;
-    } catch (error) {
-      console.error("Sign in error:", error);
-      return { user: null, error: error as Error };
-    }
-  };
-
-  const enhancedSignOut = async () => {
-    try {
-      const userId = user?.id;
-      const result = await signOut();
-      if (userId) {
-        addSystemLog('info', 'Déconnexion réussie', userId, '/auth/logout');
-      }
-      return { error: null };
-    } catch (error) {
-      console.error("Sign out error:", error);
-      return { error: error as Error };
-    }
-  };
-
-  const enhancedSignInWithGoogle = async () => {
-    try {
-      const result = await signInWithGoogle();
-      if (result && result.error) {
-        addSystemLog('error', `Échec de connexion Google: ${result.error.message}`, null, '/auth/google-login');
-      }
-      return result;
-    } catch (error) {
-      console.error("Google sign in error:", error);
-      return { error: error as Error };
-    }
-  };
-
-  const enhancedSignInWithFacebook = async () => {
-    try {
-      const result = await signInWithFacebook();
-      if (result && result.error) {
-        addSystemLog('error', `Échec de connexion Facebook: ${result.error.message}`, null, '/auth/facebook-login');
-      }
-      return result;
-    } catch (error) {
-      console.error("Facebook sign in error:", error);
-      return { error: error as Error };
-    }
-  };
-
-  // Expose a unified API that matches the original hook but with enhanced methods
+  // Expose a unified API that matches the original hook
   return {
     user,
     session,
-    signIn: enhancedSignIn,
-    signOut: enhancedSignOut,
-    signInWithGoogle: enhancedSignInWithGoogle,
-    signInWithFacebook: enhancedSignInWithFacebook,
+    signIn,
+    signOut,
+    signInWithGoogle,
+    signInWithFacebook,
     showLoginDialog,
     setShowLoginDialog,
     authMode,

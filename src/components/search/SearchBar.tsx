@@ -1,124 +1,182 @@
-
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search, X } from "lucide-react";
-import { useEffect } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { addSystemLog } from '@/services/supabaseAdminStats';
+import { useState, useRef } from 'react';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from "@/components/ui/button";
+import { SearchType, LanguageFilter } from '@/services/bookSearch';
+import { SearchInput } from './SearchInput';
+import { SearchTypeSelector } from './SearchTypeSelector';
+import { LanguageSelector } from './LanguageSelector';
+import { ShowAllResultsButton } from './ShowAllResultsButton';
+import { BookOpen } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface SearchBarProps {
-  className?: string;
+  onSearch: (query: string, searchType: SearchType, language: LanguageFilter) => Promise<void>;
   placeholder?: string;
-  onSearch?: (query: string, searchType: string, language: string) => Promise<void>;
   showAllResults?: () => void;
   hasMoreResults?: boolean;
   totalBooks?: number;
 }
 
-export function SearchBar({
-  className,
-  placeholder,
-  onSearch,
+export const SearchBar = ({ 
+  onSearch, 
+  placeholder = "Rechercher...", 
   showAllResults,
   hasMoreResults,
-  totalBooks
-}: SearchBarProps) {
-  const [query, setQuery] = useState("");
-  const [searchType, setSearchType] = useState("books");
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchError, setSearchError] = useState<string | null>(null);
+  totalBooks = 0
+}: SearchBarProps) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchType, setSearchType] = useState<SearchType>('title');
+  const [language, setLanguage] = useState<LanguageFilter>('fr');
+  const [isSearching, setIsSearching] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { user } = useSupabaseAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleSearch = async () => {
-    if (!query.trim()) return;
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
     
-    setIsLoading(true);
-    setSearchError(null);
+    if (!user) {
+      return;
+    }
     
-    try {
-      // Log search activity
-      addSystemLog(
-        'info', 
-        `Recherche: "${query}" (type: ${searchType})`, 
-        user?.id,
-        '/search'
-      );
-      
-      // If onSearch prop exists, call it
-      if (onSearch) {
-        await onSearch(query, searchType, 'fr'); // Default language to French
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    searchTimeoutRef.current = setTimeout(() => {
+      if (value.trim().length > 2) {
+        setIsSearching(true);
+        onSearch(value, searchType, language)
+          .finally(() => {
+            setIsSearching(false);
+          });
       }
-    } catch (error) {
-      console.error("Search failed:", error);
-      setSearchError("An error occurred while searching. Please try again.");
-      
-      // Log search error
-      addSystemLog(
-        'error', 
-        `Erreur de recherche: ${error instanceof Error ? error.message : 'Erreur inconnue'}`, 
-        user?.id,
-        '/search'
-      );
-    } finally {
-      setIsLoading(false);
+    }, 800);
+  };
+
+  const handleSearchTypeChange = (value: SearchType) => {
+    setSearchType(value);
+    if (searchQuery && searchQuery.trim().length > 2 && user) {
+      setIsSearching(true);
+      onSearch(searchQuery, value, language)
+        .finally(() => {
+          setIsSearching(false);
+        });
+    }
+  };
+
+  const handleLanguageChange = (value: LanguageFilter) => {
+    setLanguage(value);
+    if (searchQuery && searchQuery.trim().length > 2 && user) {
+      setIsSearching(true);
+      onSearch(searchQuery, searchType, value)
+        .finally(() => {
+          setIsSearching(false);
+        });
+    }
+  };
+
+  const handleInputFocus = () => {
+    if (!user) {
+      toast({
+        title: "Connexion requise",
+        description: "Vous devez vous connecter ou créer un compte pour faire une recherche.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleShowAllResults = () => {
+    if (showAllResults) {
+      showAllResults();
+    }
+  };
+
+  const handleJoinAdventure = () => {
+    navigate('/library');
+  };
+
+  const handleSubmitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!user) {
+      toast({
+        title: "Connexion requise",
+        description: "Vous devez vous connecter ou créer un compte pour faire une recherche.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (searchQuery.trim().length > 2) {
+      setIsSearching(true);
+      onSearch(searchQuery, searchType, language)
+        .finally(() => {
+          setIsSearching(false);
+        });
+    } else if (searchQuery.trim().length > 0) {
+      toast({
+        description: "Veuillez entrer au moins 3 caractères pour la recherche.",
+        variant: "default"
+      });
     }
   };
 
   return (
-    <div className={`flex gap-4 ${className}`}>
-      <div className="grid gap-1.5">
-        <Label htmlFor="type">Rechercher par</Label>
-        <Select value={searchType} onValueChange={(value) => setSearchType(value)}>
-          <SelectTrigger id="type">
-            <SelectValue placeholder="Type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="books">Livres</SelectItem>
-            <SelectItem value="authors">Auteurs</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="relative flex-1">
-        <Input
-          type="search"
-          placeholder={placeholder || `Rechercher des ${searchType}`}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="pr-10"
+    <div className="space-y-4">
+      <form onSubmit={handleSubmitSearch} className="flex flex-col gap-2 sm:flex-row">
+        <SearchInput 
+          searchQuery={searchQuery}
+          isSearching={isSearching}
+          onInputChange={handleSearch}
+          onInputFocus={handleInputFocus}
         />
-        {query && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full p-1.5"
-            onClick={() => setQuery("")}
-          >
-            <X className="h-4 w-4 text-muted-foreground" />
-          </Button>
-        )}
-        <Button
-          type="submit"
-          disabled={isLoading}
-          className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full p-1.5"
-          onClick={handleSearch}
-          aria-label="Search"
+        
+        <SearchTypeSelector 
+          searchType={searchType}
+          onSearchTypeChange={handleSearchTypeChange}
+        />
+        
+        <LanguageSelector 
+          language={language}
+          onLanguageChange={handleLanguageChange}
+        />
+        
+        <Button 
+          type="submit" 
+          className="h-12 sm:w-auto"
+          disabled={isSearching || !user}
         >
-          {isLoading ? (
-            <span className="h-4 w-4 animate-spin">⏳</span>
-          ) : (
-            <Search className="h-4 w-4" />
-          )}
+          {isSearching ? 'Recherche...' : 'Rechercher'}
         </Button>
-      </div>
+      </form>
+      
+      {hasMoreResults && searchQuery && (
+        <div className="flex justify-center mt-2">
+          <ShowAllResultsButton 
+            onShowAllResults={handleShowAllResults}
+            totalBooks={totalBooks}
+            searchType={searchType}
+          />
+        </div>
+      )}
+      
+      {!user && (
+        <div className="mt-2 text-center">
+          <p className="text-destructive mb-4">Vous devez vous connecter ou créer un compte pour faire une recherche.</p>
+          <div className="flex justify-center">
+            <Button 
+              onClick={handleJoinAdventure}
+              className="relative z-10 font-semibold text-base transition-all duration-300 shadow-md hover:shadow-lg pulse-effect flex items-center gap-2 bg-[#CC4153] text-white hover:bg-[#b33646]"
+              variant="pulse"
+            >
+              <BookOpen className="h-5 w-5" /> Rejoindre l'aventure
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
+};

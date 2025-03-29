@@ -3,59 +3,33 @@ import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-type AuthResult = {
-  user: any | null;
-  error: Error | null;
-};
-
 /**
  * Hook providing authentication methods (sign in, sign out, etc.)
  */
 export function useAuthMethods() {
   const { toast } = useToast();
   
-  const signIn = useCallback(async (email: string, password: string): Promise<AuthResult> => {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-      
-      if (error) throw error;
-      
-      return { user: data.user, error: null };
-    } catch (error: any) {
-      console.error("Login error:", error);
-      toast({
-        variant: "destructive",
-        description: `Erreur: ${error.message}`
-      });
-      return { user: null, error };
-    }
-  }, [toast]);
+  const signIn = useCallback((mode: 'login' | 'signup' | 'reset' = 'signup') => {
+    console.log(`signIn called with mode: ${mode}`);
+    return mode;
+  }, []);
 
-  const signOut = useCallback(async (): Promise<{ error: Error | null }> => {
+  const signOut = useCallback(async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      
+      await supabase.auth.signOut();
       // Force a complete page reload after sign out
       window.location.href = '/';
-      return { error: null };
     } catch (error: any) {
       toast({
         variant: "destructive",
         description: `Erreur lors de la déconnexion: ${error.message}`
       });
-      return { error };
     }
   }, [toast]);
 
-  const signInWithGoogle = async (): Promise<AuthResult> => {
+  const signInWithGoogle = async () => {
     try {
-      console.log("Tentative de connexion avec Google...");
-      
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}`
@@ -63,24 +37,16 @@ export function useAuthMethods() {
       });
       
       if (error) throw error;
-      
-      // Pour le débogage, affichons les données retournées
-      console.log("Données de redirection Google:", data);
-      
-      // OAuth returns a URL to redirect to, not a user object directly
-      // The user will be available after the OAuth flow completes
-      return { user: null, error: null };
     } catch (error: any) {
       console.error("Erreur lors de la connexion avec Google:", error);
       toast({
         variant: "destructive",
         description: `Erreur: ${error.message}`
       });
-      return { user: null, error };
     }
   };
 
-  const signInWithFacebook = async (): Promise<AuthResult> => {
+  const signInWithFacebook = async () => {
     try {
       console.log("Tentative de connexion avec Facebook...");
       
@@ -99,18 +65,14 @@ export function useAuthMethods() {
         throw error;
       }
       
-      console.log("Données de redirection Facebook:", data);
+      console.log("Redirecting to Facebook for authentication...", data);
       
-      // OAuth returns a URL to redirect to, not a user object directly
-      // The user will be available after the OAuth flow completes
-      return { user: null, error: null };
     } catch (error: any) {
       console.error("Error logging in with Facebook:", error);
       toast({
         variant: "destructive",
         description: `Error: ${error.message}`
       });
-      return { user: null, error };
     }
   };
 

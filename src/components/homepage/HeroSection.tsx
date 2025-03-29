@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
 export const HeroSection = () => {
-  const { user, setShowLoginDialog, setAuthMode } = useSupabaseAuth();
+  const { user, signIn } = useSupabaseAuth();
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
 
@@ -25,11 +25,10 @@ export const HeroSection = () => {
     navigate('/library');
   };
 
-  // Wrapper function for login - Fixed signIn call
+  // Wrapper function for login
   const handleSignIn = () => {
     console.log("Opening login dialog from HeroSection");
-    setShowLoginDialog(true);
-    setAuthMode('login');
+    signIn('login');
   };
 
   return (

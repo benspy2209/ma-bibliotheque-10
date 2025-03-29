@@ -19,15 +19,14 @@ export function useAuthState() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("Setting up auth state listener...");
-    
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
-      console.log(`Auth state changed: ${event}`, newSession ? `User ID: ${newSession.user.id}` : 'No user');
-      
       const newUser = newSession?.user ?? null;
       setSession(newSession);
       setUser(newUser);
       setIsLoading(false);
+      
+      console.log(`Auth state changed: ${event}`, 
+        newUser ? `User ID: ${newUser.id}` : 'No user');
       
       // Only show toast notifications for actual auth state changes, not initial loading
       if (initialAuthCheckDone) {
