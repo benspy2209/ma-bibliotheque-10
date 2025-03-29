@@ -198,36 +198,6 @@ export type Database = {
         }
         Relationships: []
       }
-      system_logs: {
-        Row: {
-          created_at: string
-          id: string
-          level: string
-          message: string
-          path: string | null
-          timestamp: string
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          level: string
-          message: string
-          path?: string | null
-          timestamp?: string
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          level?: string
-          message?: string
-          path?: string | null
-          timestamp?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
     }
     Views: {
       books_complete_view: {
@@ -305,15 +275,6 @@ export type Database = {
       }
     }
     Functions: {
-      add_system_log: {
-        Args: {
-          p_level: string
-          p_message: string
-          p_user_id?: string
-          p_path?: string
-        }
-        Returns: string
-      }
       admin_update_username: {
         Args: {
           user_id: string
