@@ -13,8 +13,9 @@ import { DisplaySettingsForm } from '@/components/user/DisplaySettingsForm';
 import { ReadingGoalsSettingsForm } from '@/components/user/ReadingGoalsSettingsForm';
 import { DeleteAccountForm } from '@/components/user/DeleteAccountForm';
 import { BooksToBuyList } from '@/components/user/BooksToBuyList';
+import { AdminDashboard } from '@/components/user/AdminDashboard';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Shield } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const ProfileSettings = () => {
@@ -23,6 +24,7 @@ const ProfileSettings = () => {
   const [searchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'to-buy'; // Default to to-buy tab
   const isMobile = useIsMobile();
+  const isAdmin = user?.email === 'debruijneb@gmail.com';
 
   // Redirect to login page if not authenticated
   useEffect(() => {
@@ -63,6 +65,16 @@ const ProfileSettings = () => {
             <TabsTrigger value="display">Affichage</TabsTrigger>
             <TabsTrigger value="goals">Objectifs</TabsTrigger>
             <TabsTrigger value="account">Compte</TabsTrigger>
+            
+            {isAdmin && (
+              <TabsTrigger 
+                value="admin"
+                className="bg-primary/10 text-primary hover:bg-primary/20 data-[state=active]:bg-primary data-[state=active]:text-white"
+              >
+                <Shield className="h-4 w-4 mr-1" />
+                Administration
+              </TabsTrigger>
+            )}
           </TabsList>
           
           <TabsContent value="to-buy" className="space-y-8">
@@ -96,6 +108,12 @@ const ProfileSettings = () => {
           <TabsContent value="account" className="space-y-8">
             <DeleteAccountForm />
           </TabsContent>
+          
+          {isAdmin && (
+            <TabsContent value="admin" className="space-y-8">
+              <AdminDashboard />
+            </TabsContent>
+          )}
         </Tabs>
       </div>
       

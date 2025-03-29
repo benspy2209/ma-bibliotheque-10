@@ -10,7 +10,6 @@ import { useFilteredBooks } from '@/hooks/use-filtered-books';
 import { useYearSelection } from '@/hooks/use-year-selection';
 import { StatisticsHeader } from '@/components/statistics/StatisticsHeader';
 import { StatisticsContent } from '@/components/statistics/StatisticsContent';
-import { AdminSection } from '@/components/statistics/AdminSection';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 
@@ -143,8 +142,6 @@ export default function Statistics() {
               completedBooks={completedBooks}
               onYearSelect={setSelectedYear}
             />
-            
-            <AdminSection />
 
             <StatisticsContent
               completedBooks={completedBooks}
