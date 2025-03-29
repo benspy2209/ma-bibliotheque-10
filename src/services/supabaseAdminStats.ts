@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 interface UserBookStats {
@@ -128,22 +129,29 @@ export async function fetchAllUsersStatistics(): Promise<UserStatistics[]> {
  */
 export async function fetchSystemLogs(): Promise<SystemLog[]> {
   try {
-    const { data: authLogs, error } = await supabase
-      .from('auth_logs')
-      .select('*')
-      .order('timestamp', { ascending: false })
-      .limit(100);
+    // Utilisation de fetch pour récupérer les logs d'authentification directement
+    // plutôt que d'essayer d'accéder à une table qui n'est pas définie dans le schéma
+    const response = await fetch(`${supabase.supabaseUrl}/auth/v1/admin/logs`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${process.env.VITE_SUPABASE_SERVICE_ROLE_KEY || ''}`,
+        'apikey': process.env.VITE_SUPABASE_SERVICE_ROLE_KEY || '',
+        'Content-Type': 'application/json'
+      }
+    });
 
-    if (error) {
-      console.error('Erreur lors de la récupération des logs système:', error);
-      return [];
+    if (!response.ok) {
+      console.error('Erreur lors de la récupération des logs:', response.statusText);
+      return getSimulatedLogs();
     }
+
+    const authLogs = await response.json();
 
     if (!authLogs || authLogs.length === 0) {
       return getSimulatedLogs();
     }
 
-    const logs: SystemLog[] = authLogs.map(log => {
+    const logs: SystemLog[] = authLogs.map((log: any) => {
       let level: 'info' | 'warning' | 'error' | 'success' = 'info';
       
       if (log.error) {
@@ -167,7 +175,7 @@ export async function fetchSystemLogs(): Promise<SystemLog[]> {
           const parsed = JSON.parse(message);
           message = parsed.msg || parsed.message || message;
         } catch (e) {
-          message = message;
+          // Garde le message tel quel en cas d'erreur
         }
       }
 
