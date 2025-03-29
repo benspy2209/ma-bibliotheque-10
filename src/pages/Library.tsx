@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
@@ -119,13 +118,12 @@ export default function Library() {
                 <Button 
                   onClick={handleLoginClick} 
                   size="lg" 
-                  className="flex items-center gap-2 z-10 relative" // Added z-10 and relative
+                  className="flex items-center gap-2 z-10 relative"
                 >
                   <BookOpen className="h-5 w-5" />
                   Rejoindre l'aventure
                 </Button>
               </div>
-              <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
             </div>
           ) : (
             <>
@@ -166,14 +164,18 @@ export default function Library() {
                     Commencez par rechercher des livres ou ajoutez-les manuellement pour créer votre bibliothèque personnelle.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <Link to="/search" className="flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors">
-                      <Search className="h-4 w-4" />
-                      Rechercher des livres
-                    </Link>
-                    <Link to="/search" className="flex items-center justify-center gap-2 bg-secondary text-secondary-foreground px-4 py-2 rounded-md hover:bg-secondary/90 transition-colors">
-                      <BookPlus className="h-4 w-4" />
-                      Ajouter manuellement
-                    </Link>
+                    <Button asChild className="flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors">
+                      <Link to="/search">
+                        <Search className="h-4 w-4" />
+                        Rechercher des livres
+                      </Link>
+                    </Button>
+                    <Button asChild className="flex items-center justify-center gap-2 bg-secondary text-secondary-foreground px-4 py-2 rounded-md hover:bg-secondary/90 transition-colors">
+                      <Link to="/search">
+                        <BookPlus className="h-4 w-4" />
+                        Ajouter manuellement
+                      </Link>
+                    </Button>
                   </div>
                 </div>
               ) : (
@@ -199,6 +201,7 @@ export default function Library() {
         </div>
       </div>
       <Footer />
+      <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
     </div>
   );
-};
+}
