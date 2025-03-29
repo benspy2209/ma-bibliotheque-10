@@ -123,23 +123,67 @@ export async function fetchAllUsersStatistics(): Promise<UserStatistics[]> {
 }
 
 /**
- * Récupère les logs d'authentification depuis Supabase Auth Logs API
+ * Récupère les logs système depuis la table system_logs
  * Cette fonction extrait les logs pertinents et les formate pour l'affichage
  */
 export async function fetchSystemLogs(): Promise<SystemLog[]> {
   try {
-    // Constantes pour l'URL de Supabase - on utilise les valeurs du client supabase
-    const SUPABASE_URL = "https://kbmnsxakgyokifzoiajo.supabase.co";
-    // La clé de service role n'est pas disponible dans le navigateur, 
-    // nous utilisons donc directement les logs simulés pour éviter l'erreur
-    console.log("Tentative de récupération des logs système (simulation uniquement)");
-    
-    // Utilisation des logs simulés car l'accès à l'API Auth nécessite la clé de service
-    // qui n'est pas sécuritaire à exposer au frontend
-    return getSimulatedLogs();
+    // Récupérer les logs depuis la table system_logs
+    const { data, error } = await supabase
+      .from('system_logs')
+      .select('*')
+      .order('timestamp', { ascending: false })
+      .limit(100);
+
+    if (error) {
+      console.error('Erreur lors de la récupération des logs système:', error);
+      return getSimulatedLogs();
+    }
+
+    // Transformer les données en SystemLog
+    const logs: SystemLog[] = data.map(log => ({
+      id: log.id,
+      timestamp: log.timestamp,
+      level: log.level as 'info' | 'warning' | 'error' | 'success',
+      message: log.message,
+      user: log.user_id ? log.user_id : undefined,
+      path: log.path
+    }));
+
+    return logs.length > 0 ? logs : getSimulatedLogs();
   } catch (error) {
     console.error('Erreur lors de l\'appel aux logs système:', error);
     return getSimulatedLogs();
+  }
+}
+
+/**
+ * Ajoute un nouveau log système
+ * Cette fonction peut être utilisée pour enregistrer des événements importants
+ */
+export async function addSystemLog(
+  level: 'info' | 'warning' | 'error' | 'success',
+  message: string,
+  userId?: string,
+  path?: string
+): Promise<string | null> {
+  try {
+    const { data, error } = await supabase.rpc('add_system_log', {
+      p_level: level,
+      p_message: message, 
+      p_user_id: userId || null,
+      p_path: path || null
+    });
+
+    if (error) {
+      console.error('Erreur lors de l\'ajout du log système:', error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Erreur lors de l\'appel à la fonction d\'ajout de log:', error);
+    return null;
   }
 }
 
