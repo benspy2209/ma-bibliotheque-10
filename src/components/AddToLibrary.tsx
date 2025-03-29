@@ -64,6 +64,15 @@ export function AddToLibrary({
       
       console.log(`Statut du livre ${bookId} changé à: ${newStatus} - Cache invalidé`);
       
+      // Forcer le rechargement complet des données
+      setTimeout(async () => {
+        console.log("AddToLibrary: Rechargement forcé de tous les livres après changement de statut");
+        await queryClient.refetchQueries({
+          queryKey: ['books'],
+          type: 'all'
+        });
+      }, 200);
+      
       let toastMessage = "";
       if (newStatus === 'to-read' && !purchased) {
         toastMessage = "Livre ajouté à votre liste d'achats";

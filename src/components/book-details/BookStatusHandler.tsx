@@ -20,6 +20,7 @@ export function BookStatusHandler({ book, onStatusChange }: BookStatusHandlerPro
   
   const handleStatusChange = async (status: ReadingStatus) => {
     console.log("BookStatusHandler: Changement de statut du livre à", status);
+    console.log("BookStatusHandler: Données actuelles du livre:", book);
     
     // Appeler la fonction de changement de statut
     await onStatusChange(status);
@@ -48,6 +49,16 @@ export function BookStatusHandler({ book, onStatusChange }: BookStatusHandlerPro
         queryKey: ['readingGoals'],
         exact: false
       });
+      
+      // Recharger une deuxième fois après un court délai pour s'assurer que tout est à jour
+      setTimeout(async () => {
+        console.log("BookStatusHandler: Deuxième rechargement des données...");
+        await queryClient.refetchQueries({ 
+          queryKey: ['books'],
+          exact: false,
+          type: 'all'
+        });
+      }, 500);
       
       console.log("BookStatusHandler: Données rechargées après changement de statut");
     }, 300);

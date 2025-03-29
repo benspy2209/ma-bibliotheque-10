@@ -14,20 +14,28 @@ import {
   calculateTopAuthors,
   calculateTopGenres,
   calculateReadingTimeDistribution,
-  calculateAverageReadingTime,
-  calculatePurchasedAndToBuyBooks
+  calculateAverageReadingTime
 } from '@/utils/statistics-utils';
 
 export function useCalculatedStats(
   completedBooks: Book[],
   readingBooks: Book[],
   toReadBooks: Book[],
-  selectedYear: number | null
+  selectedYear: number | null,
+  purchasedBooks: number,
+  toBuyBooks: number
 ): CalculatedStats {
   const { readingSpeed } = useReadingSpeed();
   const { data: readingGoals } = useReadingGoals();
 
   return useMemo(() => {
+    console.log("useCalculatedStats: Calcul des statistiques...");
+    console.log("- Livres complétés:", completedBooks.length);
+    console.log("- Livres en cours:", readingBooks.length);
+    console.log("- Livres à lire:", toReadBooks.length);
+    console.log("- Livres achetés:", purchasedBooks);
+    console.log("- Livres à acheter:", toBuyBooks);
+
     const totalBooks = completedBooks.length;
     const totalPages = calculateTotalPages(completedBooks);
     const avgPagesPerBook = totalBooks > 0 ? Math.round(totalPages / totalBooks) : 0;
@@ -58,8 +66,6 @@ export function useCalculatedStats(
     
     const { distribution: readingTimeDistribution, hasData: hasReadingTimeData } = 
       calculateReadingTimeDistribution(completedBooks);
-      
-    const { purchasedBooks, toBuyBooks } = calculatePurchasedAndToBuyBooks(toReadBooks);
 
     return {
       totalBooks,
@@ -86,5 +92,5 @@ export function useCalculatedStats(
       purchasedBooks,
       toBuyBooks
     };
-  }, [completedBooks, readingBooks, toReadBooks, readingGoals, readingSpeed]);
+  }, [completedBooks, readingBooks, toReadBooks, readingGoals, readingSpeed, purchasedBooks, toBuyBooks]);
 }

@@ -18,6 +18,8 @@ interface StatisticsContentProps {
   toReadBooks: Book[];
   selectedYear: number | null;
   allCompletedBooks: Book[];
+  purchasedBooks: number;
+  toBuyBooks: number;
 }
 
 export function StatisticsContent({
@@ -25,7 +27,9 @@ export function StatisticsContent({
   readingBooks,
   toReadBooks,
   selectedYear,
-  allCompletedBooks
+  allCompletedBooks,
+  purchasedBooks,
+  toBuyBooks
 }: StatisticsContentProps) {
   const isMobile = useIsMobile();
 
@@ -36,6 +40,8 @@ export function StatisticsContent({
         readingBooks={readingBooks}
         toReadBooks={toReadBooks}
         selectedYear={selectedYear}
+        purchasedBooks={purchasedBooks}
+        toBuyBooks={toBuyBooks}
       >
         {(stats) => (
           <>

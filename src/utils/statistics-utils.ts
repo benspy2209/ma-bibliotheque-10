@@ -1,3 +1,4 @@
+
 import { Book } from '@/types/book';
 import { MonthlyData } from '@/types/statistics';
 import { format, differenceInDays, isThisMonth, parseISO } from 'date-fns';
@@ -194,9 +195,18 @@ export function calculateAverageReadingTime(books: Book[]): string {
   return avgReadingTime.toFixed(1);
 }
 
+// Fonction corrigée pour calculer correctement les livres achetés et à acheter
 export function calculatePurchasedAndToBuyBooks(books: Book[]): { purchasedBooks: number, toBuyBooks: number } {
-  const toBuyBooks = books.filter(book => !book.purchased && (!book.status || book.status === 'to-read')).length;
+  // Seuls les livres "à lire" peuvent être achetés ou à acheter
+  const toReadBooks = books.filter(book => !book.status || book.status === 'to-read');
+  
+  // Compter les livres à acheter (non achetés et status "à lire")
+  const toBuyBooks = toReadBooks.filter(book => book.purchased === false).length;
+  
+  // Compter les livres achetés (explicitement marqués comme achetés)
   const purchasedBooks = books.filter(book => book.purchased === true).length;
+  
+  console.log(`Calcul des livres - Total: ${books.length}, À lire: ${toReadBooks.length}, Achetés: ${purchasedBooks}, À acheter: ${toBuyBooks}`);
   
   return { purchasedBooks, toBuyBooks };
 }

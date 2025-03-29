@@ -7,14 +7,14 @@ export function useAvailableYears(books: Book[], currentYear: number) {
   // Ajout d'un forceUpdate pour garantir que le hook recalcule même si les références ne changent pas
   const [forceUpdate, setForceUpdate] = useState(Date.now());
   
-  // Force un recalcul quand books change ou toutes les 3 secondes
+  // Force un recalcul quand books change ou toutes les 2 secondes (réduit de 3s à 2s)
   useEffect(() => {
     console.log("useAvailableYears: Détection de changement dans les livres");
     setForceUpdate(Date.now());
     
     const interval = setInterval(() => {
       setForceUpdate(Date.now());
-    }, 3000);
+    }, 2000);
     
     return () => clearInterval(interval);
   }, [books, books.length]);

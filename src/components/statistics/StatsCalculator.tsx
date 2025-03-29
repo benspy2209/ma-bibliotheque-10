@@ -7,9 +7,11 @@ export function StatsCalculator({
   readingBooks, 
   toReadBooks,
   selectedYear,
+  purchasedBooks,
+  toBuyBooks,
   children 
 }: StatsCalculatorProps) {
-  const stats = useCalculatedStats(completedBooks, readingBooks, toReadBooks, selectedYear);
+  const stats = useCalculatedStats(completedBooks, readingBooks, toReadBooks, selectedYear, purchasedBooks, toBuyBooks);
   return <>{children(stats)}</>;
 }
 

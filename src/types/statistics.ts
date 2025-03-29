@@ -39,5 +39,7 @@ export interface StatsCalculatorProps {
   readingBooks: Book[];
   toReadBooks: Book[];
   selectedYear: number | null;
+  purchasedBooks: number;
+  toBuyBooks: number;
   children: (stats: CalculatedStats) => React.ReactNode;
 }

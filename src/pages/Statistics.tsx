@@ -11,17 +11,25 @@ import { useYearSelection } from '@/hooks/use-year-selection';
 import { StatisticsHeader } from '@/components/statistics/StatisticsHeader';
 import { StatisticsContent } from '@/components/statistics/StatisticsContent';
 import { AdminSection } from '@/components/statistics/AdminSection';
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
 
 export default function Statistics() {
   const currentYear = new Date().getFullYear();
 
   // Force component re-render when route is accessed
   const [key, setKey] = useState(Date.now());
+  const [refreshing, setRefreshing] = useState(false);
   
   const forceRefresh = useCallback(() => {
     console.log("Statistics: Forçage du rafraîchissement...");
+    setRefreshing(true);
     setKey(Date.now());
-    refetchBooks();
+    refetchBooks().then(() => {
+      setTimeout(() => {
+        setRefreshing(false);
+      }, 1000);
+    });
   }, []);
   
   useEffect(() => {
@@ -39,11 +47,11 @@ export default function Statistics() {
     
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
-    // Rafraîchir régulièrement les données (toutes les 15 secondes)
+    // Rafraîchir régulièrement les données (toutes les 10 secondes)
     const intervalId = setInterval(() => {
       console.log("Statistics: Rafraîchissement périodique");
       forceRefresh();
-    }, 15000);
+    }, 10000);
     
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -61,7 +69,7 @@ export default function Statistics() {
   });
 
   console.log('Statistics: Livres chargés:', books.length);
-  console.log('Statistics: Statuts des livres:', books.map(book => ({ id: book.id, title: book.title, status: book.status })));
+  console.log('Statistics: Statuts des livres:', books.map(book => ({ id: book.id, title: book.title, status: book.status, purchased: book.purchased })));
 
   // Get available years and completed books
   const { availableYears, allCompletedBooks } = useAvailableYears(books, currentYear);
@@ -76,7 +84,7 @@ export default function Statistics() {
   const { selectedYear, setSelectedYear } = useYearSelection(allCompletedBooks, currentYear);
   
   // Filter books based on selected year and status
-  const { completedBooks, readingBooks, toReadBooks } = useFilteredBooks(
+  const { completedBooks, readingBooks, toReadBooks, purchasedBooks, toBuyBooks } = useFilteredBooks(
     books, 
     selectedYear, 
     allCompletedBooks
@@ -87,6 +95,15 @@ export default function Statistics() {
   completedBooks.forEach((book, index) => {
     console.log(`Livre complété pour ${selectedYear} #${index + 1}:`, book.title);
   });
+  
+  // Vérifier que le nombre total de livres est correct
+  console.log("Statistics: Comptage des livres...");
+  console.log(`- Total livres: ${books.length}`);
+  console.log(`- Livres lus: ${allCompletedBooks.length}`);
+  console.log(`- Livres en cours: ${readingBooks.length}`);
+  console.log(`- Livres à lire: ${toReadBooks.length}`);
+  console.log(`- Livres achetés: ${purchasedBooks}`);
+  console.log(`- Livres à acheter: ${toBuyBooks}`);
 
   return (
     <>
@@ -97,12 +114,22 @@ export default function Statistics() {
         <NavBar />
         <div className="px-3 sm:px-4 lg:px-6 py-6 sm:py-8 flex-grow overflow-x-hidden">
           <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
-            <button 
-              onClick={forceRefresh} 
-              className="px-3 py-1 text-xs bg-secondary text-secondary-foreground rounded-md mb-2"
-            >
-              Rafraîchir les statistiques
-            </button>
+            <div className="flex items-center justify-between">
+              <Button 
+                onClick={forceRefresh} 
+                variant="secondary"
+                size="sm"
+                className="px-3 py-1 text-xs flex items-center gap-1"
+                disabled={refreshing || isLoading}
+              >
+                <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+                {refreshing ? 'Rafraîchissement...' : 'Rafraîchir les statistiques'}
+              </Button>
+              
+              <div className="text-sm text-muted-foreground">
+                {isLoading ? 'Chargement des données...' : `${books.length} livres au total`}
+              </div>
+            </div>
             
             <StatisticsHeader
               selectedYear={selectedYear}
@@ -119,6 +146,8 @@ export default function Statistics() {
               toReadBooks={toReadBooks}
               selectedYear={selectedYear}
               allCompletedBooks={allCompletedBooks}
+              purchasedBooks={purchasedBooks}
+              toBuyBooks={toBuyBooks}
             />
           </div>
         </div>

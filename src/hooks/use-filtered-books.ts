@@ -10,6 +10,7 @@ export function useFilteredBooks(books: Book[], selectedYear: number | null, all
   // Force un recalcul lorsque les livres ou les livres complétés changent
   useEffect(() => {
     console.log("useFilteredBooks: Détection de changement dans books ou allCompletedBooks");
+    console.log(`useFilteredBooks: Nombre total de livres: ${books.length}, complétés: ${allCompletedBooks.length}`);
     setUpdateCounter(prev => prev + 1);
   }, [books, allCompletedBooks, books.length, allCompletedBooks.length]);
   
@@ -17,7 +18,7 @@ export function useFilteredBooks(books: Book[], selectedYear: number | null, all
   useEffect(() => {
     const interval = setInterval(() => {
       setUpdateCounter(prev => prev + 1);
-    }, 5000); // Toutes les 5 secondes
+    }, 3000); // Toutes les 3 secondes (réduit de 5s à 3s pour plus de réactivité)
     
     return () => clearInterval(interval);
   }, []);
@@ -37,27 +38,51 @@ export function useFilteredBooks(books: Book[], selectedYear: number | null, all
       if (!book.completionDate) return false;
       const completionYear = getYear(new Date(book.completionDate));
       const matches = completionYear === selectedYear;
+      if (matches) {
+        console.log(`Livre correspondant à l'année ${selectedYear}:`, book.title);
+      }
       return matches;
     });
   }, [selectedYear, allCompletedBooks, updateCounter]);
   
   const readingBooks = useMemo(() => {
     console.log("useFilteredBooks: Recalcul des livres en cours de lecture");
-    return books.filter((book): book is Book =>
+    const result = books.filter((book): book is Book =>
       book !== null && book.status === 'reading'
     );
+    console.log(`Livres en cours de lecture trouvés: ${result.length}`);
+    return result;
   }, [books, updateCounter]);
 
   const toReadBooks = useMemo(() => {
     console.log("useFilteredBooks: Recalcul des livres à lire");
-    return books.filter((book): book is Book =>
+    const result = books.filter((book): book is Book =>
       book !== null && (!book.status || book.status === 'to-read')
     );
+    console.log(`Livres à lire trouvés: ${result.length}`);
+    return result;
+  }, [books, updateCounter]);
+
+  // Comptage explicite des livres achetés et à acheter
+  const { purchasedBooks, toBuyBooks } = useMemo(() => {
+    // Tous les livres avec purchased=true, indépendamment du statut
+    const purchased = books.filter(book => book.purchased === true).length;
+    
+    // Uniquement les livres "à lire" qui ne sont pas achetés (purchased=false explicitement)
+    const toBuy = books.filter(book => 
+      (!book.status || book.status === 'to-read') && book.purchased === false
+    ).length;
+    
+    console.log(`useFilteredBooks: Livres achetés: ${purchased}, Livres à acheter: ${toBuy}`);
+    
+    return { purchasedBooks: purchased, toBuyBooks: toBuy };
   }, [books, updateCounter]);
 
   return {
     completedBooks,
     readingBooks,
-    toReadBooks
+    toReadBooks,
+    purchasedBooks,
+    toBuyBooks
   };
 }
