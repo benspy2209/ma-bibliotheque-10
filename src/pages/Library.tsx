@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Book } from '@/types/book';
 import { BookDetails } from '@/components/BookDetails';
@@ -117,7 +118,7 @@ export default function Library() {
                 <Button 
                   onClick={handleLoginClick} 
                   size="lg" 
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 z-10 relative" // Added z-10 and relative
                 >
                   <BookOpen className="h-5 w-5" />
                   Rejoindre l'aventure

@@ -1,3 +1,4 @@
+
 import { useState, useRef } from 'react';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { useToast } from '@/hooks/use-toast';
@@ -169,7 +170,7 @@ export const SearchBar = ({
           <div className="flex justify-center">
             <Button 
               onClick={handleJoinAdventure}
-              className="relative z-10 font-semibold text-base transition-all duration-300 shadow-md hover:shadow-lg pulse-effect flex items-center gap-2 bg-[#CC4153] text-white hover:bg-[#b33646]"
+              className="relative z-10 font-semibold text-base transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 bg-[#CC4153] text-white hover:bg-[#b33646]"
               variant="pulse"
             >
               <BookOpen className="h-5 w-5" /> Rejoindre l'aventure

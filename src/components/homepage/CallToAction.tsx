@@ -28,16 +28,16 @@ export const CallToAction = () => {
               size="lg" 
               onClick={handleSignUp}
               variant="pulse"
-              className="flex items-center gap-2 font-semibold text-base"
+              className="flex items-center gap-2 font-semibold text-base relative z-10" // Added relative z-10
             >
               <LogIn className="h-5 w-5" /> Créer un compte gratuitement
             </Button>
           ) : (
-            <Button size="lg" asChild>
+            <Button size="lg" asChild className="relative z-10"> {/* Added relative z-10 */}
               <Link to="/library">Accéder à ma bibliothèque</Link>
             </Button>
           )}
-          <Button variant="outline" size="lg" asChild className="border-2 border-[#222] dark:border-white">
+          <Button variant="outline" size="lg" asChild className="border-2 border-[#222] dark:border-white relative z-10"> {/* Added relative z-10 */}
             <Link to="/features">Explorer les fonctionnalités</Link>
           </Button>
         </div>

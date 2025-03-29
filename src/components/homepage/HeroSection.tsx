@@ -58,7 +58,7 @@ export const HeroSection = () => {
                     size="lg" 
                     onClick={handleLoginClick}
                     variant="pulse"
-                    className="font-semibold text-base flex items-center gap-2"
+                    className="font-semibold text-base flex items-center gap-2 relative z-10" // Added relative z-10
                   >
                     <LogIn className="h-5 w-5" /> Commencer l'aventure
                   </Button>
@@ -66,7 +66,7 @@ export const HeroSection = () => {
                     variant="outline" 
                     size="lg" 
                     asChild
-                    className="border-2 border-[#222] dark:border-white"
+                    className="border-2 border-[#222] dark:border-white relative z-10" // Added relative z-10
                   >
                     <Link to="/features">Découvrir les fonctionnalités</Link>
                   </Button>

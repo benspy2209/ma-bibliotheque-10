@@ -18,6 +18,12 @@ body {
   position: relative;
 }
 
+/* Fix for button clickability on mobile */
+button, a, [role="button"] {
+  position: relative;
+  z-index: 1;
+}
+
 /* Landscape mode adjustments */
 @media (orientation: landscape) {
   /* Adjustments for landscape mode on mobile */
@@ -110,6 +116,12 @@ body {
     overflow-y: auto !important;
   }
   
+  /* Fix for mobile buttons to ensure they're clickable */
+  button, a, [role="button"] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   /* Styles pour les TabsList sur mobile - NOUVEAU */
   [role="tabslist"], .TabsList {
     display: flex !important;
