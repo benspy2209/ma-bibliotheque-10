@@ -84,7 +84,13 @@ export default function Statistics() {
   const { selectedYear, setSelectedYear } = useYearSelection(allCompletedBooks, currentYear);
   
   // Filter books based on selected year and status
-  const { completedBooks, readingBooks, toReadBooks, purchasedBooks, toBuyBooks } = useFilteredBooks(
+  const { 
+    completedBooks, 
+    readingBooks, 
+    toReadBooks, 
+    purchasedBooksCount, 
+    toBuyBooksCount 
+  } = useFilteredBooks(
     books, 
     selectedYear, 
     allCompletedBooks
@@ -102,8 +108,8 @@ export default function Statistics() {
   console.log(`- Livres lus: ${allCompletedBooks.length}`);
   console.log(`- Livres en cours: ${readingBooks.length}`);
   console.log(`- Livres à lire: ${toReadBooks.length}`);
-  console.log(`- Livres achetés: ${purchasedBooks}`);
-  console.log(`- Livres à acheter: ${toBuyBooks}`);
+  console.log(`- Livres achetés: ${purchasedBooksCount}`);
+  console.log(`- Livres à acheter: ${toBuyBooksCount}`);
 
   return (
     <>
@@ -146,8 +152,8 @@ export default function Statistics() {
               toReadBooks={toReadBooks}
               selectedYear={selectedYear}
               allCompletedBooks={allCompletedBooks}
-              purchasedBooks={purchasedBooks}
-              toBuyBooks={toBuyBooks}
+              purchasedBooks={purchasedBooksCount}
+              toBuyBooks={toBuyBooksCount}
             />
           </div>
         </div>

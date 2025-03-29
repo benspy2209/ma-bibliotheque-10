@@ -78,6 +78,8 @@ export function useFilteredBooks(books: Book[], selectedYear: number | null, all
     readingBooks,
     toReadBooks,
     purchasedBooks,
-    toBuyBooks
+    toBuyBooks,
+    purchasedBooksCount: purchasedBooks.length,
+    toBuyBooksCount: toBuyBooks.length
   };
 }
