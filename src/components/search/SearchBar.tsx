@@ -1,8 +1,8 @@
+
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, X } from "lucide-react";
-import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import {
   Select,
@@ -11,45 +11,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useDebounce } from "@/hooks/use-debounce";
 import { Label } from "@/components/ui/label";
 import { addSystemLog } from '@/services/supabaseAdminStats';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
 interface SearchBarProps {
   className?: string;
+  placeholder?: string;
+  onSearch?: (query: string, searchType: string, language: string) => Promise<void>;
+  showAllResults?: () => void;
+  hasMoreResults?: boolean;
+  totalBooks?: number;
 }
 
 export function SearchBar({
   className,
+  placeholder,
+  onSearch,
+  showAllResults,
+  hasMoreResults,
+  totalBooks
 }: SearchBarProps) {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const [query, setQuery] = useState(searchParams.get("q") || "");
-  const [searchType, setSearchType] = useState(searchParams.get("type") || "books");
+  const [query, setQuery] = useState("");
+  const [searchType, setSearchType] = useState("books");
   const [isLoading, setIsLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
-  const debouncedQuery = useDebounce(query, 300);
   const { user } = useSupabaseAuth();
 
-  useEffect(() => {
-    setQuery(searchParams.get("q") || "");
-    setSearchType(searchParams.get("type") || "books");
-  }, [searchParams]);
-
-  useEffect(() => {
-    if (debouncedQuery) {
-      handleSearch();
-    }
-  }, [debouncedQuery, searchType]);
-
-  const createQueryString = (name: string, value: string) => {
-    const params = new URLSearchParams(searchParams);
-    params.set(name, value);
-    return params.toString();
-  };
-
   const handleSearch = async () => {
+    if (!query.trim()) return;
+    
     setIsLoading(true);
     setSearchError(null);
     
@@ -62,7 +53,10 @@ export function SearchBar({
         '/search'
       );
       
-      router.push("/search?" + createQueryString("q", query) + "&" + createQueryString("type", searchType));
+      // If onSearch prop exists, call it
+      if (onSearch) {
+        await onSearch(query, searchType, 'fr'); // Default language to French
+      }
     } catch (error) {
       console.error("Search failed:", error);
       setSearchError("An error occurred while searching. Please try again.");
@@ -96,7 +90,7 @@ export function SearchBar({
       <div className="relative flex-1">
         <Input
           type="search"
-          placeholder={`Rechercher des ${searchType}`}
+          placeholder={placeholder || `Rechercher des ${searchType}`}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="pr-10"
@@ -113,12 +107,16 @@ export function SearchBar({
         )}
         <Button
           type="submit"
-          isLoading={isLoading}
+          disabled={isLoading}
           className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full p-1.5"
           onClick={handleSearch}
           aria-label="Search"
         >
-          <Search className="h-4 w-4" />
+          {isLoading ? (
+            <span className="h-4 w-4 animate-spin">⏳</span>
+          ) : (
+            <Search className="h-4 w-4" />
+          )}
         </Button>
       </div>
     </div>

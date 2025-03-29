@@ -21,10 +21,14 @@ export function SearchContainer({
   searchLimitReached,
   user
 }: SearchContainerProps) {
+  const handleSearch = async (query: string, searchType: string, language: string) => {
+    await onSearch(query as SearchType, searchType as SearchType, language as LanguageFilter);
+  };
+
   return (
     <div className="mb-8 sm:mb-12">
       <SearchBar 
-        onSearch={onSearch}
+        onSearch={handleSearch}
         placeholder="Rechercher un livre, un auteur..."
         showAllResults={showAllResults}
         hasMoreResults={hasMoreResults}

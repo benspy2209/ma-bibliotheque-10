@@ -34,38 +34,58 @@ export function useSupabaseAuth() {
 
   // Enhanced auth methods with logging
   const enhancedSignIn = async (email: string, password: string) => {
-    const result = await signIn(email, password);
-    if (result.session) {
-      addSystemLog('success', 'Connexion réussie', result.session.user.id, '/auth/login');
-    } else if (result.error) {
-      addSystemLog('error', `Échec de connexion: ${result.error.message}`, null, '/auth/login');
+    try {
+      const result = await signIn(email, password);
+      if (result.user) {
+        addSystemLog('success', 'Connexion réussie', result.user.id, '/auth/login');
+      } else if (result.error) {
+        addSystemLog('error', `Échec de connexion: ${result.error.message}`, null, '/auth/login');
+      }
+      return result;
+    } catch (error) {
+      console.error("Sign in error:", error);
+      return { user: null, error: error as Error };
     }
-    return result;
   };
 
   const enhancedSignOut = async () => {
-    const userId = user?.id;
-    const result = await signOut();
-    if (!result.error && userId) {
-      addSystemLog('info', 'Déconnexion réussie', userId, '/auth/logout');
+    try {
+      const userId = user?.id;
+      await signOut();
+      if (userId) {
+        addSystemLog('info', 'Déconnexion réussie', userId, '/auth/logout');
+      }
+      return { error: null };
+    } catch (error) {
+      console.error("Sign out error:", error);
+      return { error: error as Error };
     }
-    return result;
   };
 
   const enhancedSignInWithGoogle = async () => {
-    const result = await signInWithGoogle();
-    if (result.error) {
-      addSystemLog('error', `Échec de connexion Google: ${result.error.message}`, null, '/auth/google-login');
+    try {
+      const result = await signInWithGoogle();
+      if (result.error) {
+        addSystemLog('error', `Échec de connexion Google: ${result.error.message}`, null, '/auth/google-login');
+      }
+      return result;
+    } catch (error) {
+      console.error("Google sign in error:", error);
+      return { error: error as Error };
     }
-    return result;
   };
 
   const enhancedSignInWithFacebook = async () => {
-    const result = await signInWithFacebook();
-    if (result.error) {
-      addSystemLog('error', `Échec de connexion Facebook: ${result.error.message}`, null, '/auth/facebook-login');
+    try {
+      const result = await signInWithFacebook();
+      if (result.error) {
+        addSystemLog('error', `Échec de connexion Facebook: ${result.error.message}`, null, '/auth/facebook-login');
+      }
+      return result;
+    } catch (error) {
+      console.error("Facebook sign in error:", error);
+      return { error: error as Error };
     }
-    return result;
   };
 
   // Expose a unified API that matches the original hook but with enhanced methods
