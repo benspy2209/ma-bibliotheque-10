@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { Book } from '@/types/book';
 import { getYear } from 'date-fns';
@@ -53,12 +54,24 @@ export function useFilteredBooks(books: Book[], selectedYear: number | null, all
     console.log(`Livres à lire trouvés: ${result.length}`);
     return result;
   }, [books, updateCounter]);
+  
+  const purchasedBooks = useMemo(() => {
+    const result = toReadBooks.filter(book => book.purchased);
+    console.log(`Livres achetés (à lire) trouvés: ${result.length}`);
+    return result;
+  }, [toReadBooks, updateCounter]);
+  
+  const toBuyBooks = useMemo(() => {
+    const result = toReadBooks.filter(book => !book.purchased);
+    console.log(`Livres à acheter trouvés: ${result.length}`);
+    return result;
+  }, [toReadBooks, updateCounter]);
 
   return {
     completedBooks,
     readingBooks,
     toReadBooks,
-    purchasedBooks: 0,
-    toBuyBooks: 0
+    purchasedBooks: purchasedBooks.length,
+    toBuyBooks: toBuyBooks.length
   };
 }
