@@ -36,9 +36,9 @@ export function useSupabaseAuth() {
   const enhancedSignIn = async (email: string, password: string) => {
     try {
       const result = await signIn(email, password);
-      if (result.user) {
+      if (result && result.user) {
         addSystemLog('success', 'Connexion réussie', result.user.id, '/auth/login');
-      } else if (result.error) {
+      } else if (result && result.error) {
         addSystemLog('error', `Échec de connexion: ${result.error.message}`, null, '/auth/login');
       }
       return result;
@@ -51,7 +51,7 @@ export function useSupabaseAuth() {
   const enhancedSignOut = async () => {
     try {
       const userId = user?.id;
-      await signOut();
+      const result = await signOut();
       if (userId) {
         addSystemLog('info', 'Déconnexion réussie', userId, '/auth/logout');
       }
@@ -65,7 +65,7 @@ export function useSupabaseAuth() {
   const enhancedSignInWithGoogle = async () => {
     try {
       const result = await signInWithGoogle();
-      if (result.error) {
+      if (result && result.error) {
         addSystemLog('error', `Échec de connexion Google: ${result.error.message}`, null, '/auth/google-login');
       }
       return result;
@@ -78,7 +78,7 @@ export function useSupabaseAuth() {
   const enhancedSignInWithFacebook = async () => {
     try {
       const result = await signInWithFacebook();
-      if (result.error) {
+      if (result && result.error) {
         addSystemLog('error', `Échec de connexion Facebook: ${result.error.message}`, null, '/auth/facebook-login');
       }
       return result;

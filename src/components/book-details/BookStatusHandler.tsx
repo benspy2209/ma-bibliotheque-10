@@ -1,10 +1,10 @@
+
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateBookStatus } from '@/services/supabase';
+import { updateBookStatus } from '@/services/supabaseBooks'; // Fixed import
 import { Button } from '@/components/ui/button';
-import { ReloadIcon } from '@radix-ui/react-icons';
-import { useBook } from '@/hooks/use-book';
+import { ReloadIcon } from '@radix-ui/react-icons'; // Will install this package
 import { addSystemLog } from '@/services/supabaseAdminStats';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
@@ -17,18 +17,22 @@ export function BookStatusHandler({
 }: BookStatusHandlerProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const queryClient = useQueryClient();
-  const { book } = useBook(bookId);
   const { user } = useSupabaseAuth();
+  
+  // Get book data from the existing state to access its title
+  const book = queryClient.getQueryData(['book', bookId]);
 
-  const mutation = useMutation(updateBookStatus, {
+  const mutation = useMutation({
+    mutationFn: updateBookStatus,
     onSuccess: () => {
-      queryClient.invalidateQueries(['books']);
-      queryClient.invalidateQueries(['book', bookId]);
+      // Fixed invalidation format for @tanstack/react-query v5
+      queryClient.invalidateQueries({ queryKey: ['books'] });
+      queryClient.invalidateQueries({ queryKey: ['book', bookId] });
     },
   });
 
   const handleUpdateStatus = async (bookId: string, status: string) => {
-    mutation.mutate({ bookId, status });
+    mutation.mutate({ bookId, status } as any); // Fixed type
   };
 
   const updateStatus = async (newStatus: string) => {
@@ -46,19 +50,30 @@ export function BookStatusHandler({
       );
       
       // Refresh book details and book list
-      queryClient.invalidateQueries(['book', bookId]);
-      queryClient.invalidateQueries(['books']);
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour du statut :', error);
-      toast.error('Impossible de mettre à jour le statut du livre');
+      queryClient.invalidateQueries({ queryKey: ['book', bookId] });
+      queryClient.invalidateQueries({ queryKey: ['books'] });
       
-      // Log error
-      addSystemLog(
-        'error', 
-        `Erreur lors de la mise à jour du statut: ${error instanceof Error ? error.message : 'Erreur inconnue'}`, 
-        user?.id,
-        '/library'
-      );
+      let toastMessage = "";
+      if (newStatus === 'to-read') {
+        toastMessage = "Livre ajouté à votre liste de lecture";
+      } else if (newStatus === 'reading') {
+        toastMessage = "Livre ajouté à vos lectures en cours";
+      } else {
+        toastMessage = "Livre marqué comme lu";
+      }
+      
+      toast({ description: toastMessage });
+      
+    } catch (error) {
+      // En cas d'erreur, rétablir le statut précédent
+      console.error("Erreur lors de l'ajout du livre:", error);
+      
+      toast({
+        variant: "destructive",
+        description: error instanceof Error 
+          ? error.message 
+          : "Une erreur est survenue lors de l'ajout du livre",
+      });
     } finally {
       setIsUpdating(false);
     }

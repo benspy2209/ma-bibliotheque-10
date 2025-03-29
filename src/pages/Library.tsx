@@ -31,7 +31,7 @@ export default function Library() {
   const { toast } = useToast();
   const { sortBooks } = useBookSort();
   const { viewMode, toggleView } = useViewPreference();
-  const { user, signIn, showLoginDialog, setShowLoginDialog } = useSupabaseAuth();
+  const { user, signIn, showLoginDialog, setShowLoginDialog, setAuthMode } = useSupabaseAuth();
   const { updateLinks } = useUpdateAmazonLinks();
   const isMobile = useIsMobile();
 
@@ -98,7 +98,8 @@ export default function Library() {
 
   const handleLoginClick = () => {
     console.log("Join adventure button clicked");
-    signIn('signup');
+    setShowLoginDialog(true);
+    setAuthMode('signup');
   };
 
   return (
