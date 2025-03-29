@@ -79,6 +79,18 @@ export const BookGrid = ({ books, onBookClick }: BookGridProps) => {
                   target.src = '/placeholder.svg';
                 }}
               />
+              
+              {/* Badge Amazon flottant sur la couverture */}
+              <a 
+                href={amazonUrl}
+                onClick={handleAmazonClick}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute top-2 right-2 badge flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white rounded-full"
+              >
+                <ShoppingCart className="size-3" />
+                Amazon
+              </a>
             </div>
             <div className="flex flex-col flex-grow p-3 space-y-2">
               <h3 className="font-semibold text-sm line-clamp-1">{book.title}</h3>
@@ -108,42 +120,14 @@ export const BookGrid = ({ books, onBookClick }: BookGridProps) => {
                 )}
                 
                 {(!book.purchased && (!book.status || book.status === 'to-read')) && (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Badge 
-                        variant="destructive" 
-                        className="flex items-center gap-1 w-fit cursor-pointer hover:bg-red-600 transition-colors border-0"
-                      >
-                        <ShoppingCart className="size-3" />
-                        À acheter
-                      </Badge>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-2">
-                      <a 
-                        href={amazonUrl}
-                        onClick={handleAmazonClick}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-sm bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded"
-                      >
-                        <ShoppingCart className="h-4 w-4" />
-                        Acheter sur Amazon
-                      </a>
-                    </PopoverContent>
-                  </Popover>
+                  <Badge 
+                    variant="destructive" 
+                    className="flex items-center gap-1 w-fit border-0"
+                  >
+                    <ShoppingCart className="size-3" />
+                    À acheter
+                  </Badge>
                 )}
-                
-                {/* Amazon direct badge - maintenant pour TOUS les livres */}
-                <a 
-                  href={amazonUrl}
-                  onClick={handleAmazonClick}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="badge block w-fit flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white rounded-full"
-                >
-                  <ShoppingCart className="size-3" />
-                  Amazon
-                </a>
                 
                 {book.status === 'completed' && book.completionDate && (
                   <Badge 
