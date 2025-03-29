@@ -56,22 +56,28 @@ export function useFilteredBooks(books: Book[], selectedYear: number | null, all
   }, [books, updateCounter]);
   
   const purchasedBooks = useMemo(() => {
-    const result = toReadBooks.filter(book => book.purchased);
-    console.log(`Livres achetés (à lire) trouvés: ${result.length}`);
+    // Include books explicitly marked as purchased OR completed books (which are implicitly purchased)
+    const result = books.filter(book => 
+      book.purchased || book.status === 'completed' || book.status === 'reading'
+    );
+    console.log(`Livres achetés trouvés: ${result.length}`);
     return result;
-  }, [toReadBooks, updateCounter]);
+  }, [books, updateCounter]);
   
   const toBuyBooks = useMemo(() => {
-    const result = toReadBooks.filter(book => !book.purchased);
+    // Only include books that are neither purchased nor completed/reading
+    const result = books.filter(book => 
+      !book.purchased && book.status !== 'completed' && book.status !== 'reading'
+    );
     console.log(`Livres à acheter trouvés: ${result.length}`);
     return result;
-  }, [toReadBooks, updateCounter]);
+  }, [books, updateCounter]);
 
   return {
     completedBooks,
     readingBooks,
     toReadBooks,
-    purchasedBooks: purchasedBooks.length,
-    toBuyBooks: toBuyBooks.length
+    purchasedBooks,
+    toBuyBooks
   };
 }

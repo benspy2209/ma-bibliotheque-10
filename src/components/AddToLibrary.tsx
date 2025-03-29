@@ -1,6 +1,5 @@
 
 import { ReadingStatus } from "@/types/book";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +11,6 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "@/hooks/use-theme";
-import { Badge } from "@/components/ui/badge";
 
 interface AddToLibraryProps {
   onStatusChange: (status: ReadingStatus) => void;
@@ -49,8 +47,11 @@ export function AddToLibrary({
       // Appeler la fonction de changement de statut
       await onStatusChange(newStatus);
       
+      // Si le statut est 'completed' ou 'reading', on considère automatiquement le livre comme acheté
+      const autoPurchased = newStatus === 'completed' || newStatus === 'reading' || purchased;
+      
       // For non-purchased books, set the purchased flag
-      if (!purchased) {
+      if (!autoPurchased) {
         // This is handled in the BookCard component where the book's purchased flag is set to false
         console.log("Setting book as not purchased");
       }

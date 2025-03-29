@@ -29,14 +29,14 @@ export const BookSections = ({
 }: BookSectionsProps) => {
   const isMobile = useIsMobile();
   
-  // Création de listes qui ne sont pas exclusives, un livre peut être dans plusieurs catégories
+  // Liste des livres par catégorie
   const completedBooks = books.filter(book => book.status === 'completed');
   const readingBooks = books.filter(book => book.status === 'reading');
   const toReadBooks = books.filter(book => !book.status || book.status === 'to-read');
   
-  // Filtres d'achat
-  const purchasedBooks = toReadBooks.filter(book => book.purchased);
-  const toBuyBooks = toReadBooks.filter(book => !book.purchased);
+  // Considérer les livres complétés et en cours de lecture comme achetés
+  const purchasedBooks = books.filter(book => book.purchased || book.status === 'completed' || book.status === 'reading');
+  const toBuyBooks = books.filter(book => !book.purchased && book.status !== 'completed' && book.status !== 'reading');
   
   const [activeTab, setActiveTab] = useState('all');
 
@@ -140,7 +140,7 @@ export const BookSections = ({
       <TabsContent value="purchased">
         {purchasedBooks.length === 0 ? (
           <p className="text-center text-gray-600 mt-8">
-            Aucun livre acheté dans votre liste de lecture.
+            Aucun livre acheté dans votre bibliothèque.
           </p>
         ) : (
           <BookComponent books={purchasedBooks} onBookClick={onBookClick} />
@@ -150,7 +150,7 @@ export const BookSections = ({
       <TabsContent value="to-buy">
         {toBuyBooks.length === 0 ? (
           <p className="text-center text-gray-600 mt-8">
-            Aucun livre à acheter dans votre liste de lecture.
+            Aucun livre à acheter dans votre bibliothèque.
           </p>
         ) : (
           <BookComponent books={toBuyBooks} onBookClick={onBookClick} />
