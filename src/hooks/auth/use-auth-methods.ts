@@ -53,6 +53,8 @@ export function useAuthMethods() {
 
   const signInWithGoogle = async (): Promise<AuthResult> => {
     try {
+      console.log("Tentative de connexion avec Google...");
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -61,6 +63,10 @@ export function useAuthMethods() {
       });
       
       if (error) throw error;
+      
+      // Pour le débogage, affichons les données retournées
+      console.log("Données de redirection Google:", data);
+      
       // OAuth returns a URL to redirect to, not a user object directly
       // The user will be available after the OAuth flow completes
       return { user: null, error: null };
@@ -93,7 +99,8 @@ export function useAuthMethods() {
         throw error;
       }
       
-      console.log("Redirecting to Facebook for authentication...", data);
+      console.log("Données de redirection Facebook:", data);
+      
       // OAuth returns a URL to redirect to, not a user object directly
       // The user will be available after the OAuth flow completes
       return { user: null, error: null };
