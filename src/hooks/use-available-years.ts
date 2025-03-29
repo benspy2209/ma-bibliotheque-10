@@ -7,17 +7,33 @@ export function useAvailableYears(books: Book[], currentYear: number) {
   // Ajout d'un forceUpdate pour garantir que le hook recalcule même si les références ne changent pas
   const [forceUpdate, setForceUpdate] = useState(Date.now());
   
-  // Force un recalcul quand books change
+  // Force un recalcul quand books change ou toutes les 3 secondes
   useEffect(() => {
+    console.log("useAvailableYears: Détection de changement dans les livres");
     setForceUpdate(Date.now());
-  }, [books.length]);
+    
+    const interval = setInterval(() => {
+      setForceUpdate(Date.now());
+    }, 3000);
+    
+    return () => clearInterval(interval);
+  }, [books, books.length]);
   
   const allCompletedBooks = useMemo(() => {
-    console.log(`Calculating all completed books from total books (${forceUpdate}):`, books.length);
+    console.log(`useAvailableYears: Calcul de tous les livres complétés (${forceUpdate})`);
+    console.log("useAvailableYears: Nombre total de livres:", books.length);
+    
     const completed = books.filter((book): book is Book => 
       book !== null && book.status === 'completed'
     );
-    console.log("Found completed books:", completed.length);
+    
+    console.log("useAvailableYears: Livres complétés trouvés:", completed.length);
+    
+    // Log détaillé pour le débogage
+    completed.forEach((book, index) => {
+      console.log(`Livre complété #${index + 1}:`, book.title, "Date de complétion:", book.completionDate);
+    });
+    
     return completed;
   }, [books, forceUpdate]);
   
@@ -28,6 +44,7 @@ export function useAvailableYears(books: Book[], currentYear: number) {
       if (book.completionDate) {
         const year = getYear(new Date(book.completionDate));
         years.add(year);
+        console.log(`useAvailableYears: Ajout de l'année ${year} pour le livre ${book.title}`);
       }
     });
     
@@ -43,7 +60,7 @@ export function useAvailableYears(books: Book[], currentYear: number) {
     }
     
     const sortedYears = Array.from(years).sort((a, b) => b - a);
-    console.log(`Available years (${forceUpdate}):`, sortedYears);
+    console.log(`useAvailableYears: Années disponibles (${forceUpdate}):`, sortedYears);
     return sortedYears;
   }, [allCompletedBooks, currentYear, forceUpdate]);
 

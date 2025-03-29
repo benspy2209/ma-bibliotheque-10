@@ -19,25 +19,31 @@ export default function Statistics() {
   const [key, setKey] = useState(Date.now());
   
   const forceRefresh = useCallback(() => {
+    console.log("Statistics: Forçage du rafraîchissement...");
     setKey(Date.now());
     refetchBooks();
   }, []);
   
   useEffect(() => {
     // Force rerender when component mounts
+    console.log("Statistics: Composant monté, forçage du rafraîchissement initial");
     forceRefresh();
     
     // Ajouter un écouteur d'événements pour la visibilité de la page
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
+        console.log("Statistics: Page visible, forçage du rafraîchissement");
         forceRefresh();
       }
     };
     
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
-    // Rafraîchir régulièrement les données
-    const intervalId = setInterval(forceRefresh, 30000);
+    // Rafraîchir régulièrement les données (toutes les 15 secondes)
+    const intervalId = setInterval(() => {
+      console.log("Statistics: Rafraîchissement périodique");
+      forceRefresh();
+    }, 15000);
     
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -54,11 +60,17 @@ export default function Statistics() {
     gcTime: 0,
   });
 
-  console.log('All books loaded:', books.length, 'books');
-  console.log('Book statuses:', books.map(book => ({ id: book.id, title: book.title, status: book.status })));
+  console.log('Statistics: Livres chargés:', books.length);
+  console.log('Statistics: Statuts des livres:', books.map(book => ({ id: book.id, title: book.title, status: book.status })));
 
   // Get available years and completed books
   const { availableYears, allCompletedBooks } = useAvailableYears(books, currentYear);
+  
+  // Log pour vérifier les livres complétés
+  console.log("Statistics: Livres complétés:", allCompletedBooks.length);
+  allCompletedBooks.forEach((book, index) => {
+    console.log(`Livre complété #${index + 1}:`, book.title, "Date de complétion:", book.completionDate);
+  });
   
   // Handle year selection with automatic fallback
   const { selectedYear, setSelectedYear } = useYearSelection(allCompletedBooks, currentYear);
@@ -69,6 +81,12 @@ export default function Statistics() {
     selectedYear, 
     allCompletedBooks
   );
+  
+  // Log pour vérifier les livres complétés pour l'année sélectionnée
+  console.log(`Statistics: Livres complétés pour l'année ${selectedYear}:`, completedBooks.length);
+  completedBooks.forEach((book, index) => {
+    console.log(`Livre complété pour ${selectedYear} #${index + 1}:`, book.title);
+  });
 
   return (
     <>
@@ -79,6 +97,13 @@ export default function Statistics() {
         <NavBar />
         <div className="px-3 sm:px-4 lg:px-6 py-6 sm:py-8 flex-grow overflow-x-hidden">
           <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
+            <button 
+              onClick={forceRefresh} 
+              className="px-3 py-1 text-xs bg-secondary text-secondary-foreground rounded-md mb-2"
+            >
+              Rafraîchir les statistiques
+            </button>
+            
             <StatisticsHeader
               selectedYear={selectedYear}
               availableYears={availableYears}

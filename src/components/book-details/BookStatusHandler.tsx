@@ -19,38 +19,38 @@ export function BookStatusHandler({ book, onStatusChange }: BookStatusHandlerPro
   }, [book.status, queryClient]);
   
   const handleStatusChange = async (status: ReadingStatus) => {
+    console.log("BookStatusHandler: Changement de statut du livre à", status);
+    
+    // Appeler la fonction de changement de statut
     await onStatusChange(status);
     
-    console.log("Statut modifié, invalidation des caches...");
+    console.log("BookStatusHandler: Statut modifié, invalidation des caches...");
     
-    // Force une invalidation immédiate et complète après le changement
-    await queryClient.invalidateQueries({ 
+    // Forcer une invalidation et un rechargement complet du cache
+    await queryClient.resetQueries({
       queryKey: ['books'],
-      refetchType: 'all',
       exact: false
     });
     
-    console.log("Cache invalidé après changement de statut à:", status);
-    
-    // Force refetch de toutes les données liées aux livres
-    await queryClient.refetchQueries({ 
-      queryKey: ['books'],
-      exact: false,
-      type: 'all'
-    });
-    
-    // Force refetch des statistiques spécifiquement
-    await queryClient.refetchQueries({
-      queryKey: ['readingGoals'],
-      exact: false
-    });
-    
-    // Invalidation supplémentaire pour s'assurer que tout est actualisé
-    await queryClient.invalidateQueries({
-      predicate: () => true,  // Invalide TOUS les caches
-    });
-    
-    console.log("Données rechargées après invalidation du cache");
+    // Attendre que les requêtes soient invalidées
+    setTimeout(async () => {
+      console.log("BookStatusHandler: Rechargement forcé des données...");
+      
+      // Recharger explicitement les données
+      await queryClient.refetchQueries({ 
+        queryKey: ['books'],
+        exact: false,
+        type: 'all'
+      });
+      
+      // Forcer refetch des statistiques spécifiquement
+      await queryClient.refetchQueries({
+        queryKey: ['readingGoals'],
+        exact: false
+      });
+      
+      console.log("BookStatusHandler: Données rechargées après changement de statut");
+    }, 300);
   };
   
   return null; // This is a logic-only component, no UI rendering
