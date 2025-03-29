@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { 
   fetchAllUserStats, 
@@ -6,9 +5,9 @@ import {
   fetchAllUsersStatistics,
   fetchBooksCompleteView
 } from '@/services/supabaseAdminStats';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Users, BookOpen, TrendingUp, FileText, BarChart } from 'lucide-react';
+import { Shield, Users, BookOpen, TrendingUp, FileText, BarChart, Link } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 import { LoadingState } from '@/components/statistics/admin/LoadingState';
@@ -17,6 +16,9 @@ import { UsersTable } from '@/components/statistics/admin/UsersTable';
 import { BookSummaryTable } from '@/components/statistics/admin/BookSummaryTable';
 import { BookDetailsTable } from '@/components/statistics/admin/BookDetailsTable';
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useUpdateAllAmazonLinks } from '@/services/supabaseAdminTools';
+import { updateAmazonLinksInLibrary } from '@/services/updateExistingBooks';
 
 export function AdminDashboard() {
   const [userStats, setUserStats] = useState([]);
@@ -27,9 +29,10 @@ export function AdminDashboard() {
   const [isAdmin, setIsAdmin] = useState(false);
   const { user } = useSupabaseAuth();
   const isMobile = useIsMobile();
-  
+  const { updateAllLinks } = useUpdateAllAmazonLinks();
+  const [isUpdatingLinks, setIsUpdatingLinks] = useState(false);
+
   useEffect(() => {
-    // Vérifier si l'utilisateur est admin
     const checkIfAdmin = () => {
       if (user?.email === 'debruijneb@gmail.com') {
         setIsAdmin(true);
@@ -60,14 +63,21 @@ export function AdminDashboard() {
     setIsLoading(false);
   };
 
-  // Stats calculées
+  const handleUpdateAllAmazonLinks = async () => {
+    try {
+      setIsUpdatingLinks(true);
+      await updateAllLinks();
+    } finally {
+      setIsUpdatingLinks(false);
+    }
+  };
+
   const totalUsers = userStatistics.length;
   const totalBooks = bookDetails.length;
   const completedBooks = bookDetails.filter(book => book.status === 'completed').length;
   const readingBooks = bookDetails.filter(book => book.status === 'reading').length;
   const toReadBooks = bookDetails.filter(book => !book.status || book.status === 'to-read').length;
   
-  // Statistiques par mois 
   const booksByMonth = booksComplete.reduce((acc, book) => {
     if (book.completion_date) {
       const date = new Date(book.completion_date);
@@ -114,7 +124,27 @@ export function AdminDashboard() {
         </CardHeader>
         
         <CardContent>
-          {/* Dashboard Summary */}
+          <div className="mb-8 p-4 border rounded-lg bg-amber-50 dark:bg-amber-950/20">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-medium flex items-center gap-2">
+                  <Link className="h-4 w-4 text-amber-600" />
+                  Liens d'affiliation Amazon
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Mettre à jour les liens d'affiliation Amazon pour tous les livres de tous les utilisateurs
+                </p>
+              </div>
+              <Button 
+                onClick={handleUpdateAllAmazonLinks}
+                disabled={isUpdatingLinks}
+                className="bg-amber-600 hover:bg-amber-700 text-white font-medium"
+              >
+                {isUpdatingLinks ? "Mise à jour en cours..." : "Mettre à jour tous les liens"}
+              </Button>
+            </div>
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <div className="bg-muted/40 rounded-lg p-4 border">
               <div className="flex items-center gap-3 mb-2">
@@ -175,7 +205,6 @@ export function AdminDashboard() {
             </div>
           </div>
           
-          {/* Tabs for different data views */}
           <Tabs defaultValue="users">
             <TabsList className={`mb-6 ${isMobile ? 'flex-col w-full' : 'flex-wrap h-auto py-2'}`}>
               <TabsTrigger value="users" className="flex items-center gap-1">
