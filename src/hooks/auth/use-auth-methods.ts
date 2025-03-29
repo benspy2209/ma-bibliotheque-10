@@ -61,7 +61,9 @@ export function useAuthMethods() {
       });
       
       if (error) throw error;
-      return { user: data.user, error: null };
+      // OAuth returns a URL to redirect to, not a user object directly
+      // The user will be available after the OAuth flow completes
+      return { user: null, error: null };
     } catch (error: any) {
       console.error("Erreur lors de la connexion avec Google:", error);
       toast({
@@ -92,7 +94,9 @@ export function useAuthMethods() {
       }
       
       console.log("Redirecting to Facebook for authentication...", data);
-      return { user: data.user, error: null };
+      // OAuth returns a URL to redirect to, not a user object directly
+      // The user will be available after the OAuth flow completes
+      return { user: null, error: null };
     } catch (error: any) {
       console.error("Error logging in with Facebook:", error);
       toast({
