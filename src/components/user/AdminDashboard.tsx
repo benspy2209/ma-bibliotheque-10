@@ -5,7 +5,8 @@ import {
   fetchAllUserBookDetails, 
   fetchAllUsersStatistics,
   fetchBooksCompleteView,
-  fetchSystemLogs
+  fetchSystemLogs,
+  addSystemLog
 } from '@/services/supabaseAdminStats';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,6 +21,7 @@ import { BookDetailsTable } from '@/components/statistics/admin/BookDetailsTable
 import { Badge } from "@/components/ui/badge";
 import { AdminStatisticsContent } from '@/components/statistics/admin/AdminStatisticsContent';
 import { AdminLogsContent } from '@/components/statistics/admin/AdminLogsContent';
+import { toast } from 'sonner';
 
 export function AdminDashboard() {
   const [userStats, setUserStats] = useState([]);
@@ -38,9 +40,29 @@ export function AdminDashboard() {
       if (user?.email === 'debruijneb@gmail.com') {
         setIsAdmin(true);
         loadData();
+        
+        // Enregistrer un log d'accès admin
+        if (user?.id) {
+          addSystemLog(
+            'info',
+            'Accès au tableau de bord admin',
+            user.id,
+            '/admin/dashboard'
+          );
+        }
       } else {
         setIsAdmin(false);
         setIsLoading(false);
+        
+        if (user?.id) {
+          // Enregistrer une tentative d'accès non autorisée
+          addSystemLog(
+            'warning',
+            'Tentative d\'accès non autorisée au tableau de bord admin',
+            user.id,
+            '/admin/dashboard'
+          );
+        }
       }
     };
 
@@ -50,20 +72,30 @@ export function AdminDashboard() {
   const loadData = async () => {
     setIsLoading(true);
     
-    const [stats, details, statistics, complete, logs] = await Promise.all([
-      fetchAllUserStats(),
-      fetchAllUserBookDetails(),
-      fetchAllUsersStatistics(),
-      fetchBooksCompleteView(),
-      fetchSystemLogs()
-    ]);
-    
-    setUserStats(stats);
-    setBookDetails(details);
-    setUserStatistics(statistics);
-    setBooksComplete(complete);
-    setSystemLogs(logs);
-    setIsLoading(false);
+    try {
+      const [stats, details, statistics, complete, logs] = await Promise.all([
+        fetchAllUserStats(),
+        fetchAllUserBookDetails(),
+        fetchAllUsersStatistics(),
+        fetchBooksCompleteView(),
+        fetchSystemLogs()
+      ]);
+      
+      setUserStats(stats);
+      setBookDetails(details);
+      setUserStatistics(statistics);
+      setBooksComplete(complete);
+      setSystemLogs(logs);
+      
+      if (logs.length === 0) {
+        toast.info("Aucun log système trouvé dans la base de données.");
+      }
+    } catch (error) {
+      console.error("Erreur lors du chargement des données:", error);
+      toast.error("Erreur lors du chargement des données");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Stats calculées

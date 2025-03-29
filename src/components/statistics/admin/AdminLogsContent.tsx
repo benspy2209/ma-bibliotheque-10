@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -7,18 +7,21 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, ArrowDownUp, Check, Info, RefreshCw, Search, XCircle } from "lucide-react";
-import { SystemLog } from "@/services/supabaseAdminStats";
+import { SystemLog, fetchSystemLogs, addSystemLog } from "@/services/supabaseAdminStats";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
+import { toast } from "sonner";
 
 interface AdminLogsContentProps {
   logs: SystemLog[];
 }
 
-export const AdminLogsContent: React.FC<AdminLogsContentProps> = ({ logs }) => {
+export const AdminLogsContent: React.FC<AdminLogsContentProps> = ({ logs: initialLogs }) => {
+  const [logs, setLogs] = useState<SystemLog[]>(initialLogs);
   const [filterLevel, setFilterLevel] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const filteredLogs = logs.filter(log => {
     const levelMatch = filterLevel === 'all' || log.level === filterLevel;
@@ -77,17 +80,30 @@ export const AdminLogsContent: React.FC<AdminLogsContentProps> = ({ logs }) => {
     setSortDirection(sortDirection === 'desc' ? 'asc' : 'desc');
   };
 
-  const handleRefresh = () => {
-    // This would typically trigger a refetch
-    // For now it's just a visual effect
-    const refreshButton = document.getElementById('refresh-logs-button');
-    if (refreshButton) {
-      refreshButton.classList.add('animate-spin');
-      setTimeout(() => {
-        refreshButton.classList.remove('animate-spin');
-      }, 1000);
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      const freshLogs = await fetchSystemLogs();
+      setLogs(freshLogs);
+      toast.success("Logs rafraîchis avec succès");
+    } catch (error) {
+      console.error("Erreur lors du rafraîchissement des logs:", error);
+      toast.error("Impossible de rafraîchir les logs");
+    } finally {
+      setIsRefreshing(false);
     }
   };
+
+  const handleSearch = () => {
+    // Cette fonction est appelée quand l'utilisateur clique sur le bouton de recherche
+    // La recherche s'effectue déjà dans le filteredLogs, donc aucune action supplémentaire n'est nécessaire
+    toast.info(`Recherche pour: "${searchQuery}"`);
+  };
+
+  // Mettre à jour les logs initiaux quand ils changent
+  useEffect(() => {
+    setLogs(initialLogs);
+  }, [initialLogs]);
 
   return (
     <div className="space-y-6">
@@ -98,8 +114,9 @@ export const AdminLogsContent: React.FC<AdminLogsContentProps> = ({ logs }) => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="rounded-r-none"
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           />
-          <Button variant="secondary" className="rounded-l-none border border-l-0">
+          <Button variant="secondary" className="rounded-l-none border border-l-0" onClick={handleSearch}>
             <Search className="h-4 w-4" />
           </Button>
         </div>
@@ -137,9 +154,13 @@ export const AdminLogsContent: React.FC<AdminLogsContentProps> = ({ logs }) => {
             variant="outline" 
             size="sm" 
             onClick={handleRefresh}
+            disabled={isRefreshing}
             className="flex items-center gap-1"
           >
-            <RefreshCw id="refresh-logs-button" className="h-4 w-4" />
+            <RefreshCw 
+              id="refresh-logs-button" 
+              className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} 
+            />
             Rafraîchir
           </Button>
         </div>
@@ -183,7 +204,7 @@ export const AdminLogsContent: React.FC<AdminLogsContentProps> = ({ logs }) => {
             ) : (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
-                  Aucun log correspondant aux critères de recherche.
+                  Aucun log trouvé dans la base de données. Vous pouvez ajouter des logs via la fonction addSystemLog.
                 </TableCell>
               </TableRow>
             )}
