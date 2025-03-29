@@ -53,8 +53,9 @@ export const BookGrid = ({ books, onBookClick }: BookGridProps) => {
     }).format(new Date(date));
   };
 
-  const handleAmazonClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleAmazonClick = (e: React.MouseEvent, amazonUrl: string) => {
     e.stopPropagation(); // Empêcher le clic de déclencher onBookClick
+    window.open(amazonUrl, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -81,16 +82,13 @@ export const BookGrid = ({ books, onBookClick }: BookGridProps) => {
               />
               
               {/* Badge Amazon flottant sur la couverture */}
-              <a 
-                href={amazonUrl}
-                onClick={handleAmazonClick}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="absolute top-2 right-2 badge flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white rounded-full"
+              <div
+                onClick={(e) => handleAmazonClick(e, amazonUrl)}
+                className="absolute top-2 right-2 badge flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white rounded-full cursor-pointer"
               >
                 <ShoppingCart className="size-3" />
                 Amazon
-              </a>
+              </div>
             </div>
             <div className="flex flex-col flex-grow p-3 space-y-2">
               <h3 className="font-semibold text-sm line-clamp-1">{book.title}</h3>
