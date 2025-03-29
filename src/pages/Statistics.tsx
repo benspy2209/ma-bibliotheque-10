@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { loadBooks } from '@/services/supabaseBooks';
 import NavBar from '@/components/NavBar';
@@ -18,15 +18,35 @@ export default function Statistics() {
   // Force component re-render when route is accessed
   const [key, setKey] = useState(Date.now());
   
-  useEffect(() => {
-    // Force rerender when component mounts
+  const forceRefresh = useCallback(() => {
     setKey(Date.now());
-    // Force data refresh
     refetchBooks();
   }, []);
+  
+  useEffect(() => {
+    // Force rerender when component mounts
+    forceRefresh();
+    
+    // Ajouter un écouteur d'événements pour la visibilité de la page
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        forceRefresh();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Rafraîchir régulièrement les données
+    const intervalId = setInterval(forceRefresh, 30000);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(intervalId);
+    };
+  }, [forceRefresh]);
 
-  const { data: books = [], refetch: refetchBooks } = useQuery({
-    queryKey: ['books'],
+  const { data: books = [], refetch: refetchBooks, isLoading } = useQuery({
+    queryKey: ['books', key],
     queryFn: loadBooks,
     refetchOnWindowFocus: true,
     refetchOnMount: true,

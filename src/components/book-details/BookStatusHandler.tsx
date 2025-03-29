@@ -45,6 +45,11 @@ export function BookStatusHandler({ book, onStatusChange }: BookStatusHandlerPro
       exact: false
     });
     
+    // Invalidation supplémentaire pour s'assurer que tout est actualisé
+    await queryClient.invalidateQueries({
+      predicate: () => true,  // Invalide TOUS les caches
+    });
+    
     console.log("Données rechargées après invalidation du cache");
   };
   

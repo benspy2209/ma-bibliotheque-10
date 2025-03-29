@@ -4,14 +4,22 @@ import { Book } from '@/types/book';
 import { getYear } from 'date-fns';
 
 export function useAvailableYears(books: Book[], currentYear: number) {
+  // Ajout d'un forceUpdate pour garantir que le hook recalcule même si les références ne changent pas
+  const [forceUpdate, setForceUpdate] = useState(Date.now());
+  
+  // Force un recalcul quand books change
+  useEffect(() => {
+    setForceUpdate(Date.now());
+  }, [books.length]);
+  
   const allCompletedBooks = useMemo(() => {
-    console.log("Calculating all completed books from total books:", books.length);
+    console.log(`Calculating all completed books from total books (${forceUpdate}):`, books.length);
     const completed = books.filter((book): book is Book => 
       book !== null && book.status === 'completed'
     );
     console.log("Found completed books:", completed.length);
     return completed;
-  }, [books]);
+  }, [books, forceUpdate]);
   
   const availableYears = useMemo(() => {
     const years = new Set<number>();
@@ -35,9 +43,9 @@ export function useAvailableYears(books: Book[], currentYear: number) {
     }
     
     const sortedYears = Array.from(years).sort((a, b) => b - a);
-    console.log("Available years:", sortedYears);
+    console.log(`Available years (${forceUpdate}):`, sortedYears);
     return sortedYears;
-  }, [allCompletedBooks, currentYear]);
+  }, [allCompletedBooks, currentYear, forceUpdate]);
 
   return {
     availableYears,
