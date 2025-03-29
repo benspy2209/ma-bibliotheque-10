@@ -27,6 +27,15 @@ interface UserStatistics {
   last_sign_in_at: string | null;
 }
 
+interface SystemLog {
+  id: string;
+  timestamp: string;
+  level: 'info' | 'warning' | 'error' | 'success';
+  message: string;
+  user?: string;
+  path?: string;
+}
+
 /**
  * Récupère les statistiques de tous les utilisateurs avec leurs livres
  * Cette fonction devrait être utilisée uniquement par les administrateurs
@@ -113,4 +122,117 @@ export async function fetchAllUsersStatistics(): Promise<UserStatistics[]> {
     console.error('Erreur lors de l\'appel aux statistiques globales:', error);
     return [];
   }
+}
+
+/**
+ * Récupère les logs système
+ * Pour le moment, cette fonction renvoie des données simulées
+ * À remplacer par une vraie implémentation quand disponible
+ */
+export async function fetchSystemLogs(): Promise<SystemLog[]> {
+  // Simuler quelques logs pour la démonstration
+  // Dans une implémentation réelle, ces données viendraient d'une table de logs dans Supabase
+  const now = new Date();
+  
+  const mockLogs: SystemLog[] = [
+    {
+      id: '1',
+      timestamp: new Date(now.getTime() - 1000 * 60 * 5).toISOString(), // 5 minutes ago
+      level: 'info',
+      message: 'Utilisateur connecté',
+      user: 'user@example.com',
+      path: '/auth/login'
+    },
+    {
+      id: '2',
+      timestamp: new Date(now.getTime() - 1000 * 60 * 10).toISOString(), // 10 minutes ago
+      level: 'success',
+      message: 'Mise à jour de la bibliothèque réussie',
+      user: 'admin@example.com',
+      path: '/api/library/update'
+    },
+    {
+      id: '3',
+      timestamp: new Date(now.getTime() - 1000 * 60 * 15).toISOString(), // 15 minutes ago
+      level: 'warning',
+      message: 'Tentative de connexion échouée',
+      user: 'unknown@example.com',
+      path: '/auth/login'
+    },
+    {
+      id: '4',
+      timestamp: new Date(now.getTime() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
+      level: 'error',
+      message: 'Erreur de serveur: Impossible de se connecter à la base de données',
+      path: '/api/database/connect'
+    },
+    {
+      id: '5',
+      timestamp: new Date(now.getTime() - 1000 * 60 * 60).toISOString(), // 1 hour ago
+      level: 'info',
+      message: 'Sauvegarde système automatique démarrée',
+      path: '/system/backup'
+    },
+    {
+      id: '6',
+      timestamp: new Date(now.getTime() - 1000 * 60 * 90).toISOString(), // 1.5 hours ago
+      level: 'success',
+      message: 'Sauvegarde système terminée avec succès',
+      path: '/system/backup'
+    },
+    {
+      id: '7',
+      timestamp: new Date(now.getTime() - 1000 * 60 * 120).toISOString(), // 2 hours ago
+      level: 'info',
+      message: 'Nouvel utilisateur enregistré',
+      user: 'newuser@example.com',
+      path: '/auth/register'
+    },
+    {
+      id: '8',
+      timestamp: new Date(now.getTime() - 1000 * 60 * 180).toISOString(), // 3 hours ago
+      level: 'warning',
+      message: 'Utilisation élevée de la mémoire détectée',
+      path: '/system/monitoring'
+    },
+    {
+      id: '9',
+      timestamp: new Date(now.getTime() - 1000 * 60 * 240).toISOString(), // 4 hours ago
+      level: 'info',
+      message: 'Mise à jour du système planifiée pour 00:00',
+      path: '/system/update'
+    },
+    {
+      id: '10',
+      timestamp: new Date(now.getTime() - 1000 * 60 * 300).toISOString(), // 5 hours ago
+      level: 'error',
+      message: 'Erreur lors de l\'importation de livres: Format de fichier non valide',
+      user: 'user@example.com',
+      path: '/api/books/import'
+    }
+  ];
+
+  // Dans une implémentation réelle, ce serait quelque chose comme:
+  /*
+  try {
+    const { data, error } = await supabase
+      .from('system_logs')
+      .select('*')
+      .order('timestamp', { ascending: false })
+      .limit(100);
+
+    if (error) {
+      console.error('Erreur lors de la récupération des logs système:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Erreur lors de l\'appel aux logs système:', error);
+    return [];
+  }
+  */
+
+  // Pour l'instant, on retourne les données simulées
+  return mockLogs;
 }

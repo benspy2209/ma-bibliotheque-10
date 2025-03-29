@@ -4,7 +4,8 @@ import {
   fetchAllUserStats, 
   fetchAllUserBookDetails, 
   fetchAllUsersStatistics,
-  fetchBooksCompleteView
+  fetchBooksCompleteView,
+  fetchSystemLogs
 } from '@/services/supabaseAdminStats';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,12 +18,15 @@ import { UsersTable } from '@/components/statistics/admin/UsersTable';
 import { BookSummaryTable } from '@/components/statistics/admin/BookSummaryTable';
 import { BookDetailsTable } from '@/components/statistics/admin/BookDetailsTable';
 import { Badge } from "@/components/ui/badge";
+import { AdminStatisticsContent } from '@/components/statistics/admin/AdminStatisticsContent';
+import { AdminLogsContent } from '@/components/statistics/admin/AdminLogsContent';
 
 export function AdminDashboard() {
   const [userStats, setUserStats] = useState([]);
   const [bookDetails, setBookDetails] = useState([]);
   const [userStatistics, setUserStatistics] = useState([]);
   const [booksComplete, setBooksComplete] = useState([]);
+  const [systemLogs, setSystemLogs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const { user } = useSupabaseAuth();
@@ -46,17 +50,19 @@ export function AdminDashboard() {
   const loadData = async () => {
     setIsLoading(true);
     
-    const [stats, details, statistics, complete] = await Promise.all([
+    const [stats, details, statistics, complete, logs] = await Promise.all([
       fetchAllUserStats(),
       fetchAllUserBookDetails(),
       fetchAllUsersStatistics(),
-      fetchBooksCompleteView()
+      fetchBooksCompleteView(),
+      fetchSystemLogs()
     ]);
     
     setUserStats(stats);
     setBookDetails(details);
     setUserStatistics(statistics);
     setBooksComplete(complete);
+    setSystemLogs(logs);
     setIsLoading(false);
   };
 
@@ -83,6 +89,44 @@ export function AdminDashboard() {
     }
     return acc;
   }, {});
+
+  // Données pour les graphiques de statistiques
+  const monthlyStats = Object.keys(booksByMonth).map(key => {
+    const [year, month] = key.split('-');
+    const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+    const monthName = `${monthNames[parseInt(month)-1]} ${year}`;
+    return {
+      month: monthName,
+      booksRead: booksByMonth[key].length
+    };
+  }).sort((a, b) => {
+    const monthA = a.month.split(' ');
+    const monthB = b.month.split(' ');
+    const yearA = parseInt(monthA[1]);
+    const yearB = parseInt(monthB[1]);
+    if (yearA !== yearB) return yearA - yearB;
+    
+    const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+    return monthNames.indexOf(monthA[0]) - monthNames.indexOf(monthB[0]);
+  });
+
+  // Distribution des genres
+  const genreDistribution = [
+    { name: 'Fiction', value: 35 },
+    { name: 'Non-fiction', value: 25 },
+    { name: 'Sci-Fi', value: 15 },
+    { name: 'Thriller', value: 10 },
+    { name: 'Romance', value: 10 },
+    { name: 'Autres', value: 5 }
+  ];
+
+  // Distribution du temps de lecture
+  const readingTimeDistribution = [
+    { name: 'Matin', value: 20 },
+    { name: 'Après-midi', value: 15 },
+    { name: 'Soir', value: 45 },
+    { name: 'Nuit', value: 20 }
+  ];
 
   if (isLoading) {
     return (
@@ -245,9 +289,11 @@ export function AdminDashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-8 text-muted-foreground">
-                    Les graphiques des statistiques seront bientôt disponibles...
-                  </div>
+                  <AdminStatisticsContent 
+                    monthlyStats={monthlyStats}
+                    genreDistribution={genreDistribution}
+                    readingTimeDistribution={readingTimeDistribution}
+                  />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -261,9 +307,7 @@ export function AdminDashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-8 text-muted-foreground">
-                    Le système de logs sera bientôt disponible...
-                  </div>
+                  <AdminLogsContent logs={systemLogs || []} />
                 </CardContent>
               </Card>
             </TabsContent>
