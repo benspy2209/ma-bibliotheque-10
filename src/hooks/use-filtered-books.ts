@@ -18,7 +18,7 @@ export function useFilteredBooks(books: Book[], selectedYear: number | null, all
   useEffect(() => {
     const interval = setInterval(() => {
       setUpdateCounter(prev => prev + 1);
-    }, 3000); // Toutes les 3 secondes (réduit de 5s à 3s pour plus de réactivité)
+    }, 3000); // Toutes les 3 secondes pour plus de réactivité
     
     return () => clearInterval(interval);
   }, []);
@@ -63,14 +63,14 @@ export function useFilteredBooks(books: Book[], selectedYear: number | null, all
     return result;
   }, [books, updateCounter]);
 
-  // Comptage explicite des livres achetés et à acheter
+  // Comptage des livres achetés et à acheter avec une logique non-exclusive
   const { purchasedBooks, toBuyBooks } = useMemo(() => {
-    // Tous les livres avec purchased=true, indépendamment du statut
+    // Livres achetés = explicitement marqués purchased=true, peu importe le statut
     const purchased = books.filter(book => book.purchased === true).length;
     
-    // Uniquement les livres "à lire" qui ne sont pas achetés (purchased=false explicitement)
+    // Livres à acheter = non achetés (purchased=false) ET (status=to-read ou undefined)
     const toBuy = books.filter(book => 
-      (!book.status || book.status === 'to-read') && book.purchased === false
+      book.purchased === false && (!book.status || book.status === 'to-read')
     ).length;
     
     console.log(`useFilteredBooks: Livres achetés: ${purchased}, Livres à acheter: ${toBuy}`);

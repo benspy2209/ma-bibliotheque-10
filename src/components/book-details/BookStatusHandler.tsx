@@ -3,9 +3,11 @@ import { BookStatusHandlerProps } from './types';
 import { ReadingStatus } from '@/types/book';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 export function BookStatusHandler({ book, onStatusChange }: BookStatusHandlerProps) {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   
   useEffect(() => {
     // Force une invalidation du cache chaque fois que le statut du livre change
@@ -24,6 +26,15 @@ export function BookStatusHandler({ book, onStatusChange }: BookStatusHandlerPro
     
     // Appeler la fonction de changement de statut
     await onStatusChange(status);
+    
+    // Si le livre est marqué comme "lu", informer l'utilisateur de mettre à jour les dates de lecture
+    if (status === 'completed') {
+      toast({
+        title: "Livre marqué comme lu",
+        description: "N'oubliez pas de mettre à jour les dates de lecture pour des statistiques précises !",
+        duration: 6000,
+      });
+    }
     
     console.log("BookStatusHandler: Statut modifié, invalidation des caches...");
     

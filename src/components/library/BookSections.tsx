@@ -29,10 +29,15 @@ export const BookSections = ({
   const [purchaseFilter, setPurchaseFilter] = useState<'all' | 'purchased' | 'not-purchased'>('all');
   const isMobile = useIsMobile();
   
+  // Création de listes qui ne sont pas exclusives, un livre peut être dans plusieurs catégories
   const completedBooks = books.filter(book => book.status === 'completed');
   const readingBooks = books.filter(book => book.status === 'reading');
   const toReadBooks = books.filter(book => !book.status || book.status === 'to-read');
-  const toBuyBooks = books.filter(book => !book.purchased && (!book.status || book.status === 'to-read'));
+  
+  // Un livre est à acheter s'il n'est pas acheté (purchased=false) et n'est pas lu (status=to-read ou undefined)
+  const toBuyBooks = books.filter(book => book.purchased === false && (!book.status || book.status === 'to-read'));
+  
+  // Un livre est dans la catégorie "achetés" s'il a purchased=true, indépendamment de son statut de lecture
   const purchasedBooks = books.filter(book => book.purchased === true);
 
   const filteredToReadBooks = toReadBooks.filter(book => {
