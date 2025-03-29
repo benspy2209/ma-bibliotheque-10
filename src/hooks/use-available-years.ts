@@ -4,9 +4,14 @@ import { Book } from '@/types/book';
 import { getYear } from 'date-fns';
 
 export function useAvailableYears(books: Book[], currentYear: number) {
-  const allCompletedBooks = books.filter((book): book is Book => 
-    book !== null && book.status === 'completed'
-  );
+  const allCompletedBooks = useMemo(() => {
+    console.log("Calculating all completed books from total books:", books.length);
+    const completed = books.filter((book): book is Book => 
+      book !== null && book.status === 'completed'
+    );
+    console.log("Found completed books:", completed.length);
+    return completed;
+  }, [books]);
   
   const availableYears = useMemo(() => {
     const years = new Set<number>();
@@ -29,7 +34,9 @@ export function useAvailableYears(books: Book[], currentYear: number) {
       years.add(year);
     }
     
-    return Array.from(years).sort((a, b) => b - a);
+    const sortedYears = Array.from(years).sort((a, b) => b - a);
+    console.log("Available years:", sortedYears);
+    return sortedYears;
   }, [allCompletedBooks, currentYear]);
 
   return {

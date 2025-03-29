@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { loadBooks } from '@/services/supabaseBooks';
 import NavBar from '@/components/NavBar';
@@ -14,6 +14,16 @@ import { AdminSection } from '@/components/statistics/AdminSection';
 
 export default function Statistics() {
   const currentYear = new Date().getFullYear();
+
+  // Force component re-render when route is accessed
+  const [key, setKey] = useState(Date.now());
+  
+  useEffect(() => {
+    // Force rerender when component mounts
+    setKey(Date.now());
+    // Force data refresh
+    refetchBooks();
+  }, []);
 
   const { data: books = [], refetch: refetchBooks } = useQuery({
     queryKey: ['books'],

@@ -5,12 +5,16 @@ import { getYear } from 'date-fns';
 
 export function useFilteredBooks(books: Book[], selectedYear: number | null, allCompletedBooks: Book[]) {
   const completedBooks = useMemo(() => {
+    console.log("Recalculating completed books for year:", selectedYear);
+    console.log("All completed books count:", allCompletedBooks.length);
+    
     if (!selectedYear) return allCompletedBooks;
     
     return allCompletedBooks.filter(book => {
       if (!book.completionDate) return false;
       const completionYear = getYear(new Date(book.completionDate));
-      return completionYear === selectedYear;
+      const matches = completionYear === selectedYear;
+      return matches;
     });
   }, [selectedYear, allCompletedBooks]);
   

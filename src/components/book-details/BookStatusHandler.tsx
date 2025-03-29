@@ -21,6 +21,8 @@ export function BookStatusHandler({ book, onStatusChange }: BookStatusHandlerPro
   const handleStatusChange = async (status: ReadingStatus) => {
     await onStatusChange(status);
     
+    console.log("Statut modifié, invalidation des caches...");
+    
     // Force une invalidation immédiate et complète après le changement
     await queryClient.invalidateQueries({ 
       queryKey: ['books'],
@@ -36,6 +38,14 @@ export function BookStatusHandler({ book, onStatusChange }: BookStatusHandlerPro
       exact: false,
       type: 'all'
     });
+    
+    // Force refetch des statistiques spécifiquement
+    await queryClient.refetchQueries({
+      queryKey: ['readingGoals'],
+      exact: false
+    });
+    
+    console.log("Données rechargées après invalidation du cache");
   };
   
   return null; // This is a logic-only component, no UI rendering
