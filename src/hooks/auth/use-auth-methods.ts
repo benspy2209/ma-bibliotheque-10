@@ -29,14 +29,25 @@ export function useAuthMethods() {
 
   const signInWithGoogle = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      console.log("Tentative de connexion avec Google...");
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}`
+          redirectTo: `${window.location.origin}`,
+          queryParams: {
+            prompt: 'select_account'
+          }
         }
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Google OAuth Error:", error);
+        throw error;
+      }
+      
+      console.log("Redirection vers Google pour l'authentification...", data);
+      
     } catch (error: any) {
       console.error("Erreur lors de la connexion avec Google:", error);
       toast({
@@ -50,12 +61,10 @@ export function useAuthMethods() {
     try {
       console.log("Tentative de connexion avec Facebook...");
       
-      // Use Supabase OAuth authentication with Facebook provider
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'facebook',
         options: {
           redirectTo: `${window.location.origin}`,
-          // You can specify additional scopes if needed
           scopes: 'email,public_profile'
         }
       });
@@ -65,13 +74,13 @@ export function useAuthMethods() {
         throw error;
       }
       
-      console.log("Redirecting to Facebook for authentication...", data);
+      console.log("Redirection vers Facebook pour l'authentification...", data);
       
     } catch (error: any) {
-      console.error("Error logging in with Facebook:", error);
+      console.error("Erreur lors de la connexion avec Facebook:", error);
       toast({
         variant: "destructive",
-        description: `Error: ${error.message}`
+        description: `Erreur: ${error.message}`
       });
     }
   };
