@@ -1,13 +1,12 @@
 
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
 export const HeroSection = () => {
-  const { user, signIn } = useSupabaseAuth();
-  const navigate = useNavigate();
+  const { user, setShowLoginDialog, setAuthMode } = useSupabaseAuth();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -19,16 +18,11 @@ export const HeroSection = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Modified to redirect to library page instead of search
+  // Modified to open login dialog
   const handleLoginClick = () => {
-    console.log("Commencer l'aventure clicked");
-    navigate('/library');
-  };
-
-  // Wrapper function for login
-  const handleSignIn = () => {
     console.log("Opening login dialog from HeroSection");
-    signIn('login');
+    setAuthMode('signup');
+    setShowLoginDialog(true);
   };
 
   return (

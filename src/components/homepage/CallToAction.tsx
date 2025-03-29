@@ -1,18 +1,18 @@
 
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSupabaseAuth } from '@/hooks/use-supabase-auth';
 
 export const CallToAction = () => {
-  const { user } = useSupabaseAuth();
-  const navigate = useNavigate();
+  const { user, setShowLoginDialog, setAuthMode } = useSupabaseAuth();
 
-  // Modified to redirect to library page
+  // Modified to open login dialog
   const handleSignUp = () => {
-    console.log("Commencer l'aventure clicked");
-    navigate('/library');
+    console.log("Opening login dialog from CallToAction");
+    setAuthMode('signup');
+    setShowLoginDialog(true);
   };
 
   return (

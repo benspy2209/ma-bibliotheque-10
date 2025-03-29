@@ -11,8 +11,9 @@ export const FeatureCallToAction = () => {
 
   // Function to handle click on the login button
   const handleSignInClick = () => {
-    console.log("Redirecting to library page from Features page");
-    navigate('/library');
+    console.log("Opening login dialog from Features page");
+    setAuthMode('signup');
+    setShowLoginDialog(true);
   };
 
   return (

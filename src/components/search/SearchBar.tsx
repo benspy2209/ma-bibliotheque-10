@@ -9,7 +9,6 @@ import { SearchTypeSelector } from './SearchTypeSelector';
 import { LanguageSelector } from './LanguageSelector';
 import { ShowAllResultsButton } from './ShowAllResultsButton';
 import { BookOpen } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 interface SearchBarProps {
   onSearch: (query: string, searchType: SearchType, language: LanguageFilter) => Promise<void>;
@@ -31,9 +30,8 @@ export const SearchBar = ({
   const [language, setLanguage] = useState<LanguageFilter>('fr');
   const [isSearching, setIsSearching] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const { user } = useSupabaseAuth();
+  const { user, setShowLoginDialog, setAuthMode } = useSupabaseAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const handleSearch = (value: string) => {
     setSearchQuery(value);
@@ -96,7 +94,9 @@ export const SearchBar = ({
   };
 
   const handleJoinAdventure = () => {
-    navigate('/library');
+    console.log("Opening login dialog from SearchBar");
+    setAuthMode('signup');
+    setShowLoginDialog(true);
   };
 
   const handleSubmitSearch = (e: React.FormEvent) => {
