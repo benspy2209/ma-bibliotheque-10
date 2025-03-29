@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 interface UserBookStats {
@@ -27,7 +26,7 @@ interface UserStatistics {
   last_sign_in_at: string | null;
 }
 
-interface SystemLog {
+export interface SystemLog {
   id: string;
   timestamp: string;
   level: 'info' | 'warning' | 'error' | 'success';
@@ -108,7 +107,6 @@ export async function fetchBooksCompleteView() {
  */
 export async function fetchAllUsersStatistics(): Promise<UserStatistics[]> {
   try {
-    // Utiliser la fonction RPC créée dans Supabase
     const { data, error } = await supabase
       .rpc('get_all_users_statistics');
 
@@ -125,13 +123,84 @@ export async function fetchAllUsersStatistics(): Promise<UserStatistics[]> {
 }
 
 /**
- * Récupère les logs système
- * Pour le moment, cette fonction renvoie des données simulées
- * À remplacer par une vraie implémentation quand disponible
+ * Récupère les logs d'authentification depuis Supabase Auth Logs API
+ * Cette fonction extrait les logs pertinents et les formate pour l'affichage
  */
 export async function fetchSystemLogs(): Promise<SystemLog[]> {
-  // Simuler quelques logs pour la démonstration
-  // Dans une implémentation réelle, ces données viendraient d'une table de logs dans Supabase
+  try {
+    const { data: authLogs, error } = await supabase
+      .from('auth_logs')
+      .select('*')
+      .order('timestamp', { ascending: false })
+      .limit(100);
+
+    if (error) {
+      console.error('Erreur lors de la récupération des logs système:', error);
+      return [];
+    }
+
+    if (!authLogs || authLogs.length === 0) {
+      return getSimulatedLogs();
+    }
+
+    const logs: SystemLog[] = authLogs.map(log => {
+      let level: 'info' | 'warning' | 'error' | 'success' = 'info';
+      
+      if (log.error) {
+        level = 'error';
+      } else if (log.event_message && (
+        log.event_message.includes('success') || 
+        log.event_message.includes('completed') ||
+        log.event_message.includes('Login')
+      )) {
+        level = 'success';
+      } else if (log.event_message && (
+        log.event_message.includes('warning') ||
+        log.event_message.includes('Invalid')
+      )) {
+        level = 'warning';
+      }
+
+      let message = log.event_message || 'Événement système';
+      if (typeof message === 'string' && message.startsWith('{')) {
+        try {
+          const parsed = JSON.parse(message);
+          message = parsed.msg || parsed.message || message;
+        } catch (e) {
+          message = message;
+        }
+      }
+
+      let user = undefined;
+      if (log.event_message && typeof log.event_message === 'string') {
+        const userMatch = log.event_message.match(/user_id":"([^"]+)"/);
+        if (userMatch && userMatch[1]) {
+          user = userMatch[1];
+        }
+      }
+
+      return {
+        id: log.id || `log-${Math.random().toString(36).substr(2, 9)}`,
+        timestamp: log.timestamp ? new Date(Number(log.timestamp) / 1000).toISOString() : new Date().toISOString(),
+        level,
+        message: message.substring(0, 200),
+        user,
+        path: log.path || undefined
+      };
+    });
+
+    return logs;
+  } catch (error) {
+    console.error('Erreur lors de l\'appel aux logs système:', error);
+    return getSimulatedLogs();
+  }
+}
+
+/**
+ * Fournit des logs simulés en cas d'indisponibilité des logs réels
+ * À utiliser uniquement pour la démonstration
+ */
+function getSimulatedLogs(): SystemLog[] {
   const now = new Date();
   
   const mockLogs: SystemLog[] = [
@@ -212,27 +281,5 @@ export async function fetchSystemLogs(): Promise<SystemLog[]> {
     }
   ];
 
-  // Dans une implémentation réelle, ce serait quelque chose comme:
-  /*
-  try {
-    const { data, error } = await supabase
-      .from('system_logs')
-      .select('*')
-      .order('timestamp', { ascending: false })
-      .limit(100);
-
-    if (error) {
-      console.error('Erreur lors de la récupération des logs système:', error);
-      return [];
-    }
-
-    return data || [];
-  } catch (error) {
-    console.error('Erreur lors de l\'appel aux logs système:', error);
-    return [];
-  }
-  */
-
-  // Pour l'instant, on retourne les données simulées
   return mockLogs;
 }

@@ -7,19 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Check, Info, Search, XCircle } from "lucide-react";
-
-// Types pour les logs système
-interface LogEntry {
-  id: string;
-  timestamp: string;
-  level: 'info' | 'warning' | 'error' | 'success';
-  message: string;
-  user?: string;
-  path?: string;
-}
+import { SystemLog } from "@/services/supabaseAdminStats";
 
 interface AdminLogsContentProps {
-  logs: LogEntry[];
+  logs: SystemLog[];
 }
 
 export const AdminLogsContent: React.FC<AdminLogsContentProps> = ({ logs }) => {
