@@ -32,7 +32,7 @@ export default function Library() {
   const { toast } = useToast();
   const { sortBooks } = useBookSort();
   const { viewMode, toggleView } = useViewPreference();
-  const { user, setShowLoginDialog, setAuthMode } = useSupabaseAuth();
+  const { user, setShowLoginDialog, setAuthMode, showLoginDialog } = useSupabaseAuth();
   const { updateLinks } = useUpdateAmazonLinks();
   const isMobile = useIsMobile();
 
